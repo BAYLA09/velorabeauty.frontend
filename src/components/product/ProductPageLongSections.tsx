@@ -1,6 +1,6 @@
 import { ProductFaq } from "@/components/product/ProductFaq";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
-import { VeloraImage } from "@/components/ui/VeloraImage";
+import { ProductPageImage } from "@/components/product/ProductPageImage";
 import { uaeDeliveryCities } from "@/config/productPageShared";
 import type { ProductPageConfig } from "@/config/productPages";
 
@@ -30,13 +30,9 @@ export function ProductPageLongSections({
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-5">
-              <VeloraImage
-                src={productImageSrc}
-                alt={page.hook}
-                placeholder={page.problemImagePlaceholder}
-                className="aspect-[4/5] overflow-hidden rounded-[2rem] border-8 border-white shadow-2xl"
-                sizes="(max-width: 1024px) 100vw, 420px"
-              />
+              <div className="inline-block max-w-full overflow-hidden rounded-[2rem] border-8 border-white bg-white shadow-2xl">
+                <ProductPageImage src={productImageSrc} alt={page.hook} />
+              </div>
             </div>
             <div className="flex flex-col justify-center gap-6 lg:col-span-7">
               <p className="text-base leading-relaxed text-velora-burgundy/70 sm:text-lg">{page.hookSub}</p>

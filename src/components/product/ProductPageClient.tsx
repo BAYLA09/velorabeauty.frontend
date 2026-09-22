@@ -29,14 +29,14 @@ export function ProductPageClient({ product, allProducts }: Props) {
       <ProductStoreHeader />
       <main className="bg-velora-cream pb-24 md:pb-0">
         <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-start">
-            <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
-            <ProductGallery
-              mainSrc={product.pageImage.src}
-              productName={product.name}
-              placeholder={product.pageImage.placeholder}
-              laraFrame
-            />
+          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="min-w-0 w-full">
+              <ProductGallery
+                mainSrc={product.pageImage.src}
+                productName={product.name}
+                placeholder={product.pageImage.placeholder}
+                laraFrame
+              />
             </div>
 
             <div className="flex min-w-0 flex-col gap-4 sm:gap-5">

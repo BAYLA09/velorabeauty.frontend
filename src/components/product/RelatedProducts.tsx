@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { VeloraImage } from "@/components/ui/VeloraImage";
+import { ProductPageImage } from "@/components/product/ProductPageImage";
 import type { ProductWithPage } from "@/lib/productCatalog";
 import { getProductPath } from "@/lib/productCatalog";
 
@@ -24,13 +24,13 @@ export function RelatedProducts({
               href={getProductPath(p.slug)}
               className="group flex gap-4 rounded-3xl border border-velora-burgundy/8 bg-white p-4 shadow-sm transition hover:border-velora-champagne/50"
             >
-              <VeloraImage
-                src={p.pageImage.src}
-                alt={p.name}
-                placeholder={p.pageImage.placeholder}
-                className="h-24 w-24 shrink-0 rounded-2xl"
-                sizes="96px"
-              />
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-velora-burgundy/10 bg-white">
+                <ProductPageImage
+                  src={p.pageImage.src}
+                  alt={p.name}
+                  className="h-full w-full object-contain"
+                />
+              </div>
               <div className="min-w-0 text-right">
                 <p className="font-semibold text-velora-burgundy group-hover:text-velora-burgundy-light">
                   {p.name}
