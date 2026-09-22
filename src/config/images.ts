@@ -26,7 +26,7 @@ export const images = {
   /** صفحات المنتج (PDP) — placeholders حتى تزيدي صور مخصّصة */
   productPage: {
     hair: {
-      src: "/images/products/pdp/hair.webp",
+      src: "/images/products/pdp/hair-main.png",
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
     },
     skin: {
