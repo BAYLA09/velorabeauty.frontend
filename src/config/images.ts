@@ -10,7 +10,7 @@ export const images = {
       placeholder: "[ضع صورة المنتج هنا]",
     },
     skin: {
-      src: "/images/products/skin.webp",
+      src: "/images/products/skin-gummies.png",
       placeholder: "[ضع صورة المنتج هنا]",
     },
     eye: {
