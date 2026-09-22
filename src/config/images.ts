@@ -34,7 +34,7 @@ export const images = {
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
     },
     eye: {
-      src: "/images/products/pdp/eye-serum.webp",
+      src: "/images/products/pdp/eye-main.png",
       placeholder: "[صورة صفحة المنتج — سيروم العين]",
     },
   },
