@@ -14,7 +14,7 @@ export const images = {
       placeholder: "[ضع صورة المنتج هنا]",
     },
     eye: {
-      src: "/images/products/eye-serum.webp",
+      src: "/images/products/eye-serum.png",
       placeholder: "[ضع صورة السيروم هنا]",
     },
     bundle: {
