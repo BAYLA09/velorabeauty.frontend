@@ -1,52 +1,31 @@
 "use client";
 
-import { useState } from "react";
 import { VeloraImage } from "@/components/ui/VeloraImage";
 
 type Props = {
   mainSrc: string;
   productName: string;
-  placeholders: string[];
+  placeholder: string;
   laraFrame?: boolean;
 };
 
-export function ProductGallery({ mainSrc, productName, placeholders, laraFrame = false }: Props) {
-  const [active, setActive] = useState(0);
-
+export function ProductGallery({ mainSrc, productName, placeholder, laraFrame = false }: Props) {
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-md lg:max-w-lg">
       <VeloraImage
         src={mainSrc}
         alt={productName}
-        placeholder={placeholders[active] ?? placeholders[0]}
+        placeholder={placeholder}
+        fit="contain"
+        sharp
         className={
           laraFrame
-            ? "aspect-[4/5] overflow-hidden rounded-[2rem] border-8 border-white shadow-2xl"
-            : "aspect-square rounded-[2rem] border border-velora-burgundy/10 shadow-lg"
+            ? "aspect-square w-full overflow-hidden rounded-[2rem] border-8 border-white bg-white shadow-2xl"
+            : "aspect-square w-full rounded-[2rem] border border-velora-burgundy/10 shadow-lg"
         }
         priority
-        sizes="(max-width: 768px) 100vw, 520px"
+        sizes="(max-width: 1024px) 92vw, 560px"
       />
-      <div className="grid grid-cols-3 gap-3">
-        {placeholders.map((ph, i) => (
-          <button
-            key={ph + i}
-            type="button"
-            onClick={() => setActive(i)}
-            className={`overflow-hidden rounded-2xl border-2 transition ${
-              active === i ? "border-velora-burgundy" : "border-velora-burgundy/10"
-            }`}
-          >
-            <VeloraImage
-              src={mainSrc}
-              alt=""
-              placeholder={ph}
-              className="aspect-square"
-              sizes="120px"
-            />
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

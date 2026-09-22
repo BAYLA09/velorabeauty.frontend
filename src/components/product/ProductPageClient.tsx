@@ -33,7 +33,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
             <ProductGallery
               mainSrc={product.pageImage.src}
               productName={product.name}
-              placeholders={page.galleryPlaceholders}
+              placeholder={product.pageImage.placeholder}
               laraFrame
             />
 

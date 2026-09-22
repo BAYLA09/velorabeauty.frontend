@@ -12,6 +12,8 @@ type Props = {
   sizes?: string;
   /** cover = fill frame (may crop). contain = full image visible */
   fit?: "cover" | "contain";
+  /** Skip Next optimizer — sharper for large PNG product shots */
+  sharp?: boolean;
 };
 
 export function VeloraImage({
@@ -22,6 +24,7 @@ export function VeloraImage({
   priority = false,
   sizes = "100vw",
   fit = "cover",
+  sharp = false,
 }: Props) {
   const [ready, setReady] = useState(false);
   const showPlaceholder = !ready;
@@ -56,6 +59,8 @@ export function VeloraImage({
         src={src}
         alt={alt}
         fill
+        unoptimized={sharp}
+        quality={sharp ? undefined : 85}
         className={`transition-opacity duration-500 ${
           fit === "contain" ? "object-contain" : "object-cover"
         } ${showPlaceholder ? "opacity-0" : "opacity-100"}`}
