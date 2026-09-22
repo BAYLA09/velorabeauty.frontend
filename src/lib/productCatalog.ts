@@ -1,9 +1,14 @@
+import { images } from "@/config/images";
 import { productPages } from "@/config/productPages";
 import { products, type Product, type ProductId } from "@/config/products";
+
+export type ProductImageRef = { src: string; placeholder: string };
 
 export type ProductWithPage = Product & {
   slug: string;
   page: (typeof productPages)[ProductId];
+  /** صور PDP — منفصلة عن الصفحة الرئيسية */
+  pageImage: ProductImageRef;
 };
 
 export function getAllProductsWithPages(): ProductWithPage[] {
@@ -11,6 +16,7 @@ export function getAllProductsWithPages(): ProductWithPage[] {
     ...p,
     slug: productPages[p.id].slug,
     page: productPages[p.id],
+    pageImage: images.productPage[p.id],
   }));
 }
 

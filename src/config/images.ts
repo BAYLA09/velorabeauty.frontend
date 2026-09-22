@@ -4,6 +4,7 @@ export const images = {
     background: "/images/hero/hero-background.webp",
     placeholder: "[ضع صورة الحملة الرئيسية هنا]",
   },
+  /** الصفحة الرئيسية — صور حقيقية */
   products: {
     hair: {
       src: "/images/products/hair-gummies.png",
@@ -20,6 +21,21 @@ export const images = {
     bundle: {
       src: "/images/products/bundle.png",
       placeholder: "[ضع صورة المجموعة هنا]",
+    },
+  },
+  /** صفحات المنتج (PDP) — placeholders حتى تزيدي صور مخصّصة */
+  productPage: {
+    hair: {
+      src: "/images/products/pdp/hair.webp",
+      placeholder: "[صورة صفحة المنتج — علكات الشعر]",
+    },
+    skin: {
+      src: "/images/products/pdp/skin.webp",
+      placeholder: "[صورة صفحة المنتج — علكات البشرة]",
+    },
+    eye: {
+      src: "/images/products/pdp/eye-serum.webp",
+      placeholder: "[صورة صفحة المنتج — سيروم العين]",
     },
   },
   testimonials: {

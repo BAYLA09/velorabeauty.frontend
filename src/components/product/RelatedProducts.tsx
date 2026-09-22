@@ -25,9 +25,9 @@ export function RelatedProducts({
               className="group flex gap-4 rounded-3xl border border-velora-burgundy/8 bg-white p-4 shadow-sm transition hover:border-velora-champagne/50"
             >
               <VeloraImage
-                src={p.image.src}
+                src={p.pageImage.src}
                 alt={p.name}
-                placeholder={p.image.placeholder}
+                placeholder={p.pageImage.placeholder}
                 className="h-24 w-24 shrink-0 rounded-2xl"
                 sizes="96px"
               />
