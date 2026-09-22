@@ -15,7 +15,7 @@ export function VeloraLogo({ variant = "header" }: Props) {
 
   return (
     <Link
-      href="#"
+      href="/"
       className="relative inline-flex shrink-0 items-center justify-center"
       aria-label={brand.nameAr}
     >

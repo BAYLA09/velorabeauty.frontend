@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { productSection } from "@/config/content";
-import { products } from "@/config/products";
+import { getAllProductsWithPages, getProductPath } from "@/lib/productCatalog";
 import { VeloraImage } from "./ui/VeloraImage";
 
 export function ProductIntroSection() {
+  const products = getAllProductsWithPages();
   return (
     <section className="bg-velora-cream px-4 py-14 md:px-6 md:py-20">
       <div className="mx-auto max-w-6xl">
@@ -13,8 +15,8 @@ export function ProductIntroSection() {
         <ul className="mt-10 space-y-4 md:mt-14">
           {products.map((product) => (
             <li key={product.id}>
-              <a
-                href={`#product-${product.id}`}
+              <Link
+                href={getProductPath(product.slug)}
                 className="group flex items-center gap-4 rounded-3xl border border-velora-burgundy/8 bg-white p-4 shadow-sm shadow-velora-burgundy/5 transition hover:border-velora-champagne/40 md:gap-6 md:p-5"
               >
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-velora-champagne/25 text-sm font-semibold text-velora-burgundy">
@@ -36,7 +38,7 @@ export function ProductIntroSection() {
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-velora-burgundy/15 text-velora-burgundy transition group-hover:bg-velora-burgundy group-hover:text-velora-cream">
                   ←
                 </span>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
