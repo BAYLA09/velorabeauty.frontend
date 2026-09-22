@@ -37,7 +37,7 @@ export function Header() {
         </nav>
 
         <div className="flex flex-1 justify-center md:flex-none">
-          <VeloraLogo />
+          <VeloraLogo onDark />
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-3 md:flex-none">
