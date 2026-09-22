@@ -15,9 +15,11 @@ import { WhyVeloraSection } from "@/components/WhyVeloraSection";
 export default function Home() {
   return (
     <>
-      <Header />
-      <main>
+      <div className="relative bg-velora-burgundy">
+        <Header />
         <HeroSection />
+      </div>
+      <main>
         <ProductIntroSection />
         <ProductShowcaseSection />
         <BundleSection />

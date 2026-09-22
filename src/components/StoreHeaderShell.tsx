@@ -9,15 +9,19 @@ export type StoreNavLink = { label: string; href: string };
 type Props = {
   theme: "light" | "dark";
   links: StoreNavLink[];
+  /** شفاف فوق hero (الصفحة الرئيسية) */
+  overlay?: boolean;
 };
 
-export function StoreHeaderShell({ theme, links }: Props) {
+export function StoreHeaderShell({ theme, links, overlay = false }: Props) {
   const [open, setOpen] = useState(false);
   const isDark = theme === "dark";
 
-  const headerClass = isDark
-    ? "border-white/10 bg-velora-burgundy/95 backdrop-blur-md"
-    : "border-velora-burgundy/10 bg-white shadow-sm";
+  const headerClass = overlay && isDark
+    ? "border-white/10 bg-velora-burgundy/40 backdrop-blur-md"
+    : isDark
+      ? "border-white/10 bg-velora-burgundy/95 backdrop-blur-md"
+      : "border-velora-burgundy/10 bg-white shadow-sm";
 
   const linkClass = isDark
     ? "text-sm font-medium text-velora-cream/90 transition hover:text-velora-champagne"

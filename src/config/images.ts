@@ -1,6 +1,7 @@
 export const images = {
   hero: {
     src: "/images/hero/hero-main.webp",
+    sceneBackground: "/images/hero/hero-scene-bg.webp",
     placeholder: "[ضع صورة الحملة الرئيسية هنا]",
   },
   products: {

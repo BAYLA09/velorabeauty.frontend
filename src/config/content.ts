@@ -15,6 +15,11 @@ export const hero = {
   secondaryCta: "تصفحي المنتجات",
   primaryHref: "#bundle",
   secondaryHref: "#products",
+  trustBadges: [
+    { label: "مكونات طبيعية", icon: "leaf" as const },
+    { label: "جودة عالية", icon: "diamond" as const },
+    { label: "نتائج حقيقية", icon: "spark" as const },
+  ],
 } as const;
 
 export const productSection = {
