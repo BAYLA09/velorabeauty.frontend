@@ -30,27 +30,35 @@ function TrustIcon({ type }: { type: "leaf" | "diamond" | "spark" }) {
 }
 
 export function HeroSection() {
-  return (
-    <section className="relative overflow-hidden text-velora-cream">
-      {/* Scene background (marble + burgundy — from brand mockup) */}
-      <div
-        className="absolute inset-0 bg-velora-burgundy bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('${images.hero.sceneBackground}')` }}
-        aria-hidden
-      />
-      <div
-        className="absolute inset-0 bg-gradient-to-b from-velora-burgundy-dark/55 via-velora-burgundy/25 to-velora-burgundy-dark/70 md:from-velora-burgundy/35 md:via-transparent md:to-velora-burgundy/50"
-        aria-hidden
-      />
+  const { marblePanel, burgundyPanel, flowerAccent } = images.hero;
 
-      <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-4 pb-6 pt-24 sm:pt-28 md:grid-cols-2 md:items-center md:gap-10 md:px-6 md:pb-10 md:pt-32 lg:gap-14">
-        {/* RTL: عمود يمين — النص */}
+  return (
+    <section className="relative isolate overflow-hidden bg-velora-burgundy text-velora-cream">
+      {/* Decor only — no text/UI baked into images */}
+      <div className="absolute inset-0 -z-10" aria-hidden>
+        <div
+          className="absolute inset-y-0 left-0 w-full bg-cover bg-left md:w-[46%]"
+          style={{ backgroundImage: `url('${marblePanel}')` }}
+        />
+        <div
+          className="absolute inset-y-0 right-0 hidden w-[58%] bg-cover bg-right md:block"
+          style={{ backgroundImage: `url('${burgundyPanel}')` }}
+        />
+        <div className="absolute inset-0 bg-velora-burgundy/75 md:hidden" />
+        <div className="absolute inset-y-0 right-0 hidden w-[58%] bg-gradient-to-l from-transparent via-velora-burgundy/20 to-velora-burgundy/40 md:block" />
+        <div
+          className="pointer-events-none absolute bottom-0 left-0 h-40 w-48 bg-contain bg-left-bottom bg-no-repeat opacity-90 sm:h-52 sm:w-64"
+          style={{ backgroundImage: `url('${flowerAccent}')` }}
+        />
+      </div>
+
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-4 pb-6 pt-24 sm:pt-28 md:grid-cols-2 md:items-center md:gap-12 md:px-6 md:pb-10 md:pt-28 lg:gap-14">
         <div className="order-2 space-y-6 text-center md:order-1 md:text-right">
           <p className="text-xs tracking-[0.35em] text-velora-champagne/95">VELORA BEAUTY</p>
           <h1 className="font-display text-4xl font-bold leading-[1.22] md:text-5xl lg:text-[3.15rem]">
             {hero.headline}
           </h1>
-          <p className="mx-auto max-w-md text-base leading-relaxed text-velora-cream/88 md:mx-0 md:text-lg">
+          <p className="mx-auto max-w-md text-base leading-relaxed text-velora-cream/90 md:mx-0 md:text-lg">
             {hero.subheadline}
           </p>
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
@@ -62,7 +70,7 @@ export function HeroSection() {
             </ButtonLink>
           </div>
 
-          <ul className="mx-auto flex max-w-md flex-wrap items-center justify-center gap-6 border-t border-white/15 pt-6 md:mx-0 md:justify-start">
+          <ul className="mx-auto flex max-w-md flex-wrap items-center justify-center gap-x-8 gap-y-4 border-t border-white/15 pt-6 md:mx-0 md:justify-start">
             {hero.trustBadges.map((badge) => (
               <li key={badge.label} className="flex flex-col items-center gap-2 md:items-end">
                 <TrustIcon type={badge.icon} />
@@ -72,16 +80,15 @@ export function HeroSection() {
           </ul>
         </div>
 
-        {/* RTL: عمود يسار — صورة الحملة */}
         <div className="order-1 md:order-2">
-          <div className="mx-auto max-w-md md:mx-0 md:max-w-none md:ps-2 lg:ps-6">
+          <div className="mx-auto max-w-sm md:mx-0 md:max-w-md lg:max-w-lg">
             <VeloraImage
               src={images.hero.src}
               alt={images.hero.placeholder}
               placeholder={images.hero.placeholder}
-              className="aspect-[4/5] rounded-[1.75rem] border-4 border-white/90 bg-velora-cream shadow-[0_24px_60px_rgba(26,10,14,0.35)] ring-1 ring-black/5"
+              className="aspect-[4/5] rounded-[1.75rem] border-4 border-white/95 bg-velora-cream shadow-[0_24px_60px_rgba(26,10,14,0.35)]"
               priority
-              sizes="(max-width: 768px) 90vw, 480px"
+              sizes="(max-width: 768px) 88vw, 440px"
             />
           </div>
         </div>

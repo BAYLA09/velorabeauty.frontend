@@ -1,7 +1,10 @@
 export const images = {
   hero: {
     src: "/images/hero/hero-main.webp",
-    sceneBackground: "/images/hero/hero-scene-bg.webp",
+    /** Panels décoratives فقط (بلا نص) — hero */
+    marblePanel: "/images/hero/hero-bg-marble.webp",
+    burgundyPanel: "/images/hero/hero-bg-burgundy.webp",
+    flowerAccent: "/images/hero/hero-bg-flower.webp",
     placeholder: "[ضع صورة الحملة الرئيسية هنا]",
   },
   products: {

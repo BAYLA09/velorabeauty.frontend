@@ -15,8 +15,8 @@ Premium Arabic RTL homepage for **VELORA BEAUTY** / **فيلورا بيوتي**.
 Replace assets on GitHub without changing components:
 
 - `/public/images/brand/logo-mark.png` → شعار V (شفاف) + النص فـ `src/config/brand.ts`
-- `/public/images/hero/hero-main.webp` — صورة الحملة (فوق الخلفية)
-- `/public/images/hero/hero-scene-bg.webp` — خلفية الـ hero (marble + burgundy)
+- `/public/images/hero/hero-main.webp` — صورة الحملة
+- `/public/images/hero/hero-bg-marble.webp`, `hero-bg-burgundy.webp`, `hero-bg-flower.webp` — ديكور الخلفية (بلا نص)
 - `/public/images/products/hair.webp`, `skin.webp`, `eye-serum.webp`, `bundle.webp`
 - `/public/images/testimonials/customer-01.webp`, `customer-02.webp`
 
