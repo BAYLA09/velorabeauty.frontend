@@ -6,7 +6,7 @@ export const images = {
   },
   products: {
     hair: {
-      src: "/images/products/hair.webp",
+      src: "/images/products/hair-gummies.png",
       placeholder: "[ضع صورة المنتج هنا]",
     },
     skin: {

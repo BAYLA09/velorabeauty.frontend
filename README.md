@@ -17,7 +17,7 @@ Replace assets on GitHub without changing components:
 - `/public/images/brand/logo-mark.png` → شعار V (شفاف) + النص فـ `src/config/brand.ts`
 - `/public/images/hero/0d992921-89dc-4309-bfeb-4feb78ba2834.png` — صورة الحملة (أو حدّث `src` فـ `images.ts`)
 - `/public/images/hero/hero-background.webp` — خلفية الـ hero (ديكور بلا نص)
-- `/public/images/products/hair.webp`, `skin-gummies.png`, `eye-serum.webp`, `bundle.webp`
+- `/public/images/products/hair-gummies.png`, `skin-gummies.png`, `eye-serum.webp`, `bundle.webp`
 - `/public/images/testimonials/customer-01.webp`, `customer-02.webp`
 
 Until files exist, the UI shows premium Arabic placeholders.
