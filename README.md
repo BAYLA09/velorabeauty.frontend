@@ -28,6 +28,17 @@ npm install
 npm run dev
 ```
 
+## Docker (Easypanel)
+
+Build and run locally:
+
+```bash
+docker build -t velorabeauty-frontend .
+docker run --rm -p 3000:3000 velorabeauty-frontend
+```
+
+Easypanel expects `Dockerfile` at the repository root. The app listens on port **3000**.
+
 Open [http://localhost:3000](http://localhost:3000).
 
 ## Pricing (د.إ)
