@@ -10,7 +10,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-velora-burgundy/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 md:px-6 md:py-3">
         <button
           type="button"
           className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-velora-cream md:hidden"

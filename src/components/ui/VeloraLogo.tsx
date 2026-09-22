@@ -39,6 +39,7 @@ export function VeloraLogo({ variant = "header", onDark = false }: Props) {
             height={114}
             className="h-11 w-auto object-contain sm:h-12 md:h-[3.25rem]"
             priority
+            unoptimized
             onError={() => setFailed(true)}
           />
           <span
