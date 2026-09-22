@@ -18,6 +18,25 @@ const sansArabic = Tajawal({
 export const metadata: Metadata = {
   title: `${brand.nameEn} | ${brand.nameAr}`,
   description: brand.tagline,
+  applicationName: brand.nameEn,
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#5c2a32" },
+    { media: "(prefers-color-scheme: dark)", color: "#3a1820" },
+  ],
+  appleWebApp: {
+    capable: true,
+    title: "Velora",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({
