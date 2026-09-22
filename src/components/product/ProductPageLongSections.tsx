@@ -1,4 +1,5 @@
 import { ProductFaq } from "@/components/product/ProductFaq";
+import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
 import { VeloraImage } from "@/components/ui/VeloraImage";
 import { uaeDeliveryCities } from "@/config/productPageShared";
 import type { ProductPageConfig } from "@/config/productPages";
@@ -186,26 +187,7 @@ export function ProductPageLongSections({
         </div>
       </section>
 
-      <section className="bg-velora-cream px-4 py-14 md:px-6">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-center text-2xl font-extrabold text-velora-burgundy">{page.testimonialTitle}</h2>
-          <p className="mt-2 text-center text-sm text-velora-burgundy/55">{page.testimonialSubtitle}</p>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {[1, 2, 3].map((n) => (
-              <div
-                key={n}
-                className="rounded-3xl border border-dashed border-velora-burgundy/20 bg-white p-6 text-center"
-              >
-                <div className="flex justify-center gap-0.5 text-velora-champagne/60" aria-hidden>
-                  ★★★★★
-                </div>
-                <p className="mt-4 text-sm text-velora-burgundy/70">اكتبي تجربة عميلة حقيقية هنا.</p>
-                <p className="mt-2 text-xs font-semibold text-velora-burgundy">اسم — مدينة الإمارات</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TestimonialsProductStrip title={page.testimonialTitle} subtitle={page.testimonialSubtitle} />
 
       <section className="bg-white py-14 sm:py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">

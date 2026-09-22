@@ -37,22 +37,6 @@ export const whyVelora = {
   ],
 } as const;
 
-export const testimonials = {
-  title: "آراء عميلاتنا",
-  items: [
-    {
-      quote: "اكتبي تجربة عميلة حقيقية هنا.",
-      name: "اسم العميلة — المدينة",
-      imageKey: "customer01" as const,
-    },
-    {
-      quote: "اكتبي تجربة عميلة حقيقية هنا.",
-      name: "اسم العميلة — المدينة",
-      imageKey: "customer02" as const,
-    },
-  ],
-} as const;
-
 export const howToOrder = {
   title: "كيف تطلبين؟",
   support: "تجربة طلب بسيطة وسريعة داخل الإمارات.",

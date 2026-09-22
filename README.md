@@ -10,6 +10,7 @@ Premium Arabic RTL homepage for **VELORA BEAUTY** / **فيلورا بيوتي**.
 | Products & bundle | `src/config/products.ts` |
 | Pricing (AED / COD +20) | `src/config/pricing.ts` |
 | Copy, FAQ, nav, footer | `src/config/content.ts` |
+| **Reviews (homepage + PDP)** | `src/config/testimonials.ts` — `published: true` فقط |
 | Image paths | `src/config/images.ts` |
 
 Replace assets on GitHub without changing components:
