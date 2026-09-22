@@ -43,10 +43,10 @@ export const products: Product[] = [
   {
     id: "eye",
     number: "03",
-    name: "علكات العناية بمحيط العين",
+    name: "سيروم العناية بمحيط العين",
     ingredient: "بفيتامين E",
     description:
-      "عناية مركّزة بمحيط العين، لتكملي روتينك بخطوة واحدة راقية.",
+      "سيروم مركّز لمحيط العين — خطوة راقية تكمل روتينك مع علكات الشعر والبشرة.",
     price: singleProductPrice,
     priceLabel: formatPrice(singleProductPrice),
     image: images.products.eye,

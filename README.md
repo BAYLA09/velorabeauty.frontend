@@ -16,7 +16,7 @@ Replace assets on GitHub without changing components:
 
 - `/public/images/brand/logo.svg` → your logo (same path or update `brand.ts`)
 - `/public/images/hero/hero-main.webp`
-- `/public/images/products/hair.webp`, `skin.webp`, `eye.webp`, `bundle.webp`
+- `/public/images/products/hair.webp`, `skin.webp`, `eye-serum.webp`, `bundle.webp`
 - `/public/images/testimonials/customer-01.webp`, `customer-02.webp`
 
 Until files exist, the UI shows premium Arabic placeholders.
