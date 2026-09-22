@@ -37,7 +37,8 @@ docker build -t velorabeauty-frontend .
 docker run --rm -p 3000:3000 velorabeauty-frontend
 ```
 
-Easypanel expects `Dockerfile` at the repository root. The app listens on port **3000**.
+Easypanel: **Dockerfile** at repo root, branch **`main`**, port **3000**.  
+If deploy fails in the panel, see **[docs/EASYPANEL-DEPLOY.md](docs/EASYPANEL-DEPLOY.md)** (OOM, Force Rebuild, webhook).
 
 Open [http://localhost:3000](http://localhost:3000).
 
