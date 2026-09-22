@@ -15,7 +15,7 @@ export function ProductStoreHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-velora-burgundy/10 bg-white shadow-sm">
-      <div className="mx-auto flex min-h-[4.75rem] max-w-6xl items-center justify-between px-4 py-2 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
         <VeloraLogo />
         <nav className="hidden items-center gap-6 md:flex">
           {links.map((l) => (
