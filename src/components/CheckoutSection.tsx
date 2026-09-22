@@ -1,36 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import type { BundleQuantity, PaymentMethod } from "@/lib/pricing";
+import { checkout } from "@/config/content";
+import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
 import { BundleSelector } from "./BundleSelector";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { PaymentMethodSelector } from "./PaymentMethodSelector";
 
 export function CheckoutSection() {
-  const [quantity, setQuantity] = useState<BundleQuantity>(2);
+  const [quantity, setQuantity] = useState<BundleQuantity>(3);
   const [method, setMethod] = useState<PaymentMethod>("card");
 
   return (
-    <section id="checkout" className="mx-auto max-w-6xl px-4 py-16">
-      <div className="mb-10 text-center">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-rose-500">
-          Velora Beauty · UAE
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-stone-900 sm:text-4xl">
-          الأسعار · Pricing
-        </h1>
-      </div>
+    <section id="checkout" className="scroll-mt-24 bg-velora-cream-dark px-4 py-16 md:px-6 md:py-24">
+      <div className="mx-auto max-w-6xl">
+        <h2 className="text-center text-3xl font-bold text-velora-burgundy md:text-4xl">
+          {checkout.title}
+        </h2>
 
-      <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-10">
-          <BundleSelector selected={quantity} onChange={setQuantity} />
-          <PaymentMethodSelector
-            method={method}
-            quantity={quantity}
-            onChange={setMethod}
-          />
+        <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_360px]">
+          <div className="space-y-10">
+            <BundleSelector selected={quantity} onChange={setQuantity} />
+            <PaymentMethodSelector method={method} quantity={quantity} onChange={setMethod} />
+          </div>
+          <CheckoutSummary quantity={quantity} method={method} />
         </div>
-        <CheckoutSummary quantity={quantity} method={method} />
       </div>
     </section>
   );

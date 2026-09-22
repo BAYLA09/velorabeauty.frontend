@@ -1,46 +1,49 @@
 "use client";
 
 import {
-  BUNDLE_OPTIONS,
-  CARD_PRICES,
-  COD_PRICES,
+  bundleQuantities,
+  cardBundlePrices,
+  codBundlePrices,
+  formatPrice,
   type BundleQuantity,
-  formatAed,
-} from "@/lib/pricing";
+} from "@/config/pricing";
+import { checkout } from "@/config/content";
 
 type Props = {
   selected: BundleQuantity;
   onChange: (q: BundleQuantity) => void;
 };
 
+const bundleLabels: Record<BundleQuantity, string> = {
+  1: "منتج واحد",
+  2: "منتجان",
+  3: "المجموعة الكاملة",
+};
+
 export function BundleSelector({ selected, onChange }: Props) {
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold text-stone-900">
-        اختر العرض <span className="text-stone-500 font-normal">/ Choose bundle</span>
-      </h2>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-velora-burgundy">{checkout.bundleLabel}</h3>
       <div className="grid gap-3 sm:grid-cols-3">
-        {BUNDLE_OPTIONS.map((qty) => {
-          const isActive = selected === qty;
+        {bundleQuantities.map((qty) => {
+          const active = selected === qty;
           return (
             <button
               key={qty}
               type="button"
               onClick={() => onChange(qty)}
               className={`rounded-2xl border-2 p-4 text-right transition-all ${
-                isActive
-                  ? "border-rose-500 bg-rose-50 shadow-md shadow-rose-100"
-                  : "border-stone-200 bg-white hover:border-rose-200"
+                active
+                  ? "border-velora-burgundy bg-velora-cream-dark shadow-md"
+                  : "border-velora-burgundy/10 bg-white hover:border-velora-champagne/60"
               }`}
             >
-              <p className="text-sm text-stone-600">
-                {qty === 1 ? "حبة واحدة" : `${qty} حبات`}
+              <p className="text-sm font-medium text-velora-burgundy">{bundleLabels[qty]}</p>
+              <p className="mt-2 text-xl font-bold text-velora-burgundy">
+                {formatPrice(cardBundlePrices[qty])}
               </p>
-              <p className="mt-1 text-2xl font-bold text-stone-900">
-                {formatAed(CARD_PRICES[qty])}
-              </p>
-              <p className="mt-2 text-xs text-stone-500">
-                بطاقة · COD {formatAed(COD_PRICES[qty])}
+              <p className="mt-2 text-xs text-velora-burgundy/55">
+                عند الاستلام: {formatPrice(codBundlePrices[qty])}
               </p>
             </button>
           );

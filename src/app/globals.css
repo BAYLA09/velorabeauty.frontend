@@ -1,12 +1,32 @@
 @import "tailwindcss";
 
-:root {
-  --background: #faf8f6;
-  --foreground: #1c1917;
+@theme {
+  --color-velora-burgundy: #5c2a32;
+  --color-velora-burgundy-light: #6f3540;
+  --color-velora-burgundy-dark: #3a1820;
+  --color-velora-cream: #faf6f1;
+  --color-velora-cream-dark: #f3ece4;
+  --color-velora-champagne: #c9a962;
+  --color-velora-champagne-light: #dcc48a;
+  --color-velora-champagne-dark: #a8884a;
+  --font-display: var(--font-el-messiri), "Segoe UI", sans-serif;
+  --font-body: var(--font-noto-naskh), "Segoe UI", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--color-velora-cream);
+  color: var(--color-velora-burgundy-dark);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
 }

@@ -1,72 +1,71 @@
 "use client";
 
+import { checkout } from "@/config/content";
 import {
-  COD_FEE_AED,
-  PAYMENT_METHOD_COPY,
+  codFee,
+  currencyLabel,
+  formatPrice,
+  getCheckoutTotal,
   type BundleQuantity,
   type PaymentMethod,
-  formatAed,
-  getTotalAed,
-} from "@/lib/pricing";
+} from "@/config/pricing";
 
 type Props = {
   quantity: BundleQuantity;
   method: PaymentMethod;
 };
 
+const quantityLabels: Record<BundleQuantity, string> = {
+  1: "منتج واحد",
+  2: "منتجان",
+  3: "المجموعة الكاملة (٣ منتجات)",
+};
+
 export function CheckoutSummary({ quantity, method }: Props) {
-  const total = getTotalAed(quantity, method);
-  const copy = PAYMENT_METHOD_COPY[method];
+  const total = getCheckoutTotal(quantity, method);
 
   return (
-    <aside className="rounded-3xl border border-stone-200 bg-white p-6 shadow-lg shadow-stone-200/50">
-      <h2 className="text-xl font-semibold text-stone-900">ملخص الطلب</h2>
-      <p className="text-sm text-stone-500">Order summary</p>
+    <aside className="rounded-[2rem] border border-velora-burgundy/10 bg-white p-6 shadow-xl shadow-velora-burgundy/5 lg:sticky lg:top-28">
+      <h3 className="text-xl font-bold text-velora-burgundy">{checkout.summaryTitle}</h3>
 
-      <dl className="mt-6 space-y-3 text-sm">
+      <dl className="mt-6 space-y-4 text-sm">
         <div className="flex justify-between gap-4">
-          <dt className="text-stone-600">الكمية / Quantity</dt>
-          <dd className="font-medium text-stone-900">{quantity}</dd>
+          <dt className="text-velora-burgundy/65">العرض</dt>
+          <dd className="font-medium text-velora-burgundy">{quantityLabels[quantity]}</dd>
         </div>
         <div className="flex justify-between gap-4">
-          <dt className="text-stone-600">طريقة الدفع / Payment</dt>
-          <dd className="text-right font-medium text-stone-900">
-            {copy.titleAr}
-            <br />
-            <span className="text-xs font-normal text-stone-500">{copy.titleEn}</span>
+          <dt className="text-velora-burgundy/65">طريقة الدفع</dt>
+          <dd className="font-medium text-velora-burgundy">
+            {method === "card" ? "الدفع بالبطاقة" : "الدفع عند الاستلام"}
           </dd>
         </div>
         {method === "cod" && (
-          <div className="flex justify-between gap-4 rounded-xl bg-amber-50 px-3 py-2 text-amber-900">
-            <dt>رسوم الشحن (COD)</dt>
-            <dd className="font-medium">+{formatAed(COD_FEE_AED)}</dd>
-          </div>
-        )}
-        {method === "card" && (
-          <div className="flex justify-between gap-4 rounded-xl bg-emerald-50 px-3 py-2 text-emerald-800">
-            <dt>رسوم إضافية</dt>
-            <dd className="font-medium">لا يوجد / None</dd>
+          <div className="rounded-xl bg-velora-champagne/15 px-3 py-2 text-velora-burgundy">
+            <div className="flex justify-between gap-4">
+              <dt>رسوم الدفع عند الاستلام</dt>
+              <dd className="font-semibold">
+                +{codFee} {currencyLabel}
+              </dd>
+            </div>
           </div>
         )}
       </dl>
 
-      <div className="mt-6 border-t border-stone-100 pt-4">
+      <div className="mt-6 border-t border-velora-burgundy/10 pt-5">
         <div className="flex items-end justify-between">
-          <span className="text-stone-600">المجموع / Total</span>
-          <span className="text-3xl font-bold text-rose-600">{formatAed(total)}</span>
+          <span className="text-velora-burgundy/65">المجموع</span>
+          <span className="text-3xl font-bold text-velora-burgundy">{formatPrice(total)}</span>
         </div>
-        <p className="mt-3 text-xs leading-relaxed text-stone-500">
-          {method === "card"
-            ? "الدفع بالبطاقة — بدون رسوم إضافية"
-            : `الدفع عند الاستلام — +${COD_FEE_AED} AED رسوم الشحن`}
+        <p className="mt-3 text-xs leading-relaxed text-velora-burgundy/60">
+          {method === "card" ? checkout.cardNote : checkout.codNote}
         </p>
       </div>
 
       <button
         type="button"
-        className="mt-6 w-full rounded-full bg-stone-900 py-4 text-sm font-semibold text-white transition hover:bg-stone-800"
+        className="mt-6 w-full rounded-full bg-velora-burgundy py-4 text-sm font-semibold text-velora-cream transition hover:bg-velora-burgundy-light"
       >
-        إتمام الطلب · Complete order
+        {checkout.submit}
       </button>
     </aside>
   );
