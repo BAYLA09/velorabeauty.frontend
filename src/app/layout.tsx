@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { El_Messiri, Noto_Naskh_Arabic } from "next/font/google";
+import { El_Messiri, Tajawal } from "next/font/google";
 import { brand } from "@/config/brand";
 import "./globals.css";
 
@@ -9,10 +9,10 @@ const display = El_Messiri({
   weight: ["400", "500", "600", "700"],
 });
 
-const body = Noto_Naskh_Arabic({
+const sansArabic = Tajawal({
   subsets: ["arabic"],
-  variable: "--font-noto-naskh",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-tajawal",
+  weight: ["400", "500", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" className={`${display.variable} ${body.variable}`}>
+    <html lang="ar" dir="rtl" className={`${display.variable} ${sansArabic.variable}`}>
       <body className="antialiased">{children}</body>
     </html>
   );

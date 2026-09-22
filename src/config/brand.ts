@@ -1,10 +1,12 @@
 export const brand = {
   nameEn: "VELORA BEAUTY",
-  nameAr: "فيلورا بيوتي",
+  nameAr: "فيلورا للجمال",
   tagline: "جمالك، بطابعٍ مختلف.",
   country: "الإمارات العربية المتحدة",
   logo: {
-    src: "/images/brand/logo.svg",
+    markSrc: "/images/brand/logo-mark.png",
+    wordmarkEn: "velorabeauty",
+    wordmarkAr: "فيلورا للجمال",
     placeholderLabel: "[ضع شعار VELORA هنا]",
   },
 } as const;

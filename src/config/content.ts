@@ -1,10 +1,10 @@
 import { codFee, currencyLabel, formatPrice } from "./pricing";
 
 export const navigation = [
-  { label: "الرئيسية", href: "#" },
-  { label: "المنتجات", href: "#products" },
-  { label: "المجموعة", href: "#bundle" },
-  { label: "الأسئلة الشائعة", href: "#faq" },
+  { label: "الرئيسية", href: "/" },
+  { label: "المنتجات", href: "/#products" },
+  { label: "المجموعة", href: "/#bundle" },
+  { label: "الأسئلة الشائعة", href: "/#faq" },
 ] as const;
 
 export const hero = {
@@ -111,14 +111,14 @@ export const finalCta = {
 
 export const footer = {
   links: [
-    { label: "الرئيسية", href: "#" },
-    { label: "المنتجات", href: "#products" },
-    { label: "عن فيلورا", href: "#why" },
-    { label: "الأسئلة الشائعة", href: "#faq" },
-    { label: "تواصل معنا", href: "#contact" },
-    { label: "سياسة الخصوصية", href: "#" },
-    { label: "الشروط والأحكام", href: "#" },
-    { label: "سياسة الاسترجاع", href: "#" },
+    { label: "الرئيسية", href: "/" },
+    { label: "المنتجات", href: "/#products" },
+    { label: "عن فيلورا", href: "/#why" },
+    { label: "الأسئلة الشائعة", href: "/#faq" },
+    { label: "تواصل معنا", href: "/#contact" },
+    { label: "سياسة الخصوصية", href: "/" },
+    { label: "الشروط والأحكام", href: "/" },
+    { label: "سياسة الاسترجاع", href: "/" },
   ],
   socialPlaceholder: true,
 } as const;

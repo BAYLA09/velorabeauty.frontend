@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { navigation } from "@/config/content";
 import { VeloraLogo } from "./ui/VeloraLogo";
@@ -25,34 +26,34 @@ export function Header() {
 
         <nav className="hidden items-center gap-8 md:flex md:flex-1">
           {navigation.slice(0, 2).map((item) => (
-            <a
+            <Link
               key={item.href}
               href={item.href}
               className="text-sm text-velora-cream/85 transition hover:text-velora-champagne"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
         <div className="flex flex-1 justify-center md:flex-none">
-          <VeloraLogo />
+          <VeloraLogo onDark />
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-3 md:flex-none">
           <nav className="hidden items-center gap-8 md:flex">
             {navigation.slice(2).map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className="text-sm text-velora-cream/85 transition hover:text-velora-champagne"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
-          <a
-            href="#checkout"
+          <Link
+            href="/#checkout"
             className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-velora-cream transition hover:border-velora-champagne/50 hover:text-velora-champagne"
             aria-label="السلة"
           >
@@ -62,7 +63,7 @@ export function Header() {
               <circle cx="9" cy="19" r="1" fill="currentColor" />
               <circle cx="17" cy="19" r="1" fill="currentColor" />
             </svg>
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -71,19 +72,19 @@ export function Header() {
           <ul className="space-y-3">
             {navigation.map((item) => (
               <li key={item.href}>
-                <a
+                <Link
                   href={item.href}
                   className="block py-2 text-velora-cream"
                   onClick={() => setOpen(false)}
                 >
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
             <li>
-              <a href="#checkout" className="block py-2 text-velora-champagne" onClick={() => setOpen(false)}>
+              <Link href="/#checkout" className="block py-2 text-velora-champagne" onClick={() => setOpen(false)}>
                 إتمام الطلب
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>

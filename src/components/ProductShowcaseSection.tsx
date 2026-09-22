@@ -1,9 +1,10 @@
 import { productSection } from "@/config/content";
-import { products } from "@/config/products";
+import { getAllProductsWithPages, getProductPath } from "@/lib/productCatalog";
 import { ButtonLink } from "./ui/ButtonLink";
 import { VeloraImage } from "./ui/VeloraImage";
 
 export function ProductShowcaseSection() {
+  const products = getAllProductsWithPages();
   return (
     <section id="products" className="bg-velora-cream px-4 py-14 md:px-6 md:py-20">
       <div className="mx-auto max-w-6xl">
@@ -41,8 +42,8 @@ export function ProductShowcaseSection() {
                     <p className="text-lg text-velora-champagne-dark">{product.ingredient}</p>
                     <p className="leading-relaxed text-velora-burgundy/70">{product.description}</p>
                     <p className="text-3xl font-bold text-velora-burgundy">{product.priceLabel}</p>
-                    <ButtonLink href="#checkout" variant="burgundy">
-                      {product.cta}
+                    <ButtonLink href={getProductPath(product.slug)} variant="burgundy">
+                      اطلبي الآن
                     </ButtonLink>
                   </div>
                 </div>

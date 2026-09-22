@@ -10,7 +10,8 @@
   --color-velora-champagne-light: #dcc48a;
   --color-velora-champagne-dark: #a8884a;
   --font-display: var(--font-el-messiri), "Segoe UI", sans-serif;
-  --font-body: var(--font-noto-naskh), "Segoe UI", sans-serif;
+  --font-body: var(--font-tajawal), "Segoe UI", system-ui, sans-serif;
+  --font-ui: var(--font-tajawal), "Segoe UI", system-ui, sans-serif;
 }
 
 html {
@@ -22,6 +23,23 @@ body {
   color: var(--color-velora-burgundy-dark);
   font-family: var(--font-body);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.product-typography {
+  font-family: var(--font-ui);
+  font-feature-settings: "kern" 1;
+  letter-spacing: 0.01em;
+}
+
+.product-typography h1,
+.product-typography h2,
+.product-typography h3,
+.product-typography h4 {
+  font-family: var(--font-ui);
+  letter-spacing: 0;
 }
 
 h1,
