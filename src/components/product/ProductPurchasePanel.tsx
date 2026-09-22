@@ -66,7 +66,7 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-extrabold text-velora-burgundy">اختاري العرض:</p>
+      <p className="text-base font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
 
       <div className="space-y-3">
         {quantities.map((qty) => {
@@ -78,10 +78,10 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
               key={qty}
               type="button"
               onClick={() => setQuantity(qty)}
-              className={`relative flex min-h-[4.75rem] w-full items-stretch gap-3 rounded-2xl border-2 p-4 text-right transition-all ${
+              className={`relative flex min-h-[5.25rem] w-full items-stretch gap-3 rounded-2xl border-2 p-4 text-right transition-all ${
                 active
-                  ? "border-velora-burgundy bg-velora-cream-dark shadow-md"
-                  : "border-velora-burgundy/10 bg-white hover:border-velora-burgundy/30"
+                  ? "border-velora-burgundy bg-white shadow-md ring-1 ring-velora-burgundy/15"
+                  : "border-velora-burgundy/15 bg-white hover:border-velora-burgundy/35"
               }`}
             >
               {meta.badge && (
@@ -97,10 +97,10 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
                 {active && <span className="h-2 w-2 rounded-full bg-velora-cream" />}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-extrabold text-velora-burgundy">{meta.label}</p>
-                <p className="mt-1 text-xs text-velora-burgundy/55">{meta.hint}</p>
+                <p className="text-base font-extrabold text-velora-burgundy-dark">{meta.label}</p>
+                <p className="mt-1 text-sm font-medium leading-snug text-velora-burgundy/75">{meta.hint}</p>
                 {display.showCompare && (
-                  <p className="mt-1 text-xs font-medium text-velora-champagne-dark">
+                  <p className="mt-1.5 text-xs font-bold text-velora-champagne-dark sm:text-sm">
                     وفّري {formatPrice(display.savings)} · {formatPrice(display.perUnit)} / منتج
                   </p>
                 )}
@@ -111,7 +111,7 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
                     {formatPrice(display.compareAt)}
                   </span>
                 )}
-                <span className="text-xl font-extrabold text-velora-burgundy">
+                <span className="text-2xl font-extrabold text-velora-burgundy-dark">
                   {formatPrice(display.price)}
                 </span>
               </div>
@@ -120,7 +120,7 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
         })}
       </div>
 
-      <p className="text-sm font-extrabold text-velora-burgundy">طرق الدفع المتاحة</p>
+      <p className="text-base font-extrabold text-velora-burgundy-dark">طرق الدفع المتاحة</p>
       <div className="grid gap-2 sm:grid-cols-2">
         <button
           type="button"
@@ -129,8 +129,8 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
             method === "card" ? "border-velora-burgundy bg-velora-cream-dark" : "border-velora-burgundy/10 bg-white"
           }`}
         >
-          <p className="font-bold text-velora-burgundy">الدفع بالبطاقة</p>
-          <p className="mt-1 text-xs text-velora-burgundy/60">بدون رسوم إضافية</p>
+          <p className="text-base font-bold text-velora-burgundy-dark">الدفع بالبطاقة</p>
+          <p className="mt-1 text-sm font-medium text-velora-burgundy/75">بدون رسوم إضافية</p>
         </button>
         <button
           type="button"
@@ -139,14 +139,14 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
             method === "cod" ? "border-velora-burgundy bg-velora-cream-dark" : "border-velora-burgundy/10 bg-white"
           }`}
         >
-          <p className="font-bold text-velora-burgundy">الدفع عند الاستلام</p>
-          <p className="mt-1 text-xs text-velora-burgundy/60">+20 د.إ رسوم التوصيل</p>
+          <p className="text-base font-bold text-velora-burgundy-dark">الدفع عند الاستلام</p>
+          <p className="mt-1 text-sm font-medium text-velora-burgundy/75">+20 د.إ رسوم التوصيل</p>
         </button>
       </div>
 
       <button
         type="button"
-        className="w-full rounded-full bg-velora-burgundy py-4 text-sm font-extrabold text-velora-cream shadow-lg"
+        className="w-full rounded-full bg-velora-burgundy py-4 text-base font-extrabold tracking-wide text-velora-cream shadow-lg"
         data-payment-method={method}
         data-total={total}
         data-quantity={quantity}

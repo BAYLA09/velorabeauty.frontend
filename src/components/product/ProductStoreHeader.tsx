@@ -24,7 +24,7 @@ export function ProductStoreHeader() {
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-velora-burgundy/80 hover:text-velora-burgundy"
+              className="text-sm font-bold text-velora-burgundy hover:text-velora-burgundy-dark"
             >
               {l.label}
             </Link>
