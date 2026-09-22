@@ -18,7 +18,7 @@ export const images = {
       placeholder: "[ضع صورة السيروم هنا]",
     },
     bundle: {
-      src: "/images/products/bundle.webp",
+      src: "/images/products/bundle.png",
       placeholder: "[ضع صورة المجموعة هنا]",
     },
   },
