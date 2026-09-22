@@ -10,6 +10,8 @@ type Props = {
   className?: string;
   priority?: boolean;
   sizes?: string;
+  /** cover = fill frame (may crop). contain = full image visible */
+  fit?: "cover" | "contain";
 };
 
 export function VeloraImage({
@@ -19,6 +21,7 @@ export function VeloraImage({
   className = "",
   priority = false,
   sizes = "100vw",
+  fit = "cover",
 }: Props) {
   const [ready, setReady] = useState(false);
   const showPlaceholder = !ready;
@@ -53,9 +56,9 @@ export function VeloraImage({
         src={src}
         alt={alt}
         fill
-        className={`object-cover transition-opacity duration-500 ${
-          showPlaceholder ? "opacity-0" : "opacity-100"
-        }`}
+        className={`transition-opacity duration-500 ${
+          fit === "contain" ? "object-contain" : "object-cover"
+        } ${showPlaceholder ? "opacity-0" : "opacity-100"}`}
         sizes={sizes}
         priority={priority}
         onLoad={() => setReady(true)}

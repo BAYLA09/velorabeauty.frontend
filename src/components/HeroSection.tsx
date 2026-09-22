@@ -71,14 +71,15 @@ export function HeroSection() {
         </div>
 
         <div className="order-1 md:order-2">
-          <div className="mx-auto max-w-[17rem] sm:max-w-xs md:mx-0 md:max-w-sm lg:max-w-md">
+          <div className="mx-auto w-full max-w-[min(100%,22rem)] sm:max-w-[24rem] md:mx-0 md:max-w-[26rem] lg:max-w-[28rem]">
             <VeloraImage
               src={images.hero.src}
               alt={images.hero.placeholder}
               placeholder={images.hero.placeholder}
-              className="aspect-[4/5] rounded-[1.75rem] border-4 border-white/95 bg-velora-cream shadow-[0_24px_60px_rgba(26,10,14,0.35)]"
+              fit="contain"
+              className="aspect-[941/1672] w-full rounded-[1.75rem] border-4 border-white/95 bg-velora-cream/90 shadow-[0_24px_60px_rgba(26,10,14,0.35)]"
               priority
-              sizes="(max-width: 768px) 80vw, 400px"
+              sizes="(max-width: 768px) 88vw, 448px"
             />
           </div>
         </div>
