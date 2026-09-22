@@ -7,9 +7,10 @@ type Props = {
   mainSrc: string;
   productName: string;
   placeholders: string[];
+  laraFrame?: boolean;
 };
 
-export function ProductGallery({ mainSrc, productName, placeholders }: Props) {
+export function ProductGallery({ mainSrc, productName, placeholders, laraFrame = false }: Props) {
   const [active, setActive] = useState(0);
 
   return (
@@ -18,7 +19,11 @@ export function ProductGallery({ mainSrc, productName, placeholders }: Props) {
         src={mainSrc}
         alt={productName}
         placeholder={placeholders[active] ?? placeholders[0]}
-        className="aspect-square rounded-[2rem] border border-velora-burgundy/10 shadow-lg"
+        className={
+          laraFrame
+            ? "aspect-[4/5] overflow-hidden rounded-[2rem] border-8 border-white shadow-2xl"
+            : "aspect-square rounded-[2rem] border border-velora-burgundy/10 shadow-lg"
+        }
         priority
         sizes="(max-width: 768px) 100vw, 520px"
       />
