@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ProductForm } from "@/config/productPages";
 import {
-  cardBundlePrices,
   codBundlePrices,
   formatPrice,
   getCheckoutTotal,
