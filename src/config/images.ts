@@ -30,7 +30,7 @@ export const images = {
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
     },
     skin: {
-      src: "/images/products/pdp/skin.webp",
+      src: "/images/products/pdp/skin-main.png",
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
     },
     eye: {
