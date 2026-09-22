@@ -17,20 +17,20 @@ function offerMeta(form: ProductForm, qty: BundleQuantity) {
   if (qty === 1) {
     return {
       label: form === "serum" ? "سيروم واحد" : "منتج واحد",
-      hint: form === "serum" ? "عناية محيط العين" : "علبة واحدة — روتينك",
+      hint: form === "serum" ? "عناية محيط العين" : "بداية روتينك — منتج واحد",
       badge: undefined as string | undefined,
     };
   }
   if (qty === 2) {
     return {
       label: "منتجان",
-      hint: "روتين أقوى — قيمة أوضح",
+      hint: "ثبّتي النتيجة — قيمة أوضح",
       badge: "الأكثر اختياراً",
     };
   }
   return {
     label: "3 منتجات",
-    hint: "المجموعة الكاملة — أفضل توفير",
+    hint: "3 منتجات — أقوى توفير",
     badge: "أكثر توفيراً",
   };
 }
@@ -157,20 +157,34 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
       <p className="text-center text-xs text-velora-burgundy/60">
         الدفع بالبطاقة (بدون رسوم) أو الدفع عند الاستلام (+20 د.إ)
       </p>
-      <p className="text-center text-xs text-velora-burgundy/50">
-        عند الاستلام للعرض {quantity}: {formatPrice(codBundlePrices[quantity])}
-      </p>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {["توصيل الإمارات", "دفع آمن", "COD متاح", "دعم مخصص"].map((t) => (
-          <div
-            key={t}
-            className="rounded-xl border border-velora-burgundy/10 bg-white px-2 py-2.5 text-center text-[10px] font-medium text-velora-burgundy/70 sm:text-xs"
-          >
-            {t}
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setMethod("card")}
+          className={`rounded-xl border p-2.5 text-center text-xs ${
+            method === "card" ? "border-velora-burgundy bg-velora-cream-dark" : "border-velora-burgundy/10"
+          }`}
+        >
+          الدفع بالبطاقة
+          <br />
+          <span className="text-velora-burgundy/55">بدون رسوم</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMethod("cod")}
+          className={`rounded-xl border p-2.5 text-center text-xs ${
+            method === "cod" ? "border-velora-burgundy bg-velora-cream-dark" : "border-velora-burgundy/10"
+          }`}
+        >
+          الدفع عند الاستلام
+          <br />
+          <span className="text-velora-burgundy/55">+20 د.إ</span>
+        </button>
       </div>
+      <p className="text-center text-[11px] text-velora-burgundy/50">
+        COD للعرض {quantity}: {formatPrice(codBundlePrices[quantity])}
+      </p>
     </div>
   );
 }

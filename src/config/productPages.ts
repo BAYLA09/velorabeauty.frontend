@@ -1,8 +1,11 @@
 import type { ProductId } from "./products";
+import { sharedProductPageBlocks } from "./productPageShared";
 
 export type ProductForm = "gummy" | "serum";
 
-export type ProductPageConfig = {
+type SharedBlocks = ReturnType<typeof sharedProductPageBlocks>;
+
+export type ProductPageConfig = SharedBlocks & {
   slug: string;
   form: ProductForm;
   seoTitle: string;
@@ -13,6 +16,7 @@ export type ProductPageConfig = {
   urgencyLine: string;
   hook: string;
   hookSub: string;
+  highlightStat: { value: string; label: string };
   problemImagePlaceholder: string;
   painEyebrow: string;
   painTitle: string;
@@ -24,9 +28,15 @@ export type ProductPageConfig = {
   formulaCards: { title: string; lines: string[] }[];
   notIncludedTitle: string;
   notIncluded: string[];
+  brandQuoteTitle: string;
+  brandQuote: string;
+  statHighlightGrid: { value: string; label: string }[];
   timelineTitle: string;
   timelineNote: string;
   timelineSteps: { step: string; title: string; text: string }[];
+  usageTitle: string;
+  usageSubtitle: string;
+  usageSteps: { title: string; text: string }[];
   galleryPlaceholders: string[];
   faq: { question: string; answer: string }[];
 };
@@ -39,6 +49,7 @@ const sharedNotIncluded = [
 
 export const productPages: Record<ProductId, ProductPageConfig> = {
   hair: {
+    ...sharedProductPageBlocks("gummy"),
     slug: "hair-gummies",
     form: "gummy",
     seoTitle: "علكات صحة ونمو الشعر | فيلورا بيوتي",
@@ -56,6 +67,10 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     urgencyLine: "توصيل داخل الإمارات — الدفع بالبطاقة أو عند الاستلام",
     hook: "شعرك يستحق روتيناً واضحاً",
     hookSub: "عناية من الداخل بخطوة واحدة — ضمن أسلوب فيلورا الفاخر.",
+    highlightStat: {
+      value: "3",
+      label: "عنايات في المجموعة الكاملة — شعر، بشرة، ومحيط العين",
+    },
     problemImagePlaceholder: "[ضع صورة الحملة — الشعر]",
     painEyebrow: "هل تعانين من هذا؟",
     painTitle: "مشاكل تعرفينها — وحلول بسيطة",
@@ -87,8 +102,25 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
         lines: ["استخدام بسيط", "تجربة فاخرة من فيلورا"],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين",
+    notIncludedTitle: "وش ما راح تلقين داخل التجربة",
     notIncluded: [...sharedNotIncluded, "بدون مكونات سرية"],
+    brandQuoteTitle: "رأي العناية اليومية",
+    brandQuote:
+      "كثير من النساء في الإمارات يفضّلن روتيناً بسيطاً يُستمر عليه — فيلورا بُنيت لهذا.",
+    statHighlightGrid: [
+      { value: "—", label: "تقييم (ضع هنا)" },
+      { value: "199", label: "د.إ / منتج" },
+      { value: "بيوتين", label: "المكوّن البارز" },
+      { value: "2", label: "علكة / يوم (حسب العلبة)" },
+    ],
+    usageTitle: "طريقة الاستخدام",
+    usageSubtitle: "أبسط روتين جربتيه",
+    usageSteps: [
+      { title: "خطوة 1", text: "علكة يومياً حسب تعليمات العلبة." },
+      { title: "خطوة 2", text: "الالتزام أهم من الكمية — روتين ثابت." },
+      { title: "خطوة 3", text: "يمكن الجمع مع منتجات فيلورا الأخرى." },
+      { title: "خطوة 4", text: "دقائق فقط — بدون تعقيد." },
+    ],
     timelineTitle: "وش راح تشوفين مع الاستمرار؟",
     timelineNote: "النتيجة تختلف — الاستمرار هو المفتاح.",
     timelineSteps: [
@@ -117,6 +149,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     ],
   },
   skin: {
+    ...sharedProductPageBlocks("gummy"),
     slug: "skin-gummies",
     form: "gummy",
     seoTitle: "علكات إشراقة ونضارة البشرة | فيلورا بيوتي",
@@ -134,6 +167,10 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     urgencyLine: "توصيل داخل الإمارات — الدفع بالبطاقة أو عند الاستلام",
     hook: "بشرتك تستحق إشراقة تليق بك",
     hookSub: "لمسة يومية فاخرة — من فيلورا بيوتي.",
+    highlightStat: {
+      value: "249",
+      label: "د.إ — عرض منتجين (بطاقة) لروتين أوضح",
+    },
     problemImagePlaceholder: "[ضع صورة الحملة — البشرة]",
     painEyebrow: "هل تعانين من هذا؟",
     painTitle: "مشاكل تعرفينها — وحلول بسيطة",
@@ -165,8 +202,24 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
         lines: ["خطوة واحدة", "تجربة فاخرة من فيلورا"],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين",
+    notIncludedTitle: "وش ما راح تلقين داخل التجربة",
     notIncluded: [...sharedNotIncluded],
+    brandQuoteTitle: "رأي العناية اليومية",
+    brandQuote: "الإشراق يبدأ بروتين تلتزمين به — علكة واحدة أسهل من عشر منتجات.",
+    statHighlightGrid: [
+      { value: "—", label: "تقييم (ضع هنا)" },
+      { value: "199", label: "د.إ / منتج" },
+      { value: "غلوتاثيون", label: "المكوّن البارز" },
+      { value: "UAE", label: "التوصيل" },
+    ],
+    usageTitle: "طريقة الاستخدام",
+    usageSubtitle: "أبسط روتين جربتيه",
+    usageSteps: [
+      { title: "خطوة 1", text: "علكة يومياً حسب التعليمات." },
+      { title: "خطوة 2", text: "ثبّتي وقت ثابت في يومك." },
+      { title: "خطوة 3", text: "كمّلي مع شعر أو محيط العين." },
+      { title: "خطوة 4", text: "دقائق فقط يومياً." },
+    ],
     timelineTitle: "رحلة العناية مع الاستمرار",
     timelineNote: "النتيجة تختلف — الاستمرار هو المفتاح.",
     timelineSteps: [
@@ -195,6 +248,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     ],
   },
   eye: {
+    ...sharedProductPageBlocks("serum"),
     slug: "eye-serum",
     form: "serum",
     seoTitle: "سيروم العناية بمحيط العين | فيلورا بيوتي",
@@ -212,6 +266,10 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     urgencyLine: "توصيل داخل الإمارات — الدفع بالبطاقة أو عند الاستلام",
     hook: "محيط العين يستحق عناية مركّزة",
     hookSub: "سيروم فيلورا — يكمل علكات الشعر والبشرة.",
+    highlightStat: {
+      value: "339",
+      label: "د.إ — المجموعة الكاملة (3 عنايات)",
+    },
     problemImagePlaceholder: "[ضع صورة الحملة — السيروم]",
     painEyebrow: "هل تعانين من هذا؟",
     painTitle: "مشاكل تعرفينها — وحلول بسيطة",
@@ -243,8 +301,24 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
         lines: ["استخدام موضّع", "تكامل مع روتين فيلورا"],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين",
+    notIncludedTitle: "وش ما راح تلقين داخل التجربة",
     notIncluded: [...sharedNotIncluded],
+    brandQuoteTitle: "رأي العناية المركّزة",
+    brandQuote: "محيط العين يستحق لمسة خفيفة — السيروم يناسب الروتين العصري في الإمارات.",
+    statHighlightGrid: [
+      { value: "—", label: "تقييم (ضع هنا)" },
+      { value: "199", label: "د.إ / منتج" },
+      { value: "E", label: "فيتامين E" },
+      { value: "سيروم", label: "نوع المنتج" },
+    ],
+    usageTitle: "طريقة الاستخدام",
+    usageSubtitle: "أبسط استخدام للسيروم",
+    usageSteps: [
+      { title: "خطوة 1", text: "كمية صغيرة حول محيط العين." },
+      { title: "خطوة 2", text: "طبّقي حسب تعليمات العبوة." },
+      { title: "خطوة 3", text: "صباحاً أو مساءً — ثبّتي روتينك." },
+      { title: "خطوة 4", text: "تجنّبي ملامسة العين مباشرة." },
+    ],
     timelineTitle: "كيف يخدمك السيروم في روتينك؟",
     timelineNote: "النتيجة تختلف — الاستمرار هو المفتاح.",
     timelineSteps: [
