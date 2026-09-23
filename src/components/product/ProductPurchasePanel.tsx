@@ -15,50 +15,84 @@ const quantities: BundleQuantity[] = [1, 2, 3];
 type OfferUi = {
   title: string;
   subtitle: string;
-  footnote: string;
   badge: { text: string; variant: "popular" | "bundle" } | null;
   compareAt: number | null;
   price: number;
   savingsAmount: number | null;
+  perUnit: number | null;
 };
 
-function getOfferUi(form: ProductForm, qty: BundleQuantity): OfferUi {
+function getOfferUi(form: ProductForm, qty: BundleQuantity, lara: boolean): OfferUi {
   const unit = form === "serum" ? "عبوة" : "علبة";
   const compareAt = qty > 1 ? singleProductPrice * qty : null;
   const cardPrice = qty === 1 ? 199 : qty === 2 ? 249 : 339;
-  const savingsAmount =
-    compareAt !== null ? compareAt - cardPrice : null;
+  const savingsAmount = compareAt !== null ? compareAt - cardPrice : null;
+  const perUnit = qty > 1 ? Math.round(cardPrice / qty) : null;
+
+  if (lara) {
+    if (qty === 1) {
+      return {
+        title: form === "serum" ? "عبوة واحدة" : "علبة وحدة",
+        subtitle: form === "serum" ? "روتين شهر — استخدام يومي" : "شهر كامل — 60 علكة",
+        badge: null,
+        compareAt: null,
+        price: cardPrice,
+        savingsAmount: null,
+        perUnit: null,
+      };
+    }
+    if (qty === 2) {
+      return {
+        title: form === "serum" ? "عبواتين" : "علبتين",
+        subtitle: form === "serum" ? "شهرين — ثبّتي النتيجة" : "شهرين — ثبّتي النتيجة",
+        badge: { text: "الأكثر اختياراً", variant: "popular" },
+        compareAt,
+        price: cardPrice,
+        savingsAmount,
+        perUnit,
+      };
+    }
+    return {
+      title: form === "serum" ? "3 عبوات" : "3 علب",
+      subtitle: form === "serum" ? "3 عبوات — أقوى توفير" : "3 علب — أقوى توفير",
+      badge: { text: "الأكثر توفيراً", variant: "bundle" },
+      compareAt,
+      price: cardPrice,
+      savingsAmount,
+      perUnit,
+    };
+  }
 
   if (qty === 1) {
     return {
       title: "منتج واحد",
       subtitle: `بداية روتينك — ${unit} واحدة`,
-      footnote: `ابدئي روتينك ب${unit} واحدة`,
       badge: null,
       compareAt: null,
       price: cardPrice,
       savingsAmount: null,
+      perUnit: null,
     };
   }
   if (qty === 2) {
     return {
       title: "منتجان",
       subtitle: "نتيجة أفضل وقيمة أوضح",
-      footnote: "لنعم جمالك أكثر",
       badge: { text: "الأكثر إختياراً", variant: "popular" },
       compareAt,
       price: cardPrice,
       savingsAmount,
+      perUnit,
     };
   }
   return {
     title: "3 منتجات",
     subtitle: "عناية شاملة — أقوى توفير",
-    footnote: "عناية متكاملة لإشراقة تدوم",
     badge: { text: "روتين VELORA الكامل", variant: "bundle" },
     compareAt,
     price: cardPrice,
     savingsAmount,
+    perUnit,
   };
 }
 
@@ -98,20 +132,7 @@ function OfferProductStack({
       className="relative h-[3.35rem] shrink-0 sm:h-[3.65rem]"
       style={{ width: count === 1 ? "2.65rem" : count === 2 ? "3.85rem" : "4.65rem" }}
       aria-hidden={!showImage}
-    >
-      {Array.from({ length: count }, (_, i) => (
-        <div
-          key={i}
-          className="absolute bottom-0"
-          style={{
-            right: i * 16,
-            zIndex: count - i,
-            width: "2.65rem",
-            height: "3.1rem",
-          }}
-        />
-      ))}
-    </div>
+    />
   );
 }
 
@@ -125,13 +146,13 @@ export type PurchaseState = {
 type Props = {
   form: ProductForm;
   productName: string;
-  /** صورة لكل بطاقة upsell (1 / 2 / 3) — slot فارغ إذا ما كاينش */
   upsellSlotSrc?: Partial<Record<BundleQuantity, string>>;
   quantity?: BundleQuantity;
   method?: PaymentMethod;
   onQuantityChange?: (q: BundleQuantity) => void;
   onMethodChange?: (m: PaymentMethod) => void;
   onChange?: (state: PurchaseState) => void;
+  variant?: "velora" | "lara";
 };
 
 export function ProductPurchasePanel({
@@ -143,7 +164,9 @@ export function ProductPurchasePanel({
   onQuantityChange,
   onMethodChange,
   onChange,
+  variant = "velora",
 }: Props) {
+  const lara = variant === "lara";
   const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(2);
   const [methodInternal, setMethodInternal] = useState<PaymentMethod>("card");
   const quantity = quantityProp ?? quantityInternal;
@@ -159,25 +182,37 @@ export function ProductPurchasePanel({
   };
 
   const total = getCheckoutTotal(quantity, method);
+  const unitWord = form === "serum" ? "عبوة" : "علبة";
   const ctaLabel = useMemo(
-    () => `ابدئي روتينك الآن • ${formatPrice(total)}`,
-    [total],
+    () => (lara ? `اطلبي الآن • ${formatPrice(total)}` : `ابدئي روتينك الآن • ${formatPrice(total)}`),
+    [total, lara],
   );
 
   useEffect(() => {
     onChange?.({ quantity, method, total, ctaLabel });
   }, [quantity, method, total, ctaLabel, onChange]);
 
+  const activeBorder = lara ? "border-lara-green bg-lara-green-soft" : "border-velora-burgundy bg-[#fdf2f4]";
+  const idleBorder = lara
+    ? "border-lara-green/15 bg-white hover:border-lara-green/35"
+    : "border-velora-burgundy/12 bg-white hover:border-velora-burgundy/30";
+  const accent = lara ? "text-lara-green-dark" : "text-velora-burgundy-dark";
+  const accentMuted = lara ? "text-lara-green/65" : "text-velora-burgundy/60";
+  const radioActiveBorder = lara ? "border-lara-green" : "border-velora-burgundy";
+  const radioFill = lara ? "bg-lara-green" : "bg-velora-burgundy";
+  const radioIdleBorder = lara ? "border-lara-green/25" : "border-velora-burgundy/25";
+  const badgePopular = lara ? "bg-lara-green text-velora-cream" : "bg-velora-burgundy text-velora-cream";
+  const payActive = lara ? "border-lara-green bg-lara-green-soft" : "border-velora-burgundy bg-[#fdf2f4]";
+  const payIdle = lara ? "border-lara-green/15 bg-white" : "border-velora-burgundy/15 bg-white";
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
-      </div>
+      <p className={`text-lg font-extrabold ${accent}`}>اختاري العرض:</p>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {quantities.map((qty) => {
           const active = quantity === qty;
-          const offer = getOfferUi(form, qty);
+          const offer = getOfferUi(form, qty, lara);
 
           return (
             <button
@@ -185,80 +220,98 @@ export function ProductPurchasePanel({
               type="button"
               onClick={() => setQuantity(qty)}
               className={`relative w-full cursor-pointer rounded-2xl border-2 px-3 py-3.5 text-right transition-all duration-200 sm:px-4 sm:py-4 ${
-                active
-                  ? "border-velora-burgundy bg-[#fdf2f4] shadow-md"
-                  : "border-velora-burgundy/12 bg-white hover:border-velora-burgundy/30"
+                active ? `${activeBorder} shadow-md` : idleBorder
               }`}
             >
               {offer.badge && (
                 <span
                   className={`absolute -top-3 left-3 flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-extrabold shadow-sm sm:text-[11px] ${
                     offer.badge.variant === "popular"
-                      ? "bg-velora-burgundy text-velora-cream"
-                      : "bg-[#e8d7b8] text-velora-burgundy-dark"
+                      ? badgePopular
+                      : "bg-[#e8d7b8] text-lara-green-dark"
                   }`}
                 >
                   {offer.badge.variant === "popular" && <span aria-hidden>👑</span>}
-                  {offer.badge.variant === "bundle" && <span aria-hidden>✨</span>}
                   {offer.badge.text}
                 </span>
               )}
 
               <div className="flex items-center gap-2 sm:gap-3">
-                {/* يمين: radio + صور */}
                 <span
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                    active
-                      ? "border-velora-burgundy bg-white"
-                      : "border-velora-burgundy/25 bg-white"
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 bg-white ${
+                    active ? radioActiveBorder : radioIdleBorder
                   }`}
                   aria-hidden
                 >
-                  {active && (
-                    <span className="h-3 w-3 rounded-full bg-velora-burgundy" />
-                  )}
+                  {active && <span className={`h-3 w-3 rounded-full ${radioFill}`} />}
                 </span>
 
-                <OfferProductStack
-                  src={upsellSlotSrc?.[qty]}
-                  alt={productName}
-                  count={qty}
-                />
+                <OfferProductStack src={upsellSlotSrc?.[qty]} alt={productName} count={qty} />
 
-                {/* وسط: عنوان */}
                 <div className="min-w-0 flex-1 px-0.5">
-                  <p className="text-[13px] font-extrabold leading-tight text-velora-burgundy-dark sm:text-sm">
+                  <p className={`text-[13px] font-extrabold leading-tight sm:text-sm ${accent}`}>
                     {offer.title}
                   </p>
-                  <p className="mt-0.5 text-[9px] font-semibold leading-snug text-velora-burgundy/60 sm:text-[10px]">
+                  <p className={`mt-0.5 text-[10px] font-semibold leading-snug sm:text-[11px] ${accentMuted}`}>
                     {offer.subtitle}
                   </p>
                 </div>
 
-                {/* يسار: أسعار */}
                 <div className="shrink-0 text-left">
                   {offer.compareAt !== null && (
-                    <p className="text-xs font-bold tabular-nums text-velora-burgundy/35 line-through sm:text-sm">
+                    <p className="text-xs font-bold tabular-nums text-lara-green/35 line-through sm:text-sm">
                       {offer.compareAt} د.إ
                     </p>
                   )}
-                  <p className="text-xl font-black tabular-nums leading-none text-velora-burgundy-dark sm:text-2xl">
+                  <p className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${accent}`}>
                     {offer.price} د.إ
                   </p>
+                  {offer.perUnit !== null && (
+                    <p className={`mt-1 text-[10px] font-bold tabular-nums ${accentMuted}`}>
+                      {offer.perUnit} د.إ / {unitWord}
+                    </p>
+                  )}
                   {offer.savingsAmount !== null && offer.savingsAmount > 0 && (
-                    <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-[#f5e6d3] px-2 py-0.5 text-[10px] font-extrabold text-velora-burgundy-dark sm:text-[11px]">
-                      <span aria-hidden>🏷️</span>
+                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[#f5e6d3] px-2 py-0.5 text-[10px] font-extrabold text-lara-green-dark sm:text-[11px]">
                       وفّري {offer.savingsAmount} د.إ
                     </span>
                   )}
-                  <p className="mt-1 max-w-[7rem] text-[9px] font-semibold leading-tight text-velora-burgundy/50 sm:text-[10px]">
-                    {offer.footnote}
-                  </p>
                 </div>
               </div>
             </button>
           );
         })}
+      </div>
+
+      <div className="space-y-2 pt-1">
+        <p className={`text-sm font-extrabold ${accent}`}>طرق الدفع المتاحة</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setMethod("card")}
+            className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
+              method === "card" ? payActive : payIdle
+            }`}
+          >
+            <p className={`text-sm font-extrabold ${accent}`}>الدفع بالبطاقة</p>
+            <p className={`mt-0.5 text-[11px] font-bold ${lara ? "text-lara-green" : "text-velora-burgundy"}`}>
+              شحن مجاني
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMethod("cod")}
+            className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
+              method === "cod" ? payActive : payIdle
+            }`}
+          >
+            <p className={`text-sm font-extrabold ${accent}`}>الدفع عند الاستلام</p>
+            <p className={`mt-0.5 text-[11px] font-bold ${accentMuted}`}>+20 د.إ رسوم التوصيل</p>
+          </button>
+        </div>
+        <p className={`text-center text-[11px] font-semibold ${accentMuted}`}>
+          الدفع بالبطاقة (شحن مجاني) أو الدفع عند الاستلام
+        </p>
       </div>
 
       <div className="pt-1">
@@ -267,40 +320,13 @@ export function ProductPurchasePanel({
           onClick={() => {
             document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" });
           }}
-          className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-xl transition hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
+          className={`w-full rounded-2xl py-4 text-base font-black text-white shadow-xl transition active:scale-[0.99] sm:text-lg ${
+            lara ? "bg-lara-green hover:bg-lara-green-dark" : "bg-[#2c1318] hover:bg-velora-burgundy"
+          }`}
         >
           {ctaLabel}
         </button>
-        <p className="mt-2 text-center text-xs font-bold text-velora-burgundy/70">
-          الدفع عند الاستلام • الدفع بالبطاقة
-        </p>
       </div>
-
-      <div className="flex flex-wrap items-center justify-center gap-1 pt-2 text-[10px] sm:text-[11px]">
-        <button
-          type="button"
-          onClick={() => setMethod("card")}
-          className={`rounded-full px-3 py-1 font-bold ${
-            method === "card"
-              ? "bg-velora-burgundy text-velora-cream"
-              : "bg-white text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
-          }`}
-        >
-          بطاقة
-        </button>
-        <button
-          type="button"
-          onClick={() => setMethod("cod")}
-          className={`rounded-full px-3 py-1 font-bold ${
-            method === "cod"
-              ? "bg-velora-burgundy text-velora-cream"
-              : "bg-white text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
-          }`}
-        >
-          COD (+20 د.إ)
-        </button>
-      </div>
-
     </div>
   );
 }

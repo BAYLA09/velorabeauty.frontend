@@ -28,10 +28,10 @@ export function ProductRitualSection({
             />
           </div>
 
-          <div className="bg-[#2c1318] px-4 py-4 sm:px-6 sm:py-5">
+          <div className="bg-lara-green px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex items-stretch gap-3 sm:gap-4">
               <div className="flex h-16 w-[4.25rem] shrink-0 flex-col items-center justify-center rounded-xl bg-velora-champagne px-1 sm:h-[4.75rem] sm:w-[5rem] sm:rounded-2xl">
-                <span className="text-[1.35rem] font-black tabular-nums leading-none text-[#2c1318] sm:text-[1.65rem]">
+                <span className="text-[1.35rem] font-black tabular-nums leading-none text-lara-green-dark sm:text-[1.65rem]">
                   {data.statValue}
                 </span>
               </div>

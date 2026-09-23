@@ -11,10 +11,12 @@ type TrustItem = {
 export function ProductTrustBar({
   compact = false,
   prominent = false,
+  variant = "velora",
 }: {
   compact?: boolean;
   /** Nama-style large 2×2 bar (gallery / story) */
   prominent?: boolean;
+  variant?: "velora" | "lara";
 }) {
   const items: TrustItem[] = [
     {
@@ -65,15 +67,20 @@ export function ProductTrustBar({
   ];
 
   const isLarge = prominent && !compact;
+  const shellBg = variant === "lara" ? "bg-lara-green" : "bg-[#2c1318]";
+  const shadow =
+    variant === "lara"
+      ? "shadow-[0_10px_40px_rgba(27,61,47,0.22)]"
+      : "shadow-[0_10px_40px_rgba(44,19,24,0.25)]";
 
   return (
     <div
       className={
         isLarge
-          ? "overflow-hidden rounded-[1.75rem] bg-[#2c1318] text-velora-cream shadow-[0_10px_40px_rgba(44,19,24,0.25)]"
+          ? `overflow-hidden rounded-[1.75rem] ${shellBg} text-velora-cream ${shadow}`
           : compact
-            ? "overflow-hidden rounded-2xl bg-[#2c1318] text-velora-cream"
-            : "border-y border-white/10 bg-[#2c1318] text-velora-cream"
+            ? `overflow-hidden rounded-2xl ${shellBg} text-velora-cream`
+            : `border-y border-white/10 ${shellBg} text-velora-cream`
       }
     >
       <div
