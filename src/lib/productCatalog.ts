@@ -2,7 +2,12 @@ import { images } from "@/config/images";
 import { productPages } from "@/config/productPages";
 import { products, type Product, type ProductId } from "@/config/products";
 
-export type ProductImageRef = { src: string; placeholder: string };
+export type ProductImageRef = {
+  src: string;
+  placeholder: string;
+  /** الصورة الثانية (قسم hook / before-after) */
+  storySrc?: string;
+};
 
 export type ProductWithPage = Product & {
   slug: string;

@@ -85,7 +85,10 @@ export function ProductPageClient({ product, allProducts }: Props) {
           </div>
         </section>
 
-        <ProductPageLongSections page={page} productImageSrc={product.pageImage.src} />
+        <ProductPageLongSections
+          page={page}
+          productImageSrc={product.pageImage.storySrc ?? product.pageImage.src}
+        />
         <RelatedProducts currentSlug={product.slug} products={allProducts} />
       </main>
       <FooterSection />
