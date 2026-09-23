@@ -40,8 +40,13 @@ docker build -t velorabeauty-frontend .
 docker run --rm -p 3000:3000 velorabeauty-frontend
 ```
 
-Easypanel: **Dockerfile** at repo root, branch **`main`**, port **3000**.  
-If deploy fails in the panel, see **[docs/EASYPANEL-DEPLOY.md](docs/EASYPANEL-DEPLOY.md)** (OOM, Force Rebuild, webhook).
+Easypanel (اختر واحد):
+
+1. **GitHub + Dockerfile** — branch **`main`**, port **3000**.
+2. **Docker Registry (GHCR)** — إلا Git فـ Easypanel كيعطي `Git key not found`:  
+   `ghcr.io/bayla09/velorabeauty.frontend:latest` (يبنى تلقائياً من Actions على `main`).
+
+If deploy fails, see **[docs/EASYPANEL-DEPLOY.md](docs/EASYPANEL-DEPLOY.md)**.
 
 Open [http://localhost:3000](http://localhost:3000).
 
