@@ -35,7 +35,7 @@ export const images = {
     },
     eye: {
       src: "/images/products/pdp/eye-main.png",
-      storySrc: "/images/products/pdp/eye-story.png?v=20260923-0110",
+      storySrc: "/images/products/pdp/eye-story.png?v=20260923-0111",
       placeholder: "[صورة صفحة المنتج — سيروم العين]",
     },
   },
