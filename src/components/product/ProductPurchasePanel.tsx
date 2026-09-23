@@ -67,22 +67,28 @@ function OfferProductStack({ src, alt, count }: { src: string; alt: string; coun
 
   return (
     <div
-      className="relative h-16 shrink-0 sm:h-[4.5rem]"
+      className="relative h-[4.25rem] shrink-0 sm:h-[4.75rem]"
       style={{ width }}
     >
       {Array.from({ length: count }, (_, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <div
           key={i}
-          src={src}
-          alt={i === 0 ? alt : ""}
-          aria-hidden={i > 0}
-          className="absolute bottom-0 h-14 w-auto max-w-[3rem] object-contain drop-shadow-md sm:h-16 sm:max-w-[3.25rem]"
+          className="absolute bottom-0 flex items-end justify-center rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-velora-burgundy/10"
           style={{
-            right: i * 14,
+            right: i * 16,
             zIndex: count - i,
+            width: "3.25rem",
+            height: "3.75rem",
           }}
-        />
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={i === 0 ? alt : ""}
+            aria-hidden={i > 0}
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
       ))}
     </div>
   );
