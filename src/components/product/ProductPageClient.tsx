@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
-import { ProductCheckoutSection } from "@/components/product/ProductCheckoutSection";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
 import { ProductGallery } from "@/components/product/ProductGallery";
@@ -38,7 +37,10 @@ export function ProductPageClient({ product, allProducts }: Props) {
       <ProductStoreHeader />
 
       <main className="product-typography bg-velora-cream pb-[9.5rem] md:pb-0">
-        <section className="mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:py-8">
+        <section
+          id="purchase"
+          className="scroll-mt-24 mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:py-8"
+        >
           <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-10">
             <div className="min-w-0 w-full lg:sticky lg:top-4">
               <ProductGallery
@@ -103,15 +105,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
         <ProductPageLongSections
           page={page}
           productName={product.name}
-          marketingGallery={product.pageImage.marketingGallery}
-        />
-
-        <ProductCheckoutSection
-          productSlug={product.slug}
-          productName={product.name}
-          quantity={quantity}
-          method={method}
-          onMethodChange={setMethod}
+          marketingSpotlight={product.pageImage.marketingSpotlight}
         />
 
         <RelatedProducts currentSlug={product.slug} products={allProducts} />
