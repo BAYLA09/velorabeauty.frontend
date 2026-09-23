@@ -3,35 +3,48 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ProductForm } from "@/config/productPages";
 import {
-  codBundlePrices,
   formatPrice,
   getCheckoutTotal,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
-import { getBundleDisplay } from "@/lib/bundleDisplay";
 
 const quantities: BundleQuantity[] = [1, 2, 3];
 
-function offerMeta(form: ProductForm, qty: BundleQuantity) {
+function getOfferDetails(form: ProductForm, qty: BundleQuantity) {
+  const isSerum = form === "serum";
+
   if (qty === 1) {
     return {
-      label: form === "serum" ? "سيروم واحد" : "منتج واحد",
-      hint: form === "serum" ? "عناية محيط العين" : "بداية روتينك — منتج واحد",
-      badge: undefined as string | undefined,
+      title: isSerum ? "عبوة واحدة" : "علبة واحدة",
+      subtitle: isSerum ? "30 مل • شهر كامل" : "60 علكة • شهر كامل",
+      badge: null,
+      badgeColor: "",
+      price: 199,
+      savings: null,
     };
   }
   if (qty === 2) {
     return {
-      label: "منتجان",
-      hint: "ثبّتي النتيجة — قيمة أوضح",
+      title: isSerum ? "عبوتان • ثبّتي النتيجة" : "علبتان • ثبّتي النتيجة",
+      subtitle: isSerum
+        ? "60 مل • شهر النتيجة + شهر التثبيت"
+        : "120 علكة • شهر النتيجة + شهر التثبيت",
       badge: "الأكثر اختياراً",
+      badgeColor: "bg-velora-champagne text-velora-burgundy-dark font-extrabold shadow-sm",
+      price: 249,
+      savings: "وفّري 149 د.إ",
     };
   }
   return {
-    label: "3 منتجات",
-    hint: "3 منتجات — أقوى توفير",
-    badge: "أكثر توفيراً",
+    title: isSerum ? "ثلاث عبوات • النتيجة الكاملة" : "ثلاث علب • النتيجة الكاملة",
+    subtitle: isSerum
+      ? "90 مل • نتيجة + تثبيت + شحن مجاني"
+      : "180 علكة • نتيجة + تثبيت + هدية",
+    badge: "الأكثر توفيراً",
+    badgeColor: "bg-[#e8d7b8] text-velora-burgundy-dark font-extrabold",
+    price: 339,
+    savings: "وفّري 258 د.إ",
   };
 }
 
@@ -48,16 +61,14 @@ type Props = {
 };
 
 export function ProductPurchasePanel({ form, onChange }: Props) {
+  const isSerum = form === "serum";
   const [quantity, setQuantity] = useState<BundleQuantity>(2);
-  const [method, setMethod] = useState<PaymentMethod>("card");
+  const [method, setMethod] = useState<PaymentMethod>("cod");
 
   const total = getCheckoutTotal(quantity, method);
   const ctaLabel = useMemo(
-    () =>
-      method === "card"
-        ? `ابدئي روتينك الآن · ${formatPrice(total)}`
-        : `اطلبي بالدفع عند الاستلام · ${formatPrice(total)}`,
-    [method, total],
+    () => `ابدئي روتينك الآن • ${formatPrice(total)}`,
+    [total],
   );
 
   useEffect(() => {
@@ -66,125 +77,152 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <p className="text-base font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
+        <p className="text-[11px] font-bold text-velora-burgundy/55 sm:text-xs">
+          نتيجة من {isSerum ? "العبوة" : "العلبة"} الأولى
+        </p>
+      </div>
 
-      <div className="space-y-3">
+      {/* Offer Cards Stack */}
+      <div className="space-y-3.5">
         {quantities.map((qty) => {
           const active = quantity === qty;
-          const meta = offerMeta(form, qty);
-          const display = getBundleDisplay(qty);
+          const offer = getOfferDetails(form, qty);
+
           return (
-            <button
+            <div
               key={qty}
-              type="button"
               onClick={() => setQuantity(qty)}
-              className={`relative flex min-h-[5.25rem] w-full items-stretch gap-3 rounded-2xl border-2 p-4 text-right transition-all ${
+              className={`relative cursor-pointer rounded-2xl border-2 p-4 transition-all duration-200 select-none ${
                 active
                   ? "border-velora-burgundy bg-white shadow-md ring-1 ring-velora-burgundy/15"
                   : "border-velora-burgundy/15 bg-white hover:border-velora-burgundy/35"
               }`}
             >
-              {meta.badge && (
-                <span className="absolute left-4 top-0 -translate-y-1/2 rounded-full bg-velora-champagne px-2.5 py-0.5 text-[10px] font-bold text-velora-burgundy-dark">
-                  {meta.badge}
+              {/* Badge above card */}
+              {offer.badge && (
+                <span
+                  className={`absolute -top-3 right-4 rounded-full px-3 py-0.5 text-[11px] ${offer.badgeColor}`}
+                >
+                  {offer.badge}
                 </span>
               )}
-              <span
-                className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                  active ? "border-velora-burgundy bg-velora-burgundy" : "border-velora-burgundy/25 bg-white"
-                }`}
-              >
-                {active && <span className="h-2 w-2 rounded-full bg-velora-cream" />}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-base font-extrabold text-velora-burgundy-dark">{meta.label}</p>
-                <p className="mt-1 text-sm font-medium leading-snug text-velora-burgundy/75">{meta.hint}</p>
-                {display.showCompare && (
-                  <p className="mt-1.5 text-xs font-bold text-velora-champagne-dark sm:text-sm">
-                    وفّري {formatPrice(display.savings)} · {formatPrice(display.perUnit)} / منتج
-                  </p>
-                )}
-              </div>
-              <div className="flex min-w-[5.5rem] flex-col items-end tabular-nums">
-                {display.showCompare && (
-                  <span className="text-xs text-velora-burgundy/40 line-through">
-                    {formatPrice(display.compareAt)}
+
+              <div className="flex items-center justify-between gap-3">
+                {/* Radio + Info */}
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                      active
+                        ? "border-velora-burgundy bg-velora-burgundy"
+                        : "border-velora-burgundy/25 bg-white"
+                    }`}
+                  >
+                    {active && <span className="h-2 w-2 rounded-full bg-white" />}
                   </span>
-                )}
-                <span className="text-2xl font-extrabold text-velora-burgundy-dark">
-                  {formatPrice(display.price)}
-                </span>
+
+                  <div>
+                    <p className="text-base font-extrabold text-velora-burgundy-dark">
+                      {offer.title}
+                    </p>
+                    <p className="mt-0.5 text-xs font-semibold text-velora-burgundy/65">
+                      {offer.subtitle}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Price + Savings */}
+                <div className="text-left shrink-0">
+                  <p className="text-xl font-black tabular-nums text-velora-burgundy-dark">
+                    {offer.price} د.إ
+                  </p>
+                  {offer.savings && (
+                    <p className="mt-0.5 text-xs font-extrabold text-emerald-800">
+                      {offer.savings}
+                    </p>
+                  )}
+                </div>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
 
-      <p className="text-base font-extrabold text-velora-burgundy-dark">طرق الدفع المتاحة</p>
-      <div className="grid gap-2 sm:grid-cols-2">
+      {/* Primary CTA Button */}
+      <div className="pt-2">
         <button
           type="button"
-          onClick={() => setMethod("card")}
-          className={`rounded-xl border-2 p-3 text-right text-sm ${
-            method === "card" ? "border-velora-burgundy bg-velora-cream-dark" : "border-velora-burgundy/10 bg-white"
-          }`}
+          onClick={() => {
+            const checkoutEl = document.getElementById("checkout");
+            if (checkoutEl) {
+              checkoutEl.scrollIntoView({ behavior: "smooth" });
+            } else {
+              window.location.href = `/#checkout`;
+            }
+          }}
+          className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black tracking-wide text-white shadow-xl transition-transform duration-150 hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
         >
-          <p className="text-base font-bold text-velora-burgundy-dark">الدفع بالبطاقة</p>
-          <p className="mt-1 text-sm font-medium text-velora-burgundy/75">بدون رسوم إضافية</p>
+          {ctaLabel}
         </button>
+
+        <p className="mt-2 text-center text-xs font-bold text-velora-burgundy/70">
+          الدفع عند الاستلام • بدون دفع أونلاين
+        </p>
+      </div>
+
+      {/* Payment Method Switcher */}
+      <div className="flex items-center justify-center gap-3 pt-1 text-xs">
         <button
           type="button"
           onClick={() => setMethod("cod")}
-          className={`rounded-xl border-2 p-3 text-right text-sm ${
-            method === "cod" ? "border-velora-burgundy bg-velora-cream-dark" : "border-velora-burgundy/10 bg-white"
+          className={`rounded-full px-3 py-1 font-bold transition ${
+            method === "cod"
+              ? "bg-velora-burgundy text-velora-cream"
+              : "bg-velora-cream-dark text-velora-burgundy/70"
           }`}
         >
-          <p className="text-base font-bold text-velora-burgundy-dark">الدفع عند الاستلام</p>
-          <p className="mt-1 text-sm font-medium text-velora-burgundy/75">+20 د.إ رسوم التوصيل</p>
+          الدفع عند الاستلام (COD)
         </button>
-      </div>
-
-      <button
-        type="button"
-        className="w-full rounded-full bg-velora-burgundy py-4 text-base font-extrabold tracking-wide text-velora-cream shadow-lg"
-        data-payment-method={method}
-        data-total={total}
-        data-quantity={quantity}
-      >
-        {ctaLabel}
-      </button>
-
-      <p className="text-center text-xs text-velora-burgundy/60">
-        الدفع بالبطاقة (بدون رسوم) أو الدفع عند الاستلام (+20 د.إ)
-      </p>
-
-      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => setMethod("card")}
-          className={`rounded-xl border p-2.5 text-center text-xs ${
-            method === "card" ? "border-velora-burgundy bg-velora-cream-dark" : "border-velora-burgundy/10"
+          className={`rounded-full px-3 py-1 font-bold transition ${
+            method === "card"
+              ? "bg-velora-burgundy text-velora-cream"
+              : "bg-velora-cream-dark text-velora-burgundy/70"
           }`}
         >
           الدفع بالبطاقة
-          <br />
-          <span className="text-velora-burgundy/55">بدون رسوم</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setMethod("cod")}
-          className={`rounded-xl border p-2.5 text-center text-xs ${
-            method === "cod" ? "border-velora-burgundy bg-velora-cream-dark" : "border-velora-burgundy/10"
-          }`}
-        >
-          الدفع عند الاستلام
-          <br />
-          <span className="text-velora-burgundy/55">+20 د.إ</span>
         </button>
       </div>
-      <p className="text-center text-[11px] text-velora-burgundy/50">
-        COD للعرض {quantity}: {formatPrice(codBundlePrices[quantity])}
-      </p>
+
+      {/* Bottom Mini Trust Bar (from screenshot 2) */}
+      <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-[#2c1318] p-3.5 text-velora-cream">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-velora-champagne">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-extrabold leading-tight">توصيل 1-3 أيام</p>
+            <p className="text-[10px] text-velora-cream/60">كل مدن الإمارات</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-velora-champagne">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-extrabold leading-tight">الدفع عند الاستلام</p>
+            <p className="text-[10px] text-velora-cream/60">بدون دفع أونلاين</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

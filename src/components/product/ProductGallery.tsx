@@ -8,9 +8,17 @@ type Props = {
   productName: string;
   placeholder: string;
   laraFrame?: boolean;
+  /** Nama-style: full width on mobile */
+  fullWidthMobile?: boolean;
 };
 
-export function ProductGallery({ mainSrc, productName, placeholder, laraFrame = false }: Props) {
+export function ProductGallery({
+  mainSrc,
+  productName,
+  placeholder,
+  laraFrame = false,
+  fullWidthMobile = false,
+}: Props) {
   const [failed, setFailed] = useState(false);
 
   return (
@@ -18,7 +26,9 @@ export function ProductGallery({ mainSrc, productName, placeholder, laraFrame = 
       <div
         className={
           laraFrame
-            ? "mx-auto w-fit max-w-full rounded-[2rem] border-8 border-white bg-white p-0 shadow-2xl lg:mx-0"
+            ? `rounded-[2rem] border-8 border-white bg-white p-0 shadow-2xl ${
+                fullWidthMobile ? "mx-auto w-full max-w-full lg:mx-0 lg:w-fit" : "mx-auto w-fit max-w-full lg:mx-0"
+              }`
             : "mx-auto w-fit max-w-full rounded-[2rem] border border-velora-burgundy/10 bg-white shadow-lg"
         }
       >

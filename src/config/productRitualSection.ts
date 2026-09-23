@@ -1,59 +1,26 @@
 import type { ProductId } from "./products";
 
-export type ProductRitualData = {
-  id: ProductId;
-  index: string;
-  categoryLabel: string;
-  problem: string;
-  problemCopy: string;
-  solutionLabel: string;
-  productName: string;
-  ingredient: string;
-  priceLabel: string;
+/** نص شريط المشكلة (Nama-style) — بدون أرقام إحصائية أو مصادر وهمية */
+export type ProductProblemOverlay = {
+  badge: string;
+  headline: string;
+  subline: string;
 };
 
-export const productRitualByProductId: Record<ProductId, ProductRitualData> = {
+export const productProblemOverlayById: Record<ProductId, ProductProblemOverlay> = {
   hair: {
-    id: "hair",
-    index: "01 — الشعر",
-    categoryLabel: "الشعر",
-    problem: "تساقط الشعر وضعف مظهره",
-    problemCopy:
-      "عندما تلاحظين المزيد من الشعر على المشط أو أثناء الاستحمام، تصبح العناية اليومية أكثر أهمية.",
-    solutionLabel: "خطوة من طقس فيلورا",
-    productName: "علكات صحة ونمو الشعر",
-    ingredient: "بالبيوتين",
-    priceLabel: "199 د.إ",
+    badge: "01",
+    headline: "تساقط الشعر وضعف مظهره — حين يزداد الشعر على المشط أو في الاستحمام",
+    subline: "الحرارة، التكييف، وإيقاع اليومي قد يؤثران على مظهر الشعر — العناية اليومية تصبح أهم.",
   },
   skin: {
-    id: "skin",
-    index: "02 — البشرة",
-    categoryLabel: "البشرة",
-    problem: "بشرة باهتة تفتقد الإشراقة",
-    problemCopy:
-      "الإرهاق والعوامل اليومية قد تجعل البشرة تبدو أقل نضارة وحيوية.",
-    solutionLabel: "خطوة من طقس فيلورا",
-    productName: "علكات إشراقة ونضارة البشرة",
-    ingredient: "بالغلوتاثيون",
-    priceLabel: "199 د.إ",
+    badge: "02",
+    headline: "بشرة باهتة تفتقد الإشراقة — الإرهاق والعوامل اليومية تظهر على الوجه",
+    subline: "الشمس، الجفاف، وقلة النوم قد تجعل البشرة تبدو أقل حيوية — خطوة بسيطة تلائم يومك.",
   },
   eye: {
-    id: "eye",
-    index: "03 — محيط العين",
-    categoryLabel: "محيط العين",
-    problem: "مظهر متعب حول العينين",
-    problemCopy:
-      "الهالات ومظهر الإرهاق حول العينين قد يجعلان الوجه يبدو أكثر تعباً.",
-    solutionLabel: "خطوة من طقس فيلورا",
-    productName: "سيروم العناية بمحيط العين",
-    ingredient: "بفيتامين E",
-    priceLabel: "199 د.إ",
+    badge: "03",
+    headline: "مظهر متعب حول العينين — الهالات والإجهاد يظهران قبل أن تشعرين بالتعب",
+    subline: "الشاشات والسهر المتكرر قد يبرزان محيط العين — عناية مركّزة تكمل روتينك.",
   },
 };
-
-export const ritualCta = {
-  title: "اكتشفي طقوس VELORA BEAUTY",
-  subtitle: "روتين متكامل بثلاث عنايات: شعر، بشرة، ومحيط العين.",
-  button: "اكتشفي المجموعة",
-  href: "/#bundle",
-} as const;

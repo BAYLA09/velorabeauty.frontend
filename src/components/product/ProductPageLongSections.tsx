@@ -1,17 +1,9 @@
 import { ProductFaq } from "@/components/product/ProductFaq";
-import { ProductRitualSection } from "@/components/product/ProductRitualSection";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
 import { uaeDeliveryCities } from "@/config/productPageShared";
 import type { ProductPageConfig } from "@/config/productPages";
-import type { ProductWithPage } from "@/lib/productCatalog";
 
-export function ProductPageLongSections({
-  page,
-  product,
-}: {
-  page: ProductPageConfig;
-  product: ProductWithPage;
-}) {
+export function ProductPageLongSections({ page }: { page: ProductPageConfig }) {
   return (
     <>
       <section className="border-y border-velora-burgundy/10 bg-velora-cream-dark py-8">
@@ -26,11 +18,6 @@ export function ProductPageLongSections({
           ))}
         </div>
       </section>
-
-      <ProductRitualSection
-        productId={product.id}
-        imageSrc={product.pageImage.storySrc ?? product.pageImage.src}
-      />
 
       <section className="bg-velora-cream py-14 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
