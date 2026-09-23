@@ -71,16 +71,15 @@ function OfferProductStack({
   alt: string;
   count: number;
 }) {
-  const width = count === 1 ? "3.5rem" : count === 2 ? "4.75rem" : "5.75rem";
   const showImage = Boolean(src);
 
   if (showImage && src && (count === 1 || count === 2 || count === 3)) {
     const slotClass =
       count === 1
-        ? "relative h-[4.25rem] w-[3.25rem] shrink-0 sm:h-[4.75rem] sm:w-[3.5rem]"
+        ? "relative h-[3.35rem] w-[2.65rem] shrink-0 sm:h-[3.65rem] sm:w-[2.85rem]"
         : count === 2
-          ? "relative h-[4.25rem] w-[4.75rem] shrink-0 sm:h-[4.75rem] sm:w-[5.25rem]"
-          : "relative h-[4.25rem] w-[5.75rem] shrink-0 sm:h-[4.75rem] sm:w-[6.25rem]";
+          ? "relative h-[3.35rem] w-[3.85rem] shrink-0 sm:h-[3.65rem] sm:w-[4.15rem]"
+          : "relative h-[3.35rem] w-[4.65rem] shrink-0 sm:h-[3.65rem] sm:w-[5rem]";
 
     return (
       <div className={slotClass}>
@@ -88,7 +87,7 @@ function OfferProductStack({
         <img
           src={src}
           alt={alt}
-          className="pointer-events-none absolute bottom-0 left-1/2 h-[4.15rem] w-auto max-w-none -translate-x-1/2 object-contain object-bottom sm:h-[4.65rem]"
+          className="pointer-events-none absolute bottom-0 left-1/2 h-[3.1rem] w-auto max-w-full -translate-x-1/2 object-contain object-bottom sm:h-[3.4rem]"
         />
       </div>
     );
@@ -96,8 +95,8 @@ function OfferProductStack({
 
   return (
     <div
-      className="relative h-[4.25rem] shrink-0 sm:h-[4.75rem]"
-      style={{ width }}
+      className="relative h-[3.35rem] shrink-0 sm:h-[3.65rem]"
+      style={{ width: count === 1 ? "2.65rem" : count === 2 ? "3.85rem" : "4.65rem" }}
       aria-hidden={!showImage}
     >
       {Array.from({ length: count }, (_, i) => (
@@ -107,8 +106,8 @@ function OfferProductStack({
           style={{
             right: i * 16,
             zIndex: count - i,
-            width: "3.25rem",
-            height: "3.75rem",
+            width: "2.65rem",
+            height: "3.1rem",
           }}
         />
       ))}
@@ -208,11 +207,11 @@ export function ProductPurchasePanel({
                 />
 
                 {/* وسط: عنوان */}
-                <div className="min-w-0 flex-1">
-                  <p className="text-base font-extrabold text-velora-burgundy-dark sm:text-lg">
+                <div className="min-w-0 flex-1 px-0.5">
+                  <p className="text-[13px] font-extrabold leading-tight text-velora-burgundy-dark sm:text-sm">
                     {offer.title}
                   </p>
-                  <p className="mt-0.5 text-[11px] font-semibold leading-snug text-velora-burgundy/60 sm:text-xs">
+                  <p className="mt-0.5 text-[9px] font-semibold leading-snug text-velora-burgundy/60 sm:text-[10px]">
                     {offer.subtitle}
                   </p>
                 </div>
