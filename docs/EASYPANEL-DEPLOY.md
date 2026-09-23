@@ -32,11 +32,12 @@ GitHub → **Actions** → **Publish container** → آخر run على `main` = 
 4. **Build** tab: ما محتاجش Dockerfile فـ Easypanel — الـ image جاهزة.
 5. **Port:** `3000` · **Deploy**.
 
-### 3) Package visibility (مرة واحدة)
+### 3) Package visibility
 
-GitHub → **Packages** → `velorabeauty.frontend` → **Package settings** →  
-إلا Easypanel ما قدرش يسحب: **Change visibility** → **Public**  
-(أو خلّي private و استعمل PAT ديال owner فـ Registry auth).
+الـ image دابا **public** — Easypanel **ما محتاجش** username/password.  
+إلا طلب auth: [Package settings](https://github.com/users/BAYLA09/packages/container/velorabeauty.frontend/settings) → **Public**.
+
+**دليل مختصر:** [EASYPANEL-SETUP-AR.md](./EASYPANEL-SETUP-AR.md)
 
 ### 4) بعد كل merge على main
 
