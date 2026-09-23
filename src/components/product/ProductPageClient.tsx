@@ -73,7 +73,12 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 آخر 48 ساعة على عرض الشحن المجاني هذا الأسبوع
               </div>
 
-              <ProductPurchasePanel form={page.form} onChange={setPurchase} />
+              <ProductPurchasePanel
+                form={page.form}
+                productImageSrc={product.image.src}
+                productName={product.name}
+                onChange={setPurchase}
+              />
             </div>
           </div>
         </section>
