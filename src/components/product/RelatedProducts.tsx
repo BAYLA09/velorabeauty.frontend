@@ -26,7 +26,7 @@ export function RelatedProducts({
             >
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-velora-burgundy/10 bg-white p-1">
                 <ProductPageImage
-                  src={p.pageImage.src}
+                  src={p.image.src}
                   alt={p.name}
                   className="max-h-full max-w-full object-contain"
                 />
