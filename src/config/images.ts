@@ -50,6 +50,7 @@ export const images = {
       storySrc: "/images/products/pdp/eye-story.png?v=20260923-0111",
       upsellSlotSrc: {
         1: "/images/products/pdp/upsell/eye-qty-1.png?v=20260923-1535",
+        2: "/images/products/pdp/upsell/eye-qty-2.png?v=20260923-1539",
       },
       placeholder: "[صورة صفحة المنتج — سيروم العين]",
     },
