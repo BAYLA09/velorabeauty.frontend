@@ -18,7 +18,7 @@ export function RelatedProducts({
     <section className="border-t border-velora-burgundy/10 bg-velora-cream px-4 py-12 md:px-6 md:py-14">
       <div className="mx-auto max-w-lg sm:max-w-3xl">
         <h2 className="text-right text-2xl font-extrabold text-velora-burgundy-dark">
-          منتجات أخرى من فيلورا
+          تكمّلي روتينك
         </h2>
         <div className="mt-6 space-y-4">
           {others.map((p) => (

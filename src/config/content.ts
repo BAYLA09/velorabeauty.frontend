@@ -8,92 +8,87 @@ export const navigation = [
 ] as const;
 
 export const hero = {
-  headline: "جمالك، بطابعٍ مختلف.",
-  subheadline:
-    "ثلاث عنايات صُممت لترافق روتينك اليومي، من الشعر إلى البشرة ومحيط العين.",
-  primaryCta: "اكتشفي المجموعة",
-  secondaryCta: "تصفحي المنتجات",
+  headline: "جمالكِ، يبدأ منكِ.",
+  subheadline: "روتين عناية واحد — للشعر، البشرة، ومحيط العين.",
+  primaryCta: "اكتشفي روتينك",
+  secondaryCta: "تعرّفي على VELORA",
   primaryHref: "#bundle",
   secondaryHref: "#products",
   trustBadges: [
-    { label: "مكونات طبيعية", icon: "leaf" as const },
-    { label: "جودة عالية", icon: "diamond" as const },
-    { label: "نتائج حقيقية", icon: "spark" as const },
+    { label: "روتين واضح", icon: "routine" as const },
+    { label: "عناية يومية", icon: "leaf" as const },
+    { label: "توصيل الإمارات", icon: "delivery" as const },
   ],
 } as const;
 
 export const productSection = {
-  title: "اكتشفي عنايتك",
-  introTitle: "ثلاثة حلول لمشاكل جمالك الأساسية",
+  title: "روتينكِ",
+  introTitle: "ثلاث لحظات. روتين واحد.",
 } as const;
 
 export const whyVelora = {
-  title: "لماذا فيلورا؟",
+  title: "لماذا VELORA؟",
   items: [
-    { title: "مكونات مختارة بعناية", icon: "diamond" as const },
-    { title: "روتين بسيط وواضح", icon: "routine" as const },
-    { title: "تجربة مصممة للمرأة العصرية", icon: "spark" as const },
+    { title: "عناية بلا تعقيد", icon: "routine" as const },
+    { title: "مكوّن بارز في كل منتج", icon: "diamond" as const },
+    { title: "مصمّم لإيقاع حياتكِ", icon: "spark" as const },
     { title: "توصيل داخل الإمارات", icon: "delivery" as const },
   ],
 } as const;
 
 export const howToOrder = {
-  title: "كيف تطلبين؟",
-  support: "تجربة طلب بسيطة وسريعة داخل الإمارات.",
+  title: "كيف تبدأين؟",
+  support: "ثلاث خطوات — بكل بساطة.",
   steps: [
-    { number: "01", title: "اختاري منتجاتك" },
+    { number: "01", title: "اختاري روتينك" },
     { number: "02", title: "أكملي بياناتك" },
-    { number: "03", title: "استلمي طلبك" },
+    { number: "03", title: "استلمي بكل راحة" },
   ],
 } as const;
 
 export const trustStrip = {
   items: [
-    "شحن سريع داخل الإمارات",
+    "توصيل داخل الإمارات",
     "الدفع بالبطاقة",
     "الدفع عند الاستلام",
-    "دعم مخصص",
+    "دعم بالعربية",
   ],
-  codBanner: "دفع عند الاستلام — بدون تعقيد",
+  codBanner: "الدفع عند الاستلام — براحة تامة",
 } as const;
 
 export const faq = {
-  title: "الأسئلة الشائعة",
+  title: "أسئلة قد تخطر ببالكِ",
   items: [
     {
-      question: "ما هي طرق الدفع المتاحة؟",
-      answer:
-        "نوفر الدفع بالبطاقة والدفع عند الاستلام داخل الإمارات العربية المتحدة.",
+      question: "ما طرق الدفع؟",
+      answer: "البطاقة بدون رسوم إضافية، أو الدفع عند الاستلام داخل الإمارات.",
     },
     {
-      question: "هل الدفع عند الاستلام متاح داخل الإمارات؟",
-      answer: "نعم، الدفع عند الاستلام متاح للطلبات داخل الإمارات.",
+      question: "هل الدفع عند الاستلام متاح؟",
+      answer: "نعم — للطلبات داخل الإمارات.",
     },
     {
       question: "كم يستغرق التوصيل؟",
-      answer:
-        "نوصّل داخل الإمارات، وتُبلَّغين بمدة التوصيل المتوقعة عند تأكيد طلبك.",
+      answer: "نوصّل داخل الإمارات، ونُبلّغكِ بالمدة عند تأكيد طلبكِ.",
     },
     {
-      question: "كم تبلغ رسوم الدفع عند الاستلام؟",
-      answer: `رسوم الدفع عند الاستلام ${formatPrice(codFee)} إضافية على قيمة الطلب.`,
+      question: "رسوم الدفع عند الاستلام؟",
+      answer: `رسوم ${formatPrice(codFee)} إضافية على قيمة الطلب.`,
     },
     {
-      question: "كيف أختار المنتج المناسب لي؟",
-      answer:
-        "اختاري العناية التي تناسب احتياجك: الشعر، البشرة، أو محيط العين — أو المجموعة الكاملة لروتين متكامل.",
+      question: "أي منتج يناسبني؟",
+      answer: "اختاري ما يلائم احتياجكِ: الشعر، البشرة، محيط العين — أو المجموعة الكاملة.",
     },
     {
-      question: "هل يمكنني طلب أكثر من منتج؟",
-      answer:
-        "نعم، يمكنك طلب منتجاً واحداً أو اختيار عروض متعددة المنتجات بأسعار أوضح في صفحة الدفع.",
+      question: "هل يمكن طلب أكثر من منتج؟",
+      answer: "نعم — عروض الروتين متوفرة في صفحة كل منتج.",
     },
   ],
 } as const;
 
 export const finalCta = {
-  title: "ابدئي روتينك مع فيلورا",
-  text: "اختاري ما يناسبك، واجعلي العناية جزءاً من يومك.",
+  title: "ابدئي من نفسكِ.",
+  text: "اكتشفي روتين VELORA.",
   cta: "اكتشفي المنتجات",
   href: "#products",
 } as const;
@@ -102,7 +97,7 @@ export const footer = {
   links: [
     { label: "الرئيسية", href: "/" },
     { label: "المنتجات", href: "/#products" },
-    { label: "عن فيلورا", href: "/#why" },
+    { label: "عن VELORA", href: "/#why" },
     { label: "الأسئلة الشائعة", href: "/#faq" },
     { label: "تواصل معنا", href: "/#contact" },
     { label: "سياسة الخصوصية", href: "/" },
@@ -113,11 +108,11 @@ export const footer = {
 } as const;
 
 export const checkout = {
-  title: "إتمام الطلب",
-  bundleLabel: "اختيار العرض",
+  title: "إتمام طلبك",
+  bundleLabel: "اختاري روتينك",
   paymentLabel: "طريقة الدفع",
   cardNote: "الدفع بالبطاقة — بدون رسوم إضافية",
-  codNote: `الدفع عند الاستلام — +${codFee} ${currencyLabel} رسوم الشحن`,
+  codNote: `الدفع عند الاستلام — +${codFee} ${currencyLabel}`,
   submit: "إتمام الطلب",
   summaryTitle: "ملخص الطلب",
 } as const;

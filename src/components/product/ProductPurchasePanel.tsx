@@ -32,8 +32,8 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
   if (funnelOffers) {
     if (qty === 1) {
       return {
-        title: form === "serum" ? "عبوة واحدة" : "علبة وحدة",
-        subtitle: form === "serum" ? "روتين شهر — استخدام يومي" : "شهر كامل — 60 علكة",
+        title: "ابدئي بخطوتك الأولى",
+        subtitle: form === "serum" ? "عبوة واحدة · روتينك" : "علبة واحدة · روتينك",
         badge: null,
         compareAt: null,
         price: cardPrice,
@@ -43,9 +43,9 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
     }
     if (qty === 2) {
       return {
-        title: form === "serum" ? "عبواتين" : "علبتين",
-        subtitle: form === "serum" ? "شهرين — ثبّتي النتيجة" : "شهرين — ثبّتي النتيجة",
-        badge: { text: "الأكثر اختياراً", variant: "popular" },
+        title: "اصنعي روتينك",
+        subtitle: "منتجان · عناية متناسقة",
+        badge: { text: "روتين متكامل", variant: "popular" },
         compareAt,
         price: cardPrice,
         savingsAmount,
@@ -53,9 +53,9 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
       };
     }
     return {
-      title: form === "serum" ? "3 عبوات" : "3 علب",
-      subtitle: form === "serum" ? "3 عبوات — أقوى توفير" : "3 علب — أقوى توفير",
-      badge: { text: "الأكثر توفيراً", variant: "bundle" },
+      title: "روتين VELORA الكامل",
+      subtitle: "ثلاث عنايات · روتين واحد",
+      badge: { text: "الاكتمال", variant: "bundle" },
       compareAt,
       price: cardPrice,
       savingsAmount,
@@ -186,8 +186,8 @@ export function ProductPurchasePanel({
   const ctaLabel = useMemo(
     () =>
       funnelOffers
-        ? `اطلبي الآن • ${formatPrice(total)}`
-        : `ابدئي روتينك الآن • ${formatPrice(total)}`,
+        ? `ابدئي روتينك · ${formatPrice(total)}`
+        : `ابدئي روتينك · ${formatPrice(total)}`,
     [total, funnelOffers],
   );
 
@@ -197,7 +197,7 @@ export function ProductPurchasePanel({
 
   return (
     <div className="space-y-4">
-      <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
+      <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري روتينك</p>
 
       <div className="space-y-3">
         {quantities.map((qty) => {
@@ -223,7 +223,6 @@ export function ProductPurchasePanel({
                       : "bg-[#e8d7b8] text-velora-burgundy-dark"
                   }`}
                 >
-                  {offer.badge.variant === "popular" && <span aria-hidden>👑</span>}
                   {offer.badge.text}
                 </span>
               )}
@@ -264,8 +263,8 @@ export function ProductPurchasePanel({
                     </p>
                   )}
                   {offer.savingsAmount !== null && offer.savingsAmount > 0 && (
-                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[#f5e6d3] px-2 py-0.5 text-[10px] font-extrabold text-velora-burgundy-dark sm:text-[11px]">
-                      وفّري {offer.savingsAmount} د.إ
+                    <span className="mt-1 inline-block text-[10px] font-semibold text-velora-burgundy/50 sm:text-[11px]">
+                      قيمة أوضح · {offer.savingsAmount} د.إ
                     </span>
                   )}
                 </div>

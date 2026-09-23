@@ -4,29 +4,39 @@ import { ButtonLink } from "./ui/ButtonLink";
 import { VeloraImage } from "./ui/VeloraImage";
 import { WaveDivider } from "./ui/WaveDivider";
 
-function TrustIcon({ type }: { type: "leaf" | "diamond" | "spark" }) {
+function TrustIcon({ type }: { type: (typeof hero.trustBadges)[number]["icon"] }) {
   const className = "h-7 w-7 text-velora-champagne";
-  if (type === "leaf") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.3">
-        <path d="M12 21c-4-4-6-8-6-12a6 6 0 0112 0c0 4-2 8-6 12z" />
-        <path d="M12 11c-2-3-2-5 0-7" />
-      </svg>
-    );
+  switch (type) {
+    case "leaf":
+      return (
+        <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.3">
+          <path d="M12 21c-4-4-6-8-6-12a6 6 0 0112 0c0 4-2 8-6 12z" />
+          <path d="M12 11c-2-3-2-5 0-7" />
+        </svg>
+      );
+    case "routine":
+      return (
+        <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.3">
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 8v4l3 2" />
+        </svg>
+      );
+    case "delivery":
+      return (
+        <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.3">
+          <path d="M3 7h11v8H3z" />
+          <path d="M14 10h4l3 3v2h-7" />
+          <circle cx="7" cy="17" r="2" />
+          <circle cx="18" cy="17" r="2" />
+        </svg>
+      );
+    default:
+      return (
+        <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.3">
+          <path d="M12 3l8 7-8 11L4 10l8-7z" />
+        </svg>
+      );
   }
-  if (type === "diamond") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.3">
-        <path d="M12 3l8 7-8 11L4 10l8-7z" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.3">
-      <circle cx="12" cy="8" r="3.5" />
-      <path d="M5 20c1.5-3 4-4.5 7-4.5s5.5 1.5 7 4.5" />
-    </svg>
-  );
 }
 
 export function HeroSection() {

@@ -11,6 +11,9 @@ export function ProductShowcaseSection() {
         <h2 className="text-center text-3xl font-bold text-velora-burgundy md:text-4xl">
           {productSection.title}
         </h2>
+        <p className="mx-auto mt-3 max-w-md text-center text-base text-velora-burgundy/65">
+          {productSection.introTitle}
+        </p>
 
         <div className="mt-12 space-y-16 md:mt-16 md:space-y-24">
           {products.map((product) => (
@@ -43,7 +46,7 @@ export function ProductShowcaseSection() {
                     <p className="leading-relaxed text-velora-burgundy/70">{product.description}</p>
                     <p className="text-3xl font-bold text-velora-burgundy">{product.priceLabel}</p>
                     <ButtonLink href={getProductPath(product.slug)} variant="burgundy">
-                      اطلبي الآن
+                      {product.cta}
                     </ButtonLink>
                   </div>
                 </div>
