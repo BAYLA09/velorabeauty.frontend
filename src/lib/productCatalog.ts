@@ -7,8 +7,10 @@ export type ProductImageRef = {
   placeholder: string;
   /** الصورة الثانية (قسم hook / before-after) */
   storySrc?: string;
-  /** صور بطاقات upsell — خلفية بيضاء / packshot */
+  /** صور بطاقات upsell — خلفية بيضاء / packshot (legacy single URL) */
   upsellSrc?: string;
+  /** صورة لكل بطاقة عرض: 1 / 2 / 3 منتجات (اختياري لكل slot) */
+  upsellSlotSrc?: Partial<Record<1 | 2 | 3, string>>;
 };
 
 export type ProductWithPage = Product & {
