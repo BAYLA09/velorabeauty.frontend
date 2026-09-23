@@ -37,6 +37,7 @@ export const images = {
       upsellSlotSrc: {
         1: "/images/products/pdp/upsell/skin-qty-1.png?v=20260923-1500",
         2: "/images/products/pdp/upsell/skin-qty-2.png?v=20260923-1510",
+        3: "/images/products/pdp/upsell/skin-qty-3.png?v=20260923-1513",
       },
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
     },
