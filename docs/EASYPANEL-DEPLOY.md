@@ -5,7 +5,49 @@
 - إلا **الموقع كيتحل** (`/api/health` → 200) ولكن **Deploy جديد كيفشل**، غالباً Easypanel ما قدرش يـ **clone/pull** من GitHub أو الـ **build** كيتعطل — الخدمة القديمة باقية تخدم.
 - إلا **الموقع down** بالكامل، شوف *الخدمة ما كتقلعش* تحت.
 
-## الإعداد الصحيح (App service)
+---
+
+## الحل الموصى به: Deploy من GHCR (بلا Git على Easypanel)
+
+كل push على **`main`** كيبني image فـ **GitHub Actions** (`Publish container`) و كيرفعها لـ:
+
+```text
+ghcr.io/bayla09/velorabeauty.frontend:latest
+```
+
+(و tag بـ SHA الـ commit.)
+
+### 1) تأكد أن الـ workflow خضر
+
+GitHub → **Actions** → **Publish container** → آخر run على `main` = ✅
+
+### 2) Easypanel — بدّل المصدر
+
+1. خدمة Velora → **Source** → **Docker Registry** (ماشي GitHub).
+2. **Image:** `ghcr.io/bayla09/velorabeauty.frontend:latest`
+3. **Authentication:**
+   - Username: حساب GitHub ديالك (مثلاً `BAYLA09`)
+   - Password: **Personal Access Token** (Classic) فيه **`read:packages`**  
+     (GitHub → Settings → Developer settings → Personal access tokens)
+4. **Build** tab: ما محتاجش Dockerfile فـ Easypanel — الـ image جاهزة.
+5. **Port:** `3000` · **Deploy**.
+
+### 3) Package visibility (مرة واحدة)
+
+GitHub → **Packages** → `velorabeauty.frontend` → **Package settings** →  
+إلا Easypanel ما قدرش يسحب: **Change visibility** → **Public**  
+(أو خلّي private و استعمل PAT ديال owner فـ Registry auth).
+
+### 4) بعد كل merge على main
+
+1. استنى **Publish container** ✅ (~3–8 دقائق).
+2. Easypanel → **Deploy** (Pull image جديدة — أحياناً **Force Rebuild** / Redeploy).
+
+> **Webhook:** إلا بقيتي على GitHub source، webhook كيخدم غير إلا Git متصل. مع GHCR، deploy = redeploy من registry بعد ما CI يكمل.
+
+---
+
+## الإعداد الصحيح (App service — GitHub source)
 
 | Field | Value |
 |--------|--------|
