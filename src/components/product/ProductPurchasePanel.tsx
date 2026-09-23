@@ -67,27 +67,24 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity): OfferUi {
 }
 
 function OfferProductStack({
-  src,
-  alt,
+  src: _upsellImageSrc,
+  alt: _upsellImageAlt,
   count,
 }: {
+  /** Reserved — wire upsell card image URL here when assets are ready */
   src: string;
   alt: string;
   count: number;
 }) {
-  const bottle =
-    "pointer-events-none max-h-full max-w-full object-contain drop-shadow-[0_6px_14px_rgba(58,24,32,0.12)]";
+  void _upsellImageSrc;
+  void _upsellImageAlt;
 
   if (count === 1) {
     return (
-      <div className="relative flex h-[6.25rem] w-[5rem] shrink-0 items-end justify-center sm:h-[6.75rem] sm:w-[5.5rem]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt}
-          className={`h-[5.75rem] w-auto sm:h-[6.35rem] ${bottle}`}
-        />
-      </div>
+      <div
+        className="relative flex h-[6.25rem] w-[5rem] shrink-0 items-end justify-center sm:h-[6.75rem] sm:w-[5.5rem]"
+        aria-hidden
+      />
     );
   }
 
@@ -99,6 +96,7 @@ function OfferProductStack({
     <div
       className="relative shrink-0"
       style={{ width, height: "6.5rem" }}
+      aria-hidden
     >
       {Array.from({ length: count }, (_, i) => {
         const offset =
@@ -122,15 +120,7 @@ function OfferProductStack({
               height: bottleH,
               bottom,
             }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={src}
-              alt={i === 0 ? alt : ""}
-              aria-hidden={i > 0}
-              className={bottle}
-            />
-          </div>
+          />
         );
       })}
     </div>
