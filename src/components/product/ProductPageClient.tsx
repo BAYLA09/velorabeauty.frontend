@@ -36,7 +36,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
       <ProductAnnouncementBar />
       <ProductStoreHeader />
 
-      <main className="product-typography bg-velora-cream pb-[9.5rem] md:pb-0">
+      <main className="product-typography bg-velora-cream pb-24 md:pb-0">
         <section
           id="purchase"
           className="scroll-mt-24 mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:py-8"
