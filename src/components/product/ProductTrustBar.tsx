@@ -1,5 +1,22 @@
-export function ProductTrustBar({ compact = false }: { compact?: boolean }) {
-  const items = [
+import type { ReactNode } from "react";
+
+type TrustItem = {
+  title: string;
+  sub: string;
+  /** Subtitle shown larger (e.g. حلال • جودة ممتازة) */
+  subEmphasis?: boolean;
+  icon: ReactNode;
+};
+
+export function ProductTrustBar({
+  compact = false,
+  prominent = false,
+}: {
+  compact?: boolean;
+  /** Nama-style large 2×2 bar (gallery / story) */
+  prominent?: boolean;
+}) {
+  const items: TrustItem[] = [
     {
       title: "الدفع عند الاستلام",
       sub: "بدون دفع أونلاين",
@@ -36,6 +53,7 @@ export function ProductTrustBar({ compact = false }: { compact?: boolean }) {
     {
       title: "مرخّص ومعتمد",
       sub: "حلال • جودة ممتازة",
+      subEmphasis: true,
       icon: (
         <path
           strokeLinecap="round"
@@ -46,26 +64,77 @@ export function ProductTrustBar({ compact = false }: { compact?: boolean }) {
     },
   ];
 
+  const isLarge = prominent && !compact;
+
   return (
     <div
       className={
-        compact
-          ? "overflow-hidden rounded-2xl bg-[#2c1318] text-velora-cream"
-          : "border-y border-white/10 bg-[#2c1318] text-velora-cream"
+        isLarge
+          ? "overflow-hidden rounded-[1.75rem] bg-[#2c1318] text-velora-cream shadow-[0_10px_40px_rgba(44,19,24,0.25)]"
+          : compact
+            ? "overflow-hidden rounded-2xl bg-[#2c1318] text-velora-cream"
+            : "border-y border-white/10 bg-[#2c1318] text-velora-cream"
       }
     >
-      <div className={compact ? "px-3 py-3 sm:px-4 sm:py-4" : "mx-auto max-w-6xl px-4 py-3 sm:px-6"}>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      <div
+        className={
+          isLarge
+            ? "px-4 py-5 sm:px-6 sm:py-6"
+            : compact
+              ? "px-3 py-3 sm:px-4 sm:py-4"
+              : "mx-auto max-w-6xl px-4 py-3 sm:px-6"
+        }
+      >
+        <div
+          className={
+            isLarge
+              ? "grid grid-cols-2 gap-x-4 gap-y-5 sm:gap-x-6 sm:gap-y-6"
+              : "grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
+          }
+        >
           {items.map((item) => (
-            <div key={item.title} className="flex items-center gap-2.5 sm:gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-velora-champagne/40 bg-white/5 text-velora-champagne sm:h-10 sm:w-10">
-                <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div
+              key={item.title}
+              className={`flex items-center gap-3 sm:gap-3.5 ${item.subEmphasis && isLarge ? "sm:col-span-1" : ""}`}
+            >
+              <div
+                className={
+                  isLarge
+                    ? "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-velora-champagne/45 bg-white/5 text-velora-champagne sm:h-12 sm:w-12"
+                    : "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-velora-champagne/40 bg-white/5 text-velora-champagne sm:h-10 sm:w-10"
+                }
+              >
+                <svg
+                  className={isLarge ? "h-5 w-5 sm:h-6 sm:w-6" : "h-4 w-4 sm:h-5 sm:w-5"}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   {item.icon}
                 </svg>
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-extrabold leading-snug sm:text-xs">{item.title}</p>
-                <p className="text-[9px] text-velora-cream/60 sm:text-[10px]">{item.sub}</p>
+                <p
+                  className={
+                    isLarge
+                      ? "text-[13px] font-extrabold leading-snug sm:text-[15px]"
+                      : "text-[11px] font-extrabold leading-snug sm:text-xs"
+                  }
+                >
+                  {item.title}
+                </p>
+                <p
+                  className={
+                    item.subEmphasis && isLarge
+                      ? "mt-0.5 text-[13px] font-black leading-snug text-velora-champagne sm:text-base"
+                      : isLarge
+                        ? "mt-0.5 text-[11px] font-semibold text-velora-cream/65 sm:text-xs"
+                        : "text-[9px] text-velora-cream/60 sm:text-[10px]"
+                  }
+                >
+                  {item.sub}
+                </p>
               </div>
             </div>
           ))}

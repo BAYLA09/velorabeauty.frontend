@@ -18,7 +18,13 @@
 4. **Registry username / password:** **خليهم فارغين** — الـ package public.
 5. **Domains** → Target port: **3000** (HTTP داخل الـ container).
 6. **Deploy** → استنى حتى **Running** / logs فيها `Ready`.
-7. جرب: `https://www.velorabeauty.world/api/health`
+7. جرب:
+
+   ```bash
+   curl -s https://www.velorabeauty.world/api/health
+   ```
+
+   خاصك تشوف `"version":"..."` = آخر commit على `main` (GitHub → Actions → Publish container). إلا `version` قديم → Easypanel ما سحبش image جديدة → **Deploy** من جديد.
 
 ### بعد كل تحديث على GitHub `main`
 

@@ -14,6 +14,8 @@ export function ProductRitualSection({
   const data = productProblemOverlayById[productId];
   if (!data) return null;
 
+  const pct = Math.min(100, Math.max(0, data.statPercent));
+
   return (
     <section className="bg-velora-cream py-6 sm:py-10">
       <div className="mx-auto max-w-lg px-4 sm:max-w-4xl sm:px-6 lg:max-w-6xl">
@@ -26,12 +28,11 @@ export function ProductRitualSection({
             />
           </div>
 
-          {/* Nama-style bottom bar: badge على اليمين، النص على اليسار (RTL) */}
           <div className="bg-[#2c1318] px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex items-stretch gap-3 sm:gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-velora-champagne sm:h-[4.5rem] sm:w-[4.5rem] sm:rounded-2xl">
-                <span className="text-2xl font-black tabular-nums text-[#2c1318] sm:text-3xl">
-                  {data.badge}
+              <div className="flex h-16 w-[4.25rem] shrink-0 flex-col items-center justify-center rounded-xl bg-velora-champagne px-1 sm:h-[4.75rem] sm:w-[5rem] sm:rounded-2xl">
+                <span className="text-[1.35rem] font-black tabular-nums leading-none text-[#2c1318] sm:text-[1.65rem]">
+                  {data.statValue}
                 </span>
               </div>
               <div className="min-w-0 flex-1 text-right">
@@ -42,6 +43,29 @@ export function ProductRitualSection({
                   {data.subline}
                 </p>
               </div>
+            </div>
+
+            {/* خط النسبة — يظهر دائماً تحت الصورة */}
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <div className="mb-2 flex items-center justify-between gap-2 text-[10px] font-bold text-velora-cream/75 sm:text-[11px]">
+                <span>تعاني من المشكلة</span>
+                <span className="tabular-nums text-velora-champagne">{data.statValue}</span>
+              </div>
+              <div
+                className="h-2.5 overflow-hidden rounded-full bg-white/10 sm:h-3"
+                role="img"
+                aria-label={`${data.statValue} من النساء يعانين من هذه المشكلة`}
+              >
+                <div
+                  className="h-full rounded-full bg-gradient-to-l from-velora-champagne to-velora-champagne/75 transition-all"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              {data.statSource ? (
+                <p className="mt-2 text-[9px] leading-relaxed text-velora-cream/45 sm:text-[10px]">
+                  {data.statSource}
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
