@@ -100,7 +100,11 @@ export function ProductPageClient({ product, allProducts }: Props) {
           imageSrc={product.pageImage.storySrc ?? product.pageImage.src}
         />
 
-        <ProductPageLongSections page={page} />
+        <ProductPageLongSections
+          page={page}
+          productName={product.name}
+          marketingGallery={product.pageImage.marketingGallery}
+        />
 
         <ProductCheckoutSection
           productSlug={product.slug}

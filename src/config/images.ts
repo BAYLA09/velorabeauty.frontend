@@ -34,6 +34,7 @@ export const images = {
         3: "/images/products/pdp/upsell/hair-qty-3.png?v=20260923-1528",
       },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
+      marketingGallery: [undefined, undefined, undefined],
     },
     skin: {
       src: "/images/products/pdp/skin-main.png?v=20260923-0110",
@@ -44,6 +45,7 @@ export const images = {
         3: "/images/products/pdp/upsell/skin-qty-3.png?v=20260923-1513",
       },
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
+      marketingGallery: [undefined, undefined, undefined],
     },
     eye: {
       src: "/images/products/pdp/eye-main.png",
@@ -54,6 +56,7 @@ export const images = {
         3: "/images/products/pdp/upsell/eye-qty-3.png?v=20260923-1542",
       },
       placeholder: "[صورة صفحة المنتج — سيروم العين]",
+      marketingGallery: [undefined, undefined, undefined],
     },
   },
   testimonials: {
