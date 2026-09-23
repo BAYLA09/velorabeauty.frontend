@@ -97,10 +97,5 @@ export function sharedProductPageBlocks(form: "gummy" | "serum") {
       },
     ],
     quickComparisonTitle: "مقارنة سريعة",
-    internalSurvey: {
-      value: "7",
-      headline: "من 10 عميلات يفضلن روتين بسيط يلائم يومها — بدل حلول معقدة",
-      source: "استطلاع داخلي — فيلورا بيوتي",
-    },
   };
 }
