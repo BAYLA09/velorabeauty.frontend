@@ -25,11 +25,10 @@ export type TestimonialReview = {
 };
 
 export const testimonialsSection = {
-  title: "آراء عميلاتنا",
-  subtitle: "تجارب حقيقية من الإمارات — كل رأي يُعرض بعد اعتماده.",
-  emptyTitle: "أول تقييمات Velora قريباً",
-  emptyBody:
-    "لا نعرض آراءً وهمية. حين تشاركينا تجربتك أو نعتمد تقييمات حقيقية، ستظهر هنا باسمك ومدينتك.",
+  title: "تجارب حقيقية",
+  subtitle: "تُعرض هنا عند توفرها — بلا آراء وهمية.",
+  emptyTitle: "صوتكِ يهمّنا",
+  emptyBody: "حين تشاركين تجربتكِ، ستجدينها هنا — بكل شفافية.",
   items: [] as TestimonialReview[],
 };
 

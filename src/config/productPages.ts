@@ -12,12 +12,13 @@ export type ProductPageConfig = SharedBlocks & {
   seoDescription: string;
   headlineQuestion: string;
   subhook: string;
-  statChips: { value: string; label: string }[];
-  urgencyLine: string;
-  hook: string;
-  hookSub: string;
-  highlightStat: { value: string; label: string };
-  problemImagePlaceholder: string;
+  heroMicroline: string;
+  lifestyleTitle: string;
+  lifestyleLine: string;
+  transformationTitle: string;
+  transformationPillars: string[];
+  finalCtaTitle: string;
+  finalCtaLine: string;
   painEyebrow: string;
   painTitle: string;
   painLead: string;
@@ -37,313 +38,230 @@ export type ProductPageConfig = SharedBlocks & {
   usageTitle: string;
   usageSubtitle: string;
   usageSteps: { title: string; text: string }[];
-  galleryPlaceholders: string[];
   faq: { question: string; answer: string }[];
 };
 
-const sharedNotIncluded = [
-  "بدون وعود طبية مبالغ فيها",
-  "بدون ادعاءات غير مؤكدة",
+const integrityLines = [
+  "بدون وعود طبية",
+  "بدون ادعاءات غير مدعومة",
   "بدون مكونات غير مذكورة",
+  "بدون تعقيد",
 ];
+
+const sharedTimelineNote = "ليس كل تغيير يُرى من أول يوم — الاستمرار هو الجمال.";
 
 export const productPages: Record<ProductId, ProductPageConfig> = {
   hair: {
     ...sharedProductPageBlocks("gummy"),
     slug: "hair-gummies",
     form: "gummy",
-    seoTitle: "علكات صحة ونمو الشعر | فيلورا بيوتي",
-    seoDescription:
-      "علكات بالبيوتين — روتين يومي أنيق لدعم مظهر الشعر، مع توصيل داخل الإمارات.",
-    headlineQuestion: "شعرك يتساقط ويفقد كثافته — السبب مو الشامبو",
-    subhook:
-      "هو نقص التغذية الداخلية وعوامل حرارة ومناخ الخليج. علكتان يومياً بالبيوتين تدعمان بصيلات الشعر من الداخل — بدون زيوت ثقيلة، وبدون روتين معقد.",
-    statChips: [
-      { value: "01", label: "روتين الشعر" },
-      { value: "بالبيوتين", label: "المكوّن الأساسي" },
-      { value: "199", label: "د.إ / منتج" },
-      { value: "UAE", label: "توصيل الإمارات" },
-    ],
-    urgencyLine: "توصيل داخل الإمارات — الدفع بالبطاقة أو عند الاستلام",
-    hook: "شعرك يستحق روتيناً واضحاً",
-    hookSub: "عناية من الداخل بخطوة واحدة — ضمن أسلوب فيلورا الفاخر.",
-    highlightStat: {
-      value: "3",
-      label: "عنايات في المجموعة الكاملة — شعر، بشرة، ومحيط العين",
-    },
-    problemImagePlaceholder: "[ضع صورة الحملة — الشعر]",
-    painEyebrow: "هل تعانين من هذا؟",
-    painTitle: "مشاكل تعرفينها — وحلول من الداخل",
-    painLead: "الشعر وروتينك اليومي",
+    seoTitle: "روتين الشعر | VELORA — علكات بالبيوتين",
+    seoDescription: "علكات يومية بالبيوتين — روتين عناية بسيط للشعر، توصيل داخل الإمارات.",
+    headlineQuestion: "شعركِ يستحق عناية تبدأ من الداخل.",
+    subhook: "علكات يومية بالبيوتين — لتصبح العناية جزءاً من يومكِ، لا مهمة إضافية.",
+    heroMicroline: "من 199 د.إ · علبة · توصيل الإمارات",
+    lifestyleTitle: "العناية بنفسكِ ليست مهمة أخرى.",
+    lifestyleLine: "هي لحظة تختارين فيها نفسكِ.",
+    transformationTitle: "اجعليها عادة.",
+    transformationPillars: ["روتين بسيط.", "عناية يومية.", "لحظة لكِ."],
+    finalCtaTitle: "ابدئي من نفسكِ.",
+    finalCtaLine: "اكتشفي روتين VELORA للشعر.",
+    painEyebrow: "لحظة صدق",
+    painTitle: "بين العمل، البيت، وكل ما بينهما…",
+    painLead: "متى كانت آخر مرة اخترتِ فيها نفسكِ؟",
     painItems: [
       {
-        problem: "«روتين الشعر معقد وما عندي وقت»",
-        solution: "علكة يومية سهلة — خطوة واحدة ضمن يومك.",
+        problem: "«أيامي ممتلئة — والعناية تتأجل»",
+        solution: "علكة واحدة. روتين لا يطلب منكِ أكثر مما تستطيعين.",
       },
       {
-        problem: "«بغيت شي واضح ومو ثقيل»",
-        solution: "تركيز على البيوتين — بدون تعقيد.",
+        problem: "«أريد شيئاً بسيطاً — لا قائمة منتجات»",
+        solution: "بيوتين. خطوة واحدة. VELORA.",
       },
       {
-        problem: "«بغيت أتكامل مع باقي العناية»",
-        solution: "ينسجم مع علكات البشرة وسيروم العين في المجموعة.",
+        problem: "«أريد روتيناً يكمل بعضه»",
+        solution: "الشعر، البشرة، العين — روتين واحد متناسق.",
       },
     ],
     formulaEyebrow: "التركيبة",
-    formulaTitle: "تركيز على البيوتين — بوضوح",
-    formulaSubtitle: "مكوّن واحد بارز — بدون ادعاءات إضافية غير مؤكدة.",
+    formulaTitle: "مكوّن واحد. بوضوح.",
+    formulaSubtitle: "البيوتين — محور هذا المنتج.",
     formulaCards: [
       {
         title: "البيوتين",
-        lines: ["المكوّن المميز في هذا المنتج", "ضمن تركيبة علكات الشعر"],
-      },
-      {
-        title: "روتين يومي",
-        lines: ["استخدام بسيط", "تجربة فاخرة من فيلورا"],
+        lines: ["المكوّن البارز في علكات الشعر.", "ضمن روتين يومي بسيط."],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين داخل العلبة",
-    notIncluded: [...sharedNotIncluded, "بدون مكونات سرية"],
-    brandQuoteTitle: "رأي العناية اليومية",
-    brandQuote:
-      "كثير من النساء في الإمارات يفضّلن روتيناً بسيطاً يُستمر عليه — فيلورا بُنيت لهذا.",
+    notIncludedTitle: "ما نعد به",
+    notIncluded: integrityLines,
+    brandQuoteTitle: "من VELORA",
+    brandQuote: "العناية ليست رفاهية — هي طريقة تحترمين بها نفسكِ.",
     statHighlightGrid: [
-      { value: "—", label: "تقييم (ضع هنا)" },
-      { value: "199", label: "د.إ / منتج" },
-      { value: "بيوتين", label: "المكوّن البارز" },
-      { value: "2", label: "علكة / يوم (حسب العلبة)" },
+      { value: "60", label: "علكة في العلبة" },
+      { value: "30", label: "يوماً من الروتين" },
+      { value: "2", label: "علكة / يوم (حسب التعليمات)" },
+      { value: "199", label: "د.إ · البداية" },
     ],
     usageTitle: "طريقة الاستخدام",
-    usageSubtitle: "أبسط روتين جربتيه",
+    usageSubtitle: "ثلاثون ثانية لكِ.",
     usageSteps: [
-      { title: "خطوة 1", text: "علكة يومياً حسب تعليمات العلبة." },
-      { title: "خطوة 2", text: "الالتزام أهم من الكمية — روتين ثابت." },
-      { title: "خطوة 3", text: "يمكن الجمع مع منتجات فيلورا الأخرى." },
-      { title: "خطوة 4", text: "دقائق فقط — بدون تعقيد." },
+      { title: "01", text: "خذي الجرعة الموصى بها." },
+      { title: "02", text: "اجعليها جزءاً من روتينك." },
+      { title: "03", text: "استمري." },
     ],
-    timelineTitle: "وش راح تشوفين مع الاستمرار؟",
-    timelineNote: "النتيجة تختلف — الاستمرار هو المفتاح.",
+    timelineTitle: "روتينكِ اليومي، بطريقتكِ.",
+    timelineNote: sharedTimelineNote,
     timelineSteps: [
-      { step: "1", title: "أول أسبوع", text: "بداية روتين واضح — عناية بسيطة كل يوم." },
-      { step: "2", title: "الأسبوع الثاني", text: "ثبات الروتين يرافق إيقاعك اليومي." },
-      { step: "3", title: "مع العروض", text: "منتجان أو المجموعة — قيمة أوضح لروتين أطول." },
-    ],
-    galleryPlaceholders: [
-      "[ضع صورة المنتج — رئيسية]",
-      "[ضع صورة المنتج — 2]",
-      "[ضع صورة المنتج — 3]",
+      { step: "1", title: "البداية", text: "خطوة صغيرة — إحساس جديد بالعناية." },
+      { step: "2", title: "الاستمرار", text: "عندما يصبح الروتين عادة." },
+      { step: "3", title: "الاكتمال", text: "روتين VELORA الكامل — شعر، بشرة، عين." },
     ],
     faq: [
-      {
-        question: "كم مرة في اليوم؟",
-        answer: "اتبعي التعليمات على العلبة — روتين بسيط وواضح.",
-      },
-      {
-        question: "هل يمكن الجمع مع منتجات فيلورا الأخرى؟",
-        answer: "نعم — البشرة، محيط العين، أو المجموعة الكاملة.",
-      },
-      {
-        question: "ما طرق الدفع؟",
-        answer: "الدفع بالبطاقة بدون رسوم إضافية، أو COD +20 د.إ.",
-      },
+      { question: "كم مرة في اليوم؟", answer: "اتبعي التعليمات على العلبة." },
+      { question: "مع منتجات VELORA الأخرى؟", answer: "نعم — صُممت لتتكامل." },
+      { question: "طرق الدفع؟", answer: "بطاقة أو عند الاستلام داخل الإمارات." },
     ],
   },
   skin: {
     ...sharedProductPageBlocks("gummy"),
     slug: "skin-gummies",
     form: "gummy",
-    seoTitle: "علكات إشراقة ونضارة البشرة | فيلورا بيوتي",
-    seoDescription:
-      "علكات بالغلوتاثيون — لمسة إشراق في روتين يومي، مع توصيل داخل الإمارات.",
-    headlineQuestion: "تجاعيدك وبشرتك فقدت نضارتها — السبب مو الكريمات",
-    subhook:
-      "هو أكسدة الخلايا ونقص مضادات الأكسدة من شمس الخليج والتكييف اليومي. علكتان يومياً بالغلوتاثيون تدعمان نضارة وإشراقة البشرة من الداخل — بدون إبر، وبدون بوتوكس.",
-    statChips: [
-      { value: "02", label: "روتين البشرة" },
-      { value: "بالغلوتاثيون", label: "المكوّن الأساسي" },
-      { value: "199", label: "د.إ / منتج" },
-      { value: "UAE", label: "توصيل الإمارات" },
-    ],
-    urgencyLine: "توصيل داخل الإمارات — الدفع بالبطاقة أو عند الاستلام",
-    hook: "بشرتك تستحق إشراقة تليق بك",
-    hookSub: "لمسة يومية فاخرة — من فيلورا بيوتي.",
-    highlightStat: {
-      value: "249",
-      label: "د.إ — عرض منتجين (بطاقة) لروتين أوضح",
-    },
-    problemImagePlaceholder: "[ضع صورة الحملة — البشرة]",
-    painEyebrow: "هل تعانين من هذا؟",
-    painTitle: "مشاكل تعرفينها — وحلول من الداخل",
-    painLead: "البشرة وروتينك",
+    seoTitle: "روتين البشرة | VELORA — علكات بالغلوتاثيون",
+    seoDescription: "علكات بالغلوتاثيون — روتين إشراق بسيط، توصيل داخل الإمارات.",
+    headlineQuestion: "امنحي بشرتكِ اللحظة التي تستحقها.",
+    subhook: "علكات يومية بالغلوتاثيون — عناية من الداخل، بخطوة واحدة أنيقة.",
+    heroMicroline: "من 199 د.إ · علبة · توصيل الإمارات",
+    lifestyleTitle: "جمالكِ لا يحتاج روتيناً معقّداً.",
+    lifestyleLine: "يحتاج لحظة تختارين فيها نفسكِ.",
+    transformationTitle: "روتين صغير.",
+    transformationPillars: ["إشراق.", "ثبات.", "لطف."],
+    finalCtaTitle: "ابدئي من نفسكِ.",
+    finalCtaLine: "اكتشفي روتين VELORA للبشرة.",
+    painEyebrow: "لحظة صدق",
+    painTitle: "الشمس، التكييف، وإيقاع لا يتوقف…",
+    painLead: "بشرتكِ تحكي قصة يومكِ — وتستحق أن تُسمع.",
     painItems: [
       {
-        problem: "«ما عندي وقت لروتين طويل»",
-        solution: "علكة يومية — سهلة وتلائم يومك.",
+        problem: "«لا وقت لعشر خطوات»",
+        solution: "علكة. روتين. انتهى.",
       },
       {
-        problem: "«بغيت تركيز على الإشراق»",
-        solution: "الغلوتاثيون — المكوّن البارز في هذا المنتج.",
+        problem: "«أريد عناية أثق بها»",
+        solution: "غلوتاثيون — محور هذا المنتج.",
       },
       {
-        problem: "«بغيت أكتمل روتيني»",
-        solution: "مع علكات الشعر وسيروم العين في عروض فيلورا.",
+        problem: "«أريد أن أكتمل»",
+        solution: "مع الشعر ومحيط العين — روتين واحد.",
       },
     ],
     formulaEyebrow: "التركيبة",
-    formulaTitle: "تركيز على الغلوتاثيون — بوضوح",
-    formulaSubtitle: "مكوّن واحد بارز — بدون ادعاءات إضافية غير مؤكدة.",
+    formulaTitle: "وضوح. لا زخرفة.",
+    formulaSubtitle: "الغلوتاثيون — في قلب هذه العلبة.",
     formulaCards: [
       {
         title: "الغلوتاثيون",
-        lines: ["المكوّن المميز في هذا المنتج", "ضمن تركيبة علكات البشرة"],
-      },
-      {
-        title: "روتين يومي",
-        lines: ["خطوة واحدة", "تجربة فاخرة من فيلورا"],
+        lines: ["المكوّن البارز في علكات البشرة.", "لروتين يومي خفيف."],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين داخل العلبة",
-    notIncluded: [...sharedNotIncluded],
-    brandQuoteTitle: "رأي العناية اليومية",
-    brandQuote: "الإشراق يبدأ بروتين تلتزمين به — علكة واحدة أسهل من عشر منتجات.",
+    notIncludedTitle: "ما نعد به",
+    notIncluded: integrityLines,
+    brandQuoteTitle: "من VELORA",
+    brandQuote: "الإشراق يبدأ حين تختارين العناية — لا حين تلاحقينها.",
     statHighlightGrid: [
-      { value: "—", label: "تقييم (ضع هنا)" },
-      { value: "199", label: "د.إ / منتج" },
-      { value: "غلوتاثيون", label: "المكوّن البارز" },
-      { value: "UAE", label: "التوصيل" },
+      { value: "60", label: "علكة في العلبة" },
+      { value: "30", label: "يوماً من الروتين" },
+      { value: "2", label: "علكة / يوم (حسب التعليمات)" },
+      { value: "199", label: "د.إ · البداية" },
     ],
     usageTitle: "طريقة الاستخدام",
-    usageSubtitle: "أبسط روتين جربتيه",
+    usageSubtitle: "اجعليها لحظتك اليومية.",
     usageSteps: [
-      { title: "خطوة 1", text: "علكة يومياً حسب التعليمات." },
-      { title: "خطوة 2", text: "ثبّتي وقت ثابت في يومك." },
-      { title: "خطوة 3", text: "كمّلي مع شعر أو محيط العين." },
-      { title: "خطوة 4", text: "دقائق فقط يومياً." },
+      { title: "01", text: "خذي الجرعة الموصى بها." },
+      { title: "02", text: "في وقت ثابت من يومكِ." },
+      { title: "03", text: "استمري." },
     ],
-    timelineTitle: "رحلة العناية مع الاستمرار",
-    timelineNote: "النتيجة تختلف — الاستمرار هو المفتاح.",
+    timelineTitle: "روتينكِ اليومي، بطريقتكِ.",
+    timelineNote: sharedTimelineNote,
     timelineSteps: [
-      { step: "1", title: "البداية", text: "روتين بسيط يومياً." },
-      { step: "2", title: "الثبات", text: "عناية تلائم إيقاعك." },
-      { step: "3", title: "العروض", text: "2 أو 3 منتجات — أسعار أوضح." },
-    ],
-    galleryPlaceholders: [
-      "[ضع صورة المنتج — رئيسية]",
-      "[ضع صورة المنتج — 2]",
-      "[ضع صورة المنتج — 3]",
+      { step: "1", title: "البداية", text: "لحظة لكِ — كل يوم." },
+      { step: "2", title: "الاستمرار", text: "عندما يصبح الروتين طبيعياً." },
+      { step: "3", title: "الاكتمال", text: "ثلاث عنايات — روتين VELORA." },
     ],
     faq: [
-      {
-        question: "هل تناسب كل أنواع البشرة؟",
-        answer: "اختاري ما يناسب احتياجك — للحالات الخاصة استشيري مختصاً.",
-      },
-      {
-        question: "هل يمكن طلب أكثر من منتج؟",
-        answer: "نعم — عروض 249 و 339 د.إ للمنتجين أو الثلاثة.",
-      },
-      {
-        question: "الدفع بالبطاقة؟",
-        answer: "نعم — بدون رسوم إضافية.",
-      },
+      { question: "لجميع أنواع البشرة؟", answer: "اتبعي التعليمات. للحالات الخاصة استشيري مختصاً." },
+      { question: "عروض الروتين؟", answer: "249 د.إ لمنتجين · 339 د.إ لثلاثة (بطاقة)." },
+      { question: "الدفع؟", answer: "بطاقة أو عند الاستلام." },
     ],
   },
   eye: {
     ...sharedProductPageBlocks("serum"),
     slug: "eye-serum",
     form: "serum",
-    seoTitle: "سيروم العناية بمحيط العين | فيلورا بيوتي",
-    seoDescription:
-      "سيروم بفيتامين E — عناية مركّزة بمحيط العين، مع توصيل داخل الإمارات.",
-    headlineQuestion: "الهالات والتعب حول عينيك — الحل مو المكياج المؤقت",
-    subhook:
-      "هو إجهاد البشرة الرقيقة ونقص الترطيب العميق ومظهر الإرهاق. قطرات يومية بسيروم فيتامين E المركز تنعش محيط العين وتمنحه مظهراً مستريحاً وراقياً — خطوة واحدة فاخرة.",
-    statChips: [
-      { value: "03", label: "محيط العين" },
-      { value: "بفيتامين E", label: "المكوّن الأساسي" },
-      { value: "199", label: "د.إ / منتج" },
-      { value: "UAE", label: "توصيل الإمارات" },
-    ],
-    urgencyLine: "توصيل داخل الإمارات — الدفع بالبطاقة أو عند الاستلام",
-    hook: "محيط العين يستحق عناية مركّزة",
-    hookSub: "سيروم فيلورا — يكمل علكات الشعر والبشرة.",
-    highlightStat: {
-      value: "339",
-      label: "د.إ — المجموعة الكاملة (3 عنايات)",
-    },
-    problemImagePlaceholder: "[ضع صورة الحملة — السيروم]",
-    painEyebrow: "هل تعانين من هذا؟",
-    painTitle: "مشاكل تعرفينها — وحلول من الداخل",
-    painLead: "محيط العين",
+    seoTitle: "محيط العين | VELORA — سيروم بفيتامين E",
+    seoDescription: "سيروم محيط العين بفيتامين E — خطوة مركّزة في روتينكِ.",
+    headlineQuestion: "لأن التفاصيل الصغيرة تصنع الفرق.",
+    subhook: "سيروم بفيتامين E — لطفٌ مركّز حول العين، في روتينكِ اليومي.",
+    heroMicroline: "من 199 د.إ · عبوة · توصيل الإمارات",
+    lifestyleTitle: "محيط العين يستحق هدوءاً.",
+    lifestyleLine: "خطوة واحدة — قبل أن ينام يومكِ.",
+    transformationTitle: "عناية دقيقة.",
+    transformationPillars: ["لطف.", "تركيز.", "استمرار."],
+    finalCtaTitle: "ابدئي من نفسكِ.",
+    finalCtaLine: "اكتشفي روتين VELORA لمحيط العين.",
+    painEyebrow: "لحظة صدق",
+    painTitle: "الشاشات، السهر، والتفاصيل التي لا تُخفى…",
+    painLead: "محيط العين أول ما يحكي عن تعبكِ — ويستحق عناية لطيفة.",
     painItems: [
       {
-        problem: "«بغيت خطوة مركّزة للعين»",
-        solution: "سيروم بفيتامين E — خطوة واحدة.",
+        problem: "«أريد خطوة للعين — لا عشر كريمات»",
+        solution: "سيروم واحد. فيتامين E. VELORA.",
       },
       {
-        problem: "«ما بغيت كريمات ثقيلة»",
-        solution: "تركيبة سيروم خفيفة ضمن روتين فيلورا.",
+        problem: "«بشرة رقيقة تحتاج لطفاً»",
+        solution: "تركيبة سيروم — خفيفة ومركّزة.",
       },
       {
-        problem: "«بغيت روتين متكامل»",
-        solution: "مع علكات الشعر والبشرة أو المجموعة الكاملة.",
+        problem: "«أكمل روتيني»",
+        solution: "مع علكات الشعر والبشرة — روتين متكامل.",
       },
     ],
     formulaEyebrow: "التركيبة",
-    formulaTitle: "تركيز على فيتامين E — بوضوح",
-    formulaSubtitle: "مكوّن واحد بارز — بدون ادعاءات إضافية غير مؤكدة.",
+    formulaTitle: "فيتامين E. بوضوح.",
+    formulaSubtitle: "محور سيروم محيط العين.",
     formulaCards: [
       {
         title: "فيتامين E",
-        lines: ["المكوّن المميز في هذا المنتج", "ضمن تركيبة سيروم محيط العين"],
-      },
-      {
-        title: "سيروم",
-        lines: ["استخدام موضّع", "تكامل مع روتين فيلورا"],
+        lines: ["المكوّن البارز في هذا السيروم.", "للاستخدام الموضّع حول العين."],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين داخل العلبة",
-    notIncluded: [...sharedNotIncluded],
-    brandQuoteTitle: "رأي العناية المركّزة",
-    brandQuote: "محيط العين يستحق لمسة خفيفة — السيروم يناسب الروتين العصري في الإمارات.",
+    notIncludedTitle: "ما نعد به",
+    notIncluded: integrityLines,
+    brandQuoteTitle: "من VELORA",
+    brandQuote: "التفاصيل الصغيرة — حيث تبدأ العناية الحقيقية.",
     statHighlightGrid: [
-      { value: "—", label: "تقييم (ضع هنا)" },
-      { value: "199", label: "د.إ / منتج" },
+      { value: "30", label: "مل · العبوة" },
+      { value: "1", label: "خطوة في روتينك" },
       { value: "E", label: "فيتامين E" },
-      { value: "سيروم", label: "نوع المنتج" },
+      { value: "199", label: "د.إ · البداية" },
     ],
     usageTitle: "طريقة الاستخدام",
-    usageSubtitle: "أبسط استخدام للسيروم",
+    usageSubtitle: "لحظة هادئة.",
     usageSteps: [
-      { title: "خطوة 1", text: "كمية صغيرة حول محيط العين." },
-      { title: "خطوة 2", text: "طبّقي حسب تعليمات العبوة." },
-      { title: "خطوة 3", text: "صباحاً أو مساءً — ثبّتي روتينك." },
-      { title: "خطوة 4", text: "تجنّبي ملامسة العين مباشرة." },
+      { title: "01", text: "كمية صغيرة حول محيط العين." },
+      { title: "02", text: "طبّقي حسب تعليمات العبوة." },
+      { title: "03", text: "استمري — بلطف." },
     ],
-    timelineTitle: "كيف يخدمك السيروم في روتينك؟",
-    timelineNote: "النتيجة تختلف — الاستمرار هو المفتاح.",
+    timelineTitle: "روتينكِ اليومي، بطريقتكِ.",
+    timelineNote: sharedTimelineNote,
     timelineSteps: [
-      { step: "1", title: "الخطوة الأولى", text: "طبّقي حسب التعليمات." },
-      { step: "2", title: "مع العناية اليومية", text: "بجانب علكاتك إن رغبتِ." },
-      { step: "3", title: "العروض", text: "جمعي 2 أو 3 منتجات بسعر أوضح." },
-    ],
-    galleryPlaceholders: [
-      "[ضع صورة السيروم — رئيسية]",
-      "[ضع صورة السيروم — 2]",
-      "[ضع صورة السيروم — 3]",
+      { step: "1", title: "البداية", text: "خطوة مركّزة — دقيقة واحدة." },
+      { step: "2", title: "الاستمرار", text: "عندما تصبح العادة." },
+      { step: "3", title: "الاكتمال", text: "روتين VELORA — ثلاث عنايات." },
     ],
     faq: [
-      {
-        question: "هل أستخدمه وحدي؟",
-        answer: "نعم، أو ضمن المجموعة مع الشعر والبشرة.",
-      },
-      {
-        question: "رسوم COD؟",
-        answer: "+20 د.إ على الطلب.",
-      },
-      {
-        question: "الدفع بالبطاقة؟",
-        answer: "متاح — بدون رسوم إضافية.",
-      },
+      { question: "وحدها أم مع العلكات؟", answer: "تكمل روتين الشعر والبشرة." },
+      { question: "COD؟", answer: "+20 د.إ على الطلب." },
+      { question: "البطاقة؟", answer: "بدون رسوم إضافية." },
     ],
   },
 };

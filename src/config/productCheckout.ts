@@ -2,8 +2,7 @@ import { uaeDeliveryCities } from "@/config/productPageShared";
 
 export const productCheckoutCopy = {
   sectionTitle: "إتمام طلبك",
-  sectionLead:
-    "خطوة أخيرة — روتينك على بعد دقائق. فريق فيلورا يتصل بك خلال ساعات لتأكيد العنوان والكمية.",
+  sectionLead: "خطوة أخيرة — نؤكد معكِ التفاصيل بكل وضوح.",
   formTitle: "بيانات التوصيل",
   fields: {
     name: "الاسم الكامل",
