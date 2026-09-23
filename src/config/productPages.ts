@@ -73,7 +73,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     },
     problemImagePlaceholder: "[ضع صورة الحملة — الشعر]",
     painEyebrow: "هل تعانين من هذا؟",
-    painTitle: "مشاكل تعرفينها — وحلول بسيطة",
+    painTitle: "مشاكل تعرفينها — وحلول من الداخل",
     painLead: "الشعر وروتينك اليومي",
     painItems: [
       {
@@ -102,7 +102,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
         lines: ["استخدام بسيط", "تجربة فاخرة من فيلورا"],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين داخل التجربة",
+    notIncludedTitle: "وش ما راح تلقين داخل العلبة",
     notIncluded: [...sharedNotIncluded, "بدون مكونات سرية"],
     brandQuoteTitle: "رأي العناية اليومية",
     brandQuote:
@@ -173,7 +173,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     },
     problemImagePlaceholder: "[ضع صورة الحملة — البشرة]",
     painEyebrow: "هل تعانين من هذا؟",
-    painTitle: "مشاكل تعرفينها — وحلول بسيطة",
+    painTitle: "مشاكل تعرفينها — وحلول من الداخل",
     painLead: "البشرة وروتينك",
     painItems: [
       {
@@ -202,7 +202,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
         lines: ["خطوة واحدة", "تجربة فاخرة من فيلورا"],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين داخل التجربة",
+    notIncludedTitle: "وش ما راح تلقين داخل العلبة",
     notIncluded: [...sharedNotIncluded],
     brandQuoteTitle: "رأي العناية اليومية",
     brandQuote: "الإشراق يبدأ بروتين تلتزمين به — علكة واحدة أسهل من عشر منتجات.",
@@ -272,7 +272,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     },
     problemImagePlaceholder: "[ضع صورة الحملة — السيروم]",
     painEyebrow: "هل تعانين من هذا؟",
-    painTitle: "مشاكل تعرفينها — وحلول بسيطة",
+    painTitle: "مشاكل تعرفينها — وحلول من الداخل",
     painLead: "محيط العين",
     painItems: [
       {
@@ -301,7 +301,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
         lines: ["استخدام موضّع", "تكامل مع روتين فيلورا"],
       },
     ],
-    notIncludedTitle: "وش ما راح تلقين داخل التجربة",
+    notIncludedTitle: "وش ما راح تلقين داخل العلبة",
     notIncluded: [...sharedNotIncluded],
     brandQuoteTitle: "رأي العناية المركّزة",
     brandQuote: "محيط العين يستحق لمسة خفيفة — السيروم يناسب الروتين العصري في الإمارات.",
