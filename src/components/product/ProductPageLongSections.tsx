@@ -11,6 +11,7 @@ import {
   IconTruck,
 } from "@/components/product/ProductFunnelIcons";
 import { ProductMarketingGallery } from "@/components/product/ProductMarketingGallery";
+import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
 import { uaeDeliveryCities } from "@/config/productPageShared";
 import type { ProductPageConfig } from "@/config/productPages";
@@ -50,25 +51,9 @@ export function ProductPageLongSections({
   marketingSpotlight?: string;
   productName: string;
 }) {
-  const survey = page.internalSurvey;
-
   return (
     <>
-      {survey ? (
-        <section className="mx-auto max-w-lg px-4 py-6 sm:max-w-3xl sm:px-6">
-          <div className="overflow-hidden rounded-[1.75rem] bg-[#2c1318] px-4 py-5 text-velora-cream sm:px-6 sm:py-6">
-            <div className="flex items-stretch gap-3 sm:gap-4">
-              <div className="flex h-16 w-[4.25rem] shrink-0 items-center justify-center rounded-xl bg-velora-champagne sm:h-[4.75rem] sm:w-[5rem]">
-                <span className="text-[1.65rem] font-black tabular-nums text-[#2c1318]">{survey.value}</span>
-              </div>
-              <div className="min-w-0 flex-1 text-right">
-                <p className="text-[13px] font-extrabold leading-[1.55] sm:text-[15px]">{survey.headline}</p>
-                <p className="mt-2 text-[10px] text-velora-cream/50 sm:text-[11px]">{survey.source}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <ProductVideoStoriesStrip />
 
       <section className="bg-velora-cream py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">
