@@ -18,8 +18,8 @@ function getOfferDetails(form: ProductForm, qty: BundleQuantity) {
     return {
       title: isSerum ? "عبوة واحدة" : "علبة واحدة",
       subtitle: isSerum ? "30 مل • شهر كامل" : "60 علكة • شهر كامل",
-      badge: "✨ نتيجة من العلبة الأولى",
-      badgeColor: "bg-velora-cream-dark text-velora-burgundy/80 border border-velora-burgundy/15",
+      badge: null,
+      badgeColor: "",
       price: 199,
       savings: null,
     };
@@ -61,6 +61,7 @@ type Props = {
 };
 
 export function ProductPurchasePanel({ form, onChange }: Props) {
+  const isSerum = form === "serum";
   const [quantity, setQuantity] = useState<BundleQuantity>(2);
   const [method, setMethod] = useState<PaymentMethod>("cod");
 
@@ -76,8 +77,11 @@ export function ProductPurchasePanel({ form, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
+        <p className="text-[11px] font-bold text-velora-burgundy/55 sm:text-xs">
+          نتيجة من {isSerum ? "العبوة" : "العلبة"} الأولى
+        </p>
       </div>
 
       {/* Offer Cards Stack */}

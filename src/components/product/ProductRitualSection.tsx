@@ -1,34 +1,8 @@
 "use client";
 
 import { ProductPageImage } from "@/components/product/ProductPageImage";
+import { productProblemOverlayById } from "@/config/productRitualSection";
 import type { ProductId } from "@/config/products";
-
-type ProblemHeroData = {
-  number: string;
-  headline: string;
-  source: string;
-};
-
-const problemHeroByProduct: Record<ProductId, ProblemHeroData> = {
-  hair: {
-    number: "01",
-    headline:
-      "متوسط ظهور أول علامات تساقط وضعف الشعر عند نساء الخليج بسبب حرارة الجو، التكييف، ونقص التغذية الأساسية",
-    source: "المصدر: أبحاث إقليمية للعناية، 2024",
-  },
-  skin: {
-    number: "02",
-    headline:
-      "متوسط ظهور بهتان وشحوب البشرة عند نساء الخليج بسبب أشعة الشمس، الجفاف، وأكسدة الكولاجين اليومية",
-    source: "المصدر: أبحاث جلدية إقليمية، 2024",
-  },
-  eye: {
-    number: "03",
-    headline:
-      "متوسط ظهور الهالات ومظهر الإجهاد حول العينين بسبب الشاشات، جفاف التكييف، والسهر المتكرر",
-    source: "المصدر: دراسات العناية اليومية، 2024",
-  },
-};
 
 export function ProductRitualSection({
   productId,
@@ -37,15 +11,13 @@ export function ProductRitualSection({
   productId: ProductId;
   imageSrc: string;
 }) {
-  const data = problemHeroByProduct[productId];
+  const data = productProblemOverlayById[productId];
   if (!data) return null;
 
   return (
-    <section className="bg-white py-8 sm:py-12">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6">
-        {/* Nama-style Problem Hero Card with Bottom Overlay Bar */}
-        <div className="relative overflow-hidden rounded-[2.5rem] border border-velora-burgundy/10 bg-white shadow-xl">
-          {/* Main Story Photo */}
+    <section className="bg-velora-cream py-6 sm:py-10">
+      <div className="mx-auto max-w-lg px-4 sm:max-w-4xl sm:px-6 lg:max-w-6xl">
+        <div className="overflow-hidden rounded-[2rem] border border-velora-burgundy/10 bg-white shadow-[0_12px_40px_rgba(58,24,32,0.1)] sm:rounded-[2.5rem]">
           <div className="relative w-full overflow-hidden bg-velora-cream-dark">
             <ProductPageImage
               src={imageSrc}
@@ -54,24 +26,21 @@ export function ProductRitualSection({
             />
           </div>
 
-          {/* Bottom Overlay Bar (dark burgundy with gold stat badge) */}
-          <div className="bg-[#2c1318] p-5 sm:p-6 text-velora-cream">
-            <div className="flex items-center justify-between gap-4">
-              {/* Problem text + source */}
+          {/* Nama-style bottom bar: badge على اليمين، النص على اليسار (RTL) */}
+          <div className="bg-[#2c1318] px-4 py-4 sm:px-6 sm:py-5">
+            <div className="flex items-stretch gap-3 sm:gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-velora-champagne sm:h-[4.5rem] sm:w-[4.5rem] sm:rounded-2xl">
+                <span className="text-2xl font-black tabular-nums text-[#2c1318] sm:text-3xl">
+                  {data.badge}
+                </span>
+              </div>
               <div className="min-w-0 flex-1 text-right">
-                <p className="text-sm font-extrabold leading-relaxed text-white sm:text-base">
+                <p className="text-[13px] font-extrabold leading-[1.55] text-white sm:text-[15px]">
                   {data.headline}
                 </p>
-                <p className="mt-1 text-[11px] text-velora-champagne-light/75 sm:text-xs">
-                  {data.source}
+                <p className="mt-1.5 text-[11px] leading-relaxed text-velora-cream/70 sm:text-xs">
+                  {data.subline}
                 </p>
-              </div>
-
-              {/* Number Badge (Olive/Gold block matching nama screenshot) */}
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-velora-champagne/90 text-center shadow-md sm:h-20 sm:w-20">
-                <span className="text-2xl font-black text-[#2c1318] sm:text-3xl">
-                  {data.number}
-                </span>
               </div>
             </div>
           </div>
