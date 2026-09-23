@@ -43,3 +43,23 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Ensure GHCR package is public (anonymous Easypanel pull)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method PATCH \
+            "/users/${{ github.repository_owner }}/packages/container/velorabeauty.frontend" \
+            -f visibility=public
+
+      - name: Trigger Easypanel redeploy (optional)
+        env:
+          WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "EASYPANEL_DEPLOY_WEBHOOK not set — skip auto-deploy (see docs/EASYPANEL-SETUP-AR.md)"
+            exit 0
+          fi
+          curl -fsS -X POST "$WEBHOOK"
+          echo "Easypanel deploy webhook triggered"

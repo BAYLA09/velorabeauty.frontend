@@ -1,0 +1,12 @@
+# Optional: Easypanel → New Service → Compose → paste or connect repo.
+# Pulls the prebuilt image (no Git clone / no build on the server).
+services:
+  velora-web:
+    image: ghcr.io/bayla09/velorabeauty.frontend:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+    expose:
+      - "3000"
