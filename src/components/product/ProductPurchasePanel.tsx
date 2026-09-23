@@ -74,6 +74,19 @@ function OfferProductStack({
   const width = count === 1 ? "3.5rem" : count === 2 ? "4.75rem" : "5.75rem";
   const showImage = Boolean(src);
 
+  if (count === 1 && showImage && src) {
+    return (
+      <div className="relative h-[4.25rem] w-[3.25rem] shrink-0 sm:h-[4.75rem] sm:w-[3.5rem]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={alt}
+          className="pointer-events-none absolute bottom-0 left-1/2 h-[4.15rem] w-auto max-w-none -translate-x-1/2 object-contain object-bottom sm:h-[4.65rem]"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className="relative h-[4.25rem] shrink-0 sm:h-[4.75rem]"
@@ -83,28 +96,14 @@ function OfferProductStack({
       {Array.from({ length: count }, (_, i) => (
         <div
           key={i}
-          className={
-            showImage
-              ? "absolute bottom-0 flex items-end justify-center rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-velora-burgundy/10"
-              : "absolute bottom-0"
-          }
+          className="absolute bottom-0"
           style={{
             right: i * 16,
             zIndex: count - i,
             width: "3.25rem",
             height: "3.75rem",
           }}
-        >
-          {showImage && src && (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={src}
-              alt={i === 0 ? alt : ""}
-              aria-hidden={i > 0}
-              className="max-h-full max-w-full object-contain"
-            />
-          )}
-        </div>
+        />
       ))}
     </div>
   );
