@@ -24,11 +24,11 @@ export function RelatedProducts({
               href={getProductPath(p.slug)}
               className="group flex gap-4 rounded-3xl border border-velora-burgundy/8 bg-white p-4 shadow-sm transition hover:border-velora-champagne/50"
             >
-              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-velora-burgundy/10 bg-white">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-velora-burgundy/10 bg-white p-1">
                 <ProductPageImage
                   src={p.pageImage.src}
                   alt={p.name}
-                  className="h-full w-full object-contain"
+                  className="max-h-full max-w-full object-contain"
                 />
               </div>
               <div className="min-w-0 text-right">
