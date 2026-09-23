@@ -1,15 +1,18 @@
 import { ProductFaq } from "@/components/product/ProductFaq";
+import { ProductRitualSection } from "@/components/product/ProductRitualSection";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
-import { ProductPageImage } from "@/components/product/ProductPageImage";
 import { uaeDeliveryCities } from "@/config/productPageShared";
 import type { ProductPageConfig } from "@/config/productPages";
+import type { ProductWithPage } from "@/lib/productCatalog";
 
 export function ProductPageLongSections({
   page,
-  productImageSrc,
+  allProducts,
+  currentSlug,
 }: {
   page: ProductPageConfig;
-  productImageSrc: string;
+  allProducts: ProductWithPage[];
+  currentSlug: string;
 }) {
   return (
     <>
@@ -26,27 +29,7 @@ export function ProductPageLongSections({
         </div>
       </section>
 
-      <section className="bg-white py-14 sm:py-16 lg:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-5">
-              <div className="inline-block max-w-full overflow-hidden rounded-[2rem] border-8 border-white bg-white shadow-2xl">
-                <ProductPageImage src={productImageSrc} alt={page.hook} />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center gap-6 lg:col-span-7">
-              <p className="text-base leading-relaxed text-velora-burgundy/70 sm:text-lg">{page.hookSub}</p>
-              <div className="rounded-3xl bg-velora-burgundy p-6 text-velora-cream shadow-xl sm:p-8">
-                <p className="text-4xl font-extrabold tabular-nums text-velora-champagne sm:text-5xl">
-                  {page.highlightStat.value}
-                </p>
-                <p className="mt-4 text-sm leading-relaxed sm:text-base">{page.highlightStat.label}</p>
-                <p className="mt-3 text-[11px] text-velora-cream/60">VELORA BEAUTY — الإمارات</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ProductRitualSection products={allProducts} currentSlug={currentSlug} />
 
       <section className="bg-velora-cream py-14 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
