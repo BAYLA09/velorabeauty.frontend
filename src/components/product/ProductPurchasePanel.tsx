@@ -63,37 +63,40 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity): OfferUi {
 }
 
 function OfferProductStack({
-  src: _upsellImageSrc,
-  alt: _upsellImageAlt,
+  src,
+  alt,
   count,
 }: {
-  /** Wire URL here when upsell assets are ready */
   src: string;
   alt: string;
   count: number;
 }) {
-  void _upsellImageSrc;
-  void _upsellImageAlt;
-
   const width = count === 1 ? "3.5rem" : count === 2 ? "4.75rem" : "5.75rem";
 
   return (
     <div
       className="relative h-[4.25rem] shrink-0 sm:h-[4.75rem]"
       style={{ width }}
-      aria-hidden
     >
       {Array.from({ length: count }, (_, i) => (
         <div
           key={i}
-          className="absolute bottom-0"
+          className="absolute bottom-0 flex items-end justify-center rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-velora-burgundy/10"
           style={{
             right: i * 16,
             zIndex: count - i,
             width: "3.25rem",
             height: "3.75rem",
           }}
-        />
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={i === 0 ? alt : ""}
+            aria-hidden={i > 0}
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
       ))}
     </div>
   );
