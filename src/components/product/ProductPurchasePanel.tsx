@@ -23,17 +23,21 @@ type OfferUi = {
 };
 
 function getOfferUi(form: ProductForm, qty: BundleQuantity): OfferUi {
-  const unit = form === "serum" ? "عبوة" : "علبة";
   const compareAt = qty > 1 ? singleProductPrice * qty : null;
   const cardPrice = qty === 1 ? 199 : qty === 2 ? 249 : 339;
-  const savingsAmount =
-    compareAt !== null ? compareAt - cardPrice : null;
+  const savingsAmount = compareAt !== null ? compareAt - cardPrice : null;
 
   if (qty === 1) {
     return {
       title: "منتج واحد",
-      subtitle: `بداية روتينك — ${unit} واحدة`,
-      footnote: `ابدئي روتينك ب${unit} واحدة`,
+      subtitle:
+        form === "serum"
+          ? "بداية روتينك — عبوة واحدة"
+          : "بداية روتينك — منتج واحد",
+      footnote:
+        form === "serum"
+          ? "ابدئي روتينك بعبوة واحدة"
+          : "ابدئي روتينك بمنتج واحد",
       badge: null,
       compareAt: null,
       price: cardPrice,
@@ -44,7 +48,7 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity): OfferUi {
     return {
       title: "منتجان",
       subtitle: "نتيجة أفضل وقيمة أوضح",
-      footnote: "لنعم جمالك أكثر",
+      footnote: "لناعم جمالك أكثر",
       badge: { text: "الأكثر إختياراً", variant: "popular" },
       compareAt,
       price: cardPrice,
@@ -62,34 +66,137 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity): OfferUi {
   };
 }
 
-function OfferProductStack({ src, alt, count }: { src: string; alt: string; count: number }) {
-  const width = count === 1 ? "3.5rem" : count === 2 ? "4.75rem" : "5.75rem";
+function OfferProductStack({
+  src: _upsellImageSrc,
+  alt: _upsellImageAlt,
+  count,
+}: {
+  /** Reserved — wire upsell card image URL here when assets are ready */
+  src: string;
+  alt: string;
+  count: number;
+}) {
+  void _upsellImageSrc;
+  void _upsellImageAlt;
+
+  if (count === 1) {
+    return (
+      <div
+        className="relative flex h-[6.25rem] w-[5rem] shrink-0 items-end justify-center sm:h-[6.75rem] sm:w-[5.5rem]"
+        aria-hidden
+      />
+    );
+  }
+
+  const width = count === 2 ? "6.75rem" : "7.75rem";
+  const bottleW = count === 2 ? "3.85rem" : "3.55rem";
+  const bottleH = count === 2 ? "5.35rem" : "5rem";
 
   return (
     <div
-      className="relative h-[4.25rem] shrink-0 sm:h-[4.75rem]"
-      style={{ width }}
+      className="relative shrink-0"
+      style={{ width, height: "6.5rem" }}
+      aria-hidden
     >
-      {Array.from({ length: count }, (_, i) => (
-        <div
-          key={i}
-          className="absolute bottom-0 flex items-end justify-center rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-velora-burgundy/10"
-          style={{
-            right: i * 16,
-            zIndex: count - i,
-            width: "3.25rem",
-            height: "3.75rem",
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={src}
-            alt={i === 0 ? alt : ""}
-            aria-hidden={i > 0}
-            className="max-h-full max-w-full object-contain"
+      {Array.from({ length: count }, (_, i) => {
+        const offset =
+          count === 2
+            ? i * 26
+            : i === 0
+              ? 0
+              : i === 1
+                ? 24
+                : 48;
+        const bottom = count === 3 && i === 2 ? 0 : count === 3 && i === 1 ? 6 : 0;
+
+        return (
+          <div
+            key={i}
+            className="absolute bottom-0 flex items-end justify-center"
+            style={{
+              right: offset,
+              zIndex: count - i,
+              width: bottleW,
+              height: bottleH,
+              bottom,
+            }}
           />
-        </div>
-      ))}
+        );
+      })}
+    </div>
+  );
+}
+
+function UpsellTrustStrip() {
+  const items = [
+    {
+      label: "توصيل سريع في جميع أنحاء الإمارات",
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+        />
+      ),
+    },
+    {
+      label: "دفع آمن ومضمون",
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+        />
+      ),
+    },
+    {
+      label: "إرجاع سهل خلال 14 يوم",
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        />
+      ),
+    },
+    {
+      label: "دعم عملاء مميز دائماً معك",
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+        />
+      ),
+    },
+  ];
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-velora-burgundy/10 bg-white/85 shadow-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-4 sm:divide-x sm:divide-velora-burgundy/10">
+        {items.map((item) => (
+          <div
+            key={item.label}
+            className="flex items-center gap-2 border-b border-velora-burgundy/8 px-3 py-3 last:border-b-0 sm:border-b-0 sm:px-3 sm:py-3.5 odd:border-s sm:odd:border-s-0"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#d4b896]/55 bg-[#faf6ef] text-[#9a7348]">
+              <svg
+                className="h-[1.15rem] w-[1.15rem]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.75}
+                aria-hidden
+              >
+                {item.icon}
+              </svg>
+            </div>
+            <p className="min-w-0 text-[9px] font-bold leading-snug text-velora-burgundy/72 sm:text-[10px]">
+              {item.label}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -108,7 +215,12 @@ type Props = {
   onChange?: (state: PurchaseState) => void;
 };
 
-export function ProductPurchasePanel({ form, productImageSrc, productName, onChange }: Props) {
+export function ProductPurchasePanel({
+  form,
+  productImageSrc,
+  productName,
+  onChange,
+}: Props) {
   const [quantity, setQuantity] = useState<BundleQuantity>(2);
   const [method, setMethod] = useState<PaymentMethod>("card");
 
@@ -124,11 +236,10 @@ export function ProductPurchasePanel({ form, productImageSrc, productName, onCha
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
-      </div>
+      <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
 
-      <div className="space-y-4">
+      <div className="space-y-3.5 rounded-[1.75rem] bg-gradient-to-b from-[#faf3f4] via-[#f8eef0] to-[#f5ebe8] p-3.5 sm:space-y-4 sm:p-4">
+      <div className="space-y-3.5 sm:space-y-4">
         {quantities.map((qty) => {
           const active = quantity === qty;
           const offer = getOfferUi(form, qty);
@@ -138,15 +249,17 @@ export function ProductPurchasePanel({ form, productImageSrc, productName, onCha
               key={qty}
               type="button"
               onClick={() => setQuantity(qty)}
-              className={`relative w-full cursor-pointer rounded-2xl border-2 px-3 py-3.5 text-right transition-all duration-200 sm:px-4 sm:py-4 ${
+              className={`relative w-full min-h-[6.75rem] cursor-pointer rounded-[1.35rem] px-3 py-4 text-right transition-all duration-200 sm:min-h-[7.25rem] sm:px-5 sm:py-5 ${
+                offer.badge ? "mt-3" : ""
+              } ${
                 active
-                  ? "border-velora-burgundy bg-[#fdf2f4] shadow-md"
-                  : "border-velora-burgundy/12 bg-white hover:border-velora-burgundy/30"
+                  ? "border-[3px] border-velora-burgundy bg-[#fdf2f4] shadow-[0_8px_24px_rgba(58,24,32,0.08)]"
+                  : "border-2 border-[#e8dfe1] bg-white hover:border-velora-burgundy/25"
               }`}
             >
               {offer.badge && (
                 <span
-                  className={`absolute -top-3 left-3 flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-extrabold shadow-sm sm:text-[11px] ${
+                  className={`absolute -top-3.5 left-4 flex items-center gap-1 rounded-lg px-3 py-1 text-[10px] font-extrabold shadow-md sm:text-[11px] ${
                     offer.badge.variant === "popular"
                       ? "bg-velora-burgundy text-velora-cream"
                       : "bg-[#e8d7b8] text-velora-burgundy-dark"
@@ -158,10 +271,15 @@ export function ProductPurchasePanel({ form, productImageSrc, productName, onCha
                 </span>
               )}
 
-              <div className="flex items-center gap-2 sm:gap-3">
-                {/* يمين: radio + صور */}
+              <div
+                className="grid items-center gap-x-2 gap-y-2 sm:gap-x-3"
+                style={{
+                  gridTemplateColumns:
+                    "auto auto minmax(0, 1fr) minmax(6.25rem, 7.25rem)",
+                }}
+              >
                 <span
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 ${
                     active
                       ? "border-velora-burgundy bg-white"
                       : "border-velora-burgundy/25 bg-white"
@@ -169,39 +287,41 @@ export function ProductPurchasePanel({ form, productImageSrc, productName, onCha
                   aria-hidden
                 >
                   {active && (
-                    <span className="h-3 w-3 rounded-full bg-velora-burgundy" />
+                    <span className="h-3.5 w-3.5 rounded-full bg-velora-burgundy" />
                   )}
                 </span>
 
-                <OfferProductStack src={productImageSrc} alt={productName} count={qty} />
+                <OfferProductStack
+                  src={productImageSrc}
+                  alt={productName}
+                  count={qty}
+                />
 
-                {/* وسط: عنوان */}
-                <div className="min-w-0 flex-1">
-                  <p className="text-base font-extrabold text-velora-burgundy-dark sm:text-lg">
+                <div className="min-w-0 px-0.5 text-center sm:px-1">
+                  <p className="text-base font-extrabold text-velora-burgundy-dark sm:text-[1.05rem]">
                     {offer.title}
                   </p>
-                  <p className="mt-0.5 text-[11px] font-semibold leading-snug text-velora-burgundy/60 sm:text-xs">
+                  <p className="mt-0.5 text-[11px] font-semibold leading-snug text-velora-burgundy/55 sm:text-xs">
                     {offer.subtitle}
                   </p>
                 </div>
 
-                {/* يسار: أسعار */}
-                <div className="shrink-0 text-left">
+                <div className="min-w-0 text-left">
                   {offer.compareAt !== null && (
                     <p className="text-xs font-bold tabular-nums text-velora-burgundy/35 line-through sm:text-sm">
                       {offer.compareAt} د.إ
                     </p>
                   )}
-                  <p className="text-xl font-black tabular-nums leading-none text-velora-burgundy-dark sm:text-2xl">
+                  <p className="text-[1.35rem] font-black tabular-nums leading-none text-velora-burgundy-dark sm:text-[1.65rem]">
                     {offer.price} د.إ
                   </p>
                   {offer.savingsAmount !== null && offer.savingsAmount > 0 && (
-                    <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-[#f5e6d3] px-2 py-0.5 text-[10px] font-extrabold text-velora-burgundy-dark sm:text-[11px]">
+                    <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-[#f5e6d3] px-2.5 py-0.5 text-[10px] font-extrabold text-velora-burgundy-dark sm:text-[11px]">
                       <span aria-hidden>🏷️</span>
                       وفّري {offer.savingsAmount} د.إ
                     </span>
                   )}
-                  <p className="mt-1 max-w-[7rem] text-[9px] font-semibold leading-tight text-velora-burgundy/50 sm:text-[10px]">
+                  <p className="mt-1.5 text-[9px] font-semibold leading-tight text-velora-burgundy/50 sm:text-[10px]">
                     {offer.footnote}
                   </p>
                 </div>
@@ -209,6 +329,9 @@ export function ProductPurchasePanel({ form, productImageSrc, productName, onCha
             </button>
           );
         })}
+      </div>
+
+      <UpsellTrustStrip />
       </div>
 
       <div className="pt-1">
@@ -231,7 +354,7 @@ export function ProductPurchasePanel({ form, productImageSrc, productName, onCha
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-1 pt-2 text-[10px] sm:text-[11px]">
+      <div className="flex flex-wrap items-center justify-center gap-1 pt-1 text-[10px] sm:text-[11px]">
         <button
           type="button"
           onClick={() => setMethod("card")}
@@ -255,7 +378,6 @@ export function ProductPurchasePanel({ form, productImageSrc, productName, onCha
           COD (+20 د.إ)
         </button>
       </div>
-
     </div>
   );
 }

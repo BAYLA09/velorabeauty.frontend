@@ -12,7 +12,6 @@ import {
 } from "@/components/product/ProductPurchasePanel";
 import { ProductRitualSection } from "@/components/product/ProductRitualSection";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
-import { ProductTrustBar } from "@/components/product/ProductTrustBar";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductWithPage } from "@/lib/productCatalog";
@@ -80,8 +79,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 productName={product.name}
                 onChange={setPurchase}
               />
-
-              <ProductTrustBar compact />
             </div>
           </div>
         </section>
