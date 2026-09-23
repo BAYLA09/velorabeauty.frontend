@@ -64,7 +64,7 @@ export function ProductCheckoutSection({
   return (
     <section
       id="checkout"
-      className="scroll-mt-24 border-y border-lara-green/10 bg-lara-green py-14 text-velora-cream sm:py-16 lg:py-20"
+      className="scroll-mt-24 border-y border-velora-burgundy/10 bg-[#2c1318] py-14 text-velora-cream sm:py-16 lg:py-20"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">

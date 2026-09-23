@@ -22,14 +22,14 @@ type OfferUi = {
   perUnit: number | null;
 };
 
-function getOfferUi(form: ProductForm, qty: BundleQuantity, lara: boolean): OfferUi {
+function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolean): OfferUi {
   const unit = form === "serum" ? "عبوة" : "علبة";
   const compareAt = qty > 1 ? singleProductPrice * qty : null;
   const cardPrice = qty === 1 ? 199 : qty === 2 ? 249 : 339;
   const savingsAmount = compareAt !== null ? compareAt - cardPrice : null;
   const perUnit = qty > 1 ? Math.round(cardPrice / qty) : null;
 
-  if (lara) {
+  if (funnelOffers) {
     if (qty === 1) {
       return {
         title: form === "serum" ? "عبوة واحدة" : "علبة وحدة",
@@ -152,7 +152,8 @@ type Props = {
   onQuantityChange?: (q: BundleQuantity) => void;
   onMethodChange?: (m: PaymentMethod) => void;
   onChange?: (state: PurchaseState) => void;
-  variant?: "velora" | "lara";
+  /** Lara-style bundle labels + payment block (Velora colors only) */
+  funnelOffers?: boolean;
 };
 
 export function ProductPurchasePanel({
@@ -164,9 +165,8 @@ export function ProductPurchasePanel({
   onQuantityChange,
   onMethodChange,
   onChange,
-  variant = "velora",
+  funnelOffers = false,
 }: Props) {
-  const lara = variant === "lara";
   const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(2);
   const [methodInternal, setMethodInternal] = useState<PaymentMethod>("card");
   const quantity = quantityProp ?? quantityInternal;
@@ -184,35 +184,25 @@ export function ProductPurchasePanel({
   const total = getCheckoutTotal(quantity, method);
   const unitWord = form === "serum" ? "عبوة" : "علبة";
   const ctaLabel = useMemo(
-    () => (lara ? `اطلبي الآن • ${formatPrice(total)}` : `ابدئي روتينك الآن • ${formatPrice(total)}`),
-    [total, lara],
+    () =>
+      funnelOffers
+        ? `اطلبي الآن • ${formatPrice(total)}`
+        : `ابدئي روتينك الآن • ${formatPrice(total)}`,
+    [total, funnelOffers],
   );
 
   useEffect(() => {
     onChange?.({ quantity, method, total, ctaLabel });
   }, [quantity, method, total, ctaLabel, onChange]);
 
-  const activeBorder = lara ? "border-lara-green bg-lara-green-soft" : "border-velora-burgundy bg-[#fdf2f4]";
-  const idleBorder = lara
-    ? "border-lara-green/15 bg-white hover:border-lara-green/35"
-    : "border-velora-burgundy/12 bg-white hover:border-velora-burgundy/30";
-  const accent = lara ? "text-lara-green-dark" : "text-velora-burgundy-dark";
-  const accentMuted = lara ? "text-lara-green/65" : "text-velora-burgundy/60";
-  const radioActiveBorder = lara ? "border-lara-green" : "border-velora-burgundy";
-  const radioFill = lara ? "bg-lara-green" : "bg-velora-burgundy";
-  const radioIdleBorder = lara ? "border-lara-green/25" : "border-velora-burgundy/25";
-  const badgePopular = lara ? "bg-lara-green text-velora-cream" : "bg-velora-burgundy text-velora-cream";
-  const payActive = lara ? "border-lara-green bg-lara-green-soft" : "border-velora-burgundy bg-[#fdf2f4]";
-  const payIdle = lara ? "border-lara-green/15 bg-white" : "border-velora-burgundy/15 bg-white";
-
   return (
     <div className="space-y-4">
-      <p className={`text-lg font-extrabold ${accent}`}>اختاري العرض:</p>
+      <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
 
       <div className="space-y-3">
         {quantities.map((qty) => {
           const active = quantity === qty;
-          const offer = getOfferUi(form, qty, lara);
+          const offer = getOfferUi(form, qty, funnelOffers);
 
           return (
             <button
@@ -220,15 +210,17 @@ export function ProductPurchasePanel({
               type="button"
               onClick={() => setQuantity(qty)}
               className={`relative w-full cursor-pointer rounded-2xl border-2 px-3 py-3.5 text-right transition-all duration-200 sm:px-4 sm:py-4 ${
-                active ? `${activeBorder} shadow-md` : idleBorder
+                active
+                  ? "border-velora-burgundy bg-[#fdf2f4] shadow-md"
+                  : "border-velora-burgundy/12 bg-white hover:border-velora-burgundy/30"
               }`}
             >
               {offer.badge && (
                 <span
                   className={`absolute -top-3 left-3 flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-extrabold shadow-sm sm:text-[11px] ${
                     offer.badge.variant === "popular"
-                      ? badgePopular
-                      : "bg-[#e8d7b8] text-lara-green-dark"
+                      ? "bg-velora-burgundy text-velora-cream"
+                      : "bg-[#e8d7b8] text-velora-burgundy-dark"
                   }`}
                 >
                   {offer.badge.variant === "popular" && <span aria-hidden>👑</span>}
@@ -239,40 +231,40 @@ export function ProductPurchasePanel({
               <div className="flex items-center gap-2 sm:gap-3">
                 <span
                   className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 bg-white ${
-                    active ? radioActiveBorder : radioIdleBorder
+                    active ? "border-velora-burgundy" : "border-velora-burgundy/25"
                   }`}
                   aria-hidden
                 >
-                  {active && <span className={`h-3 w-3 rounded-full ${radioFill}`} />}
+                  {active && <span className="h-3 w-3 rounded-full bg-velora-burgundy" />}
                 </span>
 
                 <OfferProductStack src={upsellSlotSrc?.[qty]} alt={productName} count={qty} />
 
                 <div className="min-w-0 flex-1 px-0.5">
-                  <p className={`text-[13px] font-extrabold leading-tight sm:text-sm ${accent}`}>
+                  <p className="text-[13px] font-extrabold leading-tight text-velora-burgundy-dark sm:text-sm">
                     {offer.title}
                   </p>
-                  <p className={`mt-0.5 text-[10px] font-semibold leading-snug sm:text-[11px] ${accentMuted}`}>
+                  <p className="mt-0.5 text-[10px] font-semibold leading-snug text-velora-burgundy/60 sm:text-[11px]">
                     {offer.subtitle}
                   </p>
                 </div>
 
                 <div className="shrink-0 text-left">
                   {offer.compareAt !== null && (
-                    <p className="text-xs font-bold tabular-nums text-lara-green/35 line-through sm:text-sm">
+                    <p className="text-xs font-bold tabular-nums text-velora-burgundy/35 line-through sm:text-sm">
                       {offer.compareAt} د.إ
                     </p>
                   )}
-                  <p className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${accent}`}>
+                  <p className="text-xl font-black tabular-nums leading-none text-velora-burgundy-dark sm:text-2xl">
                     {offer.price} د.إ
                   </p>
                   {offer.perUnit !== null && (
-                    <p className={`mt-1 text-[10px] font-bold tabular-nums ${accentMuted}`}>
+                    <p className="mt-1 text-[10px] font-bold tabular-nums text-velora-burgundy/55">
                       {offer.perUnit} د.إ / {unitWord}
                     </p>
                   )}
                   {offer.savingsAmount !== null && offer.savingsAmount > 0 && (
-                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[#f5e6d3] px-2 py-0.5 text-[10px] font-extrabold text-lara-green-dark sm:text-[11px]">
+                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[#f5e6d3] px-2 py-0.5 text-[10px] font-extrabold text-velora-burgundy-dark sm:text-[11px]">
                       وفّري {offer.savingsAmount} د.إ
                     </span>
                   )}
@@ -283,36 +275,40 @@ export function ProductPurchasePanel({
         })}
       </div>
 
-      <div className="space-y-2 pt-1">
-        <p className={`text-sm font-extrabold ${accent}`}>طرق الدفع المتاحة</p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => setMethod("card")}
-            className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
-              method === "card" ? payActive : payIdle
-            }`}
-          >
-            <p className={`text-sm font-extrabold ${accent}`}>الدفع بالبطاقة</p>
-            <p className={`mt-0.5 text-[11px] font-bold ${lara ? "text-lara-green" : "text-velora-burgundy"}`}>
-              شحن مجاني
-            </p>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMethod("cod")}
-            className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
-              method === "cod" ? payActive : payIdle
-            }`}
-          >
-            <p className={`text-sm font-extrabold ${accent}`}>الدفع عند الاستلام</p>
-            <p className={`mt-0.5 text-[11px] font-bold ${accentMuted}`}>+20 د.إ رسوم التوصيل</p>
-          </button>
+      {funnelOffers && (
+        <div className="space-y-2 pt-1">
+          <p className="text-sm font-extrabold text-velora-burgundy-dark">طرق الدفع المتاحة</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setMethod("card")}
+              className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
+                method === "card"
+                  ? "border-velora-burgundy bg-[#fdf2f4]"
+                  : "border-velora-burgundy/15 bg-white"
+              }`}
+            >
+              <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع بالبطاقة</p>
+              <p className="mt-0.5 text-[11px] font-bold text-velora-burgundy">شحن مجاني</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMethod("cod")}
+              className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
+                method === "cod"
+                  ? "border-velora-burgundy bg-[#fdf2f4]"
+                  : "border-velora-burgundy/15 bg-white"
+              }`}
+            >
+              <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع عند الاستلام</p>
+              <p className="mt-0.5 text-[11px] font-bold text-velora-burgundy/70">+20 د.إ رسوم التوصيل</p>
+            </button>
+          </div>
+          <p className="text-center text-[11px] font-semibold text-velora-burgundy/70">
+            الدفع بالبطاقة (شحن مجاني) أو الدفع عند الاستلام
+          </p>
         </div>
-        <p className={`text-center text-[11px] font-semibold ${accentMuted}`}>
-          الدفع بالبطاقة (شحن مجاني) أو الدفع عند الاستلام
-        </p>
-      </div>
+      )}
 
       <div className="pt-1">
         <button
@@ -320,13 +316,43 @@ export function ProductPurchasePanel({
           onClick={() => {
             document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" });
           }}
-          className={`w-full rounded-2xl py-4 text-base font-black text-white shadow-xl transition active:scale-[0.99] sm:text-lg ${
-            lara ? "bg-lara-green hover:bg-lara-green-dark" : "bg-[#2c1318] hover:bg-velora-burgundy"
-          }`}
+          className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-xl transition hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
         >
           {ctaLabel}
         </button>
+        {!funnelOffers && (
+          <p className="mt-2 text-center text-xs font-bold text-velora-burgundy/70">
+            الدفع عند الاستلام • الدفع بالبطاقة
+          </p>
+        )}
       </div>
+
+      {!funnelOffers && (
+        <div className="flex flex-wrap items-center justify-center gap-1 pt-2 text-[10px] sm:text-[11px]">
+          <button
+            type="button"
+            onClick={() => setMethod("card")}
+            className={`rounded-full px-3 py-1 font-bold ${
+              method === "card"
+                ? "bg-velora-burgundy text-velora-cream"
+                : "bg-white text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
+            }`}
+          >
+            بطاقة
+          </button>
+          <button
+            type="button"
+            onClick={() => setMethod("cod")}
+            className={`rounded-full px-3 py-1 font-bold ${
+              method === "cod"
+                ? "bg-velora-burgundy text-velora-cream"
+                : "bg-white text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
+            }`}
+          >
+            COD (+20 د.إ)
+          </button>
+        </div>
+      )}
     </div>
   );
 }

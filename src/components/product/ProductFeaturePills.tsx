@@ -1,16 +1,7 @@
 import type { ProductForm } from "@/config/productPages";
 
-export function ProductFeaturePills({
-  form,
-  variant = "velora",
-}: {
-  form: ProductForm;
-  variant?: "velora" | "lara";
-}) {
+export function ProductFeaturePills({ form }: { form: ProductForm }) {
   const isSerum = form === "serum";
-  const accent = variant === "lara" ? "text-lara-green" : "text-velora-burgundy-dark";
-  const border = variant === "lara" ? "border-lara-green/12" : "border-velora-burgundy/10";
-  const sub = variant === "lara" ? "text-lara-green/70" : "text-velora-burgundy/70";
 
   const items = isSerum
     ? [
@@ -31,10 +22,10 @@ export function ProductFeaturePills({
       {items.map((item) => (
         <div
           key={item.sub}
-          className={`rounded-2xl border ${border} bg-white px-1.5 py-2.5 shadow-sm sm:px-2`}
+          className="rounded-2xl border border-velora-burgundy/10 bg-white px-1.5 py-2.5 shadow-sm sm:px-2"
         >
-          <p className={`text-sm font-extrabold sm:text-base ${accent}`}>{item.main}</p>
-          <p className={`mt-0.5 text-[9px] font-semibold sm:text-[10px] ${sub}`}>{item.sub}</p>
+          <p className="text-sm font-extrabold text-velora-burgundy-dark sm:text-base">{item.main}</p>
+          <p className="mt-0.5 text-[9px] font-semibold text-velora-burgundy/70 sm:text-[10px]">{item.sub}</p>
         </div>
       ))}
     </div>
