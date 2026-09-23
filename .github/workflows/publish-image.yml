@@ -12,8 +12,8 @@ permissions:
   packages: write
 
 concurrency:
-  group: publish-container-${{ github.ref }}
-  cancel-in-progress: true
+  group: publish-container-main
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -36,31 +36,54 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=
 
-      - name: Build and push (Easypanel Dockerfile)
+      - name: Build and push (linux/amd64 — Easypanel servers)
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             GIT_SHA=${{ github.sha }}
+
+      - name: Verify image manifest on GHCR
+        run: |
+          docker buildx imagetools inspect "ghcr.io/${{ github.repository }}:latest" | head -20
+          echo "SHA tag: ghcr.io/${{ github.repository }}:${{ github.sha }}"
 
       - name: Ensure GHCR package is public (anonymous Easypanel pull)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api --method PATCH \
-            "/users/${{ github.repository_owner }}/packages/container/velorabeauty.frontend" \
-            -f visibility=public
+          OWNER="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          PKG="$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')"
+          gh api --method PATCH "/users/${OWNER}/packages/container/${PKG}" -f visibility=public \
+            || gh api --method PATCH "/orgs/${OWNER}/packages/container/${PKG}" -f visibility=public \
+            || echo "Could not PATCH visibility (package may already be public)"
+
+      - name: Deploy summary (Easypanel)
+        run: |
+          {
+            echo "## Easypanel — Docker Image (recommended)"
+            echo ""
+            echo "1. **Source:** Docker Image (not GitHub Git / not SSH Git)"
+            echo "2. **Image:** \`ghcr.io/${{ github.repository }}:latest\`"
+            echo "3. **Registry login:** leave empty (package is public)"
+            echo "4. **Port:** 3000"
+            echo "5. Click **Deploy** after this workflow succeeds"
+            echo ""
+            echo "**Verify live:** \`curl -s https://www.velorabeauty.world/api/health\`"
+            echo "Expected \`version\`: \`${{ github.sha }}\` after redeploy"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Trigger Easypanel redeploy (optional)
         env:
           WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
         run: |
           if [ -z "$WEBHOOK" ]; then
-            echo "EASYPANEL_DEPLOY_WEBHOOK not set — skip auto-deploy (see docs/EASYPANEL-SETUP-AR.md)"
+            echo "EASYPANEL_DEPLOY_WEBHOOK not set — manual Deploy on Easypanel (see docs/EASYPANEL-SETUP-AR.md)"
             exit 0
           fi
           curl -fsS -X POST "$WEBHOOK"

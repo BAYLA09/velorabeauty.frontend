@@ -29,8 +29,8 @@ export function ProductTrustBar({
       ),
     },
     {
-      title: "توصيل 1-3 أيام",
-      sub: "كل مدن الإمارات",
+      title: "توصيل داخل الإمارات",
+      sub: "لمناطق متعددة",
       icon: (
         <path
           strokeLinecap="round"
@@ -40,8 +40,8 @@ export function ProductTrustBar({
       ),
     },
     {
-      title: "ضمان 30 يوم",
-      sub: "استرجاع كامل",
+      title: "30 يوم",
+      sub: "سياسة استرجاع واضحة",
       icon: (
         <path
           strokeLinecap="round"
@@ -52,7 +52,7 @@ export function ProductTrustBar({
     },
     {
       title: "مرخّص ومعتمد",
-      sub: "حلال • جودة ممتازة",
+      sub: "حلال · معتمد",
       subEmphasis: true,
       icon: (
         <path
