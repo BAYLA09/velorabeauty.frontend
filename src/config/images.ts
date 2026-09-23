@@ -27,6 +27,7 @@ export const images = {
   productPage: {
     hair: {
       src: "/images/products/pdp/hair-main.png",
+      storySrc: "/images/products/pdp/hair-story.png?v=20260923-0131",
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
     },
     skin: {
