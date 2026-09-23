@@ -30,6 +30,7 @@ export const images = {
       storySrc: "/images/products/pdp/hair-story.png?v=20260923-0131",
       upsellSlotSrc: {
         1: "/images/products/pdp/upsell/hair-qty-1.png?v=20260923-1523",
+        2: "/images/products/pdp/upsell/hair-qty-2.png?v=20260923-1526",
       },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
     },
