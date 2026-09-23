@@ -74,9 +74,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
 
               <ProductPurchasePanel
                 form={page.form}
-                productImageSrc={
-                  product.pageImage.upsellSrc ?? product.image.src
-                }
+                upsellSlotSrc={product.pageImage.upsellSlotSrc}
                 productName={product.name}
                 onChange={setPurchase}
               />
