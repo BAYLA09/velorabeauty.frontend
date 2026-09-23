@@ -7,12 +7,10 @@ import type { ProductWithPage } from "@/lib/productCatalog";
 
 export function ProductPageLongSections({
   page,
-  allProducts,
-  currentSlug,
+  product,
 }: {
   page: ProductPageConfig;
-  allProducts: ProductWithPage[];
-  currentSlug: string;
+  product: ProductWithPage;
 }) {
   return (
     <>
@@ -29,7 +27,10 @@ export function ProductPageLongSections({
         </div>
       </section>
 
-      <ProductRitualSection products={allProducts} currentSlug={currentSlug} />
+      <ProductRitualSection
+        productId={product.id}
+        imageSrc={product.pageImage.storySrc ?? product.pageImage.src}
+      />
 
       <section className="bg-velora-cream py-14 sm:py-16 lg:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
