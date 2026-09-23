@@ -23,7 +23,6 @@ type OfferUi = {
 };
 
 function getOfferUi(form: ProductForm, qty: BundleQuantity): OfferUi {
-  const unit = form === "serum" ? "عبوة" : "علبة";
   const compareAt = qty > 1 ? singleProductPrice * qty : null;
   const cardPrice = qty === 1 ? 199 : qty === 2 ? 249 : 339;
   const savingsAmount = compareAt !== null ? compareAt - cardPrice : null;
@@ -31,8 +30,14 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity): OfferUi {
   if (qty === 1) {
     return {
       title: "منتج واحد",
-      subtitle: `بداية روتينك — ${unit} واحدة`,
-      footnote: `ابدئي روتينك ب${unit} واحدة`,
+      subtitle:
+        form === "serum"
+          ? "بداية روتينك — عبوة واحدة"
+          : "بداية روتينك — منتج واحد",
+      footnote:
+        form === "serum"
+          ? "ابدئي روتينك بعبوة واحدة"
+          : "ابدئي روتينك بمنتج واحد",
       badge: null,
       compareAt: null,
       price: cardPrice,
@@ -75,32 +80,36 @@ function OfferProductStack({
 
   if (count === 1) {
     return (
-      <div className="relative flex h-[5.25rem] w-[4.25rem] shrink-0 items-end justify-center sm:h-[5.75rem] sm:w-[4.75rem]">
+      <div className="relative flex h-[6.25rem] w-[5rem] shrink-0 items-end justify-center sm:h-[6.75rem] sm:w-[5.5rem]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={alt} className={`h-[4.75rem] w-auto sm:h-[5.25rem] ${bottle}`} />
+        <img
+          src={src}
+          alt={alt}
+          className={`h-[5.75rem] w-auto sm:h-[6.35rem] ${bottle}`}
+        />
       </div>
     );
   }
 
-  const width = count === 2 ? "5.75rem" : "6.75rem";
-  const bottleW = count === 2 ? "3.35rem" : "3.1rem";
-  const bottleH = count === 2 ? "4.65rem" : "4.35rem";
+  const width = count === 2 ? "6.75rem" : "7.75rem";
+  const bottleW = count === 2 ? "3.85rem" : "3.55rem";
+  const bottleH = count === 2 ? "5.35rem" : "5rem";
 
   return (
     <div
       className="relative shrink-0"
-      style={{ width, height: "5.75rem" }}
+      style={{ width, height: "6.5rem" }}
     >
       {Array.from({ length: count }, (_, i) => {
         const offset =
           count === 2
-            ? i * 22
+            ? i * 26
             : i === 0
               ? 0
               : i === 1
-                ? 20
-                : 40;
-        const bottom = count === 3 && i === 2 ? 0 : count === 3 && i === 1 ? 4 : 0;
+                ? 24
+                : 48;
+        const bottom = count === 3 && i === 2 ? 0 : count === 3 && i === 1 ? 6 : 0;
 
         return (
           <div
@@ -173,13 +182,16 @@ function UpsellTrustStrip() {
   ];
 
   return (
-    <div className="rounded-2xl border border-velora-burgundy/10 bg-white/70 px-3 py-4 shadow-sm backdrop-blur-sm sm:px-4">
-      <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-4 sm:gap-4">
+    <div className="overflow-hidden rounded-2xl border border-velora-burgundy/10 bg-white/85 shadow-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-4 sm:divide-x sm:divide-velora-burgundy/10">
         {items.map((item) => (
-          <div key={item.label} className="flex flex-col items-center gap-2 text-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d4b896]/50 bg-[#faf6ef] text-[#9a7348]">
+          <div
+            key={item.label}
+            className="flex items-center gap-2 border-b border-velora-burgundy/8 px-3 py-3 last:border-b-0 sm:border-b-0 sm:px-3 sm:py-3.5 odd:border-s sm:odd:border-s-0"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#d4b896]/55 bg-[#faf6ef] text-[#9a7348]">
               <svg
-                className="h-5 w-5"
+                className="h-[1.15rem] w-[1.15rem]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -189,7 +201,7 @@ function UpsellTrustStrip() {
                 {item.icon}
               </svg>
             </div>
-            <p className="text-[10px] font-bold leading-snug text-velora-burgundy/75 sm:text-[11px]">
+            <p className="min-w-0 text-[9px] font-bold leading-snug text-velora-burgundy/72 sm:text-[10px]">
               {item.label}
             </p>
           </div>
@@ -236,7 +248,8 @@ export function ProductPurchasePanel({
     <div className="space-y-4">
       <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
 
-      <div className="space-y-4">
+      <div className="space-y-3.5 rounded-[1.75rem] bg-gradient-to-b from-[#faf3f4] via-[#f8eef0] to-[#f5ebe8] p-3.5 sm:space-y-4 sm:p-4">
+      <div className="space-y-3.5 sm:space-y-4">
         {quantities.map((qty) => {
           const active = quantity === qty;
           const offer = getOfferUi(form, qty);
@@ -246,12 +259,12 @@ export function ProductPurchasePanel({
               key={qty}
               type="button"
               onClick={() => setQuantity(qty)}
-              className={`relative w-full cursor-pointer rounded-[1.35rem] px-3 py-4 text-right transition-all duration-200 sm:px-5 sm:py-[1.15rem] ${
-                offer.badge ? "mt-2" : ""
+              className={`relative w-full min-h-[6.75rem] cursor-pointer rounded-[1.35rem] px-3 py-4 text-right transition-all duration-200 sm:min-h-[7.25rem] sm:px-5 sm:py-5 ${
+                offer.badge ? "mt-3" : ""
               } ${
                 active
-                  ? "border-[3px] border-velora-burgundy bg-[#fdf2f4] shadow-md"
-                  : "border-2 border-velora-burgundy/12 bg-white hover:border-velora-burgundy/28"
+                  ? "border-[3px] border-velora-burgundy bg-[#fdf2f4] shadow-[0_8px_24px_rgba(58,24,32,0.08)]"
+                  : "border-2 border-[#e8dfe1] bg-white hover:border-velora-burgundy/25"
               }`}
             >
               {offer.badge && (
@@ -272,7 +285,7 @@ export function ProductPurchasePanel({
                 className="grid items-center gap-x-2 gap-y-2 sm:gap-x-3"
                 style={{
                   gridTemplateColumns:
-                    "auto auto minmax(0, 1fr) minmax(5.75rem, 6.75rem)",
+                    "auto auto minmax(0, 1fr) minmax(6.25rem, 7.25rem)",
                 }}
               >
                 <span
@@ -329,6 +342,7 @@ export function ProductPurchasePanel({
       </div>
 
       <UpsellTrustStrip />
+      </div>
 
       <div className="pt-1">
         <button
