@@ -1,4 +1,15 @@
 import { ProductFaq } from "@/components/product/ProductFaq";
+import {
+  IconBox,
+  IconCard,
+  IconClock,
+  IconDroplet,
+  IconLeaf,
+  IconPhone,
+  IconSparkles,
+  IconStethoscope,
+  IconTruck,
+} from "@/components/product/ProductFunnelIcons";
 import { ProductMarketingGallery } from "@/components/product/ProductMarketingGallery";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
 import { uaeDeliveryCities } from "@/config/productPageShared";
@@ -28,13 +39,15 @@ function SectionIntro({
   );
 }
 
+const usageIcons = [IconClock, IconBox, IconDroplet, IconSparkles] as const;
+
 export function ProductPageLongSections({
   page,
-  marketingGallery,
+  marketingSpotlight,
   productName,
 }: {
   page: ProductPageConfig;
-  marketingGallery?: readonly (string | undefined)[];
+  marketingSpotlight?: string;
   productName: string;
 }) {
   const survey = page.internalSurvey;
@@ -116,10 +129,10 @@ export function ProductPageLongSections({
                 className="relative overflow-hidden rounded-[1.5rem] border border-velora-burgundy/10 bg-white p-5 shadow-sm sm:p-6"
               >
                 <span
-                  className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-velora-cream-dark text-lg"
+                  className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-velora-cream-dark text-velora-burgundy"
                   aria-hidden
                 >
-                  🍃
+                  <IconLeaf className="h-5 w-5" />
                 </span>
                 <h3 className="pr-12 text-lg font-extrabold text-velora-burgundy-dark">{card.title}</h3>
                 <p className="mt-1 text-xs font-bold text-velora-champagne-dark">جرعة يومية مدروسة</p>
@@ -136,7 +149,7 @@ export function ProductPageLongSections({
         </div>
       </section>
 
-      <ProductMarketingGallery slots={marketingGallery} productName={productName} />
+      <ProductMarketingGallery src={marketingSpotlight} productName={productName} />
 
       <section className="bg-velora-cream py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">
@@ -164,7 +177,7 @@ export function ProductPageLongSections({
       <section className="mx-auto max-w-lg px-4 py-6 sm:max-w-3xl sm:px-6">
         <div className="rounded-[1.75rem] border border-velora-burgundy/10 bg-white p-5 shadow-sm sm:p-7">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-900">
-            <span aria-hidden>🩺</span>
+            <IconStethoscope className="h-4 w-4" />
             {page.brandQuoteTitle}
           </span>
           <p className="mt-4 text-base leading-[1.85] text-velora-burgundy/85 sm:text-lg">{page.brandQuote}</p>
@@ -328,20 +341,23 @@ export function ProductPageLongSections({
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">
           <SectionIntro eyebrow={page.usageTitle} title={page.usageSubtitle} />
           <ol className="space-y-3">
-            {page.usageSteps.map((step, i) => (
+            {page.usageSteps.map((step, i) => {
+              const UsageIcon = usageIcons[i] ?? IconSparkles;
+              return (
               <li
                 key={step.title}
                 className="flex items-start gap-3 rounded-[1.25rem] border border-velora-burgundy/10 bg-velora-cream p-4"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-velora-burgundy/20 bg-white text-lg">
-                  {["🕐", "📦", "💧", "✨"][i] ?? "•"}
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-velora-burgundy/20 bg-white text-velora-burgundy">
+                  <UsageIcon className="h-5 w-5" />
                 </span>
                 <div>
                   <p className="font-extrabold text-velora-burgundy-dark">{step.title}</p>
                   <p className="mt-1 text-sm text-velora-burgundy/70">{step.text}</p>
                 </div>
               </li>
-            ))}
+            );
+            })}
           </ol>
         </div>
       </section>
@@ -362,8 +378,14 @@ export function ProductPageLongSections({
                 <span className="absolute left-4 top-3 text-xs font-black text-velora-champagne-dark">
                   {s.step}
                 </span>
-                <span className="absolute right-4 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#2c1318] text-sm text-velora-cream">
-                  {s.step === "1" ? "💳" : s.step === "2" ? "📞" : "🚚"}
+                <span className="absolute right-4 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#2c1318] text-velora-cream">
+                  {s.step === "1" ? (
+                    <IconCard className="h-4 w-4" />
+                  ) : s.step === "2" ? (
+                    <IconPhone className="h-4 w-4" />
+                  ) : (
+                    <IconTruck className="h-4 w-4" />
+                  )}
                 </span>
                 <p className="mt-2 font-extrabold text-velora-burgundy-dark">{s.title}</p>
                 <p className="mt-2 text-sm leading-relaxed text-velora-burgundy/70">{s.text}</p>

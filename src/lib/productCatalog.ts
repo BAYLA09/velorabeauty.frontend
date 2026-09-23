@@ -11,8 +11,8 @@ export type ProductImageRef = {
   upsellSrc?: string;
   /** صورة لكل بطاقة عرض: 1 / 2 / 3 منتجات (اختياري لكل slot) */
   upsellSlotSrc?: Partial<Record<1 | 2 | 3, string>>;
-  /** 3 صور marketing تحت العروض — الخانة 3 فارغة حتى تزيديها */
-  marketingGallery?: readonly (string | undefined)[];
+  /** صورة marketing واحدة (تحت التركيبة) — اختيارية */
+  marketingSpotlight?: string;
 };
 
 export type ProductWithPage = Product & {

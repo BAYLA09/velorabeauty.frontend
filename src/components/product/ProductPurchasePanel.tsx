@@ -314,7 +314,7 @@ export function ProductPurchasePanel({
         <button
           type="button"
           onClick={() => {
-            document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" });
+            document.getElementById("purchase")?.scrollIntoView({ behavior: "smooth" });
           }}
           className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-xl transition hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
         >

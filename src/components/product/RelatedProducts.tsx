@@ -28,20 +28,22 @@ export function RelatedProducts({
               className="group flex overflow-hidden rounded-[1.5rem] border border-velora-burgundy/10 bg-white shadow-sm transition hover:border-velora-champagne/40"
             >
               <div className="flex min-w-0 flex-1 flex-col justify-center p-4 text-right sm:p-5">
-                <p className="text-sm font-extrabold leading-snug text-velora-burgundy-dark group-hover:text-velora-burgundy">
-                  {p.page.subhook.slice(0, 72)}
-                  {p.page.subhook.length > 72 ? "…" : ""}
+                <p className="text-base font-extrabold leading-snug text-velora-burgundy-dark group-hover:text-velora-burgundy">
+                  {p.name}
                 </p>
-                <p className="mt-2 text-xs text-velora-burgundy/60">{p.ingredient}</p>
-                <p className="mt-3 text-sm font-black text-velora-champagne-dark">
+                <p className="mt-1 text-xs font-semibold text-velora-champagne-dark">{p.ingredient}</p>
+                <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-velora-burgundy/65">
+                  {p.description}
+                </p>
+                <p className="mt-3 text-sm font-black text-velora-burgundy-dark">
                   يبدأ من {formatPrice(singleProductPrice)}
                 </p>
               </div>
-              <div className="relative h-28 w-28 shrink-0 bg-velora-cream-dark sm:h-32 sm:w-32">
+              <div className="relative flex h-32 w-32 shrink-0 items-center justify-center bg-white sm:h-36 sm:w-36">
                 <ProductPageImage
-                  src={p.pageImage.src}
+                  src={p.image.src}
                   alt={p.name}
-                  className="absolute inset-0 h-full w-full object-contain p-2"
+                  className="max-h-[85%] max-w-[85%] object-contain"
                 />
               </div>
             </Link>
