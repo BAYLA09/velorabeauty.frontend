@@ -13,6 +13,10 @@ import {
 type Props = {
   quantity: BundleQuantity;
   method: PaymentMethod;
+  submitLabel?: string;
+  submitType?: "button" | "submit";
+  onSubmit?: () => void;
+  variant?: "light" | "dark";
 };
 
 const quantityLabels: Record<BundleQuantity, string> = {
@@ -21,11 +25,25 @@ const quantityLabels: Record<BundleQuantity, string> = {
   3: "المجموعة الكاملة (٣ منتجات)",
 };
 
-export function CheckoutSummary({ quantity, method }: Props) {
+export function CheckoutSummary({
+  quantity,
+  method,
+  submitLabel = checkout.submit,
+  submitType = "button",
+  onSubmit,
+  variant = "light",
+}: Props) {
   const total = getCheckoutTotal(quantity, method);
+  const isDark = variant === "dark";
 
   return (
-    <aside className="rounded-[2rem] border border-velora-burgundy/10 bg-white p-6 shadow-xl shadow-velora-burgundy/5 lg:sticky lg:top-28">
+    <aside
+      className={
+        isDark
+          ? "rounded-[2rem] border border-white/15 bg-white p-6 shadow-2xl lg:sticky lg:top-28"
+          : "rounded-[2rem] border border-velora-burgundy/10 bg-white p-6 shadow-xl shadow-velora-burgundy/5 lg:sticky lg:top-28"
+      }
+    >
       <h3 className="text-xl font-bold text-velora-burgundy">{checkout.summaryTitle}</h3>
 
       <dl className="mt-6 space-y-4 text-sm">
@@ -62,10 +80,11 @@ export function CheckoutSummary({ quantity, method }: Props) {
       </div>
 
       <button
-        type="button"
+        type={submitType}
+        onClick={submitType === "button" ? onSubmit : undefined}
         className="mt-6 w-full rounded-full bg-velora-burgundy py-4 text-sm font-semibold text-velora-cream transition hover:bg-velora-burgundy-light"
       >
-        {checkout.submit}
+        {submitLabel}
       </button>
     </aside>
   );

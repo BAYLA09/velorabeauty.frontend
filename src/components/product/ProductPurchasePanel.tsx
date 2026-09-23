@@ -127,6 +127,10 @@ type Props = {
   productName: string;
   /** صورة لكل بطاقة upsell (1 / 2 / 3) — slot فارغ إذا ما كاينش */
   upsellSlotSrc?: Partial<Record<BundleQuantity, string>>;
+  quantity?: BundleQuantity;
+  method?: PaymentMethod;
+  onQuantityChange?: (q: BundleQuantity) => void;
+  onMethodChange?: (m: PaymentMethod) => void;
   onChange?: (state: PurchaseState) => void;
 };
 
@@ -134,10 +138,25 @@ export function ProductPurchasePanel({
   form,
   productName,
   upsellSlotSrc,
+  quantity: quantityProp,
+  method: methodProp,
+  onQuantityChange,
+  onMethodChange,
   onChange,
 }: Props) {
-  const [quantity, setQuantity] = useState<BundleQuantity>(2);
-  const [method, setMethod] = useState<PaymentMethod>("card");
+  const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(2);
+  const [methodInternal, setMethodInternal] = useState<PaymentMethod>("card");
+  const quantity = quantityProp ?? quantityInternal;
+  const method = methodProp ?? methodInternal;
+
+  const setQuantity = (q: BundleQuantity) => {
+    onQuantityChange?.(q);
+    if (quantityProp === undefined) setQuantityInternal(q);
+  };
+  const setMethod = (m: PaymentMethod) => {
+    onMethodChange?.(m);
+    if (methodProp === undefined) setMethodInternal(m);
+  };
 
   const total = getCheckoutTotal(quantity, method);
   const ctaLabel = useMemo(
@@ -246,12 +265,7 @@ export function ProductPurchasePanel({
         <button
           type="button"
           onClick={() => {
-            const checkoutEl = document.getElementById("checkout");
-            if (checkoutEl) {
-              checkoutEl.scrollIntoView({ behavior: "smooth" });
-            } else {
-              window.location.href = "/#checkout";
-            }
+            document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" });
           }}
           className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-xl transition hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
         >
