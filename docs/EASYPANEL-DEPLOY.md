@@ -12,6 +12,20 @@
 | HTTP port | **3000** |
 | Domains | `www.velorabeauty.world` + `velorabeauty.world` → نفس الخدمة |
 
+## خطأ: `Git key not found`
+
+Easypanel ma lqach **SSH deploy key** wla **GitHub App** bach ypulli l-repo.
+
+1. **Easypanel → Settings → Git** (ou **Integrations → GitHub**): connecti / **Reconnect** compte GitHub.
+2. F **service** dyalek → **Source**: khtar **`BAYLA09/velorabeauty.frontend`**, branch **`main`**, w **Save**.
+3. Ila katstakhdem **Deploy key** (SSH URL `git@github.com:...`):
+   - Easypanel → **Git Keys** / **SSH Keys** → **Generate** wla paste key
+   - **GitHub** → repo → **Settings → Deploy keys → Add** → paste **public key** dyal Easypanel (read-only OK)
+4. Ila l-source hiya **HTTPS** b token: regenerate **Personal Access Token** (scope `repo`) f GitHub w update f Easypanel.
+5. **Force Rebuild** men ba3d ma t-fixi l-git.
+
+**Alternative (bla git pull f deploy):** *Deploy Webhook* — GitHub Actions wla manual `POST` 3la webhook URL; build kaytlaunch mn image/cache — mais source khassa baqi mconnecté bach l-build yjib code.
+
 ## إلا Deploy من الواجهة كيتعطل
 
 1. **Deployments → آخر deploy → View logs**  
