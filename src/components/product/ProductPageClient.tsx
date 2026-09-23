@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
+import { ProductCheckoutSection } from "@/components/product/ProductCheckoutSection";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
 import { ProductGallery } from "@/components/product/ProductGallery";
@@ -23,6 +25,8 @@ type Props = {
 };
 
 export function ProductPageClient({ product, allProducts }: Props) {
+  const [quantity, setQuantity] = useState<BundleQuantity>(2);
+  const [method, setMethod] = useState<PaymentMethod>("card");
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
 
@@ -76,6 +80,10 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 form={page.form}
                 upsellSlotSrc={product.pageImage.upsellSlotSrc}
                 productName={product.name}
+                quantity={quantity}
+                method={method}
+                onQuantityChange={setQuantity}
+                onMethodChange={setMethod}
                 onChange={setPurchase}
               />
 
@@ -91,6 +99,15 @@ export function ProductPageClient({ product, allProducts }: Props) {
         />
 
         <ProductPageLongSections page={page} />
+
+        <ProductCheckoutSection
+          productSlug={product.slug}
+          productName={product.name}
+          quantity={quantity}
+          method={method}
+          onMethodChange={setMethod}
+        />
+
         <RelatedProducts currentSlug={product.slug} products={allProducts} />
       </main>
       <FooterSection />
@@ -100,12 +117,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
           <button
             type="button"
             onClick={() => {
-              const checkoutEl = document.getElementById("checkout");
-              if (checkoutEl) {
-                checkoutEl.scrollIntoView({ behavior: "smooth" });
-              } else {
-                window.location.href = "/#checkout";
-              }
+              document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" });
             }}
             className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-extrabold text-white shadow-lg"
           >
