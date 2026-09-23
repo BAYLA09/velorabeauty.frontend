@@ -53,8 +53,6 @@ export function ProductPageLongSections({
 }) {
   return (
     <>
-      <ProductVideoStoriesStrip />
-
       <section className="bg-velora-cream py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">
           <SectionIntro eyebrow={page.painEyebrow} title={page.painTitle} lead={page.painLead} />
@@ -89,6 +87,8 @@ export function ProductPageLongSections({
           </div>
         </div>
       </section>
+
+      <ProductVideoStoriesStrip />
 
       <section className="bg-white py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">
