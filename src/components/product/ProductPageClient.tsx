@@ -7,6 +7,7 @@ import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductFeaturePills } from "@/components/product/ProductFeaturePills";
+import { ProductMobileStickyBar } from "@/components/product/ProductMobileStickyBar";
 import { ProductPageLongSections } from "@/components/product/ProductPageLongSections";
 import {
   ProductPurchasePanel,
@@ -29,25 +30,18 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [method, setMethod] = useState<PaymentMethod>("card");
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
+  const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
 
   return (
-    <>
-      <ProductAnnouncementBar />
+    <div className="pdp-lara product-typography">
+      <ProductAnnouncementBar variant="lara" />
       <ProductStoreHeader />
 
-      <main className="bg-velora-cream pb-24 md:pb-0">
-        <section className="mx-auto max-w-lg px-4 py-5 sm:max-w-6xl sm:px-6 sm:py-8 lg:py-10">
-          <header className="mb-6 sm:mb-8">
-            <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-3xl lg:text-[2rem] lg:leading-[1.3]">
-              {page.headlineQuestion}
-            </h1>
-            <p className="mt-3 text-[15px] font-medium leading-[1.85] text-velora-burgundy/85 sm:mt-4 sm:text-base">
-              {page.subhook}
-            </p>
-          </header>
-
-          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
-            <div className="min-w-0 w-full">
+      <main className="bg-velora-cream pb-[9.5rem] md:pb-0">
+        {/* Lara funnel: صورة + pills → عنوان → عروض → دفع → trust */}
+        <section className="mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:py-8">
+          <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-10">
+            <div className="min-w-0 w-full lg:sticky lg:top-4">
               <ProductGallery
                 mainSrc={product.pageImage.src}
                 productName={product.name}
@@ -55,28 +49,38 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 laraFrame
                 fullWidthMobile
               />
-              <ProductFeaturePills form={page.form} />
+              <ProductFeaturePills form={page.form} variant="lara" />
             </div>
 
-            <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-velora-burgundy-dark">
+            <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
+              <header>
+                <h1 className="text-[1.35rem] font-black leading-[1.35] text-lara-green-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
+                  {page.headlineQuestion}
+                </h1>
+                <p className="mt-2.5 text-[15px] font-medium leading-[1.85] text-lara-green/90 sm:mt-3 sm:text-base">
+                  {page.subhook}
+                </p>
+              </header>
+
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-lara-green-dark">
                 <span className="text-base tracking-wide text-amber-500" aria-hidden>
                   ★★★★★
                 </span>
-                <span className="font-bold text-velora-burgundy/55">{page.ratingPlaceholder}</span>
-                <span className="text-velora-burgundy/30" aria-hidden>
+                <span className="font-bold text-lara-green/60">{page.ratingPlaceholder}</span>
+                <span className="text-lara-green/25" aria-hidden>
                   ·
                 </span>
                 <span className="font-extrabold">
-                  من {formatPrice(singleProductPrice)} / {page.form === "serum" ? "عبوة" : "علبة"}
+                  من {formatPrice(singleProductPrice)} / {unitLabel}
                 </span>
               </div>
 
-              <div className="rounded-full border border-rose-200/80 bg-rose-50/90 px-4 py-2.5 text-xs font-bold leading-snug text-rose-900 sm:text-sm">
-                آخر 48 ساعة على عرض الشحن المجاني هذا الأسبوع
+              <div className="rounded-full border border-amber-200/90 bg-amber-50/95 px-4 py-2.5 text-center text-xs font-bold leading-snug text-amber-950 sm:text-sm">
+                كمية محدودة هذا الأسبوع — اطلبي قبل نفاد المخزون
               </div>
 
               <ProductPurchasePanel
+                variant="lara"
                 form={page.form}
                 upsellSlotSrc={product.pageImage.upsellSlotSrc}
                 productName={product.name}
@@ -87,21 +91,19 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 onChange={setPurchase}
               />
 
+              <ProductTrustBar prominent variant="lara" />
             </div>
-          </div>
-
-          <div className="mt-6 hidden lg:block">
-            <ProductTrustBar prominent />
           </div>
         </section>
 
-        {/* Nama: problem photo + stat bar (scroll) */}
         <ProductRitualSection
           productId={product.id}
           imageSrc={product.pageImage.storySrc ?? product.pageImage.src}
         />
 
-        <ProductPageLongSections page={page} />
+        <div className="[&_h2]:text-lara-green-dark [&_h3]:text-lara-green-dark">
+          <ProductPageLongSections page={page} />
+        </div>
 
         <ProductCheckoutSection
           productSlug={product.slug}
@@ -115,19 +117,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
       </main>
       <FooterSection />
 
-      {purchase && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-velora-burgundy/10 bg-white p-3 shadow-[0_-8px_30px_rgba(58,24,32,0.12)] md:hidden">
-          <button
-            type="button"
-            onClick={() => {
-              document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-extrabold text-white shadow-lg"
-          >
-            {purchase.ctaLabel}
-          </button>
-        </div>
-      )}
-    </>
+      {purchase && <ProductMobileStickyBar ctaLabel={purchase.ctaLabel} />}
+    </div>
   );
 }

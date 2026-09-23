@@ -9,6 +9,9 @@
   --color-velora-champagne: #c9a962;
   --color-velora-champagne-light: #dcc48a;
   --color-velora-champagne-dark: #a8884a;
+  --color-lara-green: #1b3d2f;
+  --color-lara-green-dark: #142921;
+  --color-lara-green-soft: #eef5f1;
   --font-display: var(--font-el-messiri), "Segoe UI", sans-serif;
   --font-body: var(--font-tajawal), "Segoe UI", system-ui, sans-serif;
   --font-ui: var(--font-tajawal), "Segoe UI", system-ui, sans-serif;
