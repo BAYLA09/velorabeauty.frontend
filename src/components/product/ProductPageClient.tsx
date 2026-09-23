@@ -30,11 +30,18 @@ export function ProductPageClient({ product, allProducts }: Props) {
     <>
       <ProductAnnouncementBar />
       <ProductStoreHeader />
-      <ProductTrustBar />
 
       <main className="bg-velora-cream pb-24 md:pb-0">
-        {/* Nama-style: gallery → pills → copy → offers (mobile stack) */}
         <section className="mx-auto max-w-lg px-4 py-5 sm:max-w-6xl sm:px-6 sm:py-8 lg:py-10">
+          <header className="mb-6 sm:mb-8">
+            <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-3xl lg:text-[2rem] lg:leading-[1.3]">
+              {page.headlineQuestion}
+            </h1>
+            <p className="mt-3 text-[15px] font-medium leading-[1.85] text-velora-burgundy/85 sm:mt-4 sm:text-base">
+              {page.subhook}
+            </p>
+          </header>
+
           <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
             <div className="min-w-0 w-full">
               <ProductGallery
@@ -48,14 +55,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
             </div>
 
             <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-              <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-3xl lg:text-[2rem] lg:leading-[1.3]">
-                {page.headlineQuestion}
-              </h1>
-
-              <p className="text-[15px] font-medium leading-[1.85] text-velora-burgundy/85 sm:text-base">
-                {page.subhook}
-              </p>
-
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-velora-burgundy-dark">
                 <span className="text-base tracking-wide text-amber-500" aria-hidden>
                   ★★★★★
@@ -79,6 +78,8 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 productName={product.name}
                 onChange={setPurchase}
               />
+
+              <ProductTrustBar compact />
             </div>
           </div>
         </section>
