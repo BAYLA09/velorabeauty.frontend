@@ -87,12 +87,15 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 onChange={setPurchase}
               />
 
-              <ProductTrustBar compact />
             </div>
+          </div>
+
+          <div className="mt-6 hidden lg:block">
+            <ProductTrustBar prominent />
           </div>
         </section>
 
-        {/* Nama: problem photo + overlay bar (scroll) */}
+        {/* Nama: problem photo + stat bar (scroll) */}
         <ProductRitualSection
           productId={product.id}
           imageSrc={product.pageImage.storySrc ?? product.pageImage.src}
