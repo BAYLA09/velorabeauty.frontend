@@ -45,6 +45,8 @@
 | `npm ci` / lockfile | تأكد branch **`main`** وآخر commit؛ locally: `npm ci && npm run build` |
 | `COPY ... standalone` | Build method = **Dockerfile** (ماشي custom build command بلا standalone) |
 | Timeout | صور `public/images` كبيرة (~50MB) — عادي؛ زيد timeout builder إن أمكن |
+| `unknown flag: mount` / BuildKit | Dockerfile **ما فيهش** `--mount=type=cache` — إلا كنت على commit قديم، pull **`main`** و Force Rebuild |
+| `failed to solve` / `executor failed` | GitHub → **Actions** → job **docker** — نفس build اللي Easypanel خاصو يدير |
 
 ---
 
