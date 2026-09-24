@@ -64,22 +64,9 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 </p>
               </header>
 
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-velora-burgundy-dark">
-                <span className="text-base tracking-wide text-amber-500" aria-hidden>
-                  ★★★★★
-                </span>
-                <span className="font-bold text-velora-burgundy/55">{page.ratingPlaceholder}</span>
-                <span className="text-velora-burgundy/30" aria-hidden>
-                  ·
-                </span>
-                <span className="font-extrabold">
-                  من {formatPrice(singleProductPrice)} / {unitLabel}
-                </span>
-              </div>
-
-              <div className="rounded-full border border-rose-200/80 bg-rose-50/90 px-4 py-2.5 text-center text-xs font-bold leading-snug text-rose-900 sm:text-sm">
-                كمية محدودة هذا الأسبوع — اطلبي قبل نفاد المخزون
-              </div>
+              <p className="text-sm font-semibold text-velora-burgundy/75">
+                من {formatPrice(singleProductPrice)} / {unitLabel} · {page.urgencyLine}
+              </p>
 
               <ProductPurchasePanel
                 funnelOffers

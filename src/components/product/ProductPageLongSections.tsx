@@ -122,7 +122,6 @@ export function ProductPageLongSections({
                   <IconLeaf className="h-5 w-5" />
                 </span>
                 <h3 className="pr-12 text-lg font-extrabold text-velora-burgundy-dark">{card.title}</h3>
-                <p className="mt-1 text-xs font-bold text-velora-champagne-dark">جرعة يومية مدروسة</p>
                 <ul className="mt-3 space-y-1.5">
                   {card.lines.map((line) => (
                     <li key={line} className="text-sm leading-relaxed text-velora-burgundy/75">
@@ -172,18 +171,6 @@ export function ProductPageLongSections({
             {page.brandQuoteTitle}
           </span>
           <p className="mt-4 text-base leading-[1.85] text-velora-burgundy/85 sm:text-lg">{page.brandQuote}</p>
-          <p className="mt-3 text-xs font-bold text-velora-champagne-dark">تركيبة مدروسة للاستخدام اليومي</p>
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            {page.statHighlightGrid.slice(0, 2).map((s) => (
-              <div
-                key={s.label}
-                className="rounded-2xl bg-velora-cream-dark px-3 py-4 text-center"
-              >
-                <p className="text-2xl font-black tabular-nums text-velora-champagne-dark">{s.value}</p>
-                <p className="mt-1 text-[10px] font-semibold text-velora-burgundy/65">{s.label}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -204,7 +191,7 @@ export function ProductPageLongSections({
       <section className="bg-velora-cream py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">
           <SectionIntro
-            eyebrow="نتيجة من أول علبة"
+            eyebrow="رحلة الروتين"
             title={page.timelineTitle}
             lead={page.timelineNote}
           />
@@ -228,47 +215,16 @@ export function ProductPageLongSections({
         </div>
       </section>
 
-      <TestimonialsProductStrip title={page.testimonialTitle} subtitle={page.testimonialSubtitle} layout="pdp" />
+      <TestimonialsProductStrip
+        title={page.testimonialTitle}
+        subtitle={page.testimonialSubtitle}
+        layout="pdp"
+        emotionalFallback={page.emotionalProof}
+      />
 
       <section className="bg-white py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">
-          <SectionIntro
-            eyebrow="ليش فيلورا تختلف؟"
-            title={page.comparisonTitle}
-            lead={page.comparisonSubtitle}
-          />
-          <div className="space-y-4">
-            {page.competitorBlocks.map((block) => (
-              <div
-                key={block.title}
-                className="rounded-[1.5rem] border border-velora-burgundy/10 bg-white p-4 shadow-sm sm:p-5"
-              >
-                <div className="flex items-start gap-2">
-                  <span className="text-rose-600" aria-hidden>
-                    ⚠
-                  </span>
-                  <div>
-                    <p className="font-extrabold text-velora-burgundy-dark">{block.title}</p>
-                    <p className="mt-0.5 text-xs font-bold text-rose-800/80">{block.tagline}</p>
-                  </div>
-                </div>
-                <ul className="mt-3 space-y-2">
-                  {block.bullets.map((b) => (
-                    <li key={b} className="flex items-center justify-between gap-2 text-sm text-velora-burgundy/70">
-                      <span>{b}</span>
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[10px] font-bold text-rose-700">
-                        ✕
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <h3 className="mb-4 mt-10 text-center text-xl font-extrabold text-velora-burgundy-dark">
-            {page.quickComparisonTitle}
-          </h3>
+          <SectionIntro title={page.comparisonTitle} lead={page.comparisonSubtitle} />
           <div className="overflow-hidden rounded-[1.5rem] border border-velora-burgundy/10">
             <table className="w-full text-right text-sm">
               <thead className="bg-[#2c1318] text-velora-cream">
