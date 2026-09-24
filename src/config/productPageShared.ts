@@ -14,7 +14,7 @@ export const uaeDeliveryCities = [
 export function sharedProductPageBlocks(form: "gummy" | "serum") {
   const isGummy = form === "gummy";
   return {
-    ratingPlaceholder: "(ضع تقييمات حقيقية هنا)",
+    ratingPlaceholder: "",
     postCtaTrust: [
       "توصيل داخل الإمارات",
       "الدفع بالبطاقة",
@@ -81,8 +81,8 @@ export function sharedProductPageBlocks(form: "gummy" | "serum") {
         answer: "بطاقة أو COD داخل الإمارات — انظري قسم التوصيل أعلاه.",
       },
     ],
-    testimonialTitle: "ما تقوله العميلات؟",
-    testimonialSubtitle: "تقييمات مؤكدة — دفع عند الاستلام",
+    testimonialTitle: "تجارب حقيقية",
+    testimonialSubtitle: "تقييمات مؤكدة — تُعرض عند توفرها",
     formulaBadges: ["GMP", "حلال", "جودة معتمدة", "تصنيع مدروس"],
     competitorBlocks: [
       {
