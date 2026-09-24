@@ -39,7 +39,7 @@ export const images = {
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
       formulaSectionImageSrc: "/images/products/pdp/hair-formula-slot.webp?v=20260924-2020",
-      timelineSectionImageSrc: undefined as string | undefined,
+      timelineSectionImageSrc: "/images/products/pdp/hair-timeline-slot.webp?v=20260924-2026",
     },
     skin: {
       src: "/images/products/pdp/skin-main.webp?v=20260924",
