@@ -73,15 +73,25 @@ function StoryCard({ story, index }: { story: ProductVideoStory; index: number }
   );
 }
 
-export function ProductVideoStoriesStrip() {
+export function ProductVideoStoriesStrip({ compact = false }: { compact?: boolean }) {
   const { eyebrow, title, stories } = productVideoStoriesSection;
 
+  const Wrapper = compact ? "div" : "section";
+
   return (
-    <section className="bg-velora-cream py-8 sm:py-10">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mb-5 text-right sm:mb-6">
+    <Wrapper className={compact ? "py-2 sm:py-3" : "bg-velora-cream py-8 sm:py-10"}>
+      <div className={compact ? "min-w-0" : "mx-auto max-w-6xl px-4 sm:px-6"}>
+        <div className={compact ? "mb-3 text-right" : "mb-5 text-right sm:mb-6"}>
           <p className="text-[11px] font-bold tracking-[0.22em] text-velora-champagne-dark">{eyebrow}</p>
-          <h2 className="mt-1 text-xl font-extrabold text-velora-burgundy-dark sm:text-2xl">{title}</h2>
+          <h2
+            className={
+              compact
+                ? "mt-0.5 text-base font-extrabold text-velora-burgundy-dark sm:text-lg"
+                : "mt-1 text-xl font-extrabold text-velora-burgundy-dark sm:text-2xl"
+            }
+          >
+            {title}
+          </h2>
         </div>
 
         <div
@@ -92,8 +102,8 @@ export function ProductVideoStoriesStrip() {
             <StoryCard key={story.id} story={story} index={i} />
           ))}
         </div>
-        <p className="mt-3 text-right text-[10px] text-velora-burgundy/40">اسحبي لعرض المزيد</p>
+        <p className="mt-2 text-right text-[10px] text-velora-burgundy/40">اسحبي لعرض المزيد</p>
       </div>
-    </section>
+    </Wrapper>
   );
 }
