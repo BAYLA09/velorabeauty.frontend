@@ -1,4 +1,6 @@
 import { publishedTestimonials } from "@/config/testimonials";
+import { publishedProductTestimonials } from "@/config/productTestimonialReviews";
+import type { ProductId } from "@/config/products";
 import { ProductEmotionalProof } from "@/components/product/ProductEmotionalProof";
 import { TestimonialReviewCard } from "./TestimonialReviewCard";
 
@@ -12,6 +14,7 @@ type Props = {
   title: string;
   subtitle: string;
   layout?: "default" | "pdp";
+  productId?: ProductId;
   emotionalFallback?: EmotionalFallback;
 };
 
@@ -19,9 +22,13 @@ export function TestimonialsProductStrip({
   title,
   subtitle,
   layout = "default",
+  productId,
   emotionalFallback,
 }: Props) {
-  const reviews = publishedTestimonials();
+  const reviews =
+    layout === "pdp" && productId
+      ? publishedProductTestimonials(productId)
+      : publishedTestimonials();
 
   if (reviews.length > 0 && layout === "pdp") {
     return (
