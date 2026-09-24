@@ -10,6 +10,7 @@ import {
   IconStethoscope,
   IconTruck,
 } from "@/components/product/ProductFunnelIcons";
+import { ProductFormulaImageSlot } from "@/components/product/ProductFormulaImageSlot";
 import { ProductMarketingGallery } from "@/components/product/ProductMarketingGallery";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
@@ -45,10 +46,12 @@ const usageIcons = [IconClock, IconBox, IconDroplet, IconSparkles] as const;
 export function ProductPageLongSections({
   page,
   marketingSpotlight,
+  formulaSectionImageSrc,
   productName,
 }: {
   page: ProductPageConfig;
   marketingSpotlight?: string;
+  formulaSectionImageSrc?: string;
   productName: string;
 }) {
   return (
@@ -131,6 +134,7 @@ export function ProductPageLongSections({
               </div>
             ))}
           </div>
+          <ProductFormulaImageSlot src={formulaSectionImageSrc} productName={productName} />
         </div>
       </section>
 

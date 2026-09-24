@@ -13,6 +13,8 @@ export type ProductImageRef = {
   upsellSlotSrc?: Partial<Record<1 | 2 | 3, string>>;
   /** صورة marketing واحدة (تحت التركيبة) — اختيارية */
   marketingSpotlight?: string;
+  /** صورة تحت قسم التركيبة (GMP / البيوتين…) — اختيارية */
+  formulaSectionImageSrc?: string;
 };
 
 export type ProductWithPage = Product & {

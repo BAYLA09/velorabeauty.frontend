@@ -23,7 +23,9 @@ export const images = {
       placeholder: "[ضع صورة المجموعة هنا]",
     },
   },
-  /** صفحات المنتج (PDP) — placeholders حتى تزيدي صور مخصّصة */
+  /** صفحات المنتج (PDP) — placeholders حتى تزيدي صور مخصّصة
+   * formulaSectionImageSrc: صورة تحت قسم التركيبة (مثلاً /images/products/pdp/hair-formula.webp)
+   */
   productPage: {
     hair: {
       src: "/images/products/pdp/hair-main.png",
@@ -35,6 +37,7 @@ export const images = {
       },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
+      formulaSectionImageSrc: undefined as string | undefined,
     },
     skin: {
       src: "/images/products/pdp/skin-main.png?v=20260923-0110",
@@ -46,6 +49,7 @@ export const images = {
       },
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
       marketingSpotlight: undefined as string | undefined,
+      formulaSectionImageSrc: undefined as string | undefined,
     },
     eye: {
       src: "/images/products/pdp/eye-main.png",
@@ -57,6 +61,7 @@ export const images = {
       },
       placeholder: "[صورة صفحة المنتج — سيروم العين]",
       marketingSpotlight: undefined as string | undefined,
+      formulaSectionImageSrc: undefined as string | undefined,
     },
   },
   testimonials: {
