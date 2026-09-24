@@ -29,8 +29,7 @@ export const images = {
    */
   productPage: {
     hair: {
-      /** خاوي — منتج جديد قريباً (نفس slug hair-gummies) */
-      src: "",
+      src: "/images/products/pdp/hair-main.webp?v=20260924-1916",
       storySrc: undefined as string | undefined,
       upsellSlotSrc: undefined as Partial<Record<1 | 2 | 3, string>> | undefined,
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
