@@ -11,7 +11,7 @@ import {
   IconTruck,
 } from "@/components/product/ProductFunnelIcons";
 import { ProductMarketingGallery } from "@/components/product/ProductMarketingGallery";
-import { ProductPainVideoSlot } from "@/components/product/ProductPainVideoSlot";
+import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
 import { uaeDeliveryCities } from "@/config/productPageShared";
 import type { ProductPageConfig } from "@/config/productPages";
@@ -45,14 +45,10 @@ const usageIcons = [IconClock, IconBox, IconDroplet, IconSparkles] as const;
 export function ProductPageLongSections({
   page,
   marketingSpotlight,
-  painSectionVideoSrc,
-  painSectionVideoPoster,
   productName,
 }: {
   page: ProductPageConfig;
   marketingSpotlight?: string;
-  painSectionVideoSrc?: string;
-  painSectionVideoPoster?: string;
   productName: string;
 }) {
   return (
@@ -92,11 +88,7 @@ export function ProductPageLongSections({
         </div>
       </section>
 
-      <ProductPainVideoSlot
-        videoSrc={painSectionVideoSrc}
-        posterSrc={painSectionVideoPoster}
-        productName={productName}
-      />
+      <ProductVideoStoriesStrip />
 
       <section className="bg-white py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">
