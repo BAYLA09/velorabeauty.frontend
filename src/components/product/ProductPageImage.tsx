@@ -54,7 +54,7 @@ export function ProductPageImage({
         height={1400}
         sizes={sizes}
         priority={priority}
-        quality={85}
+        quality={92}
         className="relative z-[1] block h-auto w-full max-w-full"
         style={{ width: "100%", height: "auto" }}
         onLoad={() => setLoaded(true)}

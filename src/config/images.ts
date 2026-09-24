@@ -11,7 +11,7 @@ export const images = {
       placeholder: "[ضع صورة المنتج هنا]",
     },
     skin: {
-      src: "/images/products/skin-gummies.webp",
+      src: "/images/products/skin-gummies.webp?v=20260924-hq",
       placeholder: "[ضع صورة المنتج هنا]",
     },
     eye: {
@@ -42,17 +42,17 @@ export const images = {
       timelineSectionImageSrc: "/images/products/pdp/hair-timeline-slot.webp?v=20260924-2026",
     },
     skin: {
-      src: "/images/products/pdp/skin-main.webp?v=20260924",
-      storySrc: "/images/products/pdp/skin-story.webp?v=20260924",
+      src: "/images/products/pdp/skin-main.webp?v=20260924-hq",
+      storySrc: "/images/products/pdp/skin-story.webp?v=20260924-hq",
       upsellSlotSrc: {
-        1: "/images/products/pdp/upsell/skin-qty-1.webp?v=20260924",
-        2: "/images/products/pdp/upsell/skin-qty-2.webp?v=20260924",
-        3: "/images/products/pdp/upsell/skin-qty-3.webp?v=20260924",
+        1: "/images/products/pdp/upsell/skin-qty-1.webp?v=20260924-hq",
+        2: "/images/products/pdp/upsell/skin-qty-2.webp?v=20260924-hq",
+        3: "/images/products/pdp/upsell/skin-qty-3.webp?v=20260924-hq",
       },
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
       marketingSpotlight: undefined as string | undefined,
-      formulaSectionImageSrc: "/images/products/pdp/skin-formula-slot.webp?v=20260924-2127",
-      timelineSectionImageSrc: undefined as string | undefined,
+      formulaSectionImageSrc: "/images/products/pdp/skin-formula-slot.webp?v=20260924-hq",
+      timelineSectionImageSrc: "/images/products/pdp/skin-timeline-slot.webp?v=20260924-hq",
     },
     eye: {
       src: "/images/products/pdp/eye-main.webp",
