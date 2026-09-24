@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   src: string;
@@ -26,18 +26,31 @@ export function VeloraImage({
   fit = "cover",
   sharp = false,
 }: Props) {
-  const [ready, setReady] = useState(false);
-  const showPlaceholder = !ready;
+  const [placeholderVisible, setPlaceholderVisible] = useState(true);
+
+  useEffect(() => {
+    setPlaceholderVisible(true);
+  }, [src]);
 
   return (
-    <div
-      className={`relative overflow-hidden bg-velora-cream-dark ${className}`}
-    >
+    <div className={`relative overflow-hidden bg-velora-cream-dark ${className}`}>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        unoptimized={sharp}
+        quality={sharp ? undefined : 85}
+        className={`${fit === "contain" ? "object-contain" : "object-cover"}`}
+        sizes={sizes}
+        priority={priority}
+        onLoad={() => setPlaceholderVisible(false)}
+        onLoadingComplete={() => setPlaceholderVisible(false)}
+      />
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center transition-opacity duration-300 ${
-          showPlaceholder ? "opacity-100" : "pointer-events-none opacity-0"
+        className={`absolute inset-0 z-[1] flex flex-col items-center justify-center gap-3 bg-velora-cream-dark px-4 text-center transition-opacity duration-200 ${
+          placeholderVisible ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
-        aria-hidden={!showPlaceholder}
+        aria-hidden={!placeholderVisible}
       >
         <span className="flex h-12 w-12 items-center justify-center rounded-full border border-velora-burgundy/15 bg-white/60">
           <svg
@@ -51,24 +64,8 @@ export function VeloraImage({
             <circle cx="8" cy="7" r="1.5" fill="currentColor" stroke="none" />
           </svg>
         </span>
-        <p className="max-w-[16rem] text-xs leading-relaxed text-velora-burgundy/55">
-          {placeholder}
-        </p>
+        <p className="max-w-[16rem] text-xs leading-relaxed text-velora-burgundy/55">{placeholder}</p>
       </div>
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        unoptimized={sharp}
-        quality={sharp ? undefined : 85}
-        className={`transition-opacity duration-500 ${
-          fit === "contain" ? "object-contain" : "object-cover"
-        } ${showPlaceholder ? "opacity-0" : "opacity-100"}`}
-        sizes={sizes}
-        priority={priority}
-        onLoad={() => setReady(true)}
-        onError={() => setReady(false)}
-      />
     </div>
   );
 }
