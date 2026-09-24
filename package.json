@@ -7,7 +7,8 @@
     "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "next lint",
-    "optimize:images": "node scripts/optimize-pdp-images.mjs"
+    "optimize:images": "node scripts/optimize-pdp-images.mjs",
+    "reencode:skin-hq": "node scripts/reencode-skin-hq.mjs"
   },
   "dependencies": {
     "next": "^15.5.4",
