@@ -64,7 +64,7 @@ export const images = {
       },
       placeholder: "[صورة صفحة المنتج — سيروم العين]",
       marketingSpotlight: undefined as string | undefined,
-      formulaSectionImageSrc: undefined as string | undefined,
+      formulaSectionImageSrc: "/images/products/pdp/eye-formula-slot.webp?v=20260924-2130",
       timelineSectionImageSrc: undefined as string | undefined,
     },
   },
