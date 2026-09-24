@@ -1,6 +1,6 @@
 export const images = {
   hero: {
-    src: "/images/hero/0d992921-89dc-4309-bfeb-4feb78ba2834.png",
+    src: "/images/hero/hero-campaign.webp?v=20260924-2217",
     background: "/images/hero/hero-background.webp",
     placeholder: "[ضع صورة الحملة الرئيسية هنا]",
   },
