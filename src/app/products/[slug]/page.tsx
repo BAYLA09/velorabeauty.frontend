@@ -35,7 +35,9 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
-      <link rel="preload" as="image" href={img.src} fetchPriority="high" />
+      {img.src?.trim() ? (
+        <link rel="preload" as="image" href={img.src} fetchPriority="high" />
+      ) : null}
       {img.storySrc ? (
         <link rel="preload" as="image" href={img.storySrc} fetchPriority="low" />
       ) : null}

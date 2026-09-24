@@ -3,7 +3,8 @@ import { productPages } from "@/config/productPages";
 import { products, type Product, type ProductId } from "@/config/products";
 
 export type ProductImageRef = {
-  src: string;
+  /** فارغ = مساحة محجوزة على PDP */
+  src?: string;
   placeholder: string;
   /** الصورة الثانية (قسم hook / before-after) */
   storySrc?: string;
