@@ -7,19 +7,19 @@ export const images = {
   /** الصفحة الرئيسية — صور حقيقية */
   products: {
     hair: {
-      src: "/images/products/hair-gummies.png",
+      src: "/images/products/hair-gummies.webp",
       placeholder: "[ضع صورة المنتج هنا]",
     },
     skin: {
-      src: "/images/products/skin-gummies.png",
+      src: "/images/products/skin-gummies.webp",
       placeholder: "[ضع صورة المنتج هنا]",
     },
     eye: {
-      src: "/images/products/eye-serum.png",
+      src: "/images/products/eye-serum.webp",
       placeholder: "[ضع صورة السيروم هنا]",
     },
     bundle: {
-      src: "/images/products/bundle.png",
+      src: "/images/products/bundle.webp",
       placeholder: "[ضع صورة المجموعة هنا]",
     },
   },
@@ -29,12 +29,12 @@ export const images = {
    */
   productPage: {
     hair: {
-      src: "/images/products/pdp/hair-main.png",
-      storySrc: "/images/products/pdp/hair-story.png?v=20260923-0131",
+      src: "/images/products/pdp/hair-main.webp",
+      storySrc: "/images/products/pdp/hair-story.webp?v=20260924",
       upsellSlotSrc: {
-        1: "/images/products/pdp/upsell/hair-qty-1.png?v=20260923-1523",
-        2: "/images/products/pdp/upsell/hair-qty-2.png?v=20260923-1526",
-        3: "/images/products/pdp/upsell/hair-qty-3.png?v=20260923-1528",
+        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20260924",
+        2: "/images/products/pdp/upsell/hair-qty-2.webp?v=20260924",
+        3: "/images/products/pdp/upsell/hair-qty-3.webp?v=20260924",
       },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
@@ -42,12 +42,12 @@ export const images = {
       timelineSectionImageSrc: undefined as string | undefined,
     },
     skin: {
-      src: "/images/products/pdp/skin-main.png?v=20260923-0110",
-      storySrc: "/images/products/pdp/skin-story.png?v=20260923-0126",
+      src: "/images/products/pdp/skin-main.webp?v=20260924",
+      storySrc: "/images/products/pdp/skin-story.webp?v=20260924",
       upsellSlotSrc: {
-        1: "/images/products/pdp/upsell/skin-qty-1.png?v=20260923-1500",
-        2: "/images/products/pdp/upsell/skin-qty-2.png?v=20260923-1510",
-        3: "/images/products/pdp/upsell/skin-qty-3.png?v=20260923-1513",
+        1: "/images/products/pdp/upsell/skin-qty-1.webp?v=20260924",
+        2: "/images/products/pdp/upsell/skin-qty-2.webp?v=20260924",
+        3: "/images/products/pdp/upsell/skin-qty-3.webp?v=20260924",
       },
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
       marketingSpotlight: undefined as string | undefined,
@@ -55,12 +55,12 @@ export const images = {
       timelineSectionImageSrc: undefined as string | undefined,
     },
     eye: {
-      src: "/images/products/pdp/eye-main.png",
-      storySrc: "/images/products/pdp/eye-story.png?v=20260923-0111",
+      src: "/images/products/pdp/eye-main.webp",
+      storySrc: "/images/products/pdp/eye-story.webp?v=20260924",
       upsellSlotSrc: {
-        1: "/images/products/pdp/upsell/eye-qty-1.png?v=20260923-1535",
-        2: "/images/products/pdp/upsell/eye-qty-2.png?v=20260923-1539",
-        3: "/images/products/pdp/upsell/eye-qty-3.png?v=20260923-1542",
+        1: "/images/products/pdp/upsell/eye-qty-1.webp?v=20260924",
+        2: "/images/products/pdp/upsell/eye-qty-2.webp?v=20260924",
+        3: "/images/products/pdp/upsell/eye-qty-3.webp?v=20260924",
       },
       placeholder: "[صورة صفحة المنتج — سيروم العين]",
       marketingSpotlight: undefined as string | undefined,
