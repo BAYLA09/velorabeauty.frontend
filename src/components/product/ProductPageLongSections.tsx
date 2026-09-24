@@ -15,6 +15,7 @@ import { ProductMarketingGallery } from "@/components/product/ProductMarketingGa
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
 import { uaeDeliveryCities } from "@/config/productPageShared";
 import type { ProductPageConfig } from "@/config/productPages";
+import type { ProductId } from "@/config/products";
 
 function SectionIntro({
   eyebrow,
@@ -48,12 +49,14 @@ export function ProductPageLongSections({
   formulaSectionImageSrc,
   timelineSectionImageSrc,
   productName,
+  productId,
 }: {
   page: ProductPageConfig;
   marketingSpotlight?: string;
   formulaSectionImageSrc?: string;
   timelineSectionImageSrc?: string;
   productName: string;
+  productId: ProductId;
 }) {
   return (
     <>
@@ -219,6 +222,7 @@ export function ProductPageLongSections({
         title={page.testimonialTitle}
         subtitle={page.testimonialSubtitle}
         layout="pdp"
+        productId={productId}
         emotionalFallback={page.emotionalProof}
       />
 

@@ -94,6 +94,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
 
         <ProductPageLongSections
           page={page}
+          productId={product.id}
           productName={product.name}
           marketingSpotlight={product.pageImage.marketingSpotlight}
           formulaSectionImageSrc={product.pageImage.formulaSectionImageSrc}
