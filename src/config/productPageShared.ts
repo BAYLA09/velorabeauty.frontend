@@ -81,8 +81,8 @@ export function sharedProductPageBlocks(form: "gummy" | "serum") {
         answer: "بطاقة أو COD داخل الإمارات — انظري قسم التوصيل أعلاه.",
       },
     ],
-    testimonialTitle: "تجارب حقيقية",
-    testimonialSubtitle: "تقييمات مؤكدة — تُعرض عند توفرها",
+    testimonialTitle: "ما تقوله العميلات؟",
+    testimonialSubtitle: "تقييمات مؤكدة — دفع عند الاستلام",
     formulaBadges: ["GMP", "حلال", "جودة معتمدة", "تصنيع مدروس"],
     competitorBlocks: [
       {
