@@ -12,7 +12,6 @@ import {
 } from "@/components/product/ProductFunnelIcons";
 import { ProductPdpImageSlot } from "@/components/product/ProductPdpImageSlot";
 import { ProductMarketingGallery } from "@/components/product/ProductMarketingGallery";
-import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
 import { uaeDeliveryCities } from "@/config/productPageShared";
 import type { ProductPageConfig } from "@/config/productPages";
@@ -92,8 +91,6 @@ export function ProductPageLongSections({
           </div>
         </div>
       </section>
-
-      <ProductVideoStoriesStrip />
 
       <section className="bg-white py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6">

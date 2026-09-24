@@ -15,6 +15,7 @@ import {
 import { ProductRitualSection } from "@/components/product/ProductRitualSection";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
 import { ProductTrustBar } from "@/components/product/ProductTrustBar";
+import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductWithPage } from "@/lib/productCatalog";
@@ -91,6 +92,8 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 onMethodChange={setMethod}
                 onChange={setPurchase}
               />
+
+              <ProductVideoStoriesStrip compact />
 
               <ProductTrustBar prominent />
             </div>
