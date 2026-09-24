@@ -30,7 +30,7 @@ export const images = {
   productPage: {
     hair: {
       src: "/images/products/pdp/hair-main.webp?v=20260924-1916",
-      storySrc: undefined as string | undefined,
+      storySrc: "/images/products/pdp/hair-story.webp?v=20260924-1931",
       upsellSlotSrc: undefined as Partial<Record<1 | 2 | 3, string>> | undefined,
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
