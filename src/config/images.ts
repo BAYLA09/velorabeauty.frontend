@@ -31,7 +31,9 @@ export const images = {
     hair: {
       src: "/images/products/pdp/hair-main.webp?v=20260924-1916",
       storySrc: "/images/products/pdp/hair-story.webp?v=20260924-1931",
-      upsellSlotSrc: undefined as Partial<Record<1 | 2 | 3, string>> | undefined,
+      upsellSlotSrc: {
+        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20260924-1938",
+      },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
       formulaSectionImageSrc: undefined as string | undefined,
