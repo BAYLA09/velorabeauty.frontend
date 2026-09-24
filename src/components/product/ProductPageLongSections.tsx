@@ -10,7 +10,7 @@ import {
   IconStethoscope,
   IconTruck,
 } from "@/components/product/ProductFunnelIcons";
-import { ProductFormulaImageSlot } from "@/components/product/ProductFormulaImageSlot";
+import { ProductPdpImageSlot } from "@/components/product/ProductPdpImageSlot";
 import { ProductMarketingGallery } from "@/components/product/ProductMarketingGallery";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { TestimonialsProductStrip } from "@/components/testimonials/TestimonialsProductStrip";
@@ -47,11 +47,13 @@ export function ProductPageLongSections({
   page,
   marketingSpotlight,
   formulaSectionImageSrc,
+  timelineSectionImageSrc,
   productName,
 }: {
   page: ProductPageConfig;
   marketingSpotlight?: string;
   formulaSectionImageSrc?: string;
+  timelineSectionImageSrc?: string;
   productName: string;
 }) {
   return (
@@ -134,7 +136,10 @@ export function ProductPageLongSections({
               </div>
             ))}
           </div>
-          <ProductFormulaImageSlot src={formulaSectionImageSrc} productName={productName} />
+          <ProductPdpImageSlot
+            src={formulaSectionImageSrc}
+            imageAlt={`${productName} — صورة التركيبة`}
+          />
         </div>
       </section>
 
@@ -219,6 +224,10 @@ export function ProductPageLongSections({
               </li>
             ))}
           </ol>
+          <ProductPdpImageSlot
+            src={timelineSectionImageSrc}
+            imageAlt={`${productName} — صورة الاستمرار`}
+          />
         </div>
       </section>
 

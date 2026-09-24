@@ -15,6 +15,8 @@ export type ProductImageRef = {
   marketingSpotlight?: string;
   /** صورة تحت قسم التركيبة (GMP / البيوتين…) — اختيارية */
   formulaSectionImageSrc?: string;
+  /** صورة تحت قسم «مع الاستمرار» / timeline — اختيارية */
+  timelineSectionImageSrc?: string;
 };
 
 export type ProductWithPage = Product & {
