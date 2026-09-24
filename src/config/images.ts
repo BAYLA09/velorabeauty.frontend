@@ -35,6 +35,8 @@ export const images = {
       },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
+      painSectionVideoSrc: undefined as string | undefined,
+      painSectionVideoPoster: undefined as string | undefined,
     },
     skin: {
       src: "/images/products/pdp/skin-main.png?v=20260923-0110",
@@ -46,6 +48,8 @@ export const images = {
       },
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
       marketingSpotlight: undefined as string | undefined,
+      painSectionVideoSrc: undefined as string | undefined,
+      painSectionVideoPoster: undefined as string | undefined,
     },
     eye: {
       src: "/images/products/pdp/eye-main.png",
@@ -57,6 +61,8 @@ export const images = {
       },
       placeholder: "[صورة صفحة المنتج — سيروم العين]",
       marketingSpotlight: undefined as string | undefined,
+      painSectionVideoSrc: undefined as string | undefined,
+      painSectionVideoPoster: undefined as string | undefined,
     },
   },
   testimonials: {

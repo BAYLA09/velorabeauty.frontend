@@ -13,6 +13,9 @@ export type ProductImageRef = {
   upsellSlotSrc?: Partial<Record<1 | 2 | 3, string>>;
   /** صورة marketing واحدة (تحت التركيبة) — اختيارية */
   marketingSpotlight?: string;
+  /** فيديو مربع تحت قسم المشاكل — اختياري (المربع يظهر حتى بدون ملف) */
+  painSectionVideoSrc?: string;
+  painSectionVideoPoster?: string;
 };
 
 export type ProductWithPage = Product & {
