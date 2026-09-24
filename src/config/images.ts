@@ -56,7 +56,7 @@ export const images = {
     },
     eye: {
       src: "/images/products/pdp/eye-main.webp",
-      storySrc: "/images/products/pdp/eye-story.webp?v=20260924",
+      storySrc: "/images/products/pdp/eye-story.webp?v=20260924-2157",
       upsellSlotSrc: {
         1: "/images/products/pdp/upsell/eye-qty-1.webp?v=20260924",
         2: "/images/products/pdp/upsell/eye-qty-2.webp?v=20260924",
