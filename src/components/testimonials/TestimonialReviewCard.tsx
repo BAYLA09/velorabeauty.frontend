@@ -8,29 +8,34 @@ type Props = {
   layout?: "default" | "pdp";
 };
 
+function cityAgeLine(review: TestimonialReview) {
+  if (review.age != null) {
+    return `${review.city} • ${review.age} سنة`;
+  }
+  return review.city;
+}
+
 export function TestimonialReviewCard({ review, featured, layout = "default" }: Props) {
   if (layout === "pdp") {
     return (
-      <article className="rounded-[1.5rem] border border-velora-burgundy/10 bg-white p-4 shadow-sm sm:p-5">
-        <div className="mb-3 flex items-start justify-between gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-900">
+      <article className="flex h-full flex-col rounded-[1.25rem] border border-velora-burgundy/10 bg-white p-5 shadow-sm sm:p-6">
+        <div className="mb-4 flex items-start justify-between gap-2">
+          <span className="inline-flex items-center gap-1 rounded-full bg-velora-cream-dark px-2.5 py-1 text-[10px] font-bold text-velora-burgundy-dark">
             ✓ مؤكدة
           </span>
           {review.rating != null ? (
-            <div className="shrink-0">
-              <StarRating rating={review.rating} />
-            </div>
+            <StarRating rating={review.rating} className="text-amber-500" />
           ) : null}
         </div>
-        <blockquote className="text-right text-sm leading-relaxed text-velora-burgundy/85 sm:text-base">
+        <blockquote className="flex-1 text-center text-sm leading-relaxed text-velora-burgundy/85 sm:text-[15px]">
           {review.quote}
         </blockquote>
-        <footer className="mt-4 flex items-center justify-end gap-3 border-t border-velora-burgundy/8 pt-4">
-          <div className="text-right">
-            <p className="text-sm font-bold text-velora-burgundy-dark">{review.name}</p>
-            <p className="text-xs text-velora-burgundy/55">{review.city}</p>
+        <footer className="mt-5 flex items-center justify-between gap-3 border-t border-velora-burgundy/8 pt-4">
+          <div className="min-w-0 text-right">
+            <p className="text-sm font-extrabold text-velora-burgundy-dark">{review.name}</p>
+            <p className="text-xs text-velora-burgundy/55">{cityAgeLine(review)}</p>
           </div>
-          <TestimonialAvatar name={review.name} imageSrc={review.imageSrc} size="md" />
+          <TestimonialAvatar name={review.name} imageSrc={review.imageSrc} size="sm" />
         </footer>
       </article>
     );
@@ -60,7 +65,7 @@ export function TestimonialReviewCard({ review, featured, layout = "default" }: 
         <div>
           <p className="text-sm font-bold text-velora-burgundy">
             {review.name}
-            <span className="font-medium text-velora-burgundy/55"> · {review.city}</span>
+            <span className="font-medium text-velora-burgundy/55"> · {cityAgeLine(review)}</span>
           </p>
           {review.productLabel && (
             <p className="mt-1 text-xs text-velora-champagne-dark">{review.productLabel}</p>
