@@ -29,13 +29,10 @@ export const images = {
    */
   productPage: {
     hair: {
-      src: "/images/products/pdp/hair-main.webp",
-      storySrc: "/images/products/pdp/hair-story.webp?v=20260924",
-      upsellSlotSrc: {
-        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20260924",
-        2: "/images/products/pdp/upsell/hair-qty-2.webp?v=20260924",
-        3: "/images/products/pdp/upsell/hair-qty-3.webp?v=20260924",
-      },
+      /** خاوي — منتج جديد قريباً (نفس slug hair-gummies) */
+      src: "",
+      storySrc: undefined as string | undefined,
+      upsellSlotSrc: undefined as Partial<Record<1 | 2 | 3, string>> | undefined,
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
       formulaSectionImageSrc: undefined as string | undefined,

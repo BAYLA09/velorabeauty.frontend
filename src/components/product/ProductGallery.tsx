@@ -4,13 +4,22 @@ import { useState } from "react";
 import { ProductPageImage } from "./ProductPageImage";
 
 type Props = {
-  mainSrc: string;
+  mainSrc?: string;
   productName: string;
   placeholder: string;
   laraFrame?: boolean;
   /** Nama-style: full width on mobile */
   fullWidthMobile?: boolean;
 };
+
+function EmptyImageSlot({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`flex min-h-[16rem] min-w-[16rem] items-center justify-center rounded-[1.25rem] border border-dashed border-velora-burgundy/15 bg-velora-cream-dark/50 ${className}`}
+      aria-hidden
+    />
+  );
+}
 
 export function ProductGallery({
   mainSrc,
@@ -20,6 +29,7 @@ export function ProductGallery({
   fullWidthMobile = false,
 }: Props) {
   const [failed, setFailed] = useState(false);
+  const hasSrc = Boolean(mainSrc?.trim());
 
   return (
     <div className="w-full min-w-0">
@@ -32,13 +42,15 @@ export function ProductGallery({
             : "mx-auto w-fit max-w-full rounded-[2rem] border border-velora-burgundy/10 bg-white shadow-lg"
         }
       >
-        {failed ? (
+        {!hasSrc ? (
+          <EmptyImageSlot />
+        ) : failed ? (
           <div className="flex min-h-[16rem] min-w-[16rem] items-center justify-center rounded-[1.25rem] bg-velora-cream-dark p-6 text-center text-sm text-velora-burgundy/60">
             {placeholder}
           </div>
         ) : (
           <ProductPageImage
-            src={mainSrc}
+            src={mainSrc!}
             alt={productName}
             priority
             className="rounded-[1.15rem]"

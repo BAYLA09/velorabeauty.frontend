@@ -9,23 +9,28 @@ export function ProductRitualSection({
   imageSrc,
 }: {
   productId: ProductId;
-  imageSrc: string;
+  imageSrc?: string;
 }) {
   const data = productProblemOverlayById[productId];
   if (!data) return null;
 
   const pct = Math.min(100, Math.max(0, data.statPercent));
+  const hasImage = Boolean(imageSrc?.trim());
 
   return (
     <section className="bg-velora-cream py-6 sm:py-10">
       <div className="mx-auto max-w-lg px-4 sm:max-w-4xl sm:px-6 lg:max-w-6xl">
         <div className="overflow-hidden rounded-[2rem] border border-velora-burgundy/10 bg-white shadow-[0_12px_40px_rgba(58,24,32,0.1)] sm:rounded-[2.5rem]">
           <div className="relative w-full overflow-hidden bg-velora-cream-dark">
-            <ProductPageImage
-              src={imageSrc}
-              alt={data.headline}
-              className="h-auto w-full object-cover"
-            />
+            {hasImage && imageSrc ? (
+              <ProductPageImage
+                src={imageSrc}
+                alt={data.headline}
+                className="h-auto w-full object-cover"
+              />
+            ) : (
+              <div className="aspect-[4/3] w-full border-b border-dashed border-velora-burgundy/10 bg-velora-cream-dark/60 sm:aspect-[16/10]" aria-hidden />
+            )}
           </div>
 
           <div className="bg-[#2c1318] px-4 py-4 sm:px-6 sm:py-5">
