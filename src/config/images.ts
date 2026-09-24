@@ -51,7 +51,7 @@ export const images = {
       },
       placeholder: "[صورة صفحة المنتج — علكات البشرة]",
       marketingSpotlight: undefined as string | undefined,
-      formulaSectionImageSrc: undefined as string | undefined,
+      formulaSectionImageSrc: "/images/products/pdp/skin-formula-slot.webp?v=20260924-2127",
       timelineSectionImageSrc: undefined as string | undefined,
     },
     eye: {
