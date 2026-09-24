@@ -32,7 +32,7 @@ export const images = {
       src: "/images/products/pdp/hair-main.webp?v=20260924-1916",
       storySrc: "/images/products/pdp/hair-story.webp?v=20260924-1931",
       upsellSlotSrc: {
-        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20260924-1938",
+        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20260924-1945-nobg",
       },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,

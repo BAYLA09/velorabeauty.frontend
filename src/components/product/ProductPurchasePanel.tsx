@@ -116,7 +116,7 @@ function OfferProductStack({
           : "relative h-[3.35rem] w-[4.65rem] shrink-0 sm:h-[3.65rem] sm:w-[5rem]";
 
     return (
-      <div className={slotClass}>
+      <div className={`${slotClass} bg-transparent`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
@@ -124,7 +124,7 @@ function OfferProductStack({
           loading="eager"
           decoding="async"
           fetchPriority="high"
-          className="pointer-events-none absolute bottom-0 left-1/2 h-[3.1rem] w-auto max-w-full -translate-x-1/2 object-contain object-bottom sm:h-[3.4rem]"
+          className="pointer-events-none absolute bottom-0 left-1/2 h-[3.1rem] w-auto max-w-full -translate-x-1/2 bg-transparent object-contain object-bottom sm:h-[3.4rem]"
         />
       </div>
     );
