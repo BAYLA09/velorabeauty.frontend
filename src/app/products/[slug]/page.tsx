@@ -29,19 +29,11 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const all = getAllProductsWithPages();
-
-  const img = product.pageImage;
-  const upsell2 = img.upsellSlotSrc?.[2];
+  const mainSrc = product.pageImage.src?.trim();
 
   return (
     <>
-      {img.src?.trim() ? (
-        <link rel="preload" as="image" href={img.src} fetchPriority="high" />
-      ) : null}
-      {img.storySrc ? (
-        <link rel="preload" as="image" href={img.storySrc} fetchPriority="low" />
-      ) : null}
-      {upsell2 ? <link rel="preload" as="image" href={upsell2} fetchPriority="low" /> : null}
+      {mainSrc ? <link rel="preload" as="image" href={mainSrc} fetchPriority="high" /> : null}
       <ProductPageClient product={product} allProducts={all} />
     </>
   );

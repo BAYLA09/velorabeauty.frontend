@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { preloadImageUrls } from "@/lib/preloadImages";
+import { useState } from "react";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
@@ -32,17 +31,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
-
-  useEffect(() => {
-    const upsell = product.pageImage.upsellSlotSrc;
-    preloadImageUrls([
-      product.pageImage.src,
-      product.pageImage.storySrc,
-      upsell?.[1],
-      upsell?.[2],
-      upsell?.[3],
-    ]);
-  }, [product.pageImage]);
 
   return (
     <>

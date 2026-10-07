@@ -3,7 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    formats: ["image/avif", "image/webp"],
+    formats: ["image/webp"],
+    deviceSizes: [640, 828, 1200],
+    imageSizes: [64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
   async headers() {
