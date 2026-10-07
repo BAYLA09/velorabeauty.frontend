@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { BundleQuantity } from "@/config/pricing";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
+import { ProductFloatingJar } from "@/components/product/ProductFloatingJar";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductFeaturePills } from "@/components/product/ProductFeaturePills";
 import { ProductMobileStickyBar } from "@/components/product/ProductMobileStickyBar";
@@ -36,13 +37,27 @@ export function ProductPageClient({ product, allProducts }: Props) {
       <ProductAnnouncementBar />
       <ProductStoreHeader />
 
-      <main className="product-typography bg-velora-cream pb-24 md:pb-0">
+      <main className="product-typography bg-velora-cream pb-24 lg:pb-0">
+        <div className="mx-auto flex max-w-lg items-start gap-8 px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:max-w-7xl lg:py-8">
+          <aside className="hidden w-[min(100%,340px)] shrink-0 lg:block xl:w-[360px]">
+            <div className="sticky top-20 z-20">
+              <ProductGallery
+                mainSrc={product.pageImage.src}
+                productName={product.name}
+                placeholder={product.pageImage.placeholder}
+                laraFrame
+              />
+              <ProductFeaturePills form={page.form} />
+            </div>
+          </aside>
+
+          <div className="min-w-0 flex-1">
         <section
           id="purchase"
-          className="scroll-mt-24 mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:py-8"
+          className="scroll-mt-24"
         >
-          <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-10">
-            <div className="min-w-0 w-full lg:sticky lg:top-4">
+          <div id="pdp-hero-gallery" className="grid items-start gap-6 lg:block">
+            <div className="min-w-0 w-full lg:hidden">
               <ProductGallery
                 mainSrc={product.pageImage.src}
                 productName={product.name}
@@ -100,6 +115,14 @@ export function ProductPageClient({ product, allProducts }: Props) {
         />
 
         <RelatedProducts currentSlug={product.slug} products={allProducts} />
+          </div>
+        </div>
+
+        <ProductFloatingJar
+          src={product.pageImage.src ?? ""}
+          productName={product.name}
+          watchSelector="#pdp-hero-gallery"
+        />
       </main>
       <FooterSection />
 
