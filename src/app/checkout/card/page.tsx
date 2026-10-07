@@ -1,6 +1,5 @@
-import { CheckoutExperienceLayout } from "@/components/checkout/CheckoutExperienceLayout";
-import { CheckoutOrderForm } from "@/components/checkout/CheckoutOrderForm";
-import { checkoutExperience } from "@/config/checkoutExperience";
+import { CheckoutConfirmClient } from "@/components/checkout/CheckoutConfirmClient";
+import { getCheckoutProductImage } from "@/lib/checkoutProductMeta";
 import { resolveCheckoutContext } from "@/lib/resolveCheckoutContext";
 
 type PageProps = {
@@ -10,24 +9,15 @@ type PageProps = {
 export default async function CardCheckoutPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const ctx = resolveCheckoutContext(sp);
-  const copy = checkoutExperience.card;
+  const productImageSrc = getCheckoutProductImage(ctx.productSlug);
 
   return (
-    <CheckoutExperienceLayout
-      accent={copy.accent}
-      eyebrow={copy.eyebrow}
-      title={copy.title}
-      lead={copy.lead}
-      heroBadge={copy.heroBadge}
-      perks={copy.perks}
-    >
-      <CheckoutOrderForm
-        paymentMethod="card"
-        accent="gold"
-        productSlug={ctx.productSlug}
-        productName={ctx.productName}
-        quantity={ctx.quantity}
-      />
-    </CheckoutExperienceLayout>
+    <CheckoutConfirmClient
+      paymentMethod="card"
+      productSlug={ctx.productSlug}
+      productName={ctx.productName}
+      productImageSrc={productImageSrc}
+      quantity={ctx.quantity}
+    />
   );
 }

@@ -1,4 +1,4 @@
-import { CheckoutMethodHubClient } from "@/components/checkout/CheckoutMethodHubClient";
+import { CheckoutPaymentStepClient } from "@/components/checkout/CheckoutPaymentStepClient";
 import { resolveCheckoutContext } from "@/lib/resolveCheckoutContext";
 
 type PageProps = {
@@ -10,7 +10,7 @@ export default async function CheckoutMethodHubPage({ searchParams }: PageProps)
   const ctx = resolveCheckoutContext(sp);
 
   return (
-    <CheckoutMethodHubClient
+    <CheckoutPaymentStepClient
       productSlug={ctx.productSlug}
       productName={ctx.productName}
       quantity={ctx.quantity}

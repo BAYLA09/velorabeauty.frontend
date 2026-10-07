@@ -33,15 +33,17 @@ export async function POST(request: Request) {
     if (!isPaymentMethod(paymentMethod)) {
       return NextResponse.json({ error: "طريقة الدفع غير صالحة." }, { status: 400 });
     }
-    if (!customerName || !phone || !address) {
-      return NextResponse.json(
-        { error: "أكملي الاسم والهاتف والعنوان." },
-        { status: 400 },
-      );
+    if (!customerName || !phone) {
+      return NextResponse.json({ error: "أكملي الاسم ورقم الهاتف." }, { status: 400 });
     }
-    if (!checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])) {
-      return NextResponse.json({ error: "اختر الإمارة من القائمة." }, { status: 400 });
-    }
+
+    const resolvedEmirate =
+      emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
+        ? emirate
+        : (checkoutEmirates[0] ?? "دبي");
+    const resolvedAddress =
+      address ||
+      (paymentMethod === "cod" ? "يُؤكَّد معكِ بالهاتف" : "يُؤكَّد بعد التواصل");
 
     const order = createOrder({
       productSlug,
@@ -50,8 +52,8 @@ export async function POST(request: Request) {
       paymentMethod,
       customerName,
       phone,
-      emirate,
-      address,
+      emirate: resolvedEmirate,
+      address: resolvedAddress,
     });
 
     return NextResponse.json({ order });
