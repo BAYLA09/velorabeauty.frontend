@@ -1,6 +1,7 @@
 import { CheckoutCardConfirmClient } from "@/components/checkout/CheckoutCardConfirmClient";
 import { getCheckoutProductImage } from "@/lib/checkoutProductMeta";
 import { resolveCheckoutContext } from "@/lib/resolveCheckoutContext";
+import { bootstrapStripeCardCheckout } from "@/lib/stripeCardBootstrap";
 import { isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
 
 type PageProps = {
@@ -11,6 +12,15 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const ctx = resolveCheckoutContext(sp);
   const productImageSrc = getCheckoutProductImage(ctx.productSlug);
+  const stripeEnabled = isStripeCardCheckoutEnabled();
+
+  const stripeBootstrap = stripeEnabled
+    ? await bootstrapStripeCardCheckout({
+        productSlug: ctx.productSlug,
+        productName: ctx.productName,
+        quantity: ctx.quantity,
+      })
+    : null;
 
   return (
     <CheckoutCardConfirmClient
@@ -18,7 +28,8 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
       productName={ctx.productName}
       productImageSrc={productImageSrc}
       quantity={ctx.quantity}
-      stripeEnabled={isStripeCardCheckoutEnabled()}
+      stripeEnabled={stripeEnabled}
+      stripeBootstrap={stripeBootstrap}
     />
   );
 }

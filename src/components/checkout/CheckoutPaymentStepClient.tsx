@@ -13,6 +13,7 @@ import {
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
+import { useStripeWarmup } from "@/components/checkout/useStripeWarmup";
 import { buildCheckoutPath } from "@/lib/checkoutRoutes";
 
 type Props = {
@@ -86,6 +87,7 @@ export function CheckoutPaymentStepClient({
   const [method, setMethod] = useState<PaymentMethod>(initialMethod);
   const query = { product: productSlug, quantity };
   const total = getCheckoutTotal(quantity, method);
+  useStripeWarmup(true);
 
   function continueCheckout() {
     router.push(buildCheckoutPath(method, query));

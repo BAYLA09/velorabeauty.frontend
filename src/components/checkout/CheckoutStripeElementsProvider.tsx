@@ -1,10 +1,8 @@
 "use client";
 
 import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -12,14 +10,17 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { PaymentFieldsSkeleton } from "@/components/checkout/PaymentFieldsSkeleton";
 import { stripeElementsAppearance } from "@/components/checkout/stripeAppearance";
+import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
+import { preloadStripeJs } from "@/lib/stripeJsLoader";
 import type { BundleQuantity } from "@/config/pricing";
 
 type StripeCtx = {
   paymentIntentId: string;
   paymentReady: boolean;
   setPaymentReady: (ready: boolean) => void;
-  loading: boolean;
+  elementsLoading: boolean;
   error: string | null;
 };
 
@@ -33,19 +34,11 @@ export function useCheckoutStripe() {
   return ctx;
 }
 
-let stripePromise: Promise<Stripe | null> | null = null;
-
-function getStripePromise(publishableKey: string) {
-  if (!stripePromise) {
-    stripePromise = loadStripe(publishableKey, { locale: "ar" });
-  }
-  return stripePromise;
-}
-
 type Props = {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  bootstrap: StripeCardBootstrap | null;
   children: ReactNode;
 };
 
@@ -53,74 +46,99 @@ export function CheckoutStripeElementsProvider({
   productSlug,
   productName,
   quantity,
+  bootstrap,
   children,
 }: Props) {
-  const [publishableKey, setPublishableKey] = useState<string | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [paymentIntentId, setPaymentIntentId] = useState("");
+  const [publishableKey, setPublishableKey] = useState<string | null>(
+    bootstrap?.publishableKey ?? null,
+  );
+  const [clientSecret, setClientSecret] = useState<string | null>(
+    bootstrap?.clientSecret ?? null,
+  );
+  const [paymentIntentId, setPaymentIntentId] = useState(bootstrap?.paymentIntentId ?? "");
   const [paymentReady, setPaymentReady] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [elementsLoading, setElementsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const piRef = useRef("");
-
-  const initPayment = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    setPaymentReady(false);
-    try {
-      const configRes = await fetch("/api/stripe/config", { cache: "no-store" });
-      const config = (await configRes.json()) as {
-        ready?: boolean;
-        publishableKey?: string | null;
-      };
-      if (!config.ready || !config.publishableKey) {
-        setError("stripe_publishable_missing");
-        return;
-      }
-      setPublishableKey(config.publishableKey);
-
-      const piRes = await fetch("/api/stripe/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productSlug,
-          productName,
-          quantity,
-          paymentIntentId: piRef.current || undefined,
-        }),
-      });
-      const piData = (await piRes.json()) as {
-        clientSecret?: string;
-        paymentIntentId?: string;
-        error?: string;
-      };
-      if (!piRes.ok || !piData.clientSecret || !piData.paymentIntentId) {
-        setError(piData.error ?? "stripe_payment_intent_failed");
-        return;
-      }
-      piRef.current = piData.paymentIntentId;
-      setPaymentIntentId(piData.paymentIntentId);
-      setClientSecret(piData.clientSecret);
-    } catch {
-      setError("stripe_payment_intent_failed");
-    } finally {
-      setLoading(false);
-    }
-  }, [productSlug, productName, quantity]);
+  const piRef = useRef(bootstrap?.paymentIntentId ?? "");
 
   useEffect(() => {
-    void initPayment();
-  }, [initPayment]);
+    if (bootstrap?.publishableKey) {
+      void preloadStripeJs(bootstrap.publishableKey);
+    }
+  }, [bootstrap?.publishableKey]);
+
+  useEffect(() => {
+    if (bootstrap) return;
+
+    let cancelled = false;
+
+    async function loadClientSide() {
+      setElementsLoading(true);
+      setError(null);
+      setPaymentReady(false);
+      try {
+        const [configRes, piRes] = await Promise.all([
+          fetch("/api/stripe/config", { cache: "no-store" }),
+          fetch("/api/stripe/create-payment-intent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              productSlug,
+              productName,
+              quantity,
+              paymentIntentId: piRef.current || undefined,
+            }),
+          }),
+        ]);
+
+        const config = (await configRes.json()) as {
+          ready?: boolean;
+          publishableKey?: string | null;
+        };
+        const piData = (await piRes.json()) as {
+          clientSecret?: string;
+          paymentIntentId?: string;
+          error?: string;
+        };
+
+        if (cancelled) return;
+
+        if (!config.ready || !config.publishableKey) {
+          setError("stripe_publishable_missing");
+          return;
+        }
+        if (!piRes.ok || !piData.clientSecret || !piData.paymentIntentId) {
+          setError(piData.error ?? "stripe_payment_intent_failed");
+          return;
+        }
+
+        void preloadStripeJs(config.publishableKey);
+        piRef.current = piData.paymentIntentId;
+        setPublishableKey(config.publishableKey);
+        setClientSecret(piData.clientSecret);
+        setPaymentIntentId(piData.paymentIntentId);
+      } catch {
+        if (!cancelled) setError("stripe_payment_intent_failed");
+      } finally {
+        if (!cancelled) setElementsLoading(false);
+      }
+    }
+
+    void loadClientSide();
+    return () => {
+      cancelled = true;
+    };
+  }, [bootstrap, productSlug, productName, quantity]);
 
   const ctx = useMemo<StripeCtx>(
     () => ({
       paymentIntentId,
       paymentReady,
       setPaymentReady,
-      loading,
+      elementsLoading: elementsLoading || !clientSecret || !publishableKey,
       error,
     }),
-    [paymentIntentId, paymentReady, loading, error],
+    [paymentIntentId, paymentReady, elementsLoading, clientSecret, publishableKey, error],
   );
 
   if (error === "stripe_publishable_missing") {
@@ -139,41 +157,32 @@ export function CheckoutStripeElementsProvider({
     return (
       <section className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-800">
         <p className="font-bold">تعذّر تحميل نموذج الدفع</p>
-        <button
-          type="button"
-          onClick={() => void initPayment()}
-          className="mt-3 rounded-lg bg-white px-4 py-2 text-xs font-bold text-red-900 shadow-sm"
-        >
-          إعادة المحاولة
-        </button>
       </section>
     );
   }
 
-  if (loading || !clientSecret || !publishableKey) {
-    return (
-      <div className="flex items-center justify-center gap-2 rounded-lg border border-[#d9d9d9] py-12 text-sm text-neutral-500">
-        <span
-          className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-[#134E3A]"
-          aria-hidden
-        />
-        <span>جارٍ تحميل نموذج الدفع...</span>
-      </div>
-    );
-  }
+  const stripePromise =
+    publishableKey && clientSecret ? preloadStripeJs(publishableKey) : null;
 
   return (
     <CheckoutStripeContext.Provider value={ctx}>
-      <Elements
-        stripe={getStripePromise(publishableKey)}
-        options={{
-          clientSecret,
-          appearance: stripeElementsAppearance,
-          locale: "ar",
-        }}
-      >
-        {children}
-      </Elements>
+      {stripePromise && clientSecret && publishableKey ? (
+        <Elements
+          stripe={stripePromise}
+          options={{
+            clientSecret,
+            appearance: stripeElementsAppearance,
+            locale: "ar",
+            loader: "auto",
+          }}
+        >
+          {children}
+        </Elements>
+      ) : (
+        <div className="rounded-lg border border-[#d9d9d9] bg-white p-4 sm:p-5">
+          <PaymentFieldsSkeleton />
+        </div>
+      )}
     </CheckoutStripeContext.Provider>
   );
 }

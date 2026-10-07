@@ -32,6 +32,7 @@ type Props = {
   loadingLabel?: string;
   disabled?: boolean;
   hint?: string;
+  onClick?: () => void;
 };
 
 export function CheckoutPayButton({
@@ -40,11 +41,13 @@ export function CheckoutPayButton({
   loadingLabel = "جاري التأكيد…",
   disabled,
   hint,
+  onClick,
 }: Props) {
   return (
     <div className="space-y-3">
       <button
-        type="submit"
+        type={onClick ? "button" : "submit"}
+        onClick={onClick}
         disabled={disabled || loading}
         className="flex w-full items-center justify-between gap-3 rounded-xl bg-[#134E3A] px-4 py-4 text-base font-extrabold text-white shadow-sm transition hover:bg-[#0f3d2e] disabled:cursor-not-allowed disabled:opacity-60"
       >
