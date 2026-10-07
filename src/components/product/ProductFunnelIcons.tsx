@@ -93,6 +93,25 @@ export function IconTruck({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
+export function IconBanknote({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+      <rect x="3" y="6" width="18" height="12" rx="2" />
+      <circle cx="12" cy="12" r="2.5" />
+      <path strokeLinecap="round" d="M7 9h.01M17 15h.01" />
+    </svg>
+  );
+}
+
+export function IconCrown({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 18h16M6 14l2-8 4 5 4-5 2 8" />
+      <path strokeLinecap="round" d="M4 18v2h16v-2" />
+    </svg>
+  );
+}
+
 export function IconCheckCircle({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
