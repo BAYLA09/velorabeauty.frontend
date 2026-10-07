@@ -7,7 +7,7 @@ export const images = {
   /** الصفحة الرئيسية — صور حقيقية */
   products: {
     hair: {
-      src: "/images/products/hair-gummies.webp?v=20261009",
+      src: "/images/products/hair-gummies.webp?v=20261008",
       placeholder: "[ضع صورة المنتج هنا]",
     },
     skin: {
@@ -29,14 +29,12 @@ export const images = {
    */
   productPage: {
     hair: {
-      /** PDP hero — `public/images/products/ChatGPT Image Sep 24, 2026, 09_00_20 PM.png` */
-      src: "/images/products/pdp/hair-main.webp?v=20261009",
+      src: "/images/products/pdp/hair-main.webp?v=20261008",
       storySrc: "/images/products/pdp/hair-story.webp?v=20261007",
-      /** Bundle picker — before/after grape creative */
       upsellSlotSrc: {
-        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20261009",
-        2: "/images/products/pdp/upsell/hair-qty-2.webp?v=20261009",
-        3: "/images/products/pdp/upsell/hair-qty-3.webp?v=20261009",
+        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20261008",
+        2: "/images/products/pdp/upsell/hair-qty-2.webp?v=20261008",
+        3: "/images/products/pdp/upsell/hair-qty-3.webp?v=20261008",
       },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
