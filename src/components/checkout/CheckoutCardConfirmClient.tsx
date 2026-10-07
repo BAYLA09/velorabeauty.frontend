@@ -2,18 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
 import { CheckoutCardPaymentBlock } from "@/components/checkout/CheckoutCardPaymentBlock";
-import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
+import { CheckoutFormSection } from "@/components/checkout/CheckoutFormSection";
+import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
+import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
 import { CheckoutSummarySidebar } from "@/components/checkout/CheckoutSummarySidebar";
 import {
+  checkoutFieldLabelClass,
   checkoutInputClass,
-  checkoutLabelClass,
-  checkoutSectionTitleClass,
 } from "@/components/checkout/checkoutFieldStyles";
+import { checkoutPaymentCopy } from "@/config/checkoutTrust";
 import { checkoutEmirates } from "@/config/productCheckout";
-import { formatPrice, getCheckoutTotal, type BundleQuantity } from "@/config/pricing";
+import { getCheckoutTotal, type BundleQuantity } from "@/config/pricing";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
+import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 
@@ -43,6 +45,15 @@ export function CheckoutCardConfirmClient({
   const [submitting, setSubmitting] = useState(false);
 
   const total = getCheckoutTotal(quantity, "card");
+  const backHref = buildCheckoutPaymentStepPath({ product: productSlug, quantity }, "card");
+
+  const subtitle = stripeEnabled
+    ? "أكملي معلومات التوصيل — ثم ادفعي بأمان عبر Stripe"
+    : "أكملي معلومات التوصيل ثم أدخلي بيانات البطاقة";
+
+  const payHint = stripeEnabled
+    ? "بالضغط على الزر ستُوجَّهين إلى صفحة Stripe الآمنة لإكمال الدفع."
+    : checkoutPaymentCopy.payRedirectHint;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -150,37 +161,24 @@ export function CheckoutCardConfirmClient({
   }
 
   return (
-    <CheckoutFunnelShell currentStep={3}>
-      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm sm:p-8">
-          <CheckoutBackActions
-            productSlug={productSlug}
-            quantity={quantity}
-            backTo="payment"
-            className="mb-6"
-          />
-
-          <header className="border-b border-neutral-100 pb-5">
-            <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-[1.65rem]">
-              إتمام الطلب
-            </h1>
-            <p className="mt-2 text-sm text-neutral-500">
-              {stripeEnabled
-                ? "أكملي معلومات التوصيل — ثم ادفعي بأمان عبر Stripe."
-                : "أكملي معلومات التوصيل — ثم نرسل لك رابط الدفع الآمن بالبطاقة."}
-            </p>
-          </header>
-
-          <form onSubmit={handleSubmit} className="mt-6 space-y-8">
-            <fieldset className="space-y-4">
-              <legend className={checkoutSectionTitleClass}>معلومات التواصل</legend>
-              <p className="text-xs text-neutral-500">لإرسال تأكيد الطلب وتحديثات التوصيل</p>
-              <label className="block">
-                <span className={checkoutLabelClass}>
+    <CheckoutLaraShell title="إتمام الطلب" subtitle={subtitle} backHref={backHref}>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:gap-8">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
+        >
+          <div className="space-y-8">
+            <CheckoutFormSection
+              title="معلومات التواصل"
+              subtitle="لإرسال تأكيد الطلب وتحديثات التوصيل"
+            >
+              <div>
+                <label htmlFor="email" className={checkoutFieldLabelClass}>
                   البريد الإلكتروني{" "}
                   <span className="font-normal text-neutral-400">(اختياري)</span>
-                </span>
+                </label>
                 <input
+                  id="email"
                   type="email"
                   dir="ltr"
                   value={email}
@@ -189,10 +187,13 @@ export function CheckoutCardConfirmClient({
                   className={checkoutInputClass}
                   autoComplete="email"
                 />
-              </label>
-              <label className="block">
-                <span className={checkoutLabelClass}>الاسم الكامل</span>
+              </div>
+              <div>
+                <label htmlFor="name" className={checkoutFieldLabelClass}>
+                  الاسم الكامل
+                </label>
                 <input
+                  id="name"
                   required
                   value={name}
                   onChange={(ev) => setName(ev.target.value)}
@@ -200,10 +201,13 @@ export function CheckoutCardConfirmClient({
                   className={checkoutInputClass}
                   autoComplete="name"
                 />
-              </label>
-              <label className="block">
-                <span className={checkoutLabelClass}>رقم الهاتف</span>
+              </div>
+              <div>
+                <label htmlFor="phone" className={checkoutFieldLabelClass}>
+                  رقم الهاتف
+                </label>
                 <input
+                  id="phone"
                   required
                   type="tel"
                   dir="ltr"
@@ -213,14 +217,16 @@ export function CheckoutCardConfirmClient({
                   className={checkoutInputClass}
                   autoComplete="tel"
                 />
-              </label>
-            </fieldset>
+              </div>
+            </CheckoutFormSection>
 
-            <fieldset className="space-y-4">
-              <legend className={checkoutSectionTitleClass}>عنوان التوصيل</legend>
-              <label className="block">
-                <span className={checkoutLabelClass}>المنطقة</span>
+            <CheckoutFormSection title="عنوان التوصيل">
+              <div>
+                <label htmlFor="area" className={checkoutFieldLabelClass}>
+                  المنطقة
+                </label>
                 <select
+                  id="area"
                   required
                   value={emirate}
                   onChange={(ev) => setEmirate(ev.target.value)}
@@ -233,54 +239,56 @@ export function CheckoutCardConfirmClient({
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="block">
-                <span className={checkoutLabelClass}>العنوان / تفاصيل التوصيل</span>
-                <textarea
+              </div>
+              <div>
+                <label htmlFor="address" className={checkoutFieldLabelClass}>
+                  العنوان / تفاصيل التوصيل
+                </label>
+                <input
+                  id="address"
                   required
-                  rows={2}
                   value={address}
                   onChange={(ev) => setAddress(ev.target.value)}
                   placeholder="مثال: دبي مارينا، برج …"
-                  className={`${checkoutInputClass} resize-none`}
+                  className={checkoutInputClass}
                   autoComplete="street-address"
                 />
-              </label>
-              <label className="block">
-                <span className={checkoutLabelClass}>
+              </div>
+              <div>
+                <label htmlFor="building" className={checkoutFieldLabelClass}>
                   رقم المبنى / الشقة{" "}
                   <span className="font-normal text-neutral-400">(اختياري)</span>
-                </span>
+                </label>
                 <input
+                  id="building"
                   value={building}
                   onChange={(ev) => setBuilding(ev.target.value)}
-                  placeholder="Apt 1204"
+                  placeholder="مثال: برج 5، شقة 1204"
                   className={checkoutInputClass}
                 />
-              </label>
-            </fieldset>
+              </div>
+            </CheckoutFormSection>
 
             <CheckoutCardPaymentBlock stripeEnabled={stripeEnabled} />
 
-            {error && (
+            {error ? (
               <p className="text-sm font-bold text-rose-700" role="alert">
                 {error}
               </p>
-            )}
+            ) : null}
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 disabled:opacity-60"
-            >
-              {submitting
-                ? stripeEnabled
-                  ? "جاري التحويل إلى Stripe…"
-                  : "جاري التأكيد…"
-                : `الدفع بالبطاقة — ${formatPrice(total)}`}
-            </button>
-          </form>
-        </section>
+            <div className="border-t border-neutral-100 pt-6">
+              <CheckoutPayButton
+                totalAed={total}
+                loading={submitting}
+                loadingLabel={
+                  stripeEnabled ? "جاري التحويل إلى Stripe…" : "جاري التأكيد…"
+                }
+                hint={payHint}
+              />
+            </div>
+          </div>
+        </form>
 
         <CheckoutSummarySidebar
           productName={productName}
@@ -288,8 +296,9 @@ export function CheckoutCardConfirmClient({
           quantity={quantity}
           paymentMethod="card"
           totalLabel="المجموع الكلي"
+          showTrust
           footer={
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-[#e8f5e9] px-3 py-3 text-center text-xs font-bold text-emerald-900">
+            <div className="flex items-center justify-center gap-2 rounded-lg bg-[#e8f5e9] px-3 py-3 text-center text-xs font-bold text-emerald-900">
               <IconTruck className="h-4 w-4 shrink-0" />
               <span>شحن مجاني مع الدفع بالبطاقة</span>
               <IconCard className="h-4 w-4 shrink-0" />
@@ -297,6 +306,6 @@ export function CheckoutCardConfirmClient({
           }
         />
       </div>
-    </CheckoutFunnelShell>
+    </CheckoutLaraShell>
   );
 }
