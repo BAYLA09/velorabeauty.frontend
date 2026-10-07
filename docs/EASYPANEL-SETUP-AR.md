@@ -1,5 +1,35 @@
 # Easypanel — deploy بـ 5 دقائق (Velora)
 
+## 🆘 «ما قدرتش ن-deploy» — الحل السريع
+
+| اللي كتشوف | المعنى | شنو دير |
+|------------|--------|---------|
+| Deploy **1 ثانية** | ما تـ pull/image/build | **Source → Docker Image** (تحت) — حذف Git |
+| `Git key not found` | Git/Easypanel مقطوع | نفس الحل — **Docker Image** |
+| الموقع خدام ولكن **قديم** | Image ما تحدّثاتش | **Publish container** ✅ على `main` ثم **Deploy** (1–3 دق) |
+| `unauthorized` / pull | Registry | Image بالضبط `ghcr.io/bayla09/velorabeauty.frontend:latest` · auth **فارغ** (public) |
+
+**Image جاهزة دابا** (GitHub Actions → Publish container). Easypanel **يسحبها** — ما يبنيش من Git:
+
+```text
+ghcr.io/bayla09/velorabeauty.frontend:latest
+```
+
+إلا `latest` ما تبدّلش، استعمل tag الـ SHA من Actions (مثلاً `:84c1112`).
+
+**Compose copy-paste:** `deploy/easypanel-docker-image.compose.yaml` (فيه `pull_policy: always`).
+
+تحقق من بعد Deploy:
+
+```bash
+curl -s https://www.velorabeauty.world/api/health
+# version = آخر commit على main (مثلاً 84c1112...)
+```
+
+أو: `./scripts/check-live-version.sh 84c1112`
+
+---
+
 الـ repo **عام** والـ image **عامة** على GHCR. إلا كتعطل Git (`Git key not found`) — **ما تبقاش تبني من GitHub فـ Easypanel**.
 
 ---
