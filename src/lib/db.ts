@@ -31,6 +31,15 @@ function ensureSchema(database: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_orders_payment_method ON orders (payment_method);
   `);
+
+  const columns = database.prepare(`PRAGMA table_info(orders)`).all() as { name: string }[];
+  const names = new Set(columns.map((c) => c.name));
+  if (!names.has("stripe_checkout_session_id")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN stripe_checkout_session_id TEXT`);
+  }
+  database.exec(
+    `CREATE INDEX IF NOT EXISTS idx_orders_stripe_session ON orders (stripe_checkout_session_id)`,
+  );
 }
 
 export function getDb(): Database.Database {

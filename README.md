@@ -47,7 +47,7 @@ Easypanel (اختر واحد):
    `ghcr.io/bayla09/velorabeauty.frontend:latest` (يبنى تلقائياً من Actions على `main`).
 
 **Deploy ma kaymchich?** → **[docs/EASYPANEL-SETUP-AR.md](docs/EASYPANEL-SETUP-AR.md)** — Docker Image `ghcr.io/bayla09/velorabeauty.frontend:latest` (port **3000**, volume **`/app/data`**). Compose: `deploy/easypanel-docker-image.compose.yaml`.  
-Also: [docs/EASYPANEL-DEPLOY.md](docs/EASYPANEL-DEPLOY.md).
+Also: [docs/EASYPANEL-DEPLOY.md](docs/EASYPANEL-DEPLOY.md). **Stripe:** [docs/STRIPE-SETUP-AR.md](docs/STRIPE-SETUP-AR.md).
 
 Open [http://localhost:3000](http://localhost:3000).
 

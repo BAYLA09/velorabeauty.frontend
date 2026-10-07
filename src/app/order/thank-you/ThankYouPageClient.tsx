@@ -16,7 +16,9 @@ import { getProductPath } from "@/lib/productCatalog";
 export function ThankYouPageClient() {
   const searchParams = useSearchParams();
   const orderIdFromUrl = searchParams.get("id");
+  const sessionIdFromUrl = searchParams.get("session_id");
   const [order, setOrder] = useState<OrderDraft | null>(null);
+  const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,6 +26,17 @@ export function ThankYouPageClient() {
 
     async function load() {
       const draft = readOrderDraft();
+      if (orderIdFromUrl && sessionIdFromUrl) {
+        try {
+          await fetch("/api/checkout/stripe/confirm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId: orderIdFromUrl, sessionId: sessionIdFromUrl }),
+          });
+        } catch {
+          /* webhook or retry later */
+        }
+      }
       if (orderIdFromUrl) {
         try {
           const res = await fetch(`/api/orders/${encodeURIComponent(orderIdFromUrl)}`);
@@ -42,9 +55,11 @@ export function ThankYouPageClient() {
                 emirate: string;
                 address: string;
                 createdAt: string;
+                status: string;
               };
             };
             if (!cancelled) {
+              setOrderStatus(data.order.status);
               setOrder({
                 orderId: data.order.id,
                 productSlug: data.order.productSlug,
@@ -77,7 +92,7 @@ export function ThankYouPageClient() {
     return () => {
       cancelled = true;
     };
-  }, [orderIdFromUrl]);
+  }, [orderIdFromUrl, sessionIdFromUrl]);
 
   const methodLabel =
     order?.method === "cod" ? "الدفع عند الاستلام" : "الدفع بالبطاقة";
@@ -139,7 +154,9 @@ export function ThankYouPageClient() {
               )}
               <p className="mt-3 text-xs leading-relaxed text-velora-burgundy/55">
                 {order.method === "card"
-                  ? "بعد التأكيد بالهاتف، نرسل لك رابط دفع آمن — شحن مجاني."
+                  ? orderStatus === "paid"
+                    ? "تم استلام الدفع عبر Stripe — شحن مجاني. فريقنا يجهّز طلبك."
+                    : "بعد التأكيد بالهاتف، نرسل لك رابط دفع آمن — شحن مجاني."
                   : "الدفع عند الاستلام — كاش أو بطاقة للمندوب."}
               </p>
             </div>

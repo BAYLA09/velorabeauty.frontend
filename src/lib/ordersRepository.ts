@@ -22,6 +22,7 @@ export type OrderRecord = {
   emirate: string;
   address: string;
   status: string;
+  stripeCheckoutSessionId: string | null;
   createdAt: string;
 };
 
@@ -50,6 +51,7 @@ type OrderRow = {
   emirate: string;
   address: string;
   status: string;
+  stripe_checkout_session_id?: string | null;
   created_at: string;
 };
 
@@ -68,6 +70,7 @@ function rowToRecord(row: OrderRow): OrderRecord {
     emirate: row.emirate,
     address: row.address,
     status: row.status,
+    stripeCheckoutSessionId: row.stripe_checkout_session_id ?? null,
     createdAt: row.created_at,
   };
 }
@@ -126,5 +129,22 @@ export function getOrderById(id: string): OrderRecord | null {
   const row = getDb().prepare(`SELECT * FROM orders WHERE id = ?`).get(id) as
     | OrderRow
     | undefined;
+  return row ? rowToRecord(row) : null;
+}
+
+export function setOrderStripeSession(orderId: string, sessionId: string): void {
+  getDb()
+    .prepare(`UPDATE orders SET stripe_checkout_session_id = ?, status = 'awaiting_payment' WHERE id = ?`)
+    .run(sessionId, orderId);
+}
+
+export function markOrderPaid(orderId: string): void {
+  getDb().prepare(`UPDATE orders SET status = 'paid' WHERE id = ?`).run(orderId);
+}
+
+export function getOrderByStripeSessionId(sessionId: string): OrderRecord | null {
+  const row = getDb()
+    .prepare(`SELECT * FROM orders WHERE stripe_checkout_session_id = ?`)
+    .get(sessionId) as OrderRow | undefined;
   return row ? rowToRecord(row) : null;
 }
