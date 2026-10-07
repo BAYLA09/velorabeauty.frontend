@@ -7,7 +7,7 @@ export const images = {
   /** الصفحة الرئيسية — صور حقيقية */
   products: {
     hair: {
-      src: "/images/products/hair-gummies.webp?v=20261007",
+      src: "/images/products/hair-gummies.webp?v=20261011",
       placeholder: "[ضع صورة المنتج هنا]",
     },
     skin: {
