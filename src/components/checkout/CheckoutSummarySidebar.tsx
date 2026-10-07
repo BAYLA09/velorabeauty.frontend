@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 import {
   cardBundlePrices,
   codFee,
@@ -15,6 +16,8 @@ type Props = {
   productImageSrc?: string;
   quantity: BundleQuantity;
   paymentMethod: PaymentMethod;
+  totalLabel?: string;
+  footer?: ReactNode;
 };
 
 export function CheckoutSummarySidebar({
@@ -22,6 +25,8 @@ export function CheckoutSummarySidebar({
   productImageSrc,
   quantity,
   paymentMethod,
+  totalLabel = "الإجمالي",
+  footer,
 }: Props) {
   const subtotal = cardBundlePrices[quantity];
   const deliveryFee = paymentMethod === "cod" ? codFee : 0;
@@ -67,14 +72,16 @@ export function CheckoutSummarySidebar({
         </div>
         <div className="flex justify-between gap-3">
           <dt className="text-velora-burgundy/60">التوصيل</dt>
-          <dd className="font-semibold tabular-nums text-velora-burgundy">
+          <dd
+            className={`font-semibold tabular-nums ${deliveryFee > 0 ? "text-velora-burgundy" : "text-emerald-700"}`}
+          >
             {deliveryFee > 0 ? formatPrice(deliveryFee) : "مجاني"}
           </dd>
         </div>
       </dl>
 
       <div className="mt-4 flex items-end justify-between border-t border-velora-burgundy/10 pt-4">
-        <span className="text-sm font-bold text-velora-burgundy/65">الإجمالي</span>
+        <span className="text-sm font-bold text-velora-burgundy/65">{totalLabel}</span>
         <span className="text-2xl font-black tabular-nums text-velora-burgundy-dark">
           {formatPrice(total)}
         </span>
@@ -85,6 +92,8 @@ export function CheckoutSummarySidebar({
           +{codFee} {currencyLabel} رسوم التوصيل (COD)
         </p>
       )}
+
+      {footer ? <div className="mt-4">{footer}</div> : null}
     </aside>
   );
 }
