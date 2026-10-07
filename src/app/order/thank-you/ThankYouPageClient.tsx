@@ -17,6 +17,7 @@ export function ThankYouPageClient() {
   const searchParams = useSearchParams();
   const orderIdFromUrl = searchParams.get("id");
   const sessionIdFromUrl = searchParams.get("session_id");
+  const paymentIntentFromUrl = searchParams.get("payment_intent");
   const [order, setOrder] = useState<OrderDraft | null>(null);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,12 +27,16 @@ export function ThankYouPageClient() {
 
     async function load() {
       const draft = readOrderDraft();
-      if (orderIdFromUrl && sessionIdFromUrl) {
+      if (orderIdFromUrl && (sessionIdFromUrl || paymentIntentFromUrl)) {
         try {
           await fetch("/api/checkout/stripe/confirm", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ orderId: orderIdFromUrl, sessionId: sessionIdFromUrl }),
+            body: JSON.stringify({
+              orderId: orderIdFromUrl,
+              sessionId: sessionIdFromUrl ?? undefined,
+              paymentIntentId: paymentIntentFromUrl ?? undefined,
+            }),
           });
         } catch {
           /* webhook or retry later */

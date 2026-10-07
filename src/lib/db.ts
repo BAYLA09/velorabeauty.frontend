@@ -37,8 +37,14 @@ function ensureSchema(database: Database.Database): void {
   if (!names.has("stripe_checkout_session_id")) {
     database.exec(`ALTER TABLE orders ADD COLUMN stripe_checkout_session_id TEXT`);
   }
+  if (!names.has("stripe_payment_intent_id")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN stripe_payment_intent_id TEXT`);
+  }
   database.exec(
     `CREATE INDEX IF NOT EXISTS idx_orders_stripe_session ON orders (stripe_checkout_session_id)`,
+  );
+  database.exec(
+    `CREATE INDEX IF NOT EXISTS idx_orders_stripe_pi ON orders (stripe_payment_intent_id)`,
   );
 }
 

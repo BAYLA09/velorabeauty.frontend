@@ -1,4 +1,7 @@
-import { isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
+import {
+  getStripePublishableKey,
+  isStripeCardCheckoutEnabled,
+} from "@/lib/stripeServer";
 
 export async function GET() {
   const stripeSecret = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
@@ -20,7 +23,9 @@ export async function GET() {
     },
     payments: {
       stripeSecretConfigured: stripeSecret,
+      stripePublishableConfigured: Boolean(getStripePublishableKey()),
       cardCheckoutEnabled: cardEnabled,
+      embeddedPaymentElement: cardEnabled && Boolean(getStripePublishableKey()),
       webhookSecretConfigured: Boolean(process.env.STRIPE_WEBHOOK_SECRET?.trim()),
     },
   });

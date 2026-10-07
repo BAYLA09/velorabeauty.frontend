@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import {
+  getOrderByStripePaymentIntentId,
   getOrderByStripeSessionId,
   markOrderPaid,
 } from "@/lib/ordersRepository";
@@ -31,7 +32,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    if (event.type === "checkout.session.completed") {
+    if (event.type === "payment_intent.succeeded") {
+      const intent = event.data.object as Stripe.PaymentIntent;
+      const orderId = intent.metadata?.orderId;
+      if (orderId) {
+        markOrderPaid(orderId);
+      } else if (intent.id) {
+        const order = getOrderByStripePaymentIntentId(intent.id);
+        if (order) markOrderPaid(order.id);
+      }
+    } else if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.payment_status === "paid" || session.status === "complete") {
         const orderId = session.metadata?.orderId ?? session.client_reference_id ?? undefined;

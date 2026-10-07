@@ -22,6 +22,13 @@ export function isStripeCardCheckoutEnabled(): boolean {
   return true;
 }
 
+export function getStripePublishableKey(): string | null {
+  const key =
+    process.env.STRIPE_PUBLISHABLE_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
+  return key || null;
+}
+
 export function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY?.trim();
   if (!key) {
