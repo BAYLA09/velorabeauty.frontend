@@ -29,7 +29,7 @@ export const images = {
    */
   productPage: {
     hair: {
-      src: "/images/products/pdp/hair-main.webp?v=20261007",
+      src: "/images/products/pdp/hair-main.webp?v=20261012",
       storySrc: "/images/products/pdp/hair-story.webp?v=20261007",
       upsellSlotSrc: {
         1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20261007",
