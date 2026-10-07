@@ -23,6 +23,7 @@ export type OrderRecord = {
   address: string;
   status: string;
   stripeCheckoutSessionId: string | null;
+  stripePaymentIntentId: string | null;
   createdAt: string;
 };
 
@@ -52,6 +53,7 @@ type OrderRow = {
   address: string;
   status: string;
   stripe_checkout_session_id?: string | null;
+  stripe_payment_intent_id?: string | null;
   created_at: string;
 };
 
@@ -71,6 +73,7 @@ function rowToRecord(row: OrderRow): OrderRecord {
     address: row.address,
     status: row.status,
     stripeCheckoutSessionId: row.stripe_checkout_session_id ?? null,
+    stripePaymentIntentId: row.stripe_payment_intent_id ?? null,
     createdAt: row.created_at,
   };
 }
@@ -146,5 +149,20 @@ export function getOrderByStripeSessionId(sessionId: string): OrderRecord | null
   const row = getDb()
     .prepare(`SELECT * FROM orders WHERE stripe_checkout_session_id = ?`)
     .get(sessionId) as OrderRow | undefined;
+  return row ? rowToRecord(row) : null;
+}
+
+export function setOrderStripePaymentIntent(orderId: string, paymentIntentId: string): void {
+  getDb()
+    .prepare(
+      `UPDATE orders SET stripe_payment_intent_id = ?, status = 'awaiting_payment' WHERE id = ?`,
+    )
+    .run(paymentIntentId, orderId);
+}
+
+export function getOrderByStripePaymentIntentId(paymentIntentId: string): OrderRecord | null {
+  const row = getDb()
+    .prepare(`SELECT * FROM orders WHERE stripe_payment_intent_id = ?`)
+    .get(paymentIntentId) as OrderRow | undefined;
   return row ? rowToRecord(row) : null;
 }
