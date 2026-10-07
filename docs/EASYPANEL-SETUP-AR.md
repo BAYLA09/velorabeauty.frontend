@@ -23,8 +23,10 @@ ghcr.io/bayla09/velorabeauty.frontend:latest
 
 ```bash
 curl -s https://www.velorabeauty.world/api/health
-# version = آخر commit على main (مثلاً 84c1112...)
+# version = آخر commit على main · payments.cardCheckoutEnabled = true إلا Stripe خدام
 ```
+
+إلا `cardCheckoutEnabled: false` بعد Deploy → زيد `STRIPE_SECRET_KEY` + `CARD_PAYMENT_ENABLED=true` f **Environment** (ما محتاجش rebuild).
 
 أو: `./scripts/check-live-version.sh 84c1112`
 
