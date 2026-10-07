@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductForm } from "@/config/productPages";
-import { buildCheckoutPath } from "@/lib/checkoutRoutes";
+import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import {
   formatPrice,
   getCheckoutTotal,
@@ -205,10 +205,10 @@ export function ProductPurchasePanel({
 
   function goToCheckout() {
     router.push(
-      buildCheckoutPath(method, {
-        product: productSlug,
-        quantity,
-      }),
+      buildCheckoutPaymentStepPath(
+        { product: productSlug, quantity },
+        method,
+      ),
     );
   }
 
