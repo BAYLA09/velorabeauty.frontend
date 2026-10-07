@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
 import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
 import {
   codFee,
@@ -38,6 +39,7 @@ export function CheckoutPaymentStepClient({
   return (
     <CheckoutFunnelShell currentStep={2} maxWidth="md">
       <div className="mx-auto max-w-xl">
+        <CheckoutBackActions productSlug={productSlug} quantity={quantity} />
         <header className="text-center">
           <h1 className="text-2xl font-black text-velora-burgundy-dark sm:text-3xl">
             اختر طريقة الدفع

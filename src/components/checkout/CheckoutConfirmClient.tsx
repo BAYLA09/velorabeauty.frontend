@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
 import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
 import { CheckoutSummarySidebar } from "@/components/checkout/CheckoutSummarySidebar";
 import { checkoutExperience } from "@/config/checkoutExperience";
@@ -108,17 +108,14 @@ export function CheckoutConfirmClient({
     <CheckoutFunnelShell currentStep={3}>
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="rounded-2xl border border-velora-burgundy/8 bg-white p-6 shadow-sm sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-black text-velora-burgundy-dark sm:text-3xl">{title}</h1>
-              <p className="mt-2 text-sm leading-relaxed text-velora-burgundy/65">{lead}</p>
-            </div>
-            <Link
-              href={`/checkout?product=${encodeURIComponent(productSlug)}&quantity=${quantity}`}
-              className="shrink-0 text-xs font-bold text-velora-burgundy underline-offset-2 hover:underline"
-            >
-              تغيير طريقة الدفع
-            </Link>
+          <CheckoutBackActions
+            productSlug={productSlug}
+            quantity={quantity}
+            paymentMethod={paymentMethod}
+          />
+          <div>
+            <h1 className="text-2xl font-black text-velora-burgundy-dark sm:text-3xl">{title}</h1>
+            <p className="mt-2 text-sm leading-relaxed text-velora-burgundy/65">{lead}</p>
           </div>
 
           <div className="mt-6 flex gap-3 rounded-2xl border border-sky-200/80 bg-sky-50/90 px-4 py-3 text-sm text-sky-950/85">
@@ -200,6 +197,13 @@ export function CheckoutConfirmClient({
                 شحن مجاني — رابط دفع آمن بعد التأكيد
               </p>
             )}
+
+            <CheckoutBackActions
+              productSlug={productSlug}
+              quantity={quantity}
+              paymentMethod={paymentMethod}
+              variant="stacked"
+            />
           </form>
         </section>
 
