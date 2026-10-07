@@ -1,22 +1,23 @@
-# Velora Beauty — Next.js production (Easypanel / plain Docker, no BuildKit-only features)
-FROM node:20-alpine AS deps
+# Velora Beauty — Next.js production (Easypanel / plain Docker, no BuildKit-only features).
+# Heap stays at 1536 so a 2 GB Easypanel builder is not OOM-killed. Do not raise this
+# back to 4096: `npm run build` inherits NODE_OPTIONS, and a 4 GB heap dies on small VPS.
+FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:20-alpine AS builder
-RUN apk add --no-cache python3 make g++
+FROM node:22-alpine AS builder
 ARG GIT_SHA=unknown
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV NODE_OPTIONS=--max-old-space-size=1536
 ENV BUILD_SHA=${GIT_SHA}
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 ARG GIT_SHA=unknown
 WORKDIR /app
 ENV NODE_ENV=production
@@ -25,7 +26,8 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV BUILD_SHA=${GIT_SHA}
 ENV DATABASE_PATH=/app/data/velora.sqlite
-RUN addgroup --system --gid 1001 nodejs \
+RUN apk add --no-cache sqlite-libs \
+  && addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs \
   && mkdir -p /app/data \
   && chown nextjs:nodejs /app/data
@@ -34,6 +36,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/bindings ./node_modules/bindings
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/file-uri-to-path ./node_modules/file-uri-to-path
 
 USER nextjs
 EXPOSE 3000

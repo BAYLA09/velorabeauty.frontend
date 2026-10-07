@@ -4,7 +4,7 @@ export const brand = {
   tagline: "جمالك، بطابعٍ مختلف.",
   country: "الإمارات العربية المتحدة",
   logo: {
-    markSrc: "/images/brand/logo-mark.png",
+    markSrc: "/images/brand/logo-mark.png?v=20261007",
     wordmarkEn: "velorabeauty",
     wordmarkAr: "فيلورا للجمال",
     placeholderLabel: "[ضع شعار VELORA هنا]",

@@ -1,4 +1,5 @@
 import { BundleSection } from "@/components/BundleSection";
+import { images } from "@/config/images";
 import { CheckoutSection } from "@/components/CheckoutSection";
 import { FaqSection } from "@/components/FaqSection";
 import { FinalCtaSection } from "@/components/FinalCtaSection";
@@ -15,6 +16,7 @@ import { WhyVeloraSection } from "@/components/WhyVeloraSection";
 export default function Home() {
   return (
     <>
+      <link rel="preload" as="image" href={images.hero.src} fetchPriority="high" />
       <div className="relative bg-velora-burgundy">
         <Header />
         <HeroSection />

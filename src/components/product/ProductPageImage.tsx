@@ -50,15 +50,15 @@ export function ProductPageImage({
       <Image
         src={src}
         alt={alt}
-        width={1400}
-        height={1400}
+        width={1100}
+        height={1100}
         sizes={sizes}
         priority={priority}
-        quality={92}
+        fetchPriority={priority ? "high" : "auto"}
+        unoptimized
         className="relative z-[1] block h-auto w-full max-w-full"
         style={{ width: "100%", height: "auto" }}
         onLoad={() => setLoaded(true)}
-        onLoadingComplete={() => setLoaded(true)}
         onError={() => {
           setFailed(true);
           onError?.();

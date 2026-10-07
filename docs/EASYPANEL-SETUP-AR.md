@@ -17,7 +17,8 @@
 
 4. **Registry username / password:** **خليهم فارغين** — الـ package public.
 5. **Domains** → Target port: **3000** (HTTP داخل الـ container).
-6. **Deploy** → استنى حتى **Running** / logs فيها `Ready`.
+6. **Volumes** (من بعد merge checkout + SQLite): mount **`/app/data`** persistent (طلبات COD/بطاقة).
+7. **Deploy** → استنى حتى **Running** / logs فيها `Ready`.
 7. جرب:
 
    ```bash
@@ -77,7 +78,9 @@
 | `unauthorized` / pull image | Image: بالضبط `ghcr.io/bayla09/velorabeauty.frontend:latest` — auth فارغ |
 | 502 / unhealthy | Port **3000** · logs runtime (ماشي build فقط) |
 | الموقع قديم | Deploy بعد ما **Publish container** ✅ على `main` |
-| Build OOM | Docker Image (طريقة 1) أو Nixpacks + RAM 4GB |
+| Build OOM / `Killed` | Builder **≥ 2 GB** · Dockerfile فيه heap **1536** (ماشي 4096) · أو **Docker Image** من GHCR |
+| `better-sqlite3` / native module | **Builder = Dockerfile** (ماشي Nixpacks) · volume **`/app/data`** للطلبات |
+| Build context ضخم (~90MB) | `.dockerignore` كيستبعد PNG masters — pull **`main`** |
 
 ---
 

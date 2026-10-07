@@ -9,3 +9,7 @@ npm-debug.log*
 .DS_Store
 coverage
 .cursor
+# Original PNG masters and ChatGPT exports are not served. Pages use the webp files.
+# Leaving them in the context makes the Easypanel build ~90MB and the image layer ~85MB.
+public/images/**/*.png
+!public/images/brand/logo-mark.png

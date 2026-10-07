@@ -123,9 +123,9 @@ function OfferProductStack({
         <img
           src={src}
           alt={alt}
-          loading="eager"
+          loading="lazy"
           decoding="async"
-          fetchPriority="high"
+          fetchPriority="low"
           className="pointer-events-none absolute bottom-0 left-1/2 h-[3.1rem] w-auto max-w-full -translate-x-1/2 bg-transparent object-contain object-bottom sm:h-[3.4rem]"
         />
       </div>
