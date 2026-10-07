@@ -1,5 +1,10 @@
-# Optional: Easypanel → New Service → Compose → paste or connect repo.
-# Pulls the prebuilt image (no Git clone / no build on the server).
+# Easypanel → New Service → Compose → paste this file (or connect repo + path).
+# No Git clone, no Dockerfile build on the server — pulls prebuilt GHCR image from GitHub Actions.
+#
+# After each merge on main: Actions → "Publish container" ✅ then Easypanel → Deploy (1–3 min).
+# If "latest" does not update, pin the SHA tag from the workflow summary, e.g.:
+#   image: ghcr.io/bayla09/velorabeauty.frontend:84c1112
+
 services:
   velora-web:
     image: ghcr.io/bayla09/velorabeauty.frontend:latest

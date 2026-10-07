@@ -55,18 +55,40 @@ jobs:
             "/users/${{ github.repository_owner }}/packages/container/velorabeauty.frontend" \
             -f visibility=public
 
+      - name: Easypanel deploy instructions (summary)
+        run: |
+          SHA="${{ github.sha }}"
+          SHORT="${SHA:0:7}"
+          {
+            echo "## Easypanel — deploy بعد merge"
+            echo ""
+            echo "Image **public** على GHCR (ما محتاجش auth):"
+            echo ""
+            echo "\`\`\`text"
+            echo "ghcr.io/bayla09/velorabeauty.frontend:latest"
+            echo "ghcr.io/bayla09/velorabeauty.frontend:${SHORT}"
+            echo "\`\`\`"
+            echo ""
+            echo "1. Easypanel → Source = **Docker Image** (ماشي GitHub/Git)."
+            echo "2. Port **3000** · Volume **/app/data**."
+            echo "3. **Deploy** — خاصو ياخذ **1–3 دقائق** (pull). إلا **1 ثانية** → Source مازال Git."
+            echo "4. تحقق: \`curl -s https://www.velorabeauty.world/api/health\` → version فيها \`${SHA}\`."
+            echo ""
+            echo "Compose جاهز: \`deploy/easypanel-docker-image.compose.yaml\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Trigger Easypanel redeploy (optional)
         env:
           WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
         run: |
           if [ -z "$WEBHOOK" ]; then
-            echo "EASYPANEL_DEPLOY_WEBHOOK not set — skip auto-deploy (see docs/EASYPANEL-SETUP-AR.md)"
+            echo "EASYPANEL_DEPLOY_WEBHOOK not set — manual Deploy on Easypanel (Docker Image source)"
             exit 0
           fi
           code=$(curl -sS -o /tmp/easypanel-webhook.txt -w "%{http_code}" -X POST "$WEBHOOK")
           echo "Easypanel webhook HTTP ${code}"
           cat /tmp/easypanel-webhook.txt || true
           if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
-            echo "::warning::Easypanel webhook failed — fix Source (use Docker Image) or reconnect deploy URL"
+            echo "::warning::Easypanel webhook failed — use Docker Image source (see docs/EASYPANEL-SETUP-AR.md)"
             exit 0
           fi
