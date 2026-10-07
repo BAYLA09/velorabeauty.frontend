@@ -17,11 +17,17 @@ type Props = {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  initialMethod?: PaymentMethod;
 };
 
-export function CheckoutPaymentStepClient({ productSlug, productName, quantity }: Props) {
+export function CheckoutPaymentStepClient({
+  productSlug,
+  productName,
+  quantity,
+  initialMethod = "card",
+}: Props) {
   const router = useRouter();
-  const [method, setMethod] = useState<PaymentMethod>("card");
+  const [method, setMethod] = useState<PaymentMethod>(initialMethod);
   const query = { product: productSlug, quantity };
   const total = getCheckoutTotal(quantity, method);
 
@@ -50,9 +56,17 @@ export function CheckoutPaymentStepClient({ productSlug, productName, quantity }
                 : "border-velora-burgundy/12 bg-white hover:border-velora-burgundy/25"
             }`}
           >
-            <span className="absolute left-4 top-4 rounded-lg bg-velora-champagne/25 px-2 py-0.5 text-[10px] font-extrabold text-velora-burgundy-dark">
-              الأكثر اختياراً
-            </span>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <span className="rounded-lg bg-velora-champagne/25 px-2 py-0.5 text-[10px] font-extrabold text-velora-burgundy-dark">
+                الأكثر اختياراً
+              </span>
+              <span
+                className="flex items-center gap-1.5 text-[10px] font-bold text-velora-burgundy/50"
+                dir="ltr"
+              >
+                Apple Pay · Google Pay · Visa
+              </span>
+            </div>
             <div className="flex items-start gap-3">
               <span
                 className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
@@ -70,6 +84,9 @@ export function CheckoutPaymentStepClient({ productSlug, productName, quantity }
                 </p>
                 <p className="mt-1 text-sm font-bold text-emerald-800">شحن مجاني</p>
                 <p className="mt-0.5 text-xs text-velora-burgundy/55">دفع آمن — رابط بعد تأكيد الطلب</p>
+                <p className="mt-1 text-[11px] font-semibold text-velora-burgundy/45">
+                  🔒 بياناتك محمية — ما كنخزّنش بيانات البطاقة
+                </p>
                 {method === "card" && (
                   <div className="mt-4 rounded-xl border border-velora-burgundy/10 bg-white px-3 py-3 text-center text-xs text-velora-burgundy/65">
                     <span className="font-bold text-velora-burgundy">🔒</span> دفع 100% آمن — بياناتك
@@ -128,7 +145,7 @@ export function CheckoutPaymentStepClient({ productSlug, productName, quantity }
         </button>
         <p className="mt-3 text-center text-[11px] text-velora-burgundy/50">
           {method === "card"
-            ? "بعد التأكيد، نرسل لك رابط الدفع الآمن على واتساب أو SMS."
+            ? "سيتم إرسال رابط الدفع الآمن بعد تأكيد الطلب (واتساب / SMS)."
             : `رسوم التوصيل ${codFee} ${currencyLabel} — تُضاف للمجموع.`}
         </p>
       </div>

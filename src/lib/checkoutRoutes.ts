@@ -20,3 +20,18 @@ export function buildCheckoutPath(
   });
   return `/checkout/${method}?${params.toString()}`;
 }
+
+/** Step 2 — اختيار طريقة الدفع (Lara-style) */
+export function buildCheckoutPaymentStepPath(
+  query: CheckoutQuery,
+  preferredMethod?: PaymentMethod,
+): string {
+  const params = new URLSearchParams({
+    product: query.product,
+    quantity: String(query.quantity),
+  });
+  if (preferredMethod) {
+    params.set("method", preferredMethod);
+  }
+  return `/checkout?${params.toString()}`;
+}

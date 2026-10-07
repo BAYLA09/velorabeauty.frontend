@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { checkout } from "@/config/content";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
-import { buildCheckoutPath } from "@/lib/checkoutRoutes";
+import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { HOMEPAGE_PRODUCT_SLUG } from "@/lib/resolveCheckoutContext";
 import { BundleSelector } from "./BundleSelector";
 import { CheckoutSummary } from "./CheckoutSummary";
@@ -17,10 +17,10 @@ export function CheckoutSection() {
 
   function handleSubmit() {
     router.push(
-      buildCheckoutPath(method, {
-        product: HOMEPAGE_PRODUCT_SLUG,
-        quantity,
-      }),
+      buildCheckoutPaymentStepPath(
+        { product: HOMEPAGE_PRODUCT_SLUG, quantity },
+        method,
+      ),
     );
   }
 

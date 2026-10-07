@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
-import { buildCheckoutPath } from "@/lib/checkoutRoutes";
+import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 
 type Props = {
   ctaLabel: string;
@@ -20,7 +20,9 @@ export function ProductMobileStickyBar({ ctaLabel, productSlug, quantity, method
       <button
         type="button"
         onClick={() =>
-          router.push(buildCheckoutPath(method, { product: productSlug, quantity }))
+          router.push(
+            buildCheckoutPaymentStepPath({ product: productSlug, quantity }, method),
+          )
         }
         className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-lg"
       >
