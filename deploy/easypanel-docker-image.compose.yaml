@@ -16,7 +16,11 @@ services:
       PORT: "3000"
       DATABASE_PATH: /app/data/velora.sqlite
       SITE_URL: https://www.velorabeauty.world
-      # STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_CARD_PAYMENT_ENABLED=true → Easypanel UI
+      # Easypanel → Environment (required for card pay):
+      # STRIPE_SECRET_KEY=sk_live_...
+      # STRIPE_WEBHOOK_SECRET=whsec_...
+      # CARD_PAYMENT_ENABLED=true
+      # (NEXT_PUBLIC_CARD_PAYMENT_ENABLED only if you rebuild the image — prefer CARD_PAYMENT_ENABLED)
     volumes:
       - velora-orders:/app/data
     expose:

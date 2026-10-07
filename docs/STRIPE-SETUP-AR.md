@@ -6,7 +6,8 @@
 |----------|----------|--------|
 | `STRIPE_SECRET_KEY` | ✅ | `sk_live_...` أو `sk_test_...` |
 | `STRIPE_WEBHOOK_SECRET` | ✅ | `whsec_...` من Stripe Dashboard |
-| `NEXT_PUBLIC_CARD_PAYMENT_ENABLED` | ✅ | `true` لتفعيل الدفع |
+| `CARD_PAYMENT_ENABLED` | ✅ | `true` (Easypanel — **بدون rebuild**) |
+| `NEXT_PUBLIC_CARD_PAYMENT_ENABLED` | بديل | فقط إلا كتبني image من جديد |
 | `STRIPE_PUBLISHABLE_KEY` أو `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | اختياري | للـ Checkout Redirect ما محتاجش على العميل |
 | `SITE_URL` | ✅ | `https://www.velorabeauty.world` (بدون `/` أخير) |
 | `DATABASE_PATH` | ✅ | `/app/data/velora.sqlite` |
