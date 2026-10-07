@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { CheckoutCardConfirmClient } from "@/components/checkout/CheckoutCardConfirmClient";
+import { CheckoutStripePaymentFallback } from "@/components/checkout/CheckoutStripePaymentFallback";
+import { CheckoutStripePaymentLoader } from "@/components/checkout/CheckoutStripePaymentLoader";
 import { getCheckoutProductImage } from "@/lib/checkoutProductMeta";
 import { resolveCheckoutContext } from "@/lib/resolveCheckoutContext";
-import { bootstrapStripeCardCheckout } from "@/lib/stripeCardBootstrap";
 import { isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
 
 type PageProps = {
@@ -14,13 +16,15 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
   const productImageSrc = getCheckoutProductImage(ctx.productSlug);
   const stripeEnabled = isStripeCardCheckoutEnabled();
 
-  const stripeBootstrap = stripeEnabled
-    ? await bootstrapStripeCardCheckout({
-        productSlug: ctx.productSlug,
-        productName: ctx.productName,
-        quantity: ctx.quantity,
-      })
-    : null;
+  const stripePaymentSection = stripeEnabled ? (
+    <Suspense fallback={<CheckoutStripePaymentFallback />}>
+      <CheckoutStripePaymentLoader
+        productSlug={ctx.productSlug}
+        productName={ctx.productName}
+        quantity={ctx.quantity}
+      />
+    </Suspense>
+  ) : undefined;
 
   return (
     <CheckoutCardConfirmClient
@@ -29,7 +33,7 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
       productImageSrc={productImageSrc}
       quantity={ctx.quantity}
       stripeEnabled={stripeEnabled}
-      stripeBootstrap={stripeBootstrap}
+      stripePaymentSection={stripePaymentSection}
     />
   );
 }
