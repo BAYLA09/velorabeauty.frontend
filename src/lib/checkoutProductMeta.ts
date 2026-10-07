@@ -1,13 +1,13 @@
 import type { BundleQuantity } from "@/config/pricing";
 import { getProductBySlug } from "@/lib/productCatalog";
-import { HOMEPAGE_PRODUCT_SLUG } from "@/lib/resolveCheckoutContext";
 
+/** Same packshot as homepage product cards (`images.products.*`). */
 export function getCheckoutProductImage(slug: string): string | undefined {
-  if (slug === HOMEPAGE_PRODUCT_SLUG) {
-    return getProductBySlug("hair-gummies")?.pageImage.src;
-  }
   const product = getProductBySlug(slug);
-  return product?.pageImage.src ?? product?.image.src;
+  if (!product) return undefined;
+  const homeSrc = product.image.src?.trim();
+  if (homeSrc) return homeSrc;
+  return product.pageImage.src?.trim() || undefined;
 }
 
 export function bundleOfferLabel(quantity: BundleQuantity): string {
