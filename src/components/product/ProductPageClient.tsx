@@ -19,6 +19,7 @@ import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStori
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductWithPage } from "@/lib/productCatalog";
+import { orderChoiceHref } from "@/lib/orderIntent";
 
 type Props = {
   product: ProductWithPage;
@@ -73,6 +74,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 form={page.form}
                 upsellSlotSrc={product.pageImage.upsellSlotSrc}
                 productName={product.name}
+                productSlug={product.slug}
                 quantity={quantity}
                 method={method}
                 onQuantityChange={setQuantity}
@@ -105,7 +107,12 @@ export function ProductPageClient({ product, allProducts }: Props) {
       </main>
       <FooterSection />
 
-      {purchase && <ProductMobileStickyBar ctaLabel={purchase.ctaLabel} />}
+      {purchase && (
+        <ProductMobileStickyBar
+          ctaLabel={purchase.ctaLabel}
+          href={orderChoiceHref(product.slug, quantity)}
+        />
+      )}
     </>
   );
 }

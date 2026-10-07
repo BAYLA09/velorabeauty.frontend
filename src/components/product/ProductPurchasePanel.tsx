@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductForm } from "@/config/productPages";
+import { orderChoiceHref, orderPayHref } from "@/lib/orderIntent";
 import {
   formatPrice,
   getCheckoutTotal,
@@ -149,6 +151,7 @@ export type PurchaseState = {
 type Props = {
   form: ProductForm;
   productName: string;
+  productSlug?: string;
   upsellSlotSrc?: Partial<Record<BundleQuantity, string>>;
   quantity?: BundleQuantity;
   method?: PaymentMethod;
@@ -162,26 +165,21 @@ type Props = {
 export function ProductPurchasePanel({
   form,
   productName,
+  productSlug,
   upsellSlotSrc,
   quantity: quantityProp,
-  method: methodProp,
+  method: methodProp = "card",
   onQuantityChange,
-  onMethodChange,
   onChange,
   funnelOffers = false,
 }: Props) {
   const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(2);
-  const [methodInternal, setMethodInternal] = useState<PaymentMethod>("card");
   const quantity = quantityProp ?? quantityInternal;
-  const method = methodProp ?? methodInternal;
+  const method = methodProp;
 
   const setQuantity = (q: BundleQuantity) => {
     onQuantityChange?.(q);
     if (quantityProp === undefined) setQuantityInternal(q);
-  };
-  const setMethod = (m: PaymentMethod) => {
-    onMethodChange?.(m);
-    if (methodProp === undefined) setMethodInternal(m);
   };
 
   const total = getCheckoutTotal(quantity, method);
@@ -282,78 +280,55 @@ export function ProductPurchasePanel({
         <div className="space-y-2 pt-1">
           <p className="text-sm font-extrabold text-velora-burgundy-dark">طرق الدفع المتاحة</p>
           <div className="grid gap-2 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setMethod("card")}
-              className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
-                method === "card"
-                  ? "border-velora-burgundy bg-[#fdf2f4]"
-                  : "border-velora-burgundy/15 bg-white"
-              }`}
+            <Link
+              href={orderPayHref("card", productSlug, quantity)}
+              className="rounded-2xl border-2 border-velora-burgundy/15 bg-white px-3 py-3 text-right transition hover:border-velora-burgundy hover:bg-[#fdf2f4]"
             >
               <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع بالبطاقة</p>
-              <p className="mt-0.5 text-[11px] font-bold text-velora-burgundy">شحن مجاني</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMethod("cod")}
-              className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
-                method === "cod"
-                  ? "border-velora-burgundy bg-[#fdf2f4]"
-                  : "border-velora-burgundy/15 bg-white"
-              }`}
+              <p className="mt-0.5 text-[11px] font-bold text-velora-burgundy">شحن مجاني · صفحة خاصة</p>
+            </Link>
+            <Link
+              href={orderPayHref("cod", productSlug, quantity)}
+              className="rounded-2xl border-2 border-velora-burgundy/15 bg-white px-3 py-3 text-right transition hover:border-velora-burgundy hover:bg-[#fdf2f4]"
             >
               <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع عند الاستلام</p>
               <p className="mt-0.5 text-[11px] font-bold text-velora-burgundy/70">+20 د.إ رسوم التوصيل</p>
-            </button>
+            </Link>
           </div>
           <p className="text-center text-[11px] font-semibold text-velora-burgundy/70">
-            الدفع بالبطاقة (شحن مجاني) أو الدفع عند الاستلام
+            البطاقة بشحن مجاني، والدفع عند الاستلام بزيادة 20 د.إ
           </p>
         </div>
       )}
 
       <div className="pt-1">
-        <button
-          type="button"
-          onClick={() => {
-            document.getElementById("purchase")?.scrollIntoView({ behavior: "smooth" });
-          }}
-          className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-xl transition hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
+        <Link
+          href={orderChoiceHref(productSlug, quantity)}
+          className="flex w-full items-center justify-center rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-xl transition hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
         >
           {ctaLabel}
-        </button>
+        </Link>
         {!funnelOffers && (
           <p className="mt-2 text-center text-xs font-bold text-velora-burgundy/70">
-            الدفع عند الاستلام • الدفع بالبطاقة
+            الخطوة التالية: البطاقة أو الدفع عند الاستلام
           </p>
         )}
       </div>
 
       {!funnelOffers && (
         <div className="flex flex-wrap items-center justify-center gap-1 pt-2 text-[10px] sm:text-[11px]">
-          <button
-            type="button"
-            onClick={() => setMethod("card")}
-            className={`rounded-full px-3 py-1 font-bold ${
-              method === "card"
-                ? "bg-velora-burgundy text-velora-cream"
-                : "bg-white text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
-            }`}
+          <Link
+            href={orderPayHref("card", productSlug, quantity)}
+            className="rounded-full bg-white px-3 py-1 font-bold text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
           >
             بطاقة
-          </button>
-          <button
-            type="button"
-            onClick={() => setMethod("cod")}
-            className={`rounded-full px-3 py-1 font-bold ${
-              method === "cod"
-                ? "bg-velora-burgundy text-velora-cream"
-                : "bg-white text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
-            }`}
+          </Link>
+          <Link
+            href={orderPayHref("cod", productSlug, quantity)}
+            className="rounded-full bg-white px-3 py-1 font-bold text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
           >
             COD (+20 د.إ)
-          </button>
+          </Link>
         </div>
       )}
     </div>

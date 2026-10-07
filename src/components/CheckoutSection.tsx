@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { checkout } from "@/config/content";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
+import { orderPayHref } from "@/lib/orderIntent";
 import { BundleSelector } from "./BundleSelector";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { PaymentMethodSelector } from "./PaymentMethodSelector";
@@ -23,7 +24,11 @@ export function CheckoutSection() {
             <BundleSelector selected={quantity} onChange={setQuantity} />
             <PaymentMethodSelector method={method} quantity={quantity} onChange={setMethod} />
           </div>
-          <CheckoutSummary quantity={quantity} method={method} />
+          <CheckoutSummary
+            quantity={quantity}
+            method={method}
+            href={orderPayHref(method, undefined, quantity)}
+          />
         </div>
       </div>
     </section>
