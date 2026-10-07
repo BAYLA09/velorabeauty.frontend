@@ -7,7 +7,7 @@ export const images = {
   /** الصفحة الرئيسية — صور حقيقية */
   products: {
     hair: {
-      src: "/images/products/hair-gummies.webp?v=20261007",
+      src: "/images/products/hair-gummies.webp?v=20261008",
       placeholder: "[ضع صورة المنتج هنا]",
     },
     skin: {
@@ -29,12 +29,12 @@ export const images = {
    */
   productPage: {
     hair: {
-      src: "/images/products/pdp/hair-main.webp?v=20261007",
+      src: "/images/products/pdp/hair-main.webp?v=20261008",
       storySrc: "/images/products/pdp/hair-story.webp?v=20261007",
       upsellSlotSrc: {
-        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20261007",
-        2: "/images/products/pdp/upsell/hair-qty-2.webp?v=20261007",
-        3: "/images/products/pdp/upsell/hair-qty-3.webp?v=20261007",
+        1: "/images/products/pdp/upsell/hair-qty-1.webp?v=20261008",
+        2: "/images/products/pdp/upsell/hair-qty-2.webp?v=20261008",
+        3: "/images/products/pdp/upsell/hair-qty-3.webp?v=20261008",
       },
       placeholder: "[صورة صفحة المنتج — علكات الشعر]",
       marketingSpotlight: undefined as string | undefined,
