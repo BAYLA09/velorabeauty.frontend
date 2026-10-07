@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-import { preloadStripeJs } from "@/lib/stripeJsLoader";
+import type { BundleQuantity } from "@/config/pricing";
+import { prefetchStripeCardCheckout } from "@/lib/prefetchStripeCardCheckout";
 
-/** Preload Stripe.js while the shopper is on the payment-method step. */
-export function useStripeWarmup(active: boolean) {
+type WarmupContext = {
+  productSlug: string;
+  productName: string;
+  quantity: BundleQuantity;
+};
+
+/** Preload Stripe.js + PaymentIntent while the shopper is on the payment-method step. */
+export function useStripeWarmup(active: boolean, context?: WarmupContext) {
+  const productSlug = context?.productSlug;
+  const productName = context?.productName;
+  const quantity = context?.quantity;
+
   useEffect(() => {
-    if (!active) return;
-    let cancelled = false;
-    void fetch("/api/stripe/config", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data: { publishableKey?: string | null }) => {
-        if (cancelled || !data.publishableKey) return;
-        void preloadStripeJs(data.publishableKey);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [active]);
+    if (!active || !productSlug || !productName || quantity == null) return;
+    void prefetchStripeCardCheckout({ productSlug, productName, quantity });
+  }, [active, productSlug, productName, quantity]);
 }

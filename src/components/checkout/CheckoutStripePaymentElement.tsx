@@ -3,7 +3,6 @@
 import { PaymentElement } from "@stripe/react-stripe-js";
 import { useCheckoutStripe } from "@/components/checkout/CheckoutStripeElementsProvider";
 import { PaymentBrandStrip } from "@/components/checkout/PaymentBrandStrip";
-import { PaymentFieldsSkeleton } from "@/components/checkout/PaymentFieldsSkeleton";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
 
 function IconLockSmall({ className }: { className?: string }) {
@@ -15,8 +14,7 @@ function IconLockSmall({ className }: { className?: string }) {
 }
 
 export function CheckoutStripePaymentElement() {
-  const { setPaymentReady, paymentReady, elementsLoading } = useCheckoutStripe();
-  const showSkeleton = elementsLoading || !paymentReady;
+  const { setPaymentReady, elementsLoading } = useCheckoutStripe();
 
   return (
     <section>
@@ -39,13 +37,13 @@ export function CheckoutStripePaymentElement() {
           </div>
         </div>
 
-        <div className="relative min-h-[168px] bg-white p-4 sm:p-5">
-          {showSkeleton ? (
-            <div className="absolute inset-0 z-10 bg-white p-4 sm:p-5">
-              <PaymentFieldsSkeleton />
-            </div>
+        <div className="min-h-[168px] bg-white p-4 sm:p-5">
+          {elementsLoading ? (
+            <p className="mb-3 text-xs font-medium text-neutral-400" aria-live="polite">
+              جاري تجهيز حقول البطاقة…
+            </p>
           ) : null}
-          <div className={showSkeleton ? "invisible min-h-[140px]" : "min-h-[140px]"}>
+          <div className="min-h-[140px]">
             <PaymentElement
               id="card-payment-element"
               options={{

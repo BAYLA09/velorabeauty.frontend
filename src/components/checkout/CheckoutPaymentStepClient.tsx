@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
 import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
 import { IconBanknote, IconCard } from "@/components/product/ProductFunnelIcons";
@@ -87,7 +87,11 @@ export function CheckoutPaymentStepClient({
   const [method, setMethod] = useState<PaymentMethod>(initialMethod);
   const query = { product: productSlug, quantity };
   const total = getCheckoutTotal(quantity, method);
-  useStripeWarmup(true);
+  useStripeWarmup(true, { productSlug, productName, quantity });
+
+  useEffect(() => {
+    router.prefetch(buildCheckoutPath("card", { product: productSlug, quantity }));
+  }, [router, productSlug, quantity]);
 
   function continueCheckout() {
     router.push(buildCheckoutPath(method, query));
