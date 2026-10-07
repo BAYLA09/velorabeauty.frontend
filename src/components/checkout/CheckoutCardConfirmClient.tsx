@@ -24,6 +24,7 @@ import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
+import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
 
 type Props = {
   productSlug: string;
@@ -31,6 +32,16 @@ type Props = {
   productImageSrc?: string;
   quantity: BundleQuantity;
   stripeEnabled?: boolean;
+  stripeBootstrap?: StripeCardBootstrap | null;
+};
+
+type DeliveryFormState = {
+  email: string;
+  name: string;
+  phone: string;
+  emirate: string;
+  address: string;
+  building: string;
 };
 
 function CheckoutDeliveryFields(props: {
@@ -196,31 +207,26 @@ function CheckoutSummaryColumn({
   );
 }
 
-function CheckoutCardStripeForm({
+function StripeCardPaymentAndSubmit({
   productSlug,
   productName,
-  productImageSrc,
   quantity,
-  backHref,
-}: Props & { backHref: string }) {
+  form,
+}: {
+  productSlug: string;
+  productName: string;
+  quantity: BundleQuantity;
+  form: DeliveryFormState;
+}) {
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
   const { paymentIntentId, paymentReady } = useCheckoutStripe();
-
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [emirate, setEmirate] = useState("");
-  const [address, setAddress] = useState("");
-  const [building, setBuilding] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
   const total = getCheckoutTotal(quantity, "card");
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function handlePay() {
     setError(null);
 
     if (!stripe || !elements) {
@@ -228,15 +234,15 @@ function CheckoutCardStripeForm({
       return;
     }
 
-    const trimmedName = name.trim();
-    const trimmedPhone = phone.trim();
-    const trimmedAddress = address.trim();
-    if (!trimmedName || !trimmedPhone || !trimmedAddress || !emirate) {
+    const trimmedName = form.name.trim();
+    const trimmedPhone = form.phone.trim();
+    const trimmedAddress = form.address.trim();
+    if (!trimmedName || !trimmedPhone || !trimmedAddress || !form.emirate) {
       setError("أكملي الاسم والهاتف والإمارة وعنوان التوصيل.");
       return;
     }
 
-    const buildingPart = building.trim();
+    const buildingPart = form.building.trim();
     const fullAddress = buildingPart
       ? `${trimmedAddress} — ${buildingPart}`
       : trimmedAddress;
@@ -253,8 +259,8 @@ function CheckoutCardStripeForm({
           quantity,
           customerName: trimmedName,
           phone: trimmedPhone,
-          email: email.trim() || undefined,
-          emirate,
+          email: form.email.trim() || undefined,
+          emirate: form.emirate,
           address: fullAddress,
         }),
       });
@@ -294,7 +300,7 @@ function CheckoutCardStripeForm({
           payment_method_data: {
             billing_details: {
               name: trimmedName,
-              email: email.trim() || undefined,
+              email: form.email.trim() || undefined,
               phone: trimmedPhone,
             },
           },
@@ -315,6 +321,54 @@ function CheckoutCardStripeForm({
   }
 
   return (
+    <>
+      <CheckoutStripePaymentElement />
+
+      {error ? (
+        <p className="mt-4 text-sm font-bold text-rose-700" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      <div className="border-t border-neutral-100 pt-6">
+        <CheckoutPayButton
+          totalAed={total}
+          loading={submitting}
+          disabled={!paymentReady}
+          loadingLabel="جاري معالجة الدفع…"
+          hint="أدخلي بيانات البطاقة أعلاه ثم أكّدي الدفع."
+          onClick={() => void handlePay()}
+        />
+      </div>
+    </>
+  );
+}
+
+function CheckoutCardStripeForm({
+  productSlug,
+  productName,
+  productImageSrc,
+  quantity,
+  backHref,
+  stripeBootstrap,
+}: Props & { backHref: string }) {
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [emirate, setEmirate] = useState("");
+  const [address, setAddress] = useState("");
+  const [building, setBuilding] = useState("");
+
+  const formState: DeliveryFormState = {
+    email,
+    name,
+    phone,
+    emirate,
+    address,
+    building,
+  };
+
+  return (
     <CheckoutLaraShell
       title="إتمام الطلب"
       subtitle="أكملي معلومات التوصيل ثم أدخلي بيانات البطاقة"
@@ -322,7 +376,7 @@ function CheckoutCardStripeForm({
     >
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:gap-8">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => e.preventDefault()}
           className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="space-y-8">
@@ -341,23 +395,19 @@ function CheckoutCardStripeForm({
               setBuilding={setBuilding}
             />
 
-            <CheckoutStripePaymentElement />
-
-            {error ? (
-              <p className="text-sm font-bold text-rose-700" role="alert">
-                {error}
-              </p>
-            ) : null}
-
-            <div className="border-t border-neutral-100 pt-6">
-              <CheckoutPayButton
-                totalAed={total}
-                loading={submitting}
-                disabled={!paymentReady}
-                loadingLabel="جاري معالجة الدفع…"
-                hint="أدخلي بيانات البطاقة أعلاه ثم أكّدي الدفع."
+            <CheckoutStripeElementsProvider
+              productSlug={productSlug}
+              productName={productName}
+              quantity={quantity}
+              bootstrap={stripeBootstrap ?? null}
+            >
+              <StripeCardPaymentAndSubmit
+                productSlug={productSlug}
+                productName={productName}
+                quantity={quantity}
+                form={formState}
               />
-            </div>
+            </CheckoutStripeElementsProvider>
           </div>
         </form>
 
@@ -513,24 +563,20 @@ export function CheckoutCardConfirmClient({
   productImageSrc,
   quantity,
   stripeEnabled = false,
+  stripeBootstrap = null,
 }: Props) {
   const backHref = buildCheckoutPaymentStepPath({ product: productSlug, quantity }, "card");
 
   if (stripeEnabled) {
     return (
-      <CheckoutStripeElementsProvider
+      <CheckoutCardStripeForm
         productSlug={productSlug}
         productName={productName}
+        productImageSrc={productImageSrc}
         quantity={quantity}
-      >
-        <CheckoutCardStripeForm
-          productSlug={productSlug}
-          productName={productName}
-          productImageSrc={productImageSrc}
-          quantity={quantity}
-          backHref={backHref}
-        />
-      </CheckoutStripeElementsProvider>
+        backHref={backHref}
+        stripeBootstrap={stripeBootstrap}
+      />
     );
   }
 

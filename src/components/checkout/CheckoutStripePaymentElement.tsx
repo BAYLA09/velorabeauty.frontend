@@ -3,6 +3,7 @@
 import { PaymentElement } from "@stripe/react-stripe-js";
 import { useCheckoutStripe } from "@/components/checkout/CheckoutStripeElementsProvider";
 import { PaymentBrandStrip } from "@/components/checkout/PaymentBrandStrip";
+import { PaymentFieldsSkeleton } from "@/components/checkout/PaymentFieldsSkeleton";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
 
 function IconLockSmall({ className }: { className?: string }) {
@@ -14,7 +15,8 @@ function IconLockSmall({ className }: { className?: string }) {
 }
 
 export function CheckoutStripePaymentElement() {
-  const { setPaymentReady } = useCheckoutStripe();
+  const { setPaymentReady, paymentReady, elementsLoading } = useCheckoutStripe();
+  const showSkeleton = elementsLoading || !paymentReady;
 
   return (
     <section>
@@ -37,18 +39,25 @@ export function CheckoutStripePaymentElement() {
           </div>
         </div>
 
-        <div className="bg-white p-4 sm:p-5">
-          <PaymentElement
-            id="card-payment-element"
-            options={{
-              layout: "tabs",
-              wallets: { applePay: "auto", googlePay: "auto" },
-              fields: { billingDetails: { address: "never" } },
-              terms: { card: "never" },
-            }}
-            onReady={() => setPaymentReady(true)}
-            onLoadError={() => setPaymentReady(false)}
-          />
+        <div className="relative min-h-[168px] bg-white p-4 sm:p-5">
+          {showSkeleton ? (
+            <div className="absolute inset-0 z-10 bg-white p-4 sm:p-5">
+              <PaymentFieldsSkeleton />
+            </div>
+          ) : null}
+          <div className={showSkeleton ? "invisible min-h-[140px]" : "min-h-[140px]"}>
+            <PaymentElement
+              id="card-payment-element"
+              options={{
+                layout: "tabs",
+                wallets: { applePay: "auto", googlePay: "auto" },
+                fields: { billingDetails: { address: "never" } },
+                terms: { card: "never" },
+              }}
+              onReady={() => setPaymentReady(true)}
+              onLoadError={() => setPaymentReady(false)}
+            />
+          </div>
         </div>
       </div>
 
