@@ -60,3 +60,18 @@ Open [http://localhost:3000](http://localhost:3000).
 | 3 products | 339 | 359 |
 
 COD includes **+20 د.إ** (configured in `src/config/pricing.ts`).
+
+## Orders (SQLite)
+
+Checkout saves orders with **`payment_method`** (`card` | `cod`) in SQLite:
+
+| Env | Default |
+|-----|---------|
+| `DATABASE_PATH` | `./data/velora.sqlite` |
+
+Dedicated checkout pages:
+
+- `/checkout/card?product=…&quantity=1|2|3` — الدفع بالبطاقة (شحن مجاني)
+- `/checkout/cod?product=…&quantity=1|2|3` — الدفع عند الاستلام (+20 د.إ)
+
+API: `POST /api/orders`, `GET /api/orders/[id]`.

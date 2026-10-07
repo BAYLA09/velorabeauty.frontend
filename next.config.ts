@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  serverExternalPackages: ["better-sqlite3"],
   images: {
     formats: ["image/webp"],
     deviceSizes: [640, 828, 1200],

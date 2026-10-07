@@ -2,7 +2,7 @@
 # Heap stays at 1536 so a 2 GB Easypanel builder is not OOM-killed. Do not raise this
 # back to 4096: `npm run build` inherits NODE_OPTIONS, and a 4 GB heap dies on small VPS.
 FROM node:22-alpine AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -25,12 +25,18 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV BUILD_SHA=${GIT_SHA}
-RUN addgroup --system --gid 1001 nodejs \
-  && adduser --system --uid 1001 nextjs
+ENV DATABASE_PATH=/app/data/velora.sqlite
+RUN apk add --no-cache sqlite-libs \
+  && addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nextjs \
+  && mkdir -p /app/data \
+  && chown nextjs:nodejs /app/data
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+RUN node -e "require('better-sqlite3')"
 
 USER nextjs
 EXPOSE 3000

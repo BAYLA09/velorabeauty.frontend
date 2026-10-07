@@ -1,5 +1,6 @@
 # Fallback when Easypanel Dockerfile build fails (OOM / timeout).
 # Easypanel → Build → Nixpacks (not Dockerfile).
+# ⚠️ better-sqlite3 (orders DB) needs Dockerfile — Nixpacks will fail native compile.
 [variables]
 NODE_ENV = "production"
 NEXT_TELEMETRY_DISABLED = "1"

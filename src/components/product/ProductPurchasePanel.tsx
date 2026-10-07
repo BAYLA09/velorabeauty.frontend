@@ -1,7 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductForm } from "@/config/productPages";
+import { buildCheckoutPath } from "@/lib/checkoutRoutes";
 import {
   formatPrice,
   getCheckoutTotal,
@@ -148,6 +150,7 @@ export type PurchaseState = {
 
 type Props = {
   form: ProductForm;
+  productSlug: string;
   productName: string;
   upsellSlotSrc?: Partial<Record<BundleQuantity, string>>;
   quantity?: BundleQuantity;
@@ -161,6 +164,7 @@ type Props = {
 
 export function ProductPurchasePanel({
   form,
+  productSlug,
   productName,
   upsellSlotSrc,
   quantity: quantityProp,
@@ -170,6 +174,7 @@ export function ProductPurchasePanel({
   onChange,
   funnelOffers = false,
 }: Props) {
+  const router = useRouter();
   const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(2);
   const [methodInternal, setMethodInternal] = useState<PaymentMethod>("card");
   const quantity = quantityProp ?? quantityInternal;
@@ -197,6 +202,15 @@ export function ProductPurchasePanel({
   useEffect(() => {
     onChange?.({ quantity, method, total, ctaLabel });
   }, [quantity, method, total, ctaLabel, onChange]);
+
+  function goToCheckout() {
+    router.push(
+      buildCheckoutPath(method, {
+        product: productSlug,
+        quantity,
+      }),
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -316,9 +330,7 @@ export function ProductPurchasePanel({
       <div className="pt-1">
         <button
           type="button"
-          onClick={() => {
-            document.getElementById("purchase")?.scrollIntoView({ behavior: "smooth" });
-          }}
+          onClick={goToCheckout}
           className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-xl transition hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
         >
           {ctaLabel}

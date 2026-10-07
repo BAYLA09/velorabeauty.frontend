@@ -17,6 +17,7 @@ type Props = {
   submitType?: "button" | "submit";
   onSubmit?: () => void;
   variant?: "light" | "dark";
+  disabled?: boolean;
 };
 
 const quantityLabels: Record<BundleQuantity, string> = {
@@ -32,6 +33,7 @@ export function CheckoutSummary({
   submitType = "button",
   onSubmit,
   variant = "light",
+  disabled = false,
 }: Props) {
   const total = getCheckoutTotal(quantity, method);
   const isDark = variant === "dark";
@@ -81,8 +83,9 @@ export function CheckoutSummary({
 
       <button
         type={submitType}
+        disabled={disabled}
         onClick={submitType === "button" ? onSubmit : undefined}
-        className="mt-6 w-full rounded-full bg-velora-burgundy py-4 text-sm font-semibold text-velora-cream transition hover:bg-velora-burgundy-light"
+        className="mt-6 w-full rounded-full bg-velora-burgundy py-4 text-sm font-semibold text-velora-cream transition hover:bg-velora-burgundy-light disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitLabel}
       </button>

@@ -17,8 +17,9 @@
 
 4. **Registry username / password:** **خليهم فارغين** — الـ package public.
 5. **Domains** → Target port: **3000** (HTTP داخل الـ container).
-6. **Deploy** → استنى حتى **Running** / logs فيها `Ready`.
-7. جرب:
+6. **Volumes** (من بعد merge checkout + SQLite): mount **`/app/data`** persistent (طلبات COD/بطاقة).
+7. **Deploy** → استنى **1–3 دقائق** (pull image) · logs فيها `Ready` — **ماشي 1 ثانية**.
+8. جرب:
 
    ```bash
    curl -s https://www.velorabeauty.world/api/health
@@ -53,7 +54,7 @@
 | Builder | **Dockerfile** → `Dockerfile` |
 | Port | **3000** |
 
-**Resources → Memory limit:** ≥ **4096 MB** أثناء البuild (OOM شائع).
+**Resources → Memory limit:** ≥ **2048 MB** للـ builder (Dockerfile فيه heap 1536).
 
 إلا Dockerfile فشل → **Build → Nixpacks** (فيه `nixpacks.toml` فـ repo).
 
@@ -69,15 +70,43 @@
 
 ---
 
+## ⚠️ Deploy كيخلص فـ **1 ثانية** (0–2s) — الحالة ديالك
+
+فـ **Deployments** كتبان رسالة commit (`fix: let Easypanel build…`) و المدة **1 second** فقط.
+
+**معناها:** Easypanel **ما بنا image** · غالباً **Git clone فشل** (`Git key not found`) أو **webhook** كيحاول deploy على خدمة Git معطلة.
+
+الـ image **راه جاهزة** فـ GitHub Actions → **Publish container** ✅ (2–8 دقائق). Easypanel خاصو **يسحبها** ماشي يبني من Git.
+
+**الحل (5 دقائق):**
+
+1. Easypanel → خدمة frontend → **Source**.
+2. بدّل من **GitHub / Git** → **Docker Image**.
+3. Image: `ghcr.io/bayla09/velorabeauty.frontend:latest` · auth **فارغ**.
+4. Port **3000** → **Deploy** — خاصو ياخذ **دقيقة+** (pull). إلا بقى 1s → Source مازال Git.
+5. (اختياري) GitHub → repo → **Secrets** → حذف `EASYPANEL_DEPLOY_WEBHOOK` حتى ما يتكرر deploy فاشل · من بعد ما Docker Image خدام، رجّع webhook.
+
+**تحقق:**
+
+```bash
+curl -s https://www.velorabeauty.world/api/health
+# version = SHA ديال آخر Publish container على main
+```
+
+---
+
 ## أخطاء شائعة
 
 | اللي كتشوف | الحل |
 |------------|------|
-| `Git key not found` | استعمل **Docker Image** (طريقة 1) — ماشي Git |
+| Deploy **1 second** + commit message | **Docker Image** (فوق) — Git/webhook فاشل |
+| `Git key not found` | استعمل **Docker Image** (طريقة 1) — ماشi Git |
 | `unauthorized` / pull image | Image: بالضبط `ghcr.io/bayla09/velorabeauty.frontend:latest` — auth فارغ |
 | 502 / unhealthy | Port **3000** · logs runtime (ماشي build فقط) |
 | الموقع قديم | Deploy بعد ما **Publish container** ✅ على `main` |
-| Build OOM | Docker Image (طريقة 1) أو Nixpacks + RAM 4GB |
+| Build OOM / `Killed` | Builder **≥ 2 GB** · Dockerfile فيه heap **1536** (ماشي 4096) · أو **Docker Image** من GHCR |
+| `better-sqlite3` / native module | **Builder = Dockerfile** (ماشي Nixpacks) · volume **`/app/data`** للطلبات |
+| Build context ضخم (~90MB) | `.dockerignore` كيستبعد PNG masters — pull **`main`** |
 
 ---
 

@@ -63,5 +63,10 @@ jobs:
             echo "EASYPANEL_DEPLOY_WEBHOOK not set — skip auto-deploy (see docs/EASYPANEL-SETUP-AR.md)"
             exit 0
           fi
-          curl -fsS -X POST "$WEBHOOK"
-          echo "Easypanel deploy webhook triggered"
+          code=$(curl -sS -o /tmp/easypanel-webhook.txt -w "%{http_code}" -X POST "$WEBHOOK")
+          echo "Easypanel webhook HTTP ${code}"
+          cat /tmp/easypanel-webhook.txt || true
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::warning::Easypanel webhook failed — fix Source (use Docker Image) or reconnect deploy URL"
+            exit 0
+          fi
