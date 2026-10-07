@@ -14,23 +14,7 @@ import { PaymentFieldsSkeleton } from "@/components/checkout/PaymentFieldsSkelet
 import { stripeElementsAppearance } from "@/components/checkout/stripeAppearance";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
 import { preloadStripeJs } from "@/lib/stripeJsLoader";
-import { readStripePiCache } from "@/lib/stripePiSessionCache";
 import type { BundleQuantity } from "@/config/pricing";
-
-function mergeStripeBootstrap(
-  bootstrap: StripeCardBootstrap | null,
-  productSlug: string,
-  quantity: BundleQuantity,
-): StripeCardBootstrap | null {
-  if (bootstrap?.clientSecret && bootstrap.publishableKey) return bootstrap;
-  const cached = readStripePiCache(productSlug, quantity);
-  if (!cached) return bootstrap;
-  return {
-    publishableKey: cached.publishableKey,
-    clientSecret: cached.clientSecret,
-    paymentIntentId: cached.paymentIntentId,
-  };
-}
 
 type StripeCtx = {
   paymentIntentId: string;
@@ -65,35 +49,26 @@ export function CheckoutStripeElementsProvider({
   bootstrap,
   children,
 }: Props) {
-  const mergedBootstrap = mergeStripeBootstrap(bootstrap, productSlug, quantity);
   const [publishableKey, setPublishableKey] = useState<string | null>(
-    mergedBootstrap?.publishableKey ?? null,
+    bootstrap?.publishableKey ?? null,
   );
   const [clientSecret, setClientSecret] = useState<string | null>(
-    mergedBootstrap?.clientSecret ?? null,
+    bootstrap?.clientSecret ?? null,
   );
-  const [paymentIntentId, setPaymentIntentId] = useState(mergedBootstrap?.paymentIntentId ?? "");
+  const [paymentIntentId, setPaymentIntentId] = useState(bootstrap?.paymentIntentId ?? "");
   const [paymentReady, setPaymentReady] = useState(false);
   const [elementsLoading, setElementsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const piRef = useRef(mergedBootstrap?.paymentIntentId ?? "");
+  const piRef = useRef(bootstrap?.paymentIntentId ?? "");
 
   useEffect(() => {
-    const merged = mergeStripeBootstrap(bootstrap, productSlug, quantity);
-    if (merged?.publishableKey) {
-      void preloadStripeJs(merged.publishableKey);
+    if (bootstrap?.publishableKey) {
+      void preloadStripeJs(bootstrap.publishableKey);
     }
-    if (merged?.clientSecret && merged.publishableKey) {
-      piRef.current = merged.paymentIntentId;
-      setPublishableKey(merged.publishableKey);
-      setClientSecret(merged.clientSecret);
-      setPaymentIntentId(merged.paymentIntentId);
-    }
-  }, [bootstrap, productSlug, quantity]);
+  }, [bootstrap?.publishableKey]);
 
   useEffect(() => {
-    if (mergeStripeBootstrap(bootstrap, productSlug, quantity)?.clientSecret) return;
-    if (clientSecret && publishableKey) return;
+    if (bootstrap) return;
 
     let cancelled = false;
 
@@ -153,7 +128,7 @@ export function CheckoutStripeElementsProvider({
     return () => {
       cancelled = true;
     };
-  }, [bootstrap, productSlug, productName, quantity, clientSecret, publishableKey]);
+  }, [bootstrap, productSlug, productName, quantity]);
 
   const ctx = useMemo<StripeCtx>(
     () => ({
@@ -198,7 +173,7 @@ export function CheckoutStripeElementsProvider({
             clientSecret,
             appearance: stripeElementsAppearance,
             locale: "ar",
-            loader: "never",
+            loader: "auto",
           }}
         >
           {children}
