@@ -6,30 +6,42 @@ const steps: { id: Step; label: string }[] = [
   { id: 3, label: "تأكيد الطلب" },
 ];
 
+function StepCheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        d="M12.416 4.376a.75.75 0 01.208 1.04l-5 7.5a.75.75 0 01-1.154.082l-3-3.5a.75.75 0 011.14-.976L6.7 10.88l4.376-6.564a.75.75 0 011.04-.208z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 export function CheckoutStepper({ current }: { current: Step }) {
   return (
-    <nav aria-label="خطوات إتمام الطلب" className="w-full">
-      <ol className="flex items-center justify-center gap-0 sm:gap-2">
+    <nav aria-label="خطوات إتمام الطلب" className="w-full rounded-xl border border-neutral-200/80 bg-white px-3 py-4 shadow-sm sm:px-6">
+      <ol className="flex items-center justify-between gap-1 sm:justify-center sm:gap-0">
         {steps.map((step, index) => {
           const done = step.id < current;
           const active = step.id === current;
           return (
             <li key={step.id} className="flex min-w-0 flex-1 items-center">
-              <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 px-1 sm:flex-row sm:justify-center sm:gap-2">
+              <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 px-0.5 sm:flex-row sm:justify-center sm:gap-2.5">
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition ${
                     done
-                      ? "bg-velora-burgundy text-velora-cream"
+                      ? "bg-emerald-800 text-white"
                       : active
-                        ? "bg-velora-burgundy text-velora-cream ring-4 ring-velora-burgundy/15"
-                        : "bg-velora-cream-dark text-velora-burgundy/40"
+                        ? "bg-neutral-900 text-white ring-4 ring-neutral-900/10"
+                        : "border border-neutral-200 bg-neutral-50 text-neutral-400"
                   }`}
                 >
-                  {done ? "✓" : step.id}
+                  {done ? <StepCheckIcon className="h-4 w-4" /> : step.id}
                 </span>
                 <span
-                  className={`max-w-[5.5rem] text-center text-[10px] font-bold leading-tight sm:max-w-none sm:text-xs ${
-                    active ? "text-velora-burgundy-dark" : "text-velora-burgundy/45"
+                  className={`max-w-[4.75rem] text-center text-[10px] font-semibold leading-tight sm:max-w-none sm:text-xs ${
+                    active ? "text-neutral-900" : done ? "text-neutral-600" : "text-neutral-400"
                   }`}
                 >
                   {step.label}
@@ -37,8 +49,8 @@ export function CheckoutStepper({ current }: { current: Step }) {
               </div>
               {index < steps.length - 1 && (
                 <span
-                  className={`hidden h-0.5 flex-1 sm:block ${
-                    step.id < current ? "bg-velora-burgundy/50" : "bg-velora-burgundy/10"
+                  className={`mx-1 hidden h-px min-w-[1rem] flex-1 sm:block ${
+                    step.id < current ? "bg-emerald-700/40" : "bg-neutral-200"
                   }`}
                   aria-hidden
                 />

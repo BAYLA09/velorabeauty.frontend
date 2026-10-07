@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
+import type { BundleQuantity } from "@/config/pricing";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { getProductPath } from "@/lib/productCatalog";
 import { HOMEPAGE_PRODUCT_SLUG } from "@/lib/resolveCheckoutContext";
 
+type BackTarget = "product" | "payment";
+
 type Props = {
   productSlug: string;
   quantity: BundleQuantity;
-  /** Step 3: show link back to payment picker */
-  paymentMethod?: PaymentMethod;
-  variant?: "inline" | "stacked";
+  /** Step 3 → payment picker · Step 2 → product page */
+  backTo: BackTarget;
+  className?: string;
 };
 
 function productReturnHref(productSlug: string): string {
@@ -21,55 +23,45 @@ function productReturnHref(productSlug: string): string {
   return `${getProductPath(productSlug)}#purchase`;
 }
 
+function ChevronBackIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        d="M11.78 5.22a.75.75 0 010 1.06L8.06 10l3.72 3.72a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 export function CheckoutBackActions({
   productSlug,
   quantity,
-  paymentMethod,
-  variant = "inline",
+  backTo,
+  className = "",
 }: Props) {
-  const paymentHref = buildCheckoutPaymentStepPath(
-    { product: productSlug, quantity },
-    paymentMethod,
-  );
-  const productHref = productReturnHref(productSlug);
+  const href =
+    backTo === "payment"
+      ? buildCheckoutPaymentStepPath({ product: productSlug, quantity })
+      : productReturnHref(productSlug);
 
-  const linkClass =
-    "inline-flex items-center justify-center gap-2 rounded-full border border-velora-burgundy/15 bg-white px-4 py-2.5 text-sm font-bold text-velora-burgundy transition hover:border-velora-burgundy/35 hover:bg-velora-cream-dark";
-
-  if (variant === "stacked") {
-    return (
-      <div className="flex flex-col gap-2">
-        {paymentMethod !== undefined && (
-          <Link href={paymentHref} className={`${linkClass} w-full`}>
-            <span aria-hidden>→</span>
-            رجوع — اختيار طريقة الدفع
-          </Link>
-        )}
-        <Link href={productHref} className={`${linkClass} w-full`}>
-          <span aria-hidden>→</span>
-          العودة للمنتج
-        </Link>
-      </div>
-    );
-  }
+  const label =
+    backTo === "payment" ? "العودة إلى طريقة الدفع" : "العودة إلى المنتج";
 
   return (
-    <nav
-      aria-label="رجوع"
-      className="mb-5 flex flex-wrap items-center gap-2 border-b border-velora-burgundy/8 pb-4"
-    >
-      {paymentMethod !== undefined && (
-        <Link href={paymentHref} className={linkClass}>
-          <span aria-hidden>→</span>
-          طريقة الدفع
-        </Link>
-      )}
-      <Link href={productHref} className={linkClass}>
-        <span aria-hidden>→</span>
-        المنتج
-      </Link>
-      <Link href="/" className={`${linkClass} text-velora-burgundy/70`}>
-        الرئيسية
+    <nav aria-label="رجوع" className={className}>
+      <Link
+        href={href}
+        className="group inline-flex items-center gap-1.5 rounded-md py-1.5 text-sm font-medium text-neutral-600 transition hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400"
+      >
+        <ChevronBackIcon className="h-[18px] w-[18px] shrink-0 text-neutral-400 transition group-hover:text-neutral-700 rtl:rotate-180" />
+        <span>{label}</span>
       </Link>
     </nav>
   );
