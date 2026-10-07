@@ -6,14 +6,16 @@ import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
 import { CheckoutCardPaymentBlock } from "@/components/checkout/CheckoutCardPaymentBlock";
 import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
 import { CheckoutSummarySidebar } from "@/components/checkout/CheckoutSummarySidebar";
+import {
+  checkoutInputClass,
+  checkoutLabelClass,
+  checkoutSectionTitleClass,
+} from "@/components/checkout/checkoutFieldStyles";
 import { checkoutEmirates } from "@/config/productCheckout";
 import { formatPrice, getCheckoutTotal, type BundleQuantity } from "@/config/pricing";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
-
-const inputClass =
-  "mt-2 w-full rounded-lg border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 text-sm text-neutral-900 outline-none transition focus:border-neutral-400 focus:bg-white focus:ring-2 focus:ring-neutral-200/80";
 
 type Props = {
   productSlug: string;
@@ -106,30 +108,31 @@ export function CheckoutCardConfirmClient({
   return (
     <CheckoutFunnelShell currentStep={3}>
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-2xl border border-velora-burgundy/8 bg-white p-6 shadow-sm sm:p-8">
+        <section className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm sm:p-8">
           <CheckoutBackActions
             productSlug={productSlug}
             quantity={quantity}
-            paymentMethod="card"
+            backTo="payment"
+            className="mb-6"
           />
 
-          <header className="border-b border-velora-burgundy/8 pb-5">
-            <h1 className="text-2xl font-black text-velora-burgundy-dark sm:text-3xl">إتمام الطلب</h1>
-            <p className="mt-2 text-sm text-velora-burgundy/65">
+          <header className="border-b border-neutral-100 pb-5">
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-[1.65rem]">
+              إتمام الطلب
+            </h1>
+            <p className="mt-2 text-sm text-neutral-500">
               أكملي معلومات التوصيل — ثم نرسل لك رابط الدفع الآمن بالبطاقة.
             </p>
           </header>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-8">
             <fieldset className="space-y-4">
-              <legend className="text-base font-black text-velora-burgundy-dark">
-                معلومات التواصل
-              </legend>
-              <p className="text-xs text-velora-burgundy/50">لإرسال تأكيد الطلب وتحديثات التوصيل</p>
+              <legend className={checkoutSectionTitleClass}>معلومات التواصل</legend>
+              <p className="text-xs text-neutral-500">لإرسال تأكيد الطلب وتحديثات التوصيل</p>
               <label className="block">
-                <span className="text-sm font-bold text-velora-burgundy-dark">
+                <span className={checkoutLabelClass}>
                   البريد الإلكتروني{" "}
-                  <span className="font-normal text-velora-burgundy/45">(اختياري)</span>
+                  <span className="font-normal text-neutral-400">(اختياري)</span>
                 </span>
                 <input
                   type="email"
@@ -137,23 +140,23 @@ export function CheckoutCardConfirmClient({
                   value={email}
                   onChange={(ev) => setEmail(ev.target.value)}
                   placeholder="name@email.com"
-                  className={inputClass}
+                  className={checkoutInputClass}
                   autoComplete="email"
                 />
               </label>
               <label className="block">
-                <span className="text-sm font-bold text-velora-burgundy-dark">الاسم الكامل</span>
+                <span className={checkoutLabelClass}>الاسم الكامل</span>
                 <input
                   required
                   value={name}
                   onChange={(ev) => setName(ev.target.value)}
                   placeholder="مثال: نورة العتيبي"
-                  className={inputClass}
+                  className={checkoutInputClass}
                   autoComplete="name"
                 />
               </label>
               <label className="block">
-                <span className="text-sm font-bold text-velora-burgundy-dark">رقم الهاتف</span>
+                <span className={checkoutLabelClass}>رقم الهاتف</span>
                 <input
                   required
                   type="tel"
@@ -161,21 +164,21 @@ export function CheckoutCardConfirmClient({
                   value={phone}
                   onChange={(ev) => setPhone(ev.target.value)}
                   placeholder="0501234567"
-                  className={inputClass}
+                  className={checkoutInputClass}
                   autoComplete="tel"
                 />
               </label>
             </fieldset>
 
             <fieldset className="space-y-4">
-              <legend className="text-base font-black text-velora-burgundy-dark">عنوان التوصيل</legend>
+              <legend className={checkoutSectionTitleClass}>عنوان التوصيل</legend>
               <label className="block">
-                <span className="text-sm font-bold text-velora-burgundy-dark">المنطقة</span>
+                <span className={checkoutLabelClass}>المنطقة</span>
                 <select
                   required
                   value={emirate}
                   onChange={(ev) => setEmirate(ev.target.value)}
-                  className={inputClass}
+                  className={checkoutInputClass}
                 >
                   <option value="">اختاري الإمارة</option>
                   {checkoutEmirates.map((city) => (
@@ -186,29 +189,27 @@ export function CheckoutCardConfirmClient({
                 </select>
               </label>
               <label className="block">
-                <span className="text-sm font-bold text-velora-burgundy-dark">
-                  العنوان / تفاصيل التوصيل
-                </span>
+                <span className={checkoutLabelClass}>العنوان / تفاصيل التوصيل</span>
                 <textarea
                   required
                   rows={2}
                   value={address}
                   onChange={(ev) => setAddress(ev.target.value)}
                   placeholder="مثال: دبي مارينا، برج …"
-                  className={`${inputClass} resize-none`}
+                  className={`${checkoutInputClass} resize-none`}
                   autoComplete="street-address"
                 />
               </label>
               <label className="block">
-                <span className="text-sm font-bold text-velora-burgundy-dark">
+                <span className={checkoutLabelClass}>
                   رقم المبنى / الشقة{" "}
-                  <span className="font-normal text-velora-burgundy/45">(اختياري)</span>
+                  <span className="font-normal text-neutral-400">(اختياري)</span>
                 </span>
                 <input
                   value={building}
                   onChange={(ev) => setBuilding(ev.target.value)}
                   placeholder="Apt 1204"
-                  className={inputClass}
+                  className={checkoutInputClass}
                 />
               </label>
             </fieldset>
@@ -224,18 +225,10 @@ export function CheckoutCardConfirmClient({
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-velora-burgundy to-[#2c1318] py-4 text-base font-black text-velora-cream shadow-lg transition hover:opacity-95 disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 disabled:opacity-60"
             >
               {submitting ? "جاري التأكيد…" : `الدفع بالبطاقة — ${formatPrice(total)}`}
-              <span aria-hidden>←</span>
             </button>
-
-            <CheckoutBackActions
-              productSlug={productSlug}
-              quantity={quantity}
-              paymentMethod="card"
-              variant="stacked"
-            />
           </form>
         </section>
 

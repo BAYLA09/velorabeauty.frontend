@@ -33,8 +33,8 @@ export function CheckoutSummarySidebar({
   const total = getCheckoutTotal(quantity, paymentMethod);
 
   return (
-    <aside className="h-fit rounded-2xl border border-velora-burgundy/10 bg-white p-5 shadow-sm lg:sticky lg:top-28">
-      <h2 className="text-base font-black text-velora-burgundy-dark">ملخص الطلب</h2>
+    <aside className="h-fit rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-sm lg:sticky lg:top-28">
+      <h2 className="text-base font-semibold text-neutral-900">ملخص الطلب</h2>
 
       <div className="mt-4 flex gap-3 border-b border-velora-burgundy/8 pb-4">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-velora-cream-dark">
