@@ -36,14 +36,16 @@ export async function POST(request: Request) {
     if (!customerName || !phone) {
       return NextResponse.json({ error: "أكملي الاسم ورقم الهاتف." }, { status: 400 });
     }
+    if (paymentMethod === "cod" && !address) {
+      return NextResponse.json({ error: "أدخلي عنوان التوصيل." }, { status: 400 });
+    }
 
     const resolvedEmirate =
       emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
         ? emirate
         : (checkoutEmirates[0] ?? "دبي");
     const resolvedAddress =
-      address ||
-      (paymentMethod === "cod" ? "يُؤكَّد معكِ بالهاتف" : "يُؤكَّد بعد التواصل");
+      address || (paymentMethod === "card" ? "يُؤكَّد بعد التواصل" : "");
 
     const order = createOrder({
       productSlug,

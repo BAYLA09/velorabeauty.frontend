@@ -36,6 +36,7 @@ export function CheckoutConfirmClient({
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -47,8 +48,13 @@ export function CheckoutConfirmClient({
     setError(null);
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
+    const trimmedAddress = address.trim();
     if (!trimmedName || !trimmedPhone) {
       setError("أكملي الاسم ورقم الهاتف.");
+      return;
+    }
+    if (isCod && !trimmedAddress) {
+      setError("أدخلي عنوان التوصيل.");
       return;
     }
 
@@ -64,9 +70,9 @@ export function CheckoutConfirmClient({
           paymentMethod,
           customerName: trimmedName,
           phone: trimmedPhone,
-          email: email.trim() || undefined,
+          email: isCod ? undefined : email.trim() || undefined,
           emirate: "دبي",
-          address: isCod ? "يُؤكَّد معكِ بالهاتف" : "يُؤكَّد بعد التواصل",
+          address: isCod ? trimmedAddress : "يُؤكَّد بعد التواصل",
         }),
       });
 
@@ -101,7 +107,7 @@ export function CheckoutConfirmClient({
 
   const title = isCod ? "إتمام الطلب" : checkoutExperience.card.title;
   const lead = isCod
-    ? "أدخلي بياناتك — فريق فيلورا يتصل بك خلال ساعات لتأكيد العنوان وإتمام الطلب."
+    ? "الاسم، الهاتف، والعنوان — ونوصّل طلبك بالدفع عند الاستلام (+20 د.إ توصيل)."
     : "أدخلي بياناتك — نرسل لك رابط الدفع الآمن بعد التأكيد السريع.";
 
   return (
@@ -118,32 +124,35 @@ export function CheckoutConfirmClient({
             <p className="mt-2 text-sm leading-relaxed text-velora-burgundy/65">{lead}</p>
           </div>
 
-          <div className="mt-6 flex gap-3 rounded-2xl border border-sky-200/80 bg-sky-50/90 px-4 py-3 text-sm text-sky-950/85">
-            <span className="text-lg" aria-hidden>
-              📞
-            </span>
-            <p className="leading-relaxed">
-              <span className="font-bold">لا حاجة لعنوان كامل الآن</span> — الاسم والهاتف كافيان،
-              ونتصل بك لتأكيد التوصيل داخل الإمارات.
-            </p>
-          </div>
+          {!isCod && (
+            <div className="mt-6 flex gap-3 rounded-2xl border border-sky-200/80 bg-sky-50/90 px-4 py-3 text-sm text-sky-950/85">
+              <span className="text-lg" aria-hidden>
+                📞
+              </span>
+              <p className="leading-relaxed">
+                <span className="font-bold">تأكيد سريع</span> — نتصل بك قبل إرسال رابط الدفع الآمن.
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-            <label className="block">
-              <span className="text-sm font-bold text-velora-burgundy-dark">
-                البريد الإلكتروني{" "}
-                <span className="font-normal text-velora-burgundy/45">(اختياري)</span>
-              </span>
-              <input
-                type="email"
-                dir="ltr"
-                value={email}
-                onChange={(ev) => setEmail(ev.target.value)}
-                placeholder="name@email.com"
-                className="mt-2 w-full rounded-xl border border-velora-burgundy/15 bg-[#fafafa] px-4 py-3.5 text-sm text-velora-burgundy-dark outline-none focus:border-velora-burgundy/40 focus:ring-2 focus:ring-velora-burgundy/10"
-                autoComplete="email"
-              />
-            </label>
+            {!isCod && (
+              <label className="block">
+                <span className="text-sm font-bold text-velora-burgundy-dark">
+                  البريد الإلكتروني{" "}
+                  <span className="font-normal text-velora-burgundy/45">(اختياري)</span>
+                </span>
+                <input
+                  type="email"
+                  dir="ltr"
+                  value={email}
+                  onChange={(ev) => setEmail(ev.target.value)}
+                  placeholder="name@email.com"
+                  className="mt-2 w-full rounded-xl border border-velora-burgundy/15 bg-[#fafafa] px-4 py-3.5 text-sm text-velora-burgundy-dark outline-none focus:border-velora-burgundy/40 focus:ring-2 focus:ring-velora-burgundy/10"
+                  autoComplete="email"
+                />
+              </label>
+            )}
             <label className="block">
               <span className="text-sm font-bold text-velora-burgundy-dark">الاسم الكامل</span>
               <input
@@ -168,6 +177,20 @@ export function CheckoutConfirmClient({
                 autoComplete="tel"
               />
             </label>
+            {isCod && (
+              <label className="block">
+                <span className="text-sm font-bold text-velora-burgundy-dark">العنوان</span>
+                <textarea
+                  required
+                  rows={3}
+                  value={address}
+                  onChange={(ev) => setAddress(ev.target.value)}
+                  placeholder="الإمارة، المنطقة، الشارع، رقم المبنى / الشقة…"
+                  className="mt-2 w-full resize-none rounded-xl border border-velora-burgundy/15 bg-[#fafafa] px-4 py-3.5 text-sm text-velora-burgundy-dark outline-none focus:border-velora-burgundy/40 focus:ring-2 focus:ring-velora-burgundy/10"
+                  autoComplete="street-address"
+                />
+              </label>
+            )}
 
             {error && (
               <p className="text-sm font-bold text-rose-700" role="alert">
