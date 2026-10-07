@@ -22,6 +22,7 @@ type Props = {
   productName: string;
   productImageSrc?: string;
   quantity: BundleQuantity;
+  stripeEnabled?: boolean;
 };
 
 export function CheckoutCardConfirmClient({
@@ -29,6 +30,7 @@ export function CheckoutCardConfirmClient({
   productName,
   productImageSrc,
   quantity,
+  stripeEnabled = false,
 }: Props) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -60,6 +62,48 @@ export function CheckoutCardConfirmClient({
 
     setSubmitting(true);
     try {
+      if (stripeEnabled) {
+        const res = await fetch("/api/checkout/stripe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productSlug,
+            productName,
+            quantity,
+            customerName: trimmedName,
+            phone: trimmedPhone,
+            email: email.trim() || undefined,
+            emirate,
+            address: fullAddress,
+          }),
+        });
+        const data = (await res.json()) as {
+          checkoutUrl?: string;
+          orderId?: string;
+          error?: string;
+        };
+        if (!res.ok || !data.checkoutUrl || !data.orderId) {
+          setError(data.error ?? "تعذّر بدء الدفع.");
+          return;
+        }
+        saveOrderDraft({
+          orderId: data.orderId,
+          productSlug,
+          productName,
+          quantity,
+          method: "card",
+          totalAed: total,
+          deliveryFeeAed: 0,
+          customerName: trimmedName,
+          phone: trimmedPhone,
+          emirate,
+          address: fullAddress,
+          createdAt: new Date().toISOString(),
+        });
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -121,7 +165,9 @@ export function CheckoutCardConfirmClient({
               إتمام الطلب
             </h1>
             <p className="mt-2 text-sm text-neutral-500">
-              أكملي معلومات التوصيل — ثم نرسل لك رابط الدفع الآمن بالبطاقة.
+              {stripeEnabled
+                ? "أكملي معلومات التوصيل — ثم ادفعي بأمان عبر Stripe."
+                : "أكملي معلومات التوصيل — ثم نرسل لك رابط الدفع الآمن بالبطاقة."}
             </p>
           </header>
 
@@ -214,7 +260,7 @@ export function CheckoutCardConfirmClient({
               </label>
             </fieldset>
 
-            <CheckoutCardPaymentBlock />
+            <CheckoutCardPaymentBlock stripeEnabled={stripeEnabled} />
 
             {error && (
               <p className="text-sm font-bold text-rose-700" role="alert">
@@ -227,7 +273,11 @@ export function CheckoutCardConfirmClient({
               disabled={submitting}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 disabled:opacity-60"
             >
-              {submitting ? "جاري التأكيد…" : `الدفع بالبطاقة — ${formatPrice(total)}`}
+              {submitting
+                ? stripeEnabled
+                  ? "جاري التحويل إلى Stripe…"
+                  : "جاري التأكيد…"
+                : `الدفع بالبطاقة — ${formatPrice(total)}`}
             </button>
           </form>
         </section>

@@ -15,6 +15,8 @@ services:
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
       DATABASE_PATH: /app/data/velora.sqlite
+      SITE_URL: https://www.velorabeauty.world
+      # STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_CARD_PAYMENT_ENABLED=true → Easypanel UI
     volumes:
       - velora-orders:/app/data
     expose:
