@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { checkout } from "@/config/content";
 import {
   codFee,
@@ -16,6 +17,7 @@ type Props = {
   submitLabel?: string;
   submitType?: "button" | "submit";
   onSubmit?: () => void;
+  href?: string;
   variant?: "light" | "dark";
 };
 
@@ -31,6 +33,7 @@ export function CheckoutSummary({
   submitLabel = checkout.submit,
   submitType = "button",
   onSubmit,
+  href,
   variant = "light",
 }: Props) {
   const total = getCheckoutTotal(quantity, method);
@@ -79,13 +82,22 @@ export function CheckoutSummary({
         </p>
       </div>
 
-      <button
-        type={submitType}
-        onClick={submitType === "button" ? onSubmit : undefined}
-        className="mt-6 w-full rounded-full bg-velora-burgundy py-4 text-sm font-semibold text-velora-cream transition hover:bg-velora-burgundy-light"
-      >
-        {submitLabel}
-      </button>
+      {href ? (
+        <Link
+          href={href}
+          className="mt-6 flex w-full items-center justify-center rounded-full bg-velora-burgundy py-4 text-sm font-semibold text-velora-cream transition hover:bg-velora-burgundy-light"
+        >
+          {submitLabel}
+        </Link>
+      ) : (
+        <button
+          type={submitType}
+          onClick={submitType === "button" ? onSubmit : undefined}
+          className="mt-6 w-full rounded-full bg-velora-burgundy py-4 text-sm font-semibold text-velora-cream transition hover:bg-velora-burgundy-light"
+        >
+          {submitLabel}
+        </button>
+      )}
     </aside>
   );
 }
