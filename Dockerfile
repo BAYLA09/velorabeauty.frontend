@@ -1,11 +1,12 @@
 # Velora Beauty — Next.js production (Easypanel / plain Docker, no BuildKit-only features)
 FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
 FROM node:20-alpine AS builder
+RUN apk add --no-cache python3 make g++
 ARG GIT_SHA=unknown
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -23,12 +24,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV BUILD_SHA=${GIT_SHA}
+ENV DATABASE_PATH=/app/data/velora.sqlite
 RUN addgroup --system --gid 1001 nodejs \
-  && adduser --system --uid 1001 nextjs
+  && adduser --system --uid 1001 nextjs \
+  && mkdir -p /app/data \
+  && chown nextjs:nodejs /app/data
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
 
 USER nextjs
 EXPOSE 3000

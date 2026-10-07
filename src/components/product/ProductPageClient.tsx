@@ -83,6 +83,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
               <ProductPurchasePanel
                 funnelOffers
                 form={page.form}
+                productSlug={product.slug}
                 upsellSlotSrc={product.pageImage.upsellSlotSrc}
                 productName={product.name}
                 quantity={quantity}
@@ -117,7 +118,14 @@ export function ProductPageClient({ product, allProducts }: Props) {
       </main>
       <FooterSection />
 
-      {purchase && <ProductMobileStickyBar ctaLabel={purchase.ctaLabel} />}
+      {purchase && (
+        <ProductMobileStickyBar
+          ctaLabel={purchase.ctaLabel}
+          productSlug={product.slug}
+          quantity={purchase.quantity}
+          method={purchase.method}
+        />
+      )}
     </>
   );
 }

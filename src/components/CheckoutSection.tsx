@@ -1,15 +1,28 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { checkout } from "@/config/content";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
+import { buildCheckoutPath } from "@/lib/checkoutRoutes";
+import { HOMEPAGE_PRODUCT_SLUG } from "@/lib/resolveCheckoutContext";
 import { BundleSelector } from "./BundleSelector";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { PaymentMethodSelector } from "./PaymentMethodSelector";
 
 export function CheckoutSection() {
+  const router = useRouter();
   const [quantity, setQuantity] = useState<BundleQuantity>(3);
   const [method, setMethod] = useState<PaymentMethod>("card");
+
+  function handleSubmit() {
+    router.push(
+      buildCheckoutPath(method, {
+        product: HOMEPAGE_PRODUCT_SLUG,
+        quantity,
+      }),
+    );
+  }
 
   return (
     <section id="checkout" className="scroll-mt-24 bg-velora-cream-dark px-4 py-16 md:px-6 md:py-24">
@@ -23,7 +36,12 @@ export function CheckoutSection() {
             <BundleSelector selected={quantity} onChange={setQuantity} />
             <PaymentMethodSelector method={method} quantity={quantity} onChange={setMethod} />
           </div>
-          <CheckoutSummary quantity={quantity} method={method} />
+          <CheckoutSummary
+            quantity={quantity}
+            method={method}
+            submitType="button"
+            onSubmit={handleSubmit}
+          />
         </div>
       </div>
     </section>

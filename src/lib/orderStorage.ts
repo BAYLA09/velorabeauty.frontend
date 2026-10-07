@@ -1,11 +1,13 @@
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
 
 export type OrderDraft = {
+  orderId?: string;
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
   method: PaymentMethod;
   totalAed: number;
+  deliveryFeeAed?: number;
   customerName: string;
   phone: string;
   emirate: string;

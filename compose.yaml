@@ -8,5 +8,11 @@ services:
       NODE_ENV: production
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
+      DATABASE_PATH: /app/data/velora.sqlite
+    volumes:
+      - velora-orders:/app/data
     expose:
       - "3000"
+
+volumes:
+  velora-orders:
