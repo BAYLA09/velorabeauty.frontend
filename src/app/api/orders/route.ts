@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     if (!customerName || !phone) {
       return NextResponse.json({ error: "أكملي الاسم ورقم الهاتف." }, { status: 400 });
     }
-    if (paymentMethod === "cod" && !address) {
+    if (!address) {
       return NextResponse.json({ error: "أدخلي عنوان التوصيل." }, { status: 400 });
     }
 

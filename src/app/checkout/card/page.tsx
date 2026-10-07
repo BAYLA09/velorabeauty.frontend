@@ -1,4 +1,4 @@
-import { CheckoutConfirmClient } from "@/components/checkout/CheckoutConfirmClient";
+import { CheckoutCardConfirmClient } from "@/components/checkout/CheckoutCardConfirmClient";
 import { getCheckoutProductImage } from "@/lib/checkoutProductMeta";
 import { resolveCheckoutContext } from "@/lib/resolveCheckoutContext";
 
@@ -12,8 +12,7 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
   const productImageSrc = getCheckoutProductImage(ctx.productSlug);
 
   return (
-    <CheckoutConfirmClient
-      paymentMethod="card"
+    <CheckoutCardConfirmClient
       productSlug={ctx.productSlug}
       productName={ctx.productName}
       productImageSrc={productImageSrc}
