@@ -1,10 +1,9 @@
 import Image from "next/image";
 
-/** Icons live in `/public/*.png` (Easypanel uploads) — same pattern as google-pay.png */
 const brands = [
-  { src: "/visa.png", alt: "Visa" },
-  { src: "/mastercard.png", alt: "Mastercard" },
-  { src: "/apple-pay.png", alt: "Apple Pay", wide: true },
+  { src: "/images/payments/visa.png", alt: "Visa" },
+  { src: "/images/payments/mastercard.png", alt: "Mastercard" },
+  { src: "/apple-pay.png", alt: "Apple Pay" },
   { src: "/google-pay.png", alt: "Google Pay", wide: true },
 ] as const;
 
