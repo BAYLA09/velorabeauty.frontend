@@ -3,13 +3,18 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductForm } from "@/config/productPages";
+import { IconCrown } from "@/components/product/ProductFunnelIcons";
+import {
+  cardOfferPrice,
+  ProductPaymentMethodsInfo,
+} from "@/components/product/ProductPaymentMethodsInfo";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import {
+  codFee,
+  currencyLabel,
   formatPrice,
-  getCheckoutTotal,
   singleProductPrice,
   type BundleQuantity,
-  type PaymentMethod,
 } from "@/config/pricing";
 
 const quantities: BundleQuantity[] = [1, 2, 3];
@@ -27,7 +32,7 @@ type OfferUi = {
 function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolean): OfferUi {
   const unit = form === "serum" ? "عبوة" : "علبة";
   const compareAt = qty > 1 ? singleProductPrice * qty : null;
-  const cardPrice = qty === 1 ? 199 : qty === 2 ? 249 : 339;
+  const cardPrice = cardOfferPrice(qty);
   const savingsAmount = compareAt !== null ? compareAt - cardPrice : null;
   const perUnit = qty > 1 ? Math.round(cardPrice / qty) : null;
 
@@ -143,7 +148,6 @@ function OfferProductStack({
 
 export type PurchaseState = {
   quantity: BundleQuantity;
-  method: PaymentMethod;
   total: number;
   ctaLabel: string;
 };
@@ -154,11 +158,9 @@ type Props = {
   productName: string;
   upsellSlotSrc?: Partial<Record<BundleQuantity, string>>;
   quantity?: BundleQuantity;
-  method?: PaymentMethod;
   onQuantityChange?: (q: BundleQuantity) => void;
-  onMethodChange?: (m: PaymentMethod) => void;
   onChange?: (state: PurchaseState) => void;
-  /** Lara-style bundle labels + payment block (Velora colors only) */
+  /** Lara-style bundle labels + payment info (non-interactive) */
   funnelOffers?: boolean;
 };
 
@@ -168,48 +170,35 @@ export function ProductPurchasePanel({
   productName,
   upsellSlotSrc,
   quantity: quantityProp,
-  method: methodProp,
   onQuantityChange,
-  onMethodChange,
   onChange,
   funnelOffers = false,
 }: Props) {
   const router = useRouter();
   const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(2);
-  const [methodInternal, setMethodInternal] = useState<PaymentMethod>("card");
   const quantity = quantityProp ?? quantityInternal;
-  const method = methodProp ?? methodInternal;
 
   const setQuantity = (q: BundleQuantity) => {
     onQuantityChange?.(q);
     if (quantityProp === undefined) setQuantityInternal(q);
   };
-  const setMethod = (m: PaymentMethod) => {
-    onMethodChange?.(m);
-    if (methodProp === undefined) setMethodInternal(m);
-  };
 
-  const total = getCheckoutTotal(quantity, method);
+  const displayTotal = cardOfferPrice(quantity);
   const unitWord = form === "serum" ? "عبوة" : "علبة";
   const ctaLabel = useMemo(
     () =>
       funnelOffers
-        ? `اطلبي الآن • ${formatPrice(total)}`
-        : `ابدئي روتينك الآن • ${formatPrice(total)}`,
-    [total, funnelOffers],
+        ? `اطلبي الآن — ${formatPrice(displayTotal)}`
+        : `ابدئي روتينك الآن — ${formatPrice(displayTotal)}`,
+    [displayTotal, funnelOffers],
   );
 
   useEffect(() => {
-    onChange?.({ quantity, method, total, ctaLabel });
-  }, [quantity, method, total, ctaLabel, onChange]);
+    onChange?.({ quantity, total: displayTotal, ctaLabel });
+  }, [quantity, displayTotal, ctaLabel, onChange]);
 
   function goToCheckout() {
-    router.push(
-      buildCheckoutPaymentStepPath(
-        { product: productSlug, quantity },
-        method,
-      ),
-    );
+    router.push(buildCheckoutPaymentStepPath({ product: productSlug, quantity }));
   }
 
   return (
@@ -228,7 +217,7 @@ export function ProductPurchasePanel({
               onClick={() => setQuantity(qty)}
               className={`relative w-full cursor-pointer rounded-2xl border-2 px-3 py-3.5 text-right transition-all duration-200 sm:px-4 sm:py-4 ${
                 active
-                  ? "border-velora-burgundy bg-[#fdf2f4] shadow-md"
+                  ? "border-velora-burgundy bg-[#fdf2f4] shadow-md ring-1 ring-velora-burgundy/10"
                   : "border-velora-burgundy/12 bg-white hover:border-velora-burgundy/30"
               }`}
             >
@@ -240,7 +229,9 @@ export function ProductPurchasePanel({
                       : "bg-[#e8d7b8] text-velora-burgundy-dark"
                   }`}
                 >
-                  {offer.badge.variant === "popular" && <span aria-hidden>👑</span>}
+                  {offer.badge.variant === "popular" && (
+                    <IconCrown className="h-3 w-3 shrink-0 opacity-90" aria-hidden />
+                  )}
                   {offer.badge.text}
                 </span>
               )}
@@ -292,82 +283,34 @@ export function ProductPurchasePanel({
         })}
       </div>
 
-      {funnelOffers && (
-        <div className="space-y-2 pt-1">
-          <p className="text-sm font-extrabold text-velora-burgundy-dark">طرق الدفع المتاحة</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setMethod("card")}
-              className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
-                method === "card"
-                  ? "border-velora-burgundy bg-[#fdf2f4]"
-                  : "border-velora-burgundy/15 bg-white"
-              }`}
-            >
-              <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع بالبطاقة</p>
-              <p className="mt-0.5 text-[11px] font-bold text-velora-burgundy">شحن مجاني</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMethod("cod")}
-              className={`rounded-2xl border-2 px-3 py-3 text-right transition ${
-                method === "cod"
-                  ? "border-velora-burgundy bg-[#fdf2f4]"
-                  : "border-velora-burgundy/15 bg-white"
-              }`}
-            >
-              <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع عند الاستلام</p>
-              <p className="mt-0.5 text-[11px] font-bold text-velora-burgundy/70">+20 د.إ رسوم التوصيل</p>
-            </button>
-          </div>
-          <p className="text-center text-[11px] font-semibold text-velora-burgundy/70">
-            الدفع بالبطاقة (شحن مجاني) أو الدفع عند الاستلام
-          </p>
-        </div>
-      )}
+      {funnelOffers && <ProductPaymentMethodsInfo quantity={quantity} />}
 
       <div className="pt-1">
         <button
           type="button"
           onClick={goToCheckout}
-          className="w-full rounded-2xl bg-[#2c1318] py-4 text-base font-black text-white shadow-xl transition hover:bg-velora-burgundy active:scale-[0.99] sm:text-lg"
+          className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#3a1820] to-[#2c1318] py-4 text-base font-black text-white shadow-[0_12px_32px_rgba(44,19,24,0.35)] transition hover:from-velora-burgundy hover:to-[#2c1318] active:scale-[0.99] sm:text-lg"
         >
           {ctaLabel}
+          <span
+            className="text-lg transition group-hover:translate-x-[-2px]"
+            aria-hidden
+          >
+            ←
+          </span>
         </button>
+        {funnelOffers && (
+          <p className="mt-2.5 text-center text-[11px] font-semibold leading-relaxed text-velora-burgundy/60">
+            الدفع بالبطاقة (شحن مجاني) · الدفع عند الاستلام (+{codFee} {currencyLabel} عند
+            التوصيل)
+          </p>
+        )}
         {!funnelOffers && (
           <p className="mt-2 text-center text-xs font-bold text-velora-burgundy/70">
-            الدفع عند الاستلام • الدفع بالبطاقة
+            بطاقة أو COD — الاختيار في صفحة الدفع
           </p>
         )}
       </div>
-
-      {!funnelOffers && (
-        <div className="flex flex-wrap items-center justify-center gap-1 pt-2 text-[10px] sm:text-[11px]">
-          <button
-            type="button"
-            onClick={() => setMethod("card")}
-            className={`rounded-full px-3 py-1 font-bold ${
-              method === "card"
-                ? "bg-velora-burgundy text-velora-cream"
-                : "bg-white text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
-            }`}
-          >
-            بطاقة
-          </button>
-          <button
-            type="button"
-            onClick={() => setMethod("cod")}
-            className={`rounded-full px-3 py-1 font-bold ${
-              method === "cod"
-                ? "bg-velora-burgundy text-velora-cream"
-                : "bg-white text-velora-burgundy/65 ring-1 ring-velora-burgundy/15"
-            }`}
-          >
-            COD (+20 د.إ)
-          </button>
-        </div>
-      )}
     </div>
   );
 }

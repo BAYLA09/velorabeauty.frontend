@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
+import type { BundleQuantity } from "@/config/pricing";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
 import { ProductGallery } from "@/components/product/ProductGallery";
@@ -27,7 +27,6 @@ type Props = {
 
 export function ProductPageClient({ product, allProducts }: Props) {
   const [quantity, setQuantity] = useState<BundleQuantity>(2);
-  const [method, setMethod] = useState<PaymentMethod>("card");
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
@@ -75,9 +74,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 upsellSlotSrc={product.pageImage.upsellSlotSrc}
                 productName={product.name}
                 quantity={quantity}
-                method={method}
                 onQuantityChange={setQuantity}
-                onMethodChange={setMethod}
                 onChange={setPurchase}
               />
 
@@ -111,7 +108,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
           ctaLabel={purchase.ctaLabel}
           productSlug={product.slug}
           quantity={purchase.quantity}
-          method={purchase.method}
         />
       )}
     </>
