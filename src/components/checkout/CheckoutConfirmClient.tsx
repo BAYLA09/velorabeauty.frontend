@@ -194,11 +194,13 @@ export function CheckoutConfirmClient({
         </section>
 
         <CheckoutSummarySidebar
+          productSlug={productSlug}
           productName={productName}
           productImageSrc={productImageSrc}
           quantity={quantity}
           paymentMethod={paymentMethod}
           totalLabel="المجموع الكلي"
+          editableBasket
         />
       </div>
     </CheckoutFunnelShell>
