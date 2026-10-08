@@ -180,22 +180,26 @@ function CheckoutDeliveryFields(props: {
 }
 
 function CheckoutSummaryColumn({
+  productSlug,
   productName,
   productImageSrc,
   quantity,
 }: {
+  productSlug: string;
   productName: string;
   productImageSrc?: string;
   quantity: BundleQuantity;
 }) {
   return (
     <CheckoutSummarySidebar
+      productSlug={productSlug}
       productName={productName}
       productImageSrc={productImageSrc}
       quantity={quantity}
       paymentMethod="card"
       totalLabel="المجموع الكلي"
       showTrust
+      editableBasket
       footer={
         <div className="flex items-center justify-center gap-2 rounded-lg bg-[#e8f5e9] px-3 py-3 text-center text-xs font-bold text-emerald-900">
           <IconTruck className="h-4 w-4 shrink-0" />
@@ -412,6 +416,7 @@ function CheckoutCardStripeForm({
         </form>
 
         <CheckoutSummaryColumn
+          productSlug={productSlug}
           productName={productName}
           productImageSrc={productImageSrc}
           quantity={quantity}
@@ -548,6 +553,7 @@ function CheckoutCardLegacyForm({
         </form>
 
         <CheckoutSummaryColumn
+          productSlug={productSlug}
           productName={productName}
           productImageSrc={productImageSrc}
           quantity={quantity}

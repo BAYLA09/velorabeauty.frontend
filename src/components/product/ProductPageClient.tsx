@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { BundleQuantity } from "@/config/pricing";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
-import { ProductFloatingJar } from "@/components/product/ProductFloatingJar";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductFeaturePills } from "@/components/product/ProductFeaturePills";
 import { ProductMobileStickyBar } from "@/components/product/ProductMobileStickyBar";
@@ -18,7 +17,7 @@ import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
 import { ProductTrustBar } from "@/components/product/ProductTrustBar";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
-import { formatPrice, singleProductPrice } from "@/config/pricing";
+import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductWithPage } from "@/lib/productCatalog";
 
 type Props = {
@@ -118,21 +117,17 @@ export function ProductPageClient({ product, allProducts }: Props) {
           </div>
         </div>
 
-        <ProductFloatingJar
-          src={product.pageImage.src ?? ""}
-          productName={product.name}
-          watchSelector="#pdp-hero-gallery"
-        />
       </main>
       <FooterSection />
 
-      {purchase && (
-        <ProductMobileStickyBar
-          ctaLabel={purchase.ctaLabel}
-          productSlug={product.slug}
-          quantity={purchase.quantity}
-        />
-      )}
+      <ProductMobileStickyBar
+        ctaLabel={
+          purchase?.ctaLabel ??
+          `اطلبي الآن — ${formatPrice(cardBundlePrices[quantity])}`
+        }
+        productSlug={product.slug}
+        quantity={purchase?.quantity ?? quantity}
+      />
     </>
   );
 }
