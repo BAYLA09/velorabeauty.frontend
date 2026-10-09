@@ -111,6 +111,10 @@ export function ProductVideoStoriesStrip({
 }) {
   const { eyebrow, title } = productVideoStoriesSection;
   const stories = getProductVideoStories(productSlug);
+  /** بطاقات فيها فيديو أولاً — باش يبانوا من غير ما ي scrolli بزاف */
+  const storiesForStrip = [...stories].sort(
+    (a, b) => Number(Boolean(b.videoSrc?.trim())) - Number(Boolean(a.videoSrc?.trim())),
+  );
 
   const Wrapper = compact ? "div" : "section";
 
@@ -134,7 +138,7 @@ export function ProductVideoStoriesStrip({
           className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2 snap-x snap-mandatory scrollbar-thin scrollbar-track-transparent scrollbar-thumb-velora-burgundy/20"
           dir="ltr"
         >
-          {[...stories].reverse().map((story, i) => (
+          {storiesForStrip.map((story, i) => (
             <StoryCard key={story.id} story={story} index={i} />
           ))}
         </div>
