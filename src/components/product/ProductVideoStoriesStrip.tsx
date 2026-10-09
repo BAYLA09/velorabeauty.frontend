@@ -1,10 +1,46 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import {
   getProductVideoStories,
   productVideoStoriesSection,
   type ProductVideoStory,
 } from "@/config/productVideoStories";
+
+function StoryVideo({ src, poster }: { src: string; poster?: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+
+    video.muted = true;
+
+    const tryPlay = () => {
+      void video.play().catch(() => {
+        /* autoplay policy — stays on first frame until tap if blocked */
+      });
+    };
+
+    tryPlay();
+    video.addEventListener("loadeddata", tryPlay, { once: true });
+    return () => video.removeEventListener("loadeddata", tryPlay);
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      className="absolute inset-0 h-full w-full object-cover"
+      src={src}
+      poster={poster}
+      playsInline
+      muted
+      loop
+      autoPlay
+      preload="auto"
+    />
+  );
+}
 
 const cardGradients = [
   "from-velora-burgundy via-[#4a2430] to-[#2c1318]",
@@ -23,16 +59,8 @@ function StoryCard({ story, index }: { story: ProductVideoStory; index: number }
       className={`relative flex w-[9.5rem] shrink-0 snap-center flex-col overflow-hidden rounded-[1.35rem] border border-white/10 shadow-[0_12px_40px_rgba(44,19,24,0.35)] sm:w-[10.5rem] md:w-[11.25rem]`}
     >
       <div className={`relative aspect-[9/16] w-full bg-gradient-to-b ${gradient}`}>
-        {hasVideo ? (
-          <video
-            className="absolute inset-0 h-full w-full object-cover"
-            src={story.videoSrc}
-            poster={story.posterSrc}
-            playsInline
-            muted
-            loop
-            preload="metadata"
-          />
+        {hasVideo && story.videoSrc ? (
+          <StoryVideo src={story.videoSrc} poster={story.posterSrc} />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-3 text-center">
             <span
