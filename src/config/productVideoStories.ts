@@ -3,7 +3,7 @@
  *
  * علكات البشرة (4 فيديوهات):
  *   public/videos/stories/skin-gummies/01-shaima-dubai.mp4
- *   public/videos/stories/skin-gummies/02-noura-abudhabi.mp4
+ *   public/videos/stories/skin-gummies/magnific_animate-into-a-5second-photorealistic-lifestyle-cl_kling_720p_9-16_24fps_31067.mp4
  *   public/videos/stories/skin-gummies/03-mariam-sharjah.mp4
  *   public/videos/stories/skin-gummies/04-latifah-riyadh.mp4
  */
@@ -31,7 +31,7 @@ const skinGummiesVideoStories: ProductVideoStory[] = [
     id: "skin-v2",
     name: "نورة",
     city: "أبوظبي",
-    videoSrc: `${SKIN_GUMMIES_VIDEO_DIR}/02-noura-abudhabi.mp4`,
+    videoSrc: `${SKIN_GUMMIES_VIDEO_DIR}/magnific_animate-into-a-5second-photorealistic-lifestyle-cl_kling_720p_9-16_24fps_31067.mp4`,
   },
   {
     id: "skin-v3",
