@@ -15,15 +15,41 @@ export type ProductVideoStory = {
   posterSrc?: string;
 };
 
+const defaultStories: ProductVideoStory[] = [
+  { id: "story-1", name: "شيماء", city: "دبي" },
+  { id: "story-2", name: "نورة", city: "أبوظبي" },
+  { id: "story-3", name: "مريم", city: "الشارقة" },
+  { id: "story-4", name: "لطيفة", city: "الرياض" },
+  { id: "story-5", name: "هند", city: "الكويت" },
+];
+
+/** فيديوهات خاصة بصفحة منتج — slot واحد في كل مرة */
+const videoOverridesByProductSlug: Record<
+  string,
+  Partial<Record<ProductVideoStory["id"], Pick<ProductVideoStory, "videoSrc" | "posterSrc">>>
+> = {
+  "hair-gummies": {
+    /** أول بطاقة ظاهرة في الشريط (هند) */
+    "story-5": {
+      videoSrc:
+        "/images/products/magnific_animate-the-provided-starting-image-into-a-realist_kling_1080p_9-16_24fps_49239.mp4",
+    },
+  },
+};
+
+export function getProductVideoStories(productSlug: string): ProductVideoStory[] {
+  const overrides = videoOverridesByProductSlug[productSlug];
+  if (!overrides) {
+    return defaultStories.map((story) => ({ ...story }));
+  }
+
+  return defaultStories.map((story) => ({
+    ...story,
+    ...overrides[story.id],
+  }));
+}
+
 export const productVideoStoriesSection = {
   eyebrow: "تجارب من الخليج",
   title: "يسمعون من عميلاتنا",
-  /** نفس القائمة على كل صفحات المنتجات — عدّلي الأسماء أو أضيفي slots */
-  stories: [
-    { id: "story-1", name: "شيماء", city: "دبي" },
-    { id: "story-2", name: "نورة", city: "أبوظبي" },
-    { id: "story-3", name: "مريم", city: "الشارقة" },
-    { id: "story-4", name: "لطيفة", city: "الرياض" },
-    { id: "story-5", name: "هند", city: "الكويت" },
-  ] satisfies ProductVideoStory[],
 } as const;
