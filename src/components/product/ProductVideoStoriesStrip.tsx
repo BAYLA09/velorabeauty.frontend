@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  getProductVideoStories,
   productVideoStoriesSection,
   type ProductVideoStory,
 } from "@/config/productVideoStories";
@@ -73,8 +74,15 @@ function StoryCard({ story, index }: { story: ProductVideoStory; index: number }
   );
 }
 
-export function ProductVideoStoriesStrip({ compact = false }: { compact?: boolean }) {
-  const { eyebrow, title, stories } = productVideoStoriesSection;
+export function ProductVideoStoriesStrip({
+  compact = false,
+  productSlug,
+}: {
+  compact?: boolean;
+  productSlug: string;
+}) {
+  const { eyebrow, title } = productVideoStoriesSection;
+  const stories = getProductVideoStories(productSlug);
 
   const Wrapper = compact ? "div" : "section";
 
