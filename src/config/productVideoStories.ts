@@ -76,7 +76,7 @@ const hairGummiesVideoStories: ProductVideoStory[] = [
   },
 ];
 
-/** سيروم محيط العين — 5 فيديوهات */
+/** سيروم محيط العين — 4 فيديوهات (بلا هند) */
 const eyeSerumVideoStories: ProductVideoStory[] = [
   {
     id: "eye-v1",
@@ -101,12 +101,6 @@ const eyeSerumVideoStories: ProductVideoStory[] = [
     name: "لطيفة",
     city: "الرياض",
     videoSrc: `${EYE_VIDEO}/magnific_create-a-5second-ultrarealistic-smartphone-video-f_kling_720p_9-16_24fps_21724.mp4`,
-  },
-  {
-    id: "eye-v5",
-    name: "هند",
-    city: "الكويت",
-    videoSrc: `${EYE_VIDEO}/magnific_create-a-realistic-5second-vertical-916-skincare-a_kling_720p_9-16_24fps_21726.mp4`,
   },
 ];
 
