@@ -52,14 +52,14 @@ export function ProductRitualSection({
 
             {/* خط النسبة — يظهر دائماً تحت الصورة */}
             <div className="mt-4 border-t border-white/10 pt-4">
-              <div className="mb-2 flex items-center justify-between gap-2 text-[10px] font-bold text-velora-cream/75 sm:text-[11px]">
-                <span>الواقع اليومي</span>
-                <span className="tabular-nums text-velora-champagne">{data.statValue}</span>
-              </div>
+              <p className="mb-2 text-right text-[11px] font-bold leading-[1.65] text-velora-cream/90 sm:text-xs">
+                <span className="tabular-nums text-velora-champagne">{data.statValue}</span>{" "}
+                {data.statBarLine}
+              </p>
               <div
                 className="h-2.5 overflow-hidden rounded-full bg-white/10 sm:h-3"
                 role="img"
-                aria-label={`${data.statValue} من النساء يعانين من هذه المشكلة`}
+                aria-label={`${data.statValue} ${data.statBarLine}`}
               >
                 <div
                   className="h-full rounded-full bg-gradient-to-l from-velora-champagne to-velora-champagne/75 transition-all"
