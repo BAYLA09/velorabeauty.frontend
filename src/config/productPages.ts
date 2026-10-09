@@ -56,8 +56,8 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     seoTitle: "علكات الشعر بالبيوتين | فيلورا",
     seoDescription:
       "علكتان يومياً بالبيوتين — روتين أنيق لدعم مظهر الشعر، مع توصيل داخل الإمارات.",
-    headlineQuestion: "شعرٌ يُعتنى به من الداخل — بخطوة واحدة في يومك.",
-    subhook: "علكتان بالبيوتين يومياً: روتين خفيف، واضح، ومصمّم ليلائم إيقاعك.",
+    headlineQuestion: "الحرارة والتكييف يضعفان مظهر الشعر — والروتين يتأجل.",
+    subhook: "عناية الشعر من الداخل — علكتان يومياً، لا عشر زيوت.",
     statChips: [
       { value: "01", label: "روتين الشعر" },
       { value: "بيوتين", label: "المكوّن البارز" },
@@ -158,8 +158,8 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     seoTitle: "علكات البشرة بالغلوتاثيون | فيلورا",
     seoDescription:
       "علكتان بالغلوتاثيون يومياً — روتين إشراق بسيط، مع توصيل داخل الإمارات.",
-    headlineQuestion: "إشراق يبدأ من روتين — لا من عشر خطوات.",
-    subhook: "علكتان بالغلوتاثيون: لطف يومي للبشرة، بأسلوب فيلورا الهادئ.",
+    headlineQuestion: "الشمس والتكييف يجهدان بشرتك — والوقت ما يساعد.",
+    subhook: "إشراق يبدأ من روتين — لا من عشر خطوات.",
     statChips: [
       { value: "02", label: "روتين البشرة" },
       { value: "غلوتاثيون", label: "المكوّن البارز" },
@@ -260,8 +260,8 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     seoTitle: "سيروم محيط العين | فيلورا",
     seoDescription:
       "سيروم بفيتامين E — خطوة مركّزة لمحيط العين، مع توصيل داخل الإمارات.",
-    headlineQuestion: "محيط العين — حيث تبدأ ملامح الراحة.",
-    subhook: "سيروم بفيتامين E — لطف مركّز، دقيقة واحدة، يكمل روتين فيلورا.",
+    headlineQuestion: "السهر والشاشات تظهر على عينيك — والكريمات تتكدس.",
+    subhook: "محيط العين بخطوة واحدة — لا سلة منتجات.",
     highlightStat: {
       value: "339",
       label: "د.إ — المجموعة الكاملة (ثلاث عنايات)",

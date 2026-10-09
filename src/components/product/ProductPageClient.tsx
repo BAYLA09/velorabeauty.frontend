@@ -37,84 +37,83 @@ export function ProductPageClient({ product, allProducts }: Props) {
       <ProductStoreHeader />
 
       <main className="product-typography bg-velora-cream pb-24 lg:pb-0">
-        <div className="mx-auto flex max-w-lg items-start gap-8 px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:max-w-7xl lg:py-8">
-          <aside className="hidden w-[min(100%,340px)] shrink-0 lg:block xl:w-[360px]">
-            <div className="sticky top-20 z-20">
-              <ProductGallery
-                mainSrc={product.pageImage.src}
-                productName={product.name}
-                placeholder={product.pageImage.placeholder}
-                laraFrame
-              />
-              <ProductFeaturePills form={page.form} />
-            </div>
-          </aside>
-
-          <div className="min-w-0 flex-1">
-        <section
-          id="purchase"
-          className="scroll-mt-24"
-        >
-          <div id="pdp-hero-gallery" className="grid items-start gap-6 lg:block">
-            <div className="min-w-0 w-full lg:hidden">
-              <ProductGallery
-                mainSrc={product.pageImage.src}
-                productName={product.name}
-                placeholder={product.pageImage.placeholder}
-                laraFrame
-                fullWidthMobile
-              />
-              <ProductFeaturePills form={page.form} />
-            </div>
-
-            <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
-              <header>
-                <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
-                  {page.headlineQuestion}
-                </h1>
-                <p className="mt-2.5 text-[15px] font-medium leading-[1.85] text-velora-burgundy/85 sm:mt-3 sm:text-base">
-                  {page.subhook}
-                </p>
-              </header>
-
-              <p className="text-sm font-semibold text-velora-burgundy/75">
-                من {formatPrice(singleProductPrice)} / {unitLabel} · {page.urgencyLine}
+        <div className="mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:max-w-7xl lg:py-8">
+          <section id="purchase" className="scroll-mt-24">
+            <header className="mb-4 text-right sm:mb-5 lg:mb-6">
+              <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
+                {page.headlineQuestion}
+              </h1>
+              <p className="mt-2.5 text-[15px] font-medium leading-[1.85] text-velora-burgundy/85 sm:mt-3 sm:text-base">
+                {page.subhook}
               </p>
+            </header>
 
-              <ProductPurchasePanel
-                funnelOffers
-                form={page.form}
-                productSlug={product.slug}
-                upsellSlotSrc={product.pageImage.upsellSlotSrc}
-                productName={product.name}
-                quantity={quantity}
-                onQuantityChange={setQuantity}
-                onChange={setPurchase}
-              />
+            <div className="flex flex-col items-start gap-6 lg:flex-row lg:gap-8">
+              <aside className="hidden w-[min(100%,340px)] shrink-0 lg:block xl:w-[360px]">
+                <div className="sticky top-20 z-20">
+                  <ProductGallery
+                    mainSrc={product.pageImage.src}
+                    productName={product.name}
+                    placeholder={product.pageImage.placeholder}
+                    laraFrame
+                  />
+                  <ProductFeaturePills form={page.form} />
+                </div>
+              </aside>
 
-              <ProductVideoStoriesStrip compact productSlug={product.slug} />
+              <div className="min-w-0 flex-1">
+                <div id="pdp-hero-gallery" className="grid items-start gap-6 lg:block">
+                  <div className="min-w-0 w-full lg:hidden">
+                    <ProductGallery
+                      mainSrc={product.pageImage.src}
+                      productName={product.name}
+                      placeholder={product.pageImage.placeholder}
+                      laraFrame
+                      fullWidthMobile
+                    />
+                    <ProductFeaturePills form={page.form} />
+                  </div>
 
-              <ProductTrustBar prominent />
+                  <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
+                    <p className="text-sm font-semibold text-velora-burgundy/75">
+                      من {formatPrice(singleProductPrice)} / {unitLabel} · {page.urgencyLine}
+                    </p>
+
+                    <ProductPurchasePanel
+                      funnelOffers
+                      form={page.form}
+                      productSlug={product.slug}
+                      upsellSlotSrc={product.pageImage.upsellSlotSrc}
+                      productName={product.name}
+                      quantity={quantity}
+                      onQuantityChange={setQuantity}
+                      onChange={setPurchase}
+                    />
+
+                    <ProductVideoStoriesStrip compact productSlug={product.slug} />
+
+                    <ProductTrustBar prominent />
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <ProductRitualSection
-          productId={product.id}
-          imageSrc={product.pageImage.storySrc ?? product.pageImage.src}
-        />
+          <ProductRitualSection
+            productId={product.id}
+            imageSrc={product.pageImage.storySrc ?? product.pageImage.src}
+          />
 
-        <ProductPageLongSections
-          page={page}
-          productId={product.id}
-          productName={product.name}
-          marketingSpotlight={product.pageImage.marketingSpotlight}
-          formulaSectionImageSrc={product.pageImage.formulaSectionImageSrc}
-          timelineSectionImageSrc={product.pageImage.timelineSectionImageSrc}
-        />
+          <ProductPageLongSections
+            page={page}
+            productId={product.id}
+            productName={product.name}
+            marketingSpotlight={product.pageImage.marketingSpotlight}
+            formulaSectionImageSrc={product.pageImage.formulaSectionImageSrc}
+            timelineSectionImageSrc={product.pageImage.timelineSectionImageSrc}
+          />
 
-        <RelatedProducts currentSlug={product.slug} products={allProducts} />
-          </div>
+          <RelatedProducts currentSlug={product.slug} products={allProducts} />
         </div>
 
       </main>
