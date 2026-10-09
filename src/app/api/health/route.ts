@@ -20,6 +20,8 @@ export async function GET() {
         process.env.SITE_URL?.trim() ||
         process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
         null,
+      /** Easypanel: use Docker Image (not Git build) — see docs/EASYPANEL-SETUP-AR.md */
+      recommendedImage: "ghcr.io/bayla09/velorabeauty.frontend:latest",
     },
     payments: {
       stripeSecretConfigured: stripeSecret,
