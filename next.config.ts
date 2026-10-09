@@ -55,6 +55,36 @@ const nextConfig: NextConfig = {
         destination: "/products/eye-serum",
         permanent: true,
       },
+      {
+        source: "/magnific_animate-the-provided-image-into-a-5second-ultrarea_kling_1080p_9-16_24fps_21720.mp4",
+        destination:
+          "/videos/stories/hair-gummies/magnific_animate-the-provided-image-into-a-5second-ultrarea_kling_1080p_9-16_24fps_21720.mp4",
+        permanent: true,
+      },
+      {
+        source: "/magnific_create-a-5second-photorealistic-video-from-the-pro_kling_720p_9-16_24fps_21719.mp4",
+        destination:
+          "/videos/stories/hair-gummies/magnific_create-a-5second-photorealistic-video-from-the-pro_kling_720p_9-16_24fps_21719.mp4",
+        permanent: true,
+      },
+      {
+        source: "/magnific_create-a-realistic-5second-ugc-video-from-this-ima_kling_720p_9-16_24fps_21717.mp4",
+        destination:
+          "/videos/stories/hair-gummies/magnific_create-a-realistic-5second-ugc-video-from-this-ima_kling_720p_9-16_24fps_21717.mp4",
+        permanent: true,
+      },
+      {
+        source: "/magnific_animate-the-provided-image-into-a-5second-ultrarea_kling_720p_9-16_24fps_21716.mp4",
+        destination:
+          "/videos/stories/hair-gummies/magnific_animate-the-provided-image-into-a-5second-ultrarea_kling_720p_9-16_24fps_21716.mp4",
+        permanent: true,
+      },
+      {
+        source: "/magnific_animate-this-image-into-a-6second-realistic-lifest_kling_720p_9-16_24fps_21718.mp4",
+        destination:
+          "/videos/stories/hair-gummies/magnific_animate-this-image-into-a-6second-realistic-lifest_kling_720p_9-16_24fps_21718.mp4",
+        permanent: true,
+      },
     ];
   },
 };
