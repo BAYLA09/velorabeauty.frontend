@@ -40,7 +40,7 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
     if (qty === 1) {
       return {
         title: form === "serum" ? "عبوة واحدة" : "علبة وحدة",
-        subtitle: form === "serum" ? "روتين شهر — استخدام يومي" : "شهر كامل — 60 علكة",
+        subtitle: form === "serum" ? "شهر واحد — استخدام يومي" : "60 علكة — شهر روتين",
         badge: null,
         compareAt: null,
         price: cardPrice,
@@ -51,8 +51,8 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
     if (qty === 2) {
       return {
         title: form === "serum" ? "عبواتين" : "علبتين",
-        subtitle: form === "serum" ? "شهرين — ثبّتي النتيجة" : "شهرين — ثبّتي النتيجة",
-        badge: { text: "الأكثر اختياراً", variant: "popular" },
+        subtitle: form === "serum" ? "شهران — للاستمرار" : "شهران — القيمة الأنسب",
+        badge: { text: "الأكثر طلباً", variant: "popular" },
         compareAt,
         price: cardPrice,
         savingsAmount,
@@ -61,8 +61,8 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
     }
     return {
       title: form === "serum" ? "3 عبوات" : "3 علب",
-      subtitle: form === "serum" ? "3 عبوات — أقوى توفير" : "3 علب — أقوى توفير",
-      badge: { text: "الأكثر توفيراً", variant: "bundle" },
+      subtitle: form === "serum" ? "3 عبوات — أقصى وفور" : "3 علب — أقصى وفور",
+      badge: { text: "أفضل قيمة", variant: "bundle" },
       compareAt,
       price: cardPrice,
       savingsAmount,
@@ -85,7 +85,7 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
     return {
       title: "منتجان",
       subtitle: "نتيجة أفضل وقيمة أوضح",
-      badge: { text: "الأكثر إختياراً", variant: "popular" },
+      badge: { text: "الأكثر طلباً", variant: "popular" },
       compareAt,
       price: cardPrice,
       savingsAmount,
@@ -95,7 +95,7 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
   return {
     title: "3 منتجات",
     subtitle: "عناية شاملة — أقوى توفير",
-    badge: { text: "روتين VELORA الكامل", variant: "bundle" },
+    badge: { text: "روتين فيلورا الكامل", variant: "bundle" },
     compareAt,
     price: cardPrice,
     savingsAmount,
@@ -203,7 +203,7 @@ export function ProductPurchasePanel({
 
   return (
     <div className="space-y-4">
-      <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري العرض:</p>
+      <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري الكمية</p>
 
       <div className="space-y-3">
         {quantities.map((qty) => {

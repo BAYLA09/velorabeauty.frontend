@@ -53,7 +53,7 @@ export function ProductRitualSection({
             {/* خط النسبة — يظهر دائماً تحت الصورة */}
             <div className="mt-4 border-t border-white/10 pt-4">
               <div className="mb-2 flex items-center justify-between gap-2 text-[10px] font-bold text-velora-cream/75 sm:text-[11px]">
-                <span>تعاني من المشكلة</span>
+                <span>الواقع اليومي</span>
                 <span className="tabular-nums text-velora-champagne">{data.statValue}</span>
               </div>
               <div

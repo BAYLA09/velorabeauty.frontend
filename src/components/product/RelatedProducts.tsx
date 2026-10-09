@@ -18,7 +18,7 @@ export function RelatedProducts({
     <section className="border-t border-velora-burgundy/10 bg-velora-cream px-4 py-12 md:px-6 md:py-14">
       <div className="mx-auto max-w-lg sm:max-w-3xl">
         <h2 className="text-right text-2xl font-extrabold text-velora-burgundy-dark">
-          منتجات أخرى من فيلورا
+          أكملي روتينكِ
         </h2>
         <div className="mt-6 space-y-4">
           {others.map((p) => (
@@ -36,7 +36,7 @@ export function RelatedProducts({
                   {p.description}
                 </p>
                 <p className="mt-3 text-sm font-black text-velora-burgundy-dark">
-                  يبدأ من {formatPrice(singleProductPrice)}
+                  من {formatPrice(singleProductPrice)}
                 </p>
               </div>
               <div className="relative flex h-32 w-32 shrink-0 items-center justify-center bg-white sm:h-36 sm:w-36">

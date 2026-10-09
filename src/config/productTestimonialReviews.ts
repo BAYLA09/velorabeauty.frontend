@@ -2,8 +2,7 @@ import type { ProductId } from "./products";
 import type { TestimonialReview } from "./testimonials";
 
 /**
- * تقييمات حسب المنتج — كل مجموعة تتكلم عن «المشكلة» اللي العناية تستهدفها.
- * عدّلي النصوص أو أضيفي تقييمات حقيقية لاحقاً (published: true).
+ * تقييمات حسب المنتج — عدّلي النصوص أو أضيفي تقييمات حقيقية (published: true).
  */
 export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> = {
   hair: [
@@ -11,7 +10,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "hair-r1",
       published: true,
       quote:
-        "كنت ألتفت في المرآة وأحس شعري يضعف — مع الروتين حسّيت التساقط هدأ، وشعري صار يستحق أن أعتني فيه.",
+        "كنت أؤجل العناية لأن يومي مزدحم. علكتان في الصباح — وصار الروتين جزءاً مني، وأحس بثقة أكبر تجاه شعري.",
       name: "نورة",
       city: "دبي",
       age: 34,
@@ -22,7 +21,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "hair-r2",
       published: true,
       quote:
-        "ما كنت أبغى زيوت ولا ساعة قدام المرآة. علكتين — وبدأت أحس بشعري أقوى وأهدأ من جوّا.",
+        "ما أحب الزيوت ولا ساعات أمام المرآة. هنا خطوة واحدة واضحة — والاستمرار صار أسهل مما توقعت.",
       name: "مريم",
       city: "الشارقة",
       age: 29,
@@ -32,7 +31,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "hair-r3",
       published: true,
       quote:
-        "أهم شي عندي: التساقط وقف يزعجني كل صباح. اليوم أحس إني أرجّع لشعري قوته — خطوة بخطوة.",
+        "أهم شيء عندي الوضوح: أعرف ماذا آخذ ومتى. فيلورا أعطتني روتيناً بسيطاً ألتزم به من دون إحساس بالتعب.",
       name: "لطيفة",
       city: "أبوظبي",
       age: 41,
@@ -44,7 +43,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "skin-r1",
       published: true,
       quote:
-        "بشرتي كانت باهتة وما أحب المرآة. بعد أسابيع من الروتين، حسّيتها أنعم — كأنها تتنفس من جديد.",
+        "بشرتي كانت تبدو مرهقة مع الشغل والتكييف. الروتين اليومي صار طقساً قصيراً — وأحس ببشرتي أكثر راحة.",
       name: "شيماء",
       city: "دبي",
       age: 28,
@@ -55,7 +54,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "skin-r2",
       published: true,
       quote:
-        "الشمس والتكييف يخليني أحس بشرتي «تعبانة». الحين الإشراق رجع — مو مكياج، إحساس من الداخل.",
+        "الشمس والتكييف يجهدان بشرتي. علكتان يومياً — أخف من أي روتين طويل، وأنا ألتزم بها فعلاً.",
       name: "هند",
       city: "أبوظبي",
       age: 36,
@@ -65,7 +64,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "skin-r3",
       published: true,
       quote:
-        "كنت أغطي البقع بالكونسيلر كل يوم. اليوم بشرتي أهدأ — أحس إني ما أخبي وجهي، أعتني فيه.",
+        "كنت أغطي التعب بالمكياج. اليوم أعتني من الداخل بخطوة بسيطة — وأحس أني أكرّم وجهي لا أخفيه.",
       name: "ريم",
       city: "العين",
       age: 31,
@@ -77,7 +76,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "eye-r1",
       published: true,
       quote:
-        "الهالات كانت أول شي أشوفه — تعب طول اليوم. السيروم خلّى محيط عيني أهدأ، والسواد خفّ واضح.",
+        "السهر والشاشات تظهر حول عيني. السيروم خطوة واحدة قبل النوم — وأحس بمحيط العين أكثر راحة.",
       name: "فاطمة",
       city: "دبي",
       age: 33,
@@ -88,7 +87,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "eye-r2",
       published: true,
       quote:
-        "ما أحب أبدو مرهقة قدام الناس. بعد الروتين، عيني صارت تبان أرتاح — حتى بدون concealer.",
+        "ما أحب أبدو مرهقة في الاجتماعات. دقيقة مع السيروم — وإحساس بالعناية حتى في الأيام المزدحمة.",
       name: "عائشة",
       city: "أبوظبي",
       age: 39,
@@ -98,7 +97,7 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
       id: "eye-r3",
       published: true,
       quote:
-        "سهر وشاشات — والهالات ما تسامحني. خطوة واحدة قبل النوم، والفرق حول عيني حسّيته من أول أسبوعين.",
+        "سهر وشاشات — ومحيط العين يحتاج لطفاً. خطوة واحدة، بلطف، والاستمرار أسهل من أي كريم ثقيل.",
       name: "دانة",
       city: "الشارقة",
       age: 27,

@@ -6,9 +6,11 @@ import {
   IconDroplet,
   IconLeaf,
   IconPhone,
+  IconCheckCircle,
   IconSparkles,
   IconStethoscope,
   IconTruck,
+  IconXCircle,
 } from "@/components/product/ProductFunnelIcons";
 import { ProductPdpImageSlot } from "@/components/product/ProductPdpImageSlot";
 import { ProductMarketingGallery } from "@/components/product/ProductMarketingGallery";
@@ -71,10 +73,10 @@ export function ProductPageLongSections({
               >
                 <div className="flex items-start gap-3 p-4 sm:p-5">
                   <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-100 text-sm font-bold text-rose-700"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-700/90"
                     aria-hidden
                   >
-                    ✕
+                    <IconXCircle className="h-4 w-4" />
                   </span>
                   <p className="flex-1 text-sm font-medium italic leading-relaxed text-velora-burgundy">
                     {item.problem}
@@ -82,10 +84,10 @@ export function ProductPageLongSections({
                 </div>
                 <div className="flex items-start gap-3 border-t border-velora-burgundy/8 bg-velora-cream-dark/90 p-4 sm:p-5">
                   <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-800"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-800/90"
                     aria-hidden
                   >
-                    ✓
+                    <IconCheckCircle className="h-4 w-4" />
                   </span>
                   <p className="flex-1 text-sm leading-relaxed text-velora-burgundy/85">{item.solution}</p>
                 </div>
@@ -155,8 +157,8 @@ export function ProductPageLongSections({
                 key={item}
                 className="flex items-center gap-2 rounded-2xl border border-velora-burgundy/10 bg-white px-3 py-4 text-right"
               >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-100 text-xs font-bold text-rose-700">
-                  ✕
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-700/90">
+                  <IconXCircle className="h-3.5 w-3.5" />
                 </span>
                 <span className="text-[11px] font-semibold leading-snug text-velora-burgundy/80 sm:text-xs">
                   {item}
@@ -247,17 +249,13 @@ export function ProductPageLongSections({
                     <td className="p-3 font-semibold text-velora-burgundy">{row.label}</td>
                     <td className="p-3 text-velora-burgundy">
                       <span className="inline-flex items-center gap-1">
-                        <span className="text-emerald-700" aria-hidden>
-                          ✓
-                        </span>
+                        <IconCheckCircle className="h-4 w-4 shrink-0 text-emerald-700" aria-hidden />
                         {row.velora}
                       </span>
                     </td>
                     <td className="p-3 text-velora-burgundy/60">
                       <span className="inline-flex items-center gap-1">
-                        <span className="text-rose-600" aria-hidden>
-                          ✕
-                        </span>
+                        <IconXCircle className="h-4 w-4 shrink-0 text-rose-600/90" aria-hidden />
                         {row.others}
                       </span>
                     </td>
@@ -322,7 +320,7 @@ export function ProductPageLongSections({
           <SectionIntro
             eyebrow={page.deliveryTitle}
             title={page.deliverySubtitle}
-            lead="بطاقة (شحن مجاني) أو دفع عند الاستلام"
+            lead="بطاقة مع شحن مجاني، أو دفع عند الاستلام (+20 د.إ)"
           />
           <ol className="space-y-4">
             {page.deliverySteps.map((s) => (
@@ -359,9 +357,7 @@ export function ProductPageLongSections({
                   key={city}
                   className="inline-flex items-center gap-1 rounded-full border border-velora-burgundy/12 bg-velora-cream px-3 py-1.5 text-[11px] font-semibold text-velora-burgundy/80"
                 >
-                  <span className="text-emerald-700" aria-hidden>
-                    ✓
-                  </span>
+                  <IconCheckCircle className="h-3 w-3 shrink-0 text-emerald-700/90" aria-hidden />
                   {city}
                 </span>
               ))}
@@ -376,7 +372,7 @@ export function ProductPageLongSections({
       <ProductFaq
         items={[...page.preOrderFaq, ...page.faq]}
         title={page.preOrderFaqTitle}
-        subtitle="كل اللي تحتاجين تعرفينه"
+        subtitle="إجابات واضحة قبل الطلب"
       />
     </>
   );

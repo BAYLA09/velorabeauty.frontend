@@ -71,7 +71,7 @@ function StoryCard({ story, index }: { story: ProductVideoStory; index: number }
                 <path d="M8 5v14l11-7z" />
               </svg>
             </span>
-            <p className="text-[10px] font-semibold leading-snug text-velora-cream/45">فيديو قريباً</p>
+            <p className="text-[10px] font-semibold leading-snug text-velora-cream/45">الفيديو قريباً</p>
           </div>
         )}
 
@@ -138,7 +138,7 @@ export function ProductVideoStoriesStrip({
             <StoryCard key={story.id} story={story} index={i} />
           ))}
         </div>
-        <p className="mt-2 text-right text-[10px] text-velora-burgundy/40">اسحبي لعرض المزيد</p>
+        <p className="mt-2 text-right text-[10px] text-velora-burgundy/40">مرّري لاستكشاف المزيد</p>
       </div>
     </Wrapper>
   );

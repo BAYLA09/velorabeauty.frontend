@@ -182,7 +182,7 @@ export function CheckoutOrderForm({
 
       {accent === "gold" && (
         <p className="text-center text-[11px] leading-relaxed text-velora-burgundy/50">
-          🔒 الدفع بالبطاقة يتم عبر رابط آمن بعد تأكيد الطلب — لا نخزّن بيانات البطاقة على
+          الدفع بالبطاقة يتم عبر رابط آمن بعد تأكيد الطلب — لا نخزّن بيانات البطاقة على
           الموقع.
         </p>
       )}

@@ -50,6 +50,6 @@ export function getProductVideoStories(productSlug: string): ProductVideoStory[]
 }
 
 export const productVideoStoriesSection = {
-  eyebrow: "تجارب من الخليج",
-  title: "يسمعون من عميلاتنا",
+  eyebrow: "من الخليج",
+  title: "نسمع من عميلاتنا",
 } as const;
