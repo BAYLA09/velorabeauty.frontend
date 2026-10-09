@@ -85,6 +85,36 @@ const nextConfig: NextConfig = {
           "/videos/stories/hair-gummies/magnific_animate-this-image-into-a-6second-realistic-lifest_kling_720p_9-16_24fps_21718.mp4",
         permanent: true,
       },
+      {
+        source: "/videos/stories/magnific_create-a-5second-ultrarealistic-beauty-ugc-video-u_kling_720p_9-16_24fps_21725.mp4",
+        destination:
+          "/videos/stories/eye-serum/magnific_create-a-5second-ultrarealistic-beauty-ugc-video-u_kling_720p_9-16_24fps_21725.mp4",
+        permanent: true,
+      },
+      {
+        source: "/videos/stories/magnific_create-a-5second-ultrarealistic-skincare-video-usi_kling_720p_9-16_24fps_21727.mp4",
+        destination:
+          "/videos/stories/eye-serum/magnific_create-a-5second-ultrarealistic-skincare-video-usi_kling_720p_9-16_24fps_21727.mp4",
+        permanent: true,
+      },
+      {
+        source: "/videos/stories/magnific_create-a-5second-ultrarealistic-vertical-916-skinc_kling_720p_9-16_24fps_21728.mp4",
+        destination:
+          "/videos/stories/eye-serum/magnific_create-a-5second-ultrarealistic-vertical-916-skinc_kling_720p_9-16_24fps_21728.mp4",
+        permanent: true,
+      },
+      {
+        source: "/videos/stories/magnific_create-a-5second-ultrarealistic-smartphone-video-f_kling_720p_9-16_24fps_21724.mp4",
+        destination:
+          "/videos/stories/eye-serum/magnific_create-a-5second-ultrarealistic-smartphone-video-f_kling_720p_9-16_24fps_21724.mp4",
+        permanent: true,
+      },
+      {
+        source: "/videos/stories/magnific_create-a-realistic-5second-vertical-916-skincare-a_kling_720p_9-16_24fps_21726.mp4",
+        destination:
+          "/videos/stories/eye-serum/magnific_create-a-realistic-5second-vertical-916-skincare-a_kling_720p_9-16_24fps_21726.mp4",
+        permanent: true,
+      },
     ];
   },
 };
