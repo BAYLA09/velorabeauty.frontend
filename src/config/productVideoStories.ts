@@ -11,6 +11,7 @@ export type ProductVideoStory = {
 
 const SKIN_VIDEO = "/videos/stories/skin-gummies";
 const HAIR_VIDEO = "/videos/stories/hair-gummies";
+const EYE_VIDEO = "/videos/stories/eye-serum";
 const SKIN_LEGACY_49239 =
   "/images/products/magnific_animate-the-provided-starting-image-into-a-realist_kling_1080p_9-16_24fps_49239.mp4";
 
@@ -75,6 +76,40 @@ const hairGummiesVideoStories: ProductVideoStory[] = [
   },
 ];
 
+/** سيروم محيط العين — 5 فيديوهات */
+const eyeSerumVideoStories: ProductVideoStory[] = [
+  {
+    id: "eye-v1",
+    name: "شيماء",
+    city: "دبي",
+    videoSrc: `${EYE_VIDEO}/magnific_create-a-5second-ultrarealistic-beauty-ugc-video-u_kling_720p_9-16_24fps_21725.mp4`,
+  },
+  {
+    id: "eye-v2",
+    name: "نورة",
+    city: "أبوظبي",
+    videoSrc: `${EYE_VIDEO}/magnific_create-a-5second-ultrarealistic-skincare-video-usi_kling_720p_9-16_24fps_21727.mp4`,
+  },
+  {
+    id: "eye-v3",
+    name: "مريم",
+    city: "الشارقة",
+    videoSrc: `${EYE_VIDEO}/magnific_create-a-5second-ultrarealistic-vertical-916-skinc_kling_720p_9-16_24fps_21728.mp4`,
+  },
+  {
+    id: "eye-v4",
+    name: "لطيفة",
+    city: "الرياض",
+    videoSrc: `${EYE_VIDEO}/magnific_create-a-5second-ultrarealistic-smartphone-video-f_kling_720p_9-16_24fps_21724.mp4`,
+  },
+  {
+    id: "eye-v5",
+    name: "هند",
+    city: "الكويت",
+    videoSrc: `${EYE_VIDEO}/magnific_create-a-realistic-5second-vertical-916-skincare-a_kling_720p_9-16_24fps_21726.mp4`,
+  },
+];
+
 const defaultStories: ProductVideoStory[] = [
   { id: "story-1", name: "شيماء", city: "دبي" },
   { id: "story-2", name: "نورة", city: "أبوظبي" },
@@ -94,6 +129,9 @@ export function getProductVideoStories(productSlug: string): ProductVideoStory[]
   }
   if (productSlug === "hair-gummies") {
     return hairGummiesVideoStories.map((story) => ({ ...story }));
+  }
+  if (productSlug === "eye-serum") {
+    return eyeSerumVideoStories.map((story) => ({ ...story }));
   }
 
   const overrides = videoOverridesByProductSlug[productSlug];
