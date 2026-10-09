@@ -22,7 +22,7 @@ export const products: Product[] = [
     name: "علكات الشعر",
     ingredient: "بالبيوتين",
     description:
-      "علكتان يومياً لدعم مظهر الشعر — روتين واضح يلائم إيقاعك، بلا تعقيد.",
+      "روتين الشعر من الداخل — واضح ويلائم إيقاعك، بلا عشر زيوت.",
     price: singleProductPrice,
     priceLabel: formatPrice(singleProductPrice),
     image: images.products.hair,
@@ -34,7 +34,7 @@ export const products: Product[] = [
     name: "علكات البشرة",
     ingredient: "بالغلوتاثيون",
     description:
-      "روتين إشراق من الداخل — علكتان بالغلوتاثيون، بأسلوب فيلورا الهادئ.",
+      "إشراق من الداخل — روتين بسيط يلائم يومك، بلا قوائم منتجات طويلة.",
     price: singleProductPrice,
     priceLabel: formatPrice(singleProductPrice),
     image: images.products.skin,

@@ -75,8 +75,8 @@ export function ProductPageClient({ product, allProducts }: Props) {
                   </div>
 
                   <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
-                    <p className="text-sm font-semibold text-velora-burgundy/75">
-                      من {formatPrice(singleProductPrice)} / {unitLabel} · {page.urgencyLine}
+                    <p className="text-sm font-semibold tabular-nums text-velora-burgundy/75">
+                      من {formatPrice(singleProductPrice)} / {unitLabel}
                     </p>
 
                     <ProductPurchasePanel

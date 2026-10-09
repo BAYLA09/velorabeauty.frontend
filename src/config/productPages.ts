@@ -57,7 +57,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     seoDescription:
       "علكتان يومياً بالبيوتين — روتين أنيق لدعم مظهر الشعر، مع توصيل داخل الإمارات.",
     headlineQuestion: "الحرارة والتكييف يضعفان مظهر الشعر — والروتين يتأجل.",
-    subhook: "عناية الشعر من الداخل — علكتان يومياً، لا عشر زيوت.",
+    subhook: "روتين الشعر من الداخل — لا عشر زيوت.",
     statChips: [
       { value: "01", label: "روتين الشعر" },
       { value: "بيوتين", label: "المكوّن البارز" },
@@ -66,7 +66,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     ],
     urgencyLine: "توصيل داخل الإمارات — بطاقة أو دفع عند الاستلام",
     hook: "روتين شعر بلا تعقيد",
-    hookSub: "عناية من الداخل — بأسلوب فيلورا الهادئ والواضح.",
+    hookSub: "روتين من الداخل — بلا تعقيد.",
     highlightStat: {
       value: "3",
       label: "عنايات في المجموعة — شعر، بشرة، ومحيط العين",
@@ -157,7 +157,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     form: "gummy",
     seoTitle: "علكات البشرة بالغلوتاثيون | فيلورا",
     seoDescription:
-      "علكتان بالغلوتاثيون يومياً — روتين إشراق بسيط، مع توصيل داخل الإمارات.",
+      "روتين إشراق بسيط للبشرة — مع توصيل داخل الإمارات.",
     headlineQuestion: "الشمس والتكييف يجهدان بشرتك — والوقت ما يساعد.",
     subhook: "إشراق يبدأ من روتين — لا من عشر خطوات.",
     statChips: [
@@ -168,7 +168,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     ],
     urgencyLine: "توصيل داخل الإمارات — بطاقة أو دفع عند الاستلام",
     hook: "بشرة تُعتنى بها من الداخل",
-    hookSub: "لمسة يومية — بلا قوائم منتجات لا تنتهي.",
+    hookSub: "روتين بسيط — بلا قوائم لا تنتهي.",
     highlightStat: {
       value: "249",
       label: "د.إ — منتجان بالبطاقة (عرض الروتين المزدوج)",
