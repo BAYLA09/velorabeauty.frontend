@@ -28,7 +28,7 @@ const videoOverridesByProductSlug: Record<
   string,
   Partial<Record<ProductVideoStory["id"], Pick<ProductVideoStory, "videoSrc" | "posterSrc">>>
 > = {
-  "hair-gummies": {
+  "skin-gummies": {
     /** أول بطاقة ظاهرة في الشريط (هند) */
     "story-5": {
       videoSrc:
