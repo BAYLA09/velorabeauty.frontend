@@ -13,7 +13,7 @@ const SKIN_VIDEO = "/videos/stories/skin-gummies";
 const SKIN_LEGACY_49239 =
   "/images/products/magnific_animate-the-provided-starting-image-into-a-realist_kling_1080p_9-16_24fps_49239.mp4";
 
-/** علكات البشرة — 5 فيديوهات */
+/** علكات البشرة — 4 فيديوهات (بلا لطيفة) */
 const skinGummiesVideoStories: ProductVideoStory[] = [
   {
     id: "skin-v1",
@@ -35,12 +35,6 @@ const skinGummiesVideoStories: ProductVideoStory[] = [
   },
   {
     id: "skin-v4",
-    name: "لطيفة",
-    city: "الرياض",
-    videoSrc: `${SKIN_VIDEO}/magnific_generate-a-56-second-realistic-home-lifestyle-vide_kling_720p_9-16_24fps_31066.mp4`,
-  },
-  {
-    id: "skin-v5",
     name: "هند",
     city: "الكويت",
     videoSrc: `${SKIN_VIDEO}/magnific_animate-this-image-into-a-5second-realistic-smartp_kling_720p_9-16_24fps_31065.mp4`,
