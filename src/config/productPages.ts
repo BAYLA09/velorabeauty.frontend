@@ -56,7 +56,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     seoTitle: "علكات الشعر بالبيوتين | فيلورا",
     seoDescription:
       "علكتان يومياً بالبيوتين — روتين أنيق لدعم مظهر الشعر، مع توصيل داخل الإمارات.",
-    headlineQuestion: "الحرارة والتكييف يضعفان مظهر الشعر — والروتين يتأجل.",
+    headlineQuestion: "الحرارة والتكييف يضعفان مظهر الشعر — والروتين يتأجل؟",
     subhook: "روتين الشعر من الداخل — لا عشر زيوت.",
     statChips: [
       { value: "01", label: "روتين الشعر" },
@@ -159,7 +159,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     seoTitle: "علكات البشرة بالغلوتاثيون | فيلورا",
     seoDescription:
       "روتين إشراق بسيط للبشرة — مع توصيل داخل الإمارات.",
-    headlineQuestion: "الشمس والتكييف يجهدان بشرتك — والوقت ما يساعد.",
+    headlineQuestion: "الشمس والتكييف يجهدان بشرتك — والوقت ما يساعد؟",
     subhook: "إشراق يبدأ من روتين — لا من عشر خطوات.",
     statChips: [
       { value: "02", label: "روتين البشرة" },
@@ -262,7 +262,7 @@ export const productPages: Record<ProductId, ProductPageConfig> = {
     seoTitle: "سيروم محيط العين | فيلورا",
     seoDescription:
       "سيروم بفيتامين E — خطوة مركّزة لمحيط العين، مع توصيل داخل الإمارات.",
-    headlineQuestion: "السهر والشاشات تظهر على عينيك — والكريمات تتكدس.",
+    headlineQuestion: "السهر والشاشات تظهر على عينيك — والكريمات تتكدس؟",
     subhook: "محيط العين بخطوة واحدة — لا سلة منتجات.",
     highlightStat: {
       value: "339",

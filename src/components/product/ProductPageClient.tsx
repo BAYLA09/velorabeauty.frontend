@@ -90,9 +90,9 @@ export function ProductPageClient({ product, allProducts }: Props) {
                       onChange={setPurchase}
                     />
 
-                    <ProductVideoStoriesStrip compact productSlug={product.slug} />
-
                     <ProductTrustBar prominent />
+
+                    <ProductVideoStoriesStrip compact productSlug={product.slug} />
                   </div>
                 </div>
               </div>
