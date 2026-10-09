@@ -13,7 +13,8 @@ permissions:
 
 concurrency:
   group: publish-container-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel mid-push — Easypanel may pull a broken half-published tag.
+  cancel-in-progress: false
 
 jobs:
   publish:
