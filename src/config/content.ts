@@ -18,13 +18,13 @@ export const hero = {
   trustBadges: [
     { label: "مكونات طبيعية", icon: "leaf" as const },
     { label: "جودة عالية", icon: "diamond" as const },
-    { label: "نتائج حقيقية", icon: "spark" as const },
+    { label: "روتين مدروس", icon: "spark" as const },
   ],
 } as const;
 
 export const productSection = {
   title: "اكتشفي عنايتك",
-  introTitle: "ثلاثة حلول لمشاكل جمالك الأساسية",
+  introTitle: "ثلاث عنايات — روتين واحد من فيلورا",
 } as const;
 
 export const whyVelora = {

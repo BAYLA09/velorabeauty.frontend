@@ -19,10 +19,10 @@ export const products: Product[] = [
   {
     id: "hair",
     number: "01",
-    name: "علكات صحة ونمو الشعر",
+    name: "علكات الشعر",
     ingredient: "بالبيوتين",
     description:
-      "روتين يومي لدعم مظهر الشعر بثقة، ضمن عناية بسيطة تناسب إيقاعك.",
+      "علكتان يومياً لدعم مظهر الشعر — روتين واضح يلائم إيقاعك، بلا تعقيد.",
     price: singleProductPrice,
     priceLabel: formatPrice(singleProductPrice),
     image: images.products.hair,
@@ -31,10 +31,10 @@ export const products: Product[] = [
   {
     id: "skin",
     number: "02",
-    name: "علكات إشراقة ونضارة البشرة",
+    name: "علكات البشرة",
     ingredient: "بالغلوتاثيون",
     description:
-      "لمسة عناية تمنح بشرتك حضوراً مشرقاً، في تجربة أنيقة وسهلة.",
+      "روتين إشراق من الداخل — علكتان بالغلوتاثيون، بأسلوب فيلورا الهادئ.",
     price: singleProductPrice,
     priceLabel: formatPrice(singleProductPrice),
     image: images.products.skin,
@@ -43,10 +43,10 @@ export const products: Product[] = [
   {
     id: "eye",
     number: "03",
-    name: "سيروم العناية بمحيط العين",
+    name: "سيروم محيط العين",
     ingredient: "بفيتامين E",
     description:
-      "سيروم مركّز لمحيط العين — خطوة راقية تكمل روتينك مع علكات الشعر والبشرة.",
+      "خطوة مركّزة حول العين — تكمل علكات الشعر والبشرة في روتين واحد.",
     price: singleProductPrice,
     priceLabel: formatPrice(singleProductPrice),
     image: images.products.eye,
@@ -55,10 +55,10 @@ export const products: Product[] = [
 ];
 
 export const bundle = {
-  title: "المجموعة الكاملة لجمالك",
-  subtitle: "ثلاث عنايات في روتين واحد.",
-  savingsLine: "وفّري أكثر مع المجموعة الكاملة",
+  title: "المجموعة الكاملة",
+  subtitle: "شعر، بشرة، ومحيط العين — روتين فيلورا بثلاث خطوات.",
+  savingsLine: "قيمة أوضح عند اختيار المجموعة",
   priceLabel: formatPrice(339),
-  cta: "احصلي على المجموعة",
+  cta: "اختاري المجموعة",
   image: images.products.bundle,
 } as const;

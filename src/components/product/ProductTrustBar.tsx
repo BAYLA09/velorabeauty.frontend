@@ -18,8 +18,8 @@ export function ProductTrustBar({
 }) {
   const items: TrustItem[] = [
     {
-      title: "ضمان 30 يوم",
-      sub: "استرجاع كامل",
+      title: "ضمان 30 يوماً",
+      sub: "استرجاع وفق الشروط",
       icon: (
         <path
           strokeLinecap="round"
@@ -29,8 +29,8 @@ export function ProductTrustBar({
       ),
     },
     {
-      title: "توصيل 2–4 أيام",
-      sub: "كل الإمارات",
+      title: "توصيل سريع",
+      sub: "2–4 أيام · الإمارات",
       icon: (
         <>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h11v8H3V7z" />
@@ -42,7 +42,7 @@ export function ProductTrustBar({
     },
     {
       title: "الدفع عند الاستلام",
-      sub: "+20 د.إ رسوم التوصيل",
+      sub: "+20 د.إ عند التوصيل",
       icon: (
         <>
           <rect x="4" y="7" width="16" height="10" rx="2" />

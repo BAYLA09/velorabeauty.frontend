@@ -1,3 +1,4 @@
+import { IconCheckCircle } from "@/components/product/ProductFunnelIcons";
 import type { TestimonialReview } from "@/config/testimonials";
 import { TestimonialAvatar } from "./TestimonialAvatar";
 import { StarRating } from "./StarRating";
@@ -21,7 +22,8 @@ export function TestimonialReviewCard({ review, featured, layout = "default" }: 
       <article className="flex h-full flex-col rounded-[1.25rem] border border-velora-burgundy/10 bg-white p-5 shadow-sm sm:p-6">
         <div className="mb-4 flex items-start justify-between gap-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-velora-cream-dark px-2.5 py-1 text-[10px] font-bold text-velora-burgundy-dark">
-            ✓ مؤكدة
+            <IconCheckCircle className="h-3 w-3 shrink-0 opacity-80" aria-hidden />
+            تجربة عميلة
           </span>
           {review.rating != null ? (
             <StarRating rating={review.rating} className="text-amber-500" />
@@ -55,9 +57,6 @@ export function TestimonialReviewCard({ review, featured, layout = "default" }: 
         </div>
       )}
       <blockquote className="mt-4 flex-1 text-base leading-relaxed text-velora-burgundy/85 md:text-lg">
-        <span className="text-velora-champagne/80" aria-hidden>
-          ❝{" "}
-        </span>
         {review.quote}
       </blockquote>
       <footer className="mt-6 flex flex-col items-center gap-3">
