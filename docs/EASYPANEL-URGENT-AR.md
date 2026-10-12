@@ -1,16 +1,16 @@
 # Easypanel — باقي ما كيدپloyش؟ (2026-10-12)
 
-## ✅ GitHub جاهز دابا (2026-10-12 — PR #117 merged)
+## ✅ GitHub جاهز دابا (2026-10-12 — PR #121 merged)
 
-- **Publish container** على `main` → **✅ ناجح** (آخر merge: panier + upsell drawer)
-- Image جديدة:
+- **Publish container** على `main` → **✅ ناجح** (آخر merge: **4 produits** — 3×339 + 4ème +199)
+- Image جديدة (Easypanel خاصو **pull**):
 
 ```text
 ghcr.io/bayla09/velorabeauty.frontend:latest
-ghcr.io/bayla09/velorabeauty.frontend:a6a4d9f
+ghcr.io/bayla09/velorabeauty.frontend:b1ddd2e
 ```
 
-الموقع الحي **ما كيتبدّلش** حتى **Deploy ف Easypanel** (pull image). GitHub وحدّو ما كيكفي.
+الموقع الحي **ما كيتبدّلش** من GitHub وحدو — **Deploy يدوي ف Easypanel** (1–3 دقائق). Secret `EASYPANEL_DEPLOY_WEBHOOK` **ماشي مفعّل** → ما كاينش auto-deploy.
 
 ---
 
@@ -69,10 +69,10 @@ ghcr.io/bayla09/velorabeauty.frontend:a6a4d9f
 curl -s https://www.velorabeauty.world/api/health
 ```
 
-خاص `version` يبدا بـ **`a6a4d9f`** (أو أحدث commit على main).
+خاص `version` يبدا بـ **`b1ddd2e`** (أو أحدث commit على main).
 
-إلا بقى `3f6061f` أو أقدم → Easypanel **ما سحبش** image:
-- بدّل Image إلى `:a6a4d9f` بالضبط
+إلا بقى `f141bae` أو أقدم → Easypanel **ما سحبش** image:
+- بدّل Image إلى `:b1ddd2e` بالضبط
 - **Redeploy** / **Recreate container**
 - تأكد Source ماشي Git
 
@@ -80,6 +80,7 @@ curl -s https://www.velorabeauty.world/api/health
 
 ## 5) « Deploy ما خدام » — 3 أسباب شائعة
 
-1. **PR ما mergedش** → GitHub ما بنى image. دابا **#117 merged** — خاص Easypanel Deploy.
-2. **Deploy 1 ثانية** → Source = Git (غلط). بدّل ل **Docker Image** أو Compose `docker-compose.yml` **بلا build**.
-3. **Deploy ناجح ولكن نفس المحتوى** → `curl …/api/health` — إلا `version` قديم، زيد `:a6a4d9f` ف Image و **Recreate**.
+1. **PR ما mergedش** → GitHub ma kaybni image. دابا **#121 merged** — dir **Deploy** f Easypanel.
+2. **Deploy 1 ثانية** → Source = Git (غلط). بدّl l **Docker Image** (`ghcr.io/bayla09/velorabeauty.frontend:b1ddd2e`).
+3. **Deploy ناجح ولكن نفس المحتوى** → `curl …/api/health` — ila `version` qdima, pin `:b1ddd2e` w **Recreate container**.
+4. **GitHub ✅ ولكن site ma tbdlch** → ma kaynch `EASYPANEL_DEPLOY_WEBHOOK` — **كل merge** khass **Deploy** يدوي (1–3 min, logs fiha pull layers).
