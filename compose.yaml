@@ -1,5 +1,5 @@
-# Optional: Easypanel → New Service → Compose → paste or connect repo.
-# Pulls the prebuilt image (no Git clone / no build on the server).
+# Easypanel → New Service → Compose (path: compose.yaml) OR paste deploy/easypanel-docker-image.compose.yaml
+# IMPORTANT: do NOT use "GitHub + Dockerfile" on the server — pull prebuilt GHCR image only.
 services:
   velora-web:
     image: ghcr.io/bayla09/velorabeauty.frontend:latest
@@ -10,6 +10,7 @@ services:
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
       DATABASE_PATH: /app/data/velora.sqlite
+      SITE_URL: https://www.velorabeauty.world
     volumes:
       - velora-orders:/app/data
     expose:
