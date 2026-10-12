@@ -16,7 +16,11 @@ import {
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
-import { bundleOfferLabel } from "@/lib/checkoutProductMeta";
+import {
+  allocateCartLinePrices,
+  bundleOfferLabel,
+  getCheckoutProductImage,
+} from "@/lib/checkoutProductMeta";
 import {
   buildCheckoutPath,
   buildCheckoutPaymentStepPath,
@@ -60,10 +64,11 @@ export function CheckoutSummarySidebar({
       : [];
   const mixedCart = Boolean(cartItemsParam?.trim());
   const validated = mixedCart ? validateCartForCheckout(lines) : null;
-  const displayName = validated?.ok ? validated.cart.productName : productName;
   const bundleQty = validated?.ok ? validated.cart.bundleQuantity : quantity;
 
   const subtotal = cardBundlePrices[bundleQty];
+  const linePrices = allocateCartLinePrices(lines, subtotal);
+  const singleLineBasket = lines.length === 1 && !mixedCart;
   const deliveryFee = paymentMethod === "cod" ? codFee : 0;
   const total = getCheckoutTotal(bundleQty, paymentMethod);
 
@@ -105,75 +110,108 @@ export function CheckoutSummarySidebar({
       <aside className="h-fit rounded-xl border border-[#d9d9d9] bg-white p-4 shadow-sm sm:p-5">
         <h2 className="text-base font-extrabold text-neutral-900">ملخص الطلب</h2>
 
-        <div className="mt-4 flex gap-3 border-b border-neutral-100 pb-4">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-50">
-            {productImageSrc ? (
-              <Image
-                src={productImageSrc}
-                alt=""
-                fill
-                className="object-contain p-1"
-                sizes="64px"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-[10px] font-bold text-neutral-300">
-                VELORA
-              </div>
-            )}
-          </div>
-          <div className="min-w-0 flex-1 text-right">
-            <p className="text-sm font-bold leading-snug text-neutral-900">{displayName}</p>
-            <p className="mt-1 text-xs text-neutral-500">{bundleOfferLabel(bundleQty)}</p>
-            {mixedCart && lines.length > 1 ? (
-              <ul className="mt-1 space-y-0.5 text-[10px] text-neutral-500">
-                {lines.map((l) => {
-                  const p = getProductBySlug(l.slug);
-                  return (
-                    <li key={l.slug}>
-                      {p?.name ?? l.slug} ×{l.quantity}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
-            <p className="mt-2 text-sm font-extrabold tabular-nums text-neutral-900">
-              {formatPrice(subtotal)}
-            </p>
-          </div>
-          {editableBasket && productSlug && !mixedCart ? (
-            <div className="flex shrink-0 flex-col items-center gap-1">
-              <span className="text-[10px] font-bold text-neutral-400">الكمية</span>
-              <div className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-neutral-50 p-0.5">
-                <button
-                  type="button"
-                  aria-label="نقصان الكمية"
-                  disabled={quantity <= 1}
-                  onClick={() => setQuantity((quantity - 1) as BundleQuantity)}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 disabled:opacity-30"
-                >
-                  −
-                </button>
-                <span className="min-w-[1.25rem] text-center text-sm font-extrabold tabular-nums">
-                  {quantity}
-                </span>
-                <button
-                  type="button"
-                  aria-label="زيادة الكمية"
-                  disabled={quantity >= 3}
-                  onClick={() => setQuantity((quantity + 1) as BundleQuantity)}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 disabled:opacity-30"
-                >
-                  +
-                </button>
-              </div>
+        {productSlug && lines.length > 0 ? (
+          <ul className="mt-4 space-y-3 border-b border-neutral-100 pb-4">
+            {lines.map((line) => {
+              const product = getProductBySlug(line.slug);
+              const imageSrc =
+                getCheckoutProductImage(line.slug) ??
+                product?.pageImage.upsellSlotSrc?.[1] ??
+                productImageSrc;
+              const lineTotal = linePrices.get(line.slug) ?? subtotal;
+              return (
+                <li key={line.slug} className="flex gap-3">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-neutral-100">
+                    {imageSrc ? (
+                      <Image
+                        src={imageSrc}
+                        alt={product?.image.placeholder ?? ""}
+                        fill
+                        className="object-contain p-1"
+                        sizes="64px"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-[10px] font-bold text-neutral-300">
+                        VELORA
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1 text-right">
+                    <p className="text-sm font-bold leading-snug text-neutral-900">
+                      {product?.name ?? line.slug}
+                    </p>
+                    {product?.ingredient ? (
+                      <p className="mt-0.5 text-xs text-neutral-500">{product.ingredient}</p>
+                    ) : null}
+                    {!mixedCart && lines.length === 1 ? (
+                      <p className="mt-0.5 text-[11px] text-neutral-500">
+                        {bundleOfferLabel(bundleQty)}
+                      </p>
+                    ) : null}
+                    <p className="mt-2 text-sm font-extrabold tabular-nums text-neutral-900">
+                      {formatPrice(lineTotal)}
+                    </p>
+                  </div>
+                  {editableBasket && singleLineBasket ? (
+                    <div className="flex shrink-0 flex-col items-center gap-1">
+                      <span className="text-[10px] font-bold text-neutral-400">الكمية</span>
+                      <div className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-neutral-50 p-0.5">
+                        <button
+                          type="button"
+                          aria-label="نقصان الكمية"
+                          disabled={quantity <= 1}
+                          onClick={() => setQuantity((quantity - 1) as BundleQuantity)}
+                          className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 disabled:opacity-30"
+                        >
+                          −
+                        </button>
+                        <span className="min-w-[1.25rem] text-center text-sm font-extrabold tabular-nums">
+                          {line.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label="زيادة الكمية"
+                          disabled={quantity >= 3}
+                          onClick={() => setQuantity((quantity + 1) as BundleQuantity)}
+                          className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 disabled:opacity-30"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex shrink-0 flex-col items-center justify-center rounded-md border border-neutral-200 px-2 py-1">
+                      <span className="text-[10px] font-bold text-neutral-400">الكمية</span>
+                      <span className="text-sm font-extrabold tabular-nums text-neutral-900">
+                        {line.quantity}
+                      </span>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="mt-4 flex gap-3 border-b border-neutral-100 pb-4">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-50">
+              {productImageSrc ? (
+                <Image
+                  src={productImageSrc}
+                  alt=""
+                  fill
+                  className="object-contain p-1"
+                  sizes="64px"
+                />
+              ) : null}
             </div>
-          ) : (
-            <div className="flex shrink-0 flex-col items-center justify-center rounded-md border border-neutral-200 px-2 py-1">
-              <span className="text-[10px] font-bold text-neutral-400">الكمية</span>
-              <span className="text-sm font-extrabold text-neutral-900">{bundleQty}</span>
+            <div className="min-w-0 flex-1 text-right">
+              <p className="text-sm font-bold text-neutral-900">{productName}</p>
+              <p className="mt-2 text-sm font-extrabold tabular-nums text-neutral-900">
+                {formatPrice(subtotal)}
+              </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <dl className="mt-4 space-y-2.5 text-sm">
           <div className="flex justify-between gap-3">
