@@ -1,6 +1,6 @@
-# Fallback when Easypanel Dockerfile build fails (OOM / timeout).
-# Easypanel → Build → Nixpacks (not Dockerfile).
-# ⚠️ better-sqlite3 (orders DB) needs Dockerfile — Nixpacks will fail native compile.
+# ⚠️ DO NOT use Nixpacks on Easypanel for this app (better-sqlite3 breaks).
+# Use Docker Image: ghcr.io/bayla09/velorabeauty.frontend:latest
+# or Compose: docker-compose.yml (pull only, no build).
 [variables]
 NODE_ENV = "production"
 NEXT_TELEMETRY_DISABLED = "1"

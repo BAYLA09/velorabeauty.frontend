@@ -59,7 +59,7 @@ export function StoreHeaderShell({ theme, links, overlay = false }: Props) {
 
         {/* inline-end = يسار — السلة */}
         <div className="relative z-10 flex flex-1 items-center justify-end gap-0.5">
-          <Link href="/#checkout" className={cartClass} aria-label="السلة">
+          <Link href="/#products" className={cartClass} aria-label="السلة">
             <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M6 7h15l-1.5 9h-12z" />
               <path d="M6 7L5 4H2" />
@@ -92,11 +92,11 @@ export function StoreHeaderShell({ theme, links, overlay = false }: Props) {
             </Link>
           ))}
           <Link
-            href="/#checkout"
+            href="/#products"
             className={`block py-2.5 font-bold ${isDark ? "text-velora-champagne" : "text-velora-burgundy-dark"}`}
             onClick={() => setOpen(false)}
           >
-            السلة / إتمام الطلب
+            المنتجات
           </Link>
         </nav>
       )}

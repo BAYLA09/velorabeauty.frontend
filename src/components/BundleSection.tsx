@@ -22,7 +22,7 @@ export function BundleSection() {
 
         <p className="mt-8 text-4xl font-bold text-velora-champagne">{bundle.priceLabel}</p>
         <div className="mt-8">
-          <ButtonLink href="#checkout" variant="gold">
+          <ButtonLink href="#products" variant="gold">
             {bundle.cta}
           </ButtonLink>
         </div>

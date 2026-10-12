@@ -1,6 +1,5 @@
 import { BundleSection } from "@/components/BundleSection";
 import { images } from "@/config/images";
-import { CheckoutSection } from "@/components/CheckoutSection";
 import { FaqSection } from "@/components/FaqSection";
 import { FinalCtaSection } from "@/components/FinalCtaSection";
 import { FooterSection } from "@/components/FooterSection";
@@ -29,7 +28,6 @@ export default function Home() {
         <TestimonialsSection />
         <HowToOrderSection />
         <TrustStripSection />
-        <CheckoutSection />
         <FaqSection />
         <FinalCtaSection />
       </main>

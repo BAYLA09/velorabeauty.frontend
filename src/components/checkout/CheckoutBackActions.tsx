@@ -18,7 +18,7 @@ type Props = {
 
 function productReturnHref(productSlug: string): string {
   if (productSlug === HOMEPAGE_PRODUCT_SLUG) {
-    return "/#checkout";
+    return "/#products";
   }
   return `${getProductPath(productSlug)}#purchase`;
 }
