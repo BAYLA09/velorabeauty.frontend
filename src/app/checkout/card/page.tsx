@@ -1,5 +1,4 @@
 import { CheckoutCardConfirmClient } from "@/components/checkout/CheckoutCardConfirmClient";
-import { CheckoutPaymentInstantBlock } from "@/components/checkout/CheckoutPaymentInstantBlock";
 import { StripeEarlyInit } from "@/components/checkout/StripeEarlyInit";
 import { getCheckoutProductImage } from "@/lib/checkoutProductMeta";
 import { resolveCheckoutContext } from "@/lib/resolveCheckoutContext";
@@ -37,10 +36,6 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
         eligibleUnits={ctx.eligibleUnits}
         stripeEnabled={stripeEnabled}
         stripeBootstrap={stripeBootstrap}
-        serverPaymentInstant={Boolean(stripeBootstrap)}
-        paymentInstantSlot={
-          stripeBootstrap ? <CheckoutPaymentInstantBlock /> : undefined
-        }
       />
     </>
   );
