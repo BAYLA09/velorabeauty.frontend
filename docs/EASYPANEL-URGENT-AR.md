@@ -1,16 +1,16 @@
 # Easypanel — باقي ما كيدپloyش؟ (2026-10-12)
 
-## ✅ GitHub جاهز دابا
+## ✅ GitHub جاهز دابا (2026-10-12 — PR #117 merged)
 
-- **Publish container** على `main` → **✅ ناجح**
+- **Publish container** على `main` → **✅ ناجح** (آخر merge: panier + upsell drawer)
 - Image جديدة:
 
 ```text
 ghcr.io/bayla09/velorabeauty.frontend:latest
-ghcr.io/bayla09/velorabeauty.frontend:74e4538
+ghcr.io/bayla09/velorabeauty.frontend:a6a4d9f
 ```
 
-الموقع الحي مازال على commit قديم حتى **تدير Deploy ف Easypanel** (هاد normal).
+الموقع الحي **ما كيتبدّلش** حتى **Deploy ف Easypanel** (pull image). GitHub وحدّو ما كيكفي.
 
 ---
 
@@ -69,16 +69,17 @@ ghcr.io/bayla09/velorabeauty.frontend:74e4538
 curl -s https://www.velorabeauty.world/api/health
 ```
 
-خاص `version` يبدا بـ **`74e4538`** (أو أحدث commit على main).
+خاص `version` يبدا بـ **`a6a4d9f`** (أو أحدث commit على main).
 
-إلا بقى `518a181` → Easypanel **ما سحبش** image:
-- بدّل Image إلى `:74e4538` بالضبط
+إلا بقى `3f6061f` أو أقدم → Easypanel **ما سحبش** image:
+- بدّل Image إلى `:a6a4d9f` بالضبط
 - **Redeploy** / **Recreate container**
 - تأكد Source ماشي Git
 
 ---
 
-## 5) إلا بغيتي Cart drawer / frontend جديد
+## 5) « Deploy ما خدام » — 3 أسباب شائعة
 
-هاد التحديث ف branch **`cursor/cart-drawer-upsell-7460`** — **مازال ما mergedش** لـ `main`.  
-Deploy الحالي **ما غاديش** يبان فيه حتى merge + Publish container ✅ + Deploy Easypanel.
+1. **PR ما mergedش** → GitHub ما بنى image. دابا **#117 merged** — خاص Easypanel Deploy.
+2. **Deploy 1 ثانية** → Source = Git (غلط). بدّل ل **Docker Image** أو Compose `docker-compose.yml` **بلا build**.
+3. **Deploy ناجح ولكن نفس المحتوى** → `curl …/api/health` — إلا `version` قديم، زيد `:a6a4d9f` ف Image و **Recreate**.
