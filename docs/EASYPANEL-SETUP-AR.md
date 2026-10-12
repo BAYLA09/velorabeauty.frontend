@@ -10,13 +10,15 @@
 | Actions **❌ Publish container** | ما بقاش image جديدة | Merge آخر fix CI أو **Re-run failed jobs** · مؤقتاً pin tag SHA (تحت) |
 | `unauthorized` / pull | Registry | Image `ghcr.io/bayla09/velorabeauty.frontend:latest` · username/password **فارغين** |
 
-**Image شغالة دابا (آخر publish ناجح)** — إلا `latest` ما خدمش:
+**Image دابا (Publish container ✅ 2026-10-12):**
 
 ```text
-ghcr.io/bayla09/velorabeauty.frontend:2510251
+ghcr.io/bayla09/velorabeauty.frontend:latest
+ghcr.io/bayla09/velorabeauty.frontend:74e4538
 ```
 
-بعد ما **Publish container** يولي ✅ على `main`، رجّع `latest` و Deploy.
+إلا `latest` ما تبدّلش ف Easypanel → pin `:74e4538` ثم Deploy.  
+تفاصيل: **`docs/EASYPANEL-URGENT-AR.md`**
 
 **Image جاهزة دابا** (GitHub Actions → Publish container). Easypanel **يسحبها** — ما يبنيش من Git:
 

@@ -46,7 +46,7 @@ Easypanel (اختر واحد):
 2. **Docker Registry (GHCR)** — إلا Git فـ Easypanel كيعطي `Git key not found`:  
    `ghcr.io/bayla09/velorabeauty.frontend:latest` (يبنى تلقائياً من Actions على `main`).
 
-**Deploy ma kaymchich?** → **[docs/EASYPANEL-SETUP-AR.md](docs/EASYPANEL-SETUP-AR.md)** — Docker Image `ghcr.io/bayla09/velorabeauty.frontend:latest` (port **3000**, volume **`/app/data`**). Compose: `deploy/easypanel-docker-image.compose.yaml`.  
+**Deploy ma kaymchich?** → **[docs/EASYPANEL-URGENT-AR.md](docs/EASYPANEL-URGENT-AR.md)** (دليل سريع) · Image: `ghcr.io/bayla09/velorabeauty.frontend:latest` أو `:74e4538` · port **3000** · volume **`/app/data`** · **ماشي Git build**.  
 Also: [docs/EASYPANEL-DEPLOY.md](docs/EASYPANEL-DEPLOY.md). **Stripe:** [docs/STRIPE-SETUP-AR.md](docs/STRIPE-SETUP-AR.md).
 
 Open [http://localhost:3000](http://localhost:3000).
