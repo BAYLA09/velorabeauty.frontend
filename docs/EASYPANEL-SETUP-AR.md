@@ -1,13 +1,22 @@
 # Easypanel — deploy بـ 5 دقائق (Velora)
 
-## 🆘 «ما قدرتش ن-deploy» — الحل السريع
+## 🆘 «ما قدرتش n-deploy» — الحل السريع (3 دقائق)
 
 | اللي كتشوف | المعنى | شنو دير |
 |------------|--------|---------|
-| Deploy **1 ثانية** | ما تـ pull/image/build | **Source → Docker Image** (تحت) — حذف Git |
+| Deploy **1 ثانية** | ما تـ pull/image/build | **Source → Docker Image** (تحت) — **حذف Git** |
 | `Git key not found` | Git/Easypanel مقطوع | نفس الحل — **Docker Image** |
-| الموقع خدام ولكن **قديم** | Image ما تحدّثاتش | **Publish container** ✅ على `main` ثم **Deploy** (1–3 دق) |
-| `unauthorized` / pull | Registry | Image بالضبط `ghcr.io/bayla09/velorabeauty.frontend:latest` · auth **فارغ** (public) |
+| الموقع خدام ولكن **قديم** | Image ما تحدّثاتش | GitHub → **Actions** → **Publish container** ✅ ثم Easypanel **Deploy** (1–3 دق) |
+| Actions **❌ Publish container** | ما بقاش image جديدة | Merge آخر fix CI أو **Re-run failed jobs** · مؤقتاً pin tag SHA (تحت) |
+| `unauthorized` / pull | Registry | Image `ghcr.io/bayla09/velorabeauty.frontend:latest` · username/password **فارغين** |
+
+**Image شغالة دابا (آخر publish ناجح)** — إلا `latest` ما خدمش:
+
+```text
+ghcr.io/bayla09/velorabeauty.frontend:2510251
+```
+
+بعد ما **Publish container** يولي ✅ على `main`، رجّع `latest` و Deploy.
 
 **Image جاهزة دابا** (GitHub Actions → Publish container). Easypanel **يسحبها** — ما يبنيش من Git:
 
