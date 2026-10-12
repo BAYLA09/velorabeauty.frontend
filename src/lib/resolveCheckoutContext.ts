@@ -22,7 +22,7 @@ export function resolveCheckoutContext(
   const quantity = parseCheckoutQuantity(typeof rawQty === "string" ? rawQty : null);
 
   if (!quantity) {
-    redirect("/#checkout");
+    redirect("/#products");
   }
 
   const catalog = getProductBySlug(productSlug);
