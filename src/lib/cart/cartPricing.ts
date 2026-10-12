@@ -1,12 +1,13 @@
 import {
-  cardBundlePrices,
+  bundleQuantityFromUnitCount,
   codFee,
-  getCheckoutTotal,
+  getCheckoutTotalForUnits,
+  getMerchandiseAedForUnits,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
-import { MAX_BUNDLE_UNITS } from "@/lib/cart/cartTypes";
+import { MAX_CART_UNITS } from "@/lib/cart/cartTypes";
 import { isEligibleProductSlug } from "@/lib/cart/eligibleCatalog";
 
 export type CartPricingResult =
@@ -40,11 +41,6 @@ export function countEligibleUnits(lines: CartLine[]): number {
   return normalizeCartLines(lines).reduce((sum, l) => sum + l.quantity, 0);
 }
 
-export function bundleQuantityFromUnitCount(units: number): BundleQuantity | null {
-  if (units === 1 || units === 2 || units === 3) return units;
-  return null;
-}
-
 export function computeCartPricing(
   lines: CartLine[],
   paymentMethod?: PaymentMethod | null,
@@ -60,20 +56,20 @@ export function computeCartPricing(
     return { ok: false, reason: "invalid_lines", eligibleUnits };
   }
 
-  if (eligibleUnits > MAX_BUNDLE_UNITS) {
+  if (eligibleUnits > MAX_CART_UNITS) {
     return { ok: false, reason: "too_many_units", eligibleUnits };
   }
 
   const bundleQuantity = bundleQuantityFromUnitCount(eligibleUnits);
-  if (!bundleQuantity) {
+  const merchandiseAed = getMerchandiseAedForUnits(eligibleUnits);
+  if (!bundleQuantity || merchandiseAed === null) {
     return { ok: false, reason: "no_bundle_rule", eligibleUnits };
   }
 
-  const merchandiseAed = cardBundlePrices[bundleQuantity];
   const method = paymentMethod ?? null;
   const shippingAed = method === "cod" ? codFee : method === "card" ? 0 : null;
   const totalAed =
-    method === null ? null : getCheckoutTotal(bundleQuantity, method);
+    method === null ? null : getCheckoutTotalForUnits(eligibleUnits, method);
 
   return {
     ok: true,
@@ -86,15 +82,14 @@ export function computeCartPricing(
   };
 }
 
-/** Incremental merchandise cost to reach next bundle tier (card pricing). */
+/** Incremental merchandise cost to reach next unit tier (card pricing). */
 export function upsellMerchandiseDelta(currentUnits: number): number | null {
-  if (currentUnits === 1) return cardBundlePrices[2] - cardBundlePrices[1];
-  if (currentUnits === 2) return cardBundlePrices[3] - cardBundlePrices[2];
-  return null;
+  const current = getMerchandiseAedForUnits(currentUnits);
+  const next = getMerchandiseAedForUnits(currentUnits + 1);
+  if (current === null || next === null) return null;
+  return next - current;
 }
 
 export function targetBundleTotalAfterUpsell(currentUnits: number): number | null {
-  if (currentUnits === 1) return cardBundlePrices[2];
-  if (currentUnits === 2) return cardBundlePrices[3];
-  return null;
+  return getMerchandiseAedForUnits(currentUnits + 1);
 }

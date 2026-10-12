@@ -19,6 +19,7 @@ export async function POST(request: Request) {
 
     let productSlug = String(body.productSlug ?? "").trim();
     let productName = String(body.productName ?? "").trim();
+    let eligibleUnits: number | undefined;
     const quantity = body.quantity;
     const rawCartLines = body.cartLines;
     const paymentMethod = body.paymentMethod;
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
       }
       productSlug = validated.cart.productSlug;
       productName = validated.cart.productName;
+      eligibleUnits = validated.cart.eligibleUnits;
     }
 
     if (!productSlug || !productName) {
@@ -76,6 +78,7 @@ export async function POST(request: Request) {
       productSlug,
       productName,
       quantity,
+      eligibleUnits,
       paymentMethod,
       customerName,
       phone,

@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     const paymentIntentId = String(body.paymentIntentId ?? "").trim();
     let productSlug = String(body.productSlug ?? "").trim();
     let productName = String(body.productName ?? "").trim();
+    let eligibleUnits: number | undefined;
     const quantity = body.quantity;
     const rawCartLines = body.cartLines;
     const customerName = String(body.customerName ?? "").trim();
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
       }
       productSlug = validated.cart.productSlug;
       productName = validated.cart.productName;
+      eligibleUnits = validated.cart.eligibleUnits;
     }
 
     if (!productSlug || !productName || !isBundleQuantity(quantity)) {
@@ -72,6 +74,7 @@ export async function POST(request: Request) {
       productSlug,
       productName,
       quantity,
+      eligibleUnits,
       paymentMethod: "card",
       customerName,
       phone,

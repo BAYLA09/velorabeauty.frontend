@@ -12,7 +12,7 @@ import {
 } from "react";
 import { countEligibleUnits, normalizeCartLines } from "@/lib/cart/cartPricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
-import { MAX_BUNDLE_UNITS } from "@/lib/cart/cartTypes";
+import { MAX_CART_UNITS } from "@/lib/cart/cartTypes";
 import { isEligibleProductSlug } from "@/lib/cart/eligibleCatalog";
 import { readCartFromStorage, writeCartToStorage } from "@/lib/cart/cartStorage";
 
@@ -108,11 +108,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (!isEligibleProductSlug(slug)) return false;
       const addQty = Math.max(1, Math.floor(quantity));
       const current = countEligibleUnits(state.lines);
-      if (current + addQty > MAX_BUNDLE_UNITS) {
+      if (current + addQty > MAX_CART_UNITS) {
         dispatch({
           type: "set_status",
           status: "error",
-          message: "الحد الأقصى 3 منتجات في السلة.",
+          message: "الحد 4 منتجات (3 بعرض + الرابع 199 د.إ).",
         });
         return false;
       }
@@ -134,11 +134,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return;
       }
       const others = countEligibleUnits(state.lines.filter((l) => l.slug !== slug));
-      if (others + qty > MAX_BUNDLE_UNITS) {
+      if (others + qty > MAX_CART_UNITS) {
         dispatch({
           type: "set_status",
           status: "error",
-          message: "الحد الأقصى 3 منتجات في السلة.",
+          message: "الحد 4 منتجات (3 بعرض + الرابع 199 د.إ).",
         });
         return;
       }

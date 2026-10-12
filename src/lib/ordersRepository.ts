@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
-  cardBundlePrices,
-  codFee,
-  getCheckoutTotal,
+  getCheckoutTotalForUnits,
+  getMerchandiseAedForUnits,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
@@ -82,15 +81,25 @@ export function computeOrderAmounts(
   quantity: BundleQuantity,
   paymentMethod: PaymentMethod,
 ): { subtotalAed: number; deliveryFeeAed: number; totalAed: number } {
-  const subtotalAed = cardBundlePrices[quantity];
-  const deliveryFeeAed = paymentMethod === "cod" ? codFee : 0;
-  const totalAed = getCheckoutTotal(quantity, paymentMethod);
+  return computeOrderAmountsForUnits(quantity, paymentMethod);
+}
+
+export function computeOrderAmountsForUnits(
+  eligibleUnits: number,
+  paymentMethod: PaymentMethod,
+): { subtotalAed: number; deliveryFeeAed: number; totalAed: number } {
+  const subtotalAed = getMerchandiseAedForUnits(eligibleUnits) ?? 0;
+  const totalAed = getCheckoutTotalForUnits(eligibleUnits, paymentMethod) ?? subtotalAed;
+  const deliveryFeeAed = totalAed - subtotalAed;
   return { subtotalAed, deliveryFeeAed, totalAed };
 }
 
-export function createOrder(input: CreateOrderInput): OrderRecord {
-  const { subtotalAed, deliveryFeeAed, totalAed } = computeOrderAmounts(
-    input.quantity,
+export function createOrder(
+  input: CreateOrderInput & { eligibleUnits?: number },
+): OrderRecord {
+  const units = input.eligibleUnits ?? input.quantity;
+  const { subtotalAed, deliveryFeeAed, totalAed } = computeOrderAmountsForUnits(
+    units,
     input.paymentMethod,
   );
 

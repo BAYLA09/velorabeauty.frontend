@@ -17,6 +17,11 @@ export async function POST(request: Request) {
     const productSlug = String(body.productSlug ?? "").trim();
     const productName = String(body.productName ?? "").trim();
     const quantity = body.quantity;
+    const rawEligible = body.eligibleUnits;
+    const eligibleUnits =
+      typeof rawEligible === "number" && rawEligible >= 1 && rawEligible <= 4
+        ? rawEligible
+        : undefined;
     const existingPi = String(body.paymentIntentId ?? "").trim();
 
     if (!productSlug || !productName || !isBundleQuantity(quantity)) {
@@ -27,6 +32,7 @@ export async function POST(request: Request) {
       productSlug,
       productName,
       quantity,
+      eligibleUnits,
       paymentIntentId: existingPi || undefined,
     });
 

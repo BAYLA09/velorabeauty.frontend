@@ -19,7 +19,7 @@ import {
 } from "@/components/checkout/checkoutFieldStyles";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
 import { checkoutEmirates } from "@/config/productCheckout";
-import { getCheckoutTotal, type BundleQuantity } from "@/config/pricing";
+import { resolveCheckoutTotalAed, type BundleQuantity } from "@/config/pricing";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
@@ -32,6 +32,7 @@ type Props = {
   productName: string;
   productImageSrc?: string;
   quantity: BundleQuantity;
+  eligibleUnits: number;
   stripeEnabled?: boolean;
   stripeBootstrap?: StripeCardBootstrap | null;
 };
@@ -216,6 +217,7 @@ function StripeCardPaymentAndSubmit({
   productSlug,
   productName,
   quantity,
+  eligibleUnits,
   form,
   cartLines,
   sendCartLines,
@@ -223,6 +225,7 @@ function StripeCardPaymentAndSubmit({
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  eligibleUnits: number;
   form: DeliveryFormState;
   cartLines: ReturnType<typeof parseCheckoutLines>;
   sendCartLines: boolean;
@@ -233,7 +236,7 @@ function StripeCardPaymentAndSubmit({
   const { paymentIntentId, paymentReady } = useCheckoutStripe();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const total = getCheckoutTotal(quantity, "card");
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits);
 
   async function handlePay() {
     setError(null);
@@ -359,6 +362,7 @@ function CheckoutCardStripeForm({
   productName,
   productImageSrc,
   quantity,
+  eligibleUnits,
   backHref,
   stripeBootstrap,
   cartLines,
@@ -415,12 +419,14 @@ function CheckoutCardStripeForm({
               productSlug={productSlug}
               productName={productName}
               quantity={quantity}
+              eligibleUnits={eligibleUnits}
               bootstrap={stripeBootstrap ?? null}
             >
               <StripeCardPaymentAndSubmit
                 productSlug={productSlug}
                 productName={productName}
                 quantity={quantity}
+                eligibleUnits={eligibleUnits}
                 form={formState}
                 cartLines={cartLines}
                 sendCartLines={sendCartLines}
@@ -445,6 +451,7 @@ function CheckoutCardLegacyForm({
   productName,
   productImageSrc,
   quantity,
+  eligibleUnits,
   backHref,
   cartLines,
   sendCartLines,
@@ -462,7 +469,7 @@ function CheckoutCardLegacyForm({
   const [building, setBuilding] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const total = getCheckoutTotal(quantity, "card");
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -589,6 +596,7 @@ export function CheckoutCardConfirmClient({
   productName,
   productImageSrc,
   quantity,
+  eligibleUnits,
   stripeEnabled = false,
   stripeBootstrap = null,
 }: Props) {
@@ -608,6 +616,7 @@ export function CheckoutCardConfirmClient({
         productName={productName}
         productImageSrc={productImageSrc}
         quantity={quantity}
+        eligibleUnits={eligibleUnits}
         backHref={backHref}
         stripeBootstrap={stripeBootstrap}
         cartLines={cartLines}
@@ -622,6 +631,7 @@ export function CheckoutCardConfirmClient({
       productName={productName}
       productImageSrc={productImageSrc}
       quantity={quantity}
+      eligibleUnits={eligibleUnits}
       backHref={backHref}
       cartLines={cartLines}
       sendCartLines={sendCartLines}

@@ -1,5 +1,5 @@
 import type { BundleQuantity } from "@/config/pricing";
-import { getCheckoutTotal } from "@/config/pricing";
+import { getCheckoutTotal, getCheckoutTotalForUnits } from "@/config/pricing";
 import { getSiteUrl } from "@/lib/siteUrl";
 import { getStripe } from "@/lib/stripeServer";
 
@@ -13,10 +13,13 @@ export async function createOrUpdateCardPaymentIntent(input: {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  eligibleUnits?: number;
   paymentIntentId?: string;
 }): Promise<CardPaymentIntentResult> {
-  const { productSlug, productName, quantity, paymentIntentId } = input;
-  const totalAed = getCheckoutTotal(quantity, "card");
+  const { productSlug, productName, quantity, eligibleUnits, paymentIntentId } = input;
+  const units = eligibleUnits ?? quantity;
+  const totalAed =
+    getCheckoutTotalForUnits(units, "card") ?? getCheckoutTotal(quantity, "card");
   const amountFils = totalAed * 100;
   const stripe = getStripe();
 
