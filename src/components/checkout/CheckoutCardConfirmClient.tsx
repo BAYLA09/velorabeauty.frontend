@@ -225,18 +225,10 @@ function CheckoutPaymentLiveLayer({
   children: React.ReactNode;
 }) {
   const { paymentReady } = useCheckoutStripe();
-  if (!serverPainted) {
-    return <div className="relative z-10">{children}</div>;
+  if (serverPainted && !paymentReady) {
+    return null;
   }
-  return (
-    <div
-      className={`absolute inset-0 z-10 bg-white transition-opacity duration-100 ${
-        paymentReady ? "opacity-100" : "pointer-events-none opacity-0"
-      }`}
-    >
-      {children}
-    </div>
-  );
+  return <div className="relative">{children}</div>;
 }
 
 function StripeCardPaymentAndSubmit({
@@ -427,7 +419,7 @@ function CheckoutCardStripeForm({
   return (
     <CheckoutLaraShell
       title="إتمام الطلب"
-      subtitle="بيانات البطاقة تظهر فوراً — أكملي التوصيل ثم أكّدي الدفع"
+      subtitle="أكملي معلومات التوصيل ثم أدخلي بيانات البطاقة"
       backHref={backHref}
     >
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:gap-8">
@@ -436,6 +428,21 @@ function CheckoutCardStripeForm({
           className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="space-y-8">
+            <CheckoutDeliveryFields
+              email={email}
+              setEmail={setEmail}
+              name={name}
+              setName={setName}
+              phone={phone}
+              setPhone={setPhone}
+              emirate={emirate}
+              setEmirate={setEmirate}
+              address={address}
+              setAddress={setAddress}
+              building={building}
+              setBuilding={setBuilding}
+            />
+
             <CheckoutStripeElementsProvider
               productSlug={productSlug}
               productName={productName}
@@ -450,21 +457,6 @@ function CheckoutCardStripeForm({
                   <CheckoutStripePaymentElement serverPainted={serverPaymentInstant} />
                 </CheckoutPaymentLiveLayer>
               </div>
-
-              <CheckoutDeliveryFields
-                email={email}
-                setEmail={setEmail}
-                name={name}
-                setName={setName}
-                phone={phone}
-                setPhone={setPhone}
-                emirate={emirate}
-                setEmirate={setEmirate}
-                address={address}
-                setAddress={setAddress}
-                building={building}
-                setBuilding={setBuilding}
-              />
 
               <StripeCardPaymentAndSubmit
                 productSlug={productSlug}
