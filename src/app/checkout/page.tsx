@@ -20,6 +20,7 @@ export default async function CheckoutMethodHubPage({ searchParams }: PageProps)
       productSlug={ctx.productSlug}
       productName={ctx.productName}
       quantity={ctx.quantity}
+      cartItemsParam={ctx.cartItemsParam}
       initialMethod={parsePreferredMethod(sp.method)}
     />
   );

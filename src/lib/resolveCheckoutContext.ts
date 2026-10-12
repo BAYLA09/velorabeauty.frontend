@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import type { BundleQuantity } from "@/config/pricing";
+import { parseCartItemsParam } from "@/lib/cart/cartSerialization";
+import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import { getProductBySlug } from "@/lib/productCatalog";
 import { parseCheckoutQuantity } from "@/lib/checkoutRoutes";
 
@@ -9,11 +11,26 @@ export type CheckoutContext = {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  cartItemsParam?: string;
 };
 
 export function resolveCheckoutContext(
   searchParams: Record<string, string | string[] | undefined>,
 ): CheckoutContext {
+  const rawItems = searchParams.items;
+  if (typeof rawItems === "string" && rawItems.trim()) {
+    const parsed = parseCartItemsParam(rawItems);
+    if (!parsed) redirect("/#products");
+    const validated = validateCartForCheckout(parsed);
+    if (!validated.ok) redirect("/#products");
+    return {
+      productSlug: validated.cart.productSlug,
+      productName: validated.cart.productName,
+      quantity: validated.cart.bundleQuantity,
+      cartItemsParam: rawItems.trim(),
+    };
+  }
+
   const rawProduct = searchParams.product;
   const rawQty = searchParams.quantity;
 

@@ -20,6 +20,7 @@ type Props = {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  cartItemsParam?: string;
   initialMethod?: PaymentMethod;
 };
 
@@ -81,11 +82,12 @@ export function CheckoutPaymentStepClient({
   productSlug,
   productName,
   quantity,
+  cartItemsParam,
   initialMethod = "card",
 }: Props) {
   const router = useRouter();
   const [method, setMethod] = useState<PaymentMethod>(initialMethod);
-  const query = { product: productSlug, quantity };
+  const query = { product: productSlug, quantity, items: cartItemsParam };
   const total = getCheckoutTotal(quantity, method);
   useStripeWarmup(true);
 
@@ -100,6 +102,7 @@ export function CheckoutPaymentStepClient({
           <CheckoutBackActions
             productSlug={productSlug}
             quantity={quantity}
+            cartItemsParam={cartItemsParam}
             backTo="product"
             className="mb-6"
           />

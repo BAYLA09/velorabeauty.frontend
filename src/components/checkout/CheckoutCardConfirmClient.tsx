@@ -1,7 +1,7 @@
 "use client";
 
 import { useElements, useStripe } from "@stripe/react-stripe-js";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { CheckoutCardPaymentBlock } from "@/components/checkout/CheckoutCardPaymentBlock";
 import { CheckoutFormSection } from "@/components/checkout/CheckoutFormSection";
@@ -22,6 +22,7 @@ import { checkoutEmirates } from "@/config/productCheckout";
 import { getCheckoutTotal, type BundleQuantity } from "@/config/pricing";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
+import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
@@ -216,11 +217,15 @@ function StripeCardPaymentAndSubmit({
   productName,
   quantity,
   form,
+  cartLines,
+  sendCartLines,
 }: {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
   form: DeliveryFormState;
+  cartLines: ReturnType<typeof parseCheckoutLines>;
+  sendCartLines: boolean;
 }) {
   const router = useRouter();
   const stripe = useStripe();
@@ -266,6 +271,7 @@ function StripeCardPaymentAndSubmit({
           email: form.email.trim() || undefined,
           emirate: form.emirate,
           address: fullAddress,
+          ...(sendCartLines ? { cartLines } : {}),
         }),
       });
       const finalizeData = (await finalizeRes.json()) as {
@@ -355,7 +361,13 @@ function CheckoutCardStripeForm({
   quantity,
   backHref,
   stripeBootstrap,
-}: Props & { backHref: string }) {
+  cartLines,
+  sendCartLines,
+}: Props & {
+  backHref: string;
+  cartLines: ReturnType<typeof parseCheckoutLines>;
+  sendCartLines: boolean;
+}) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -410,6 +422,8 @@ function CheckoutCardStripeForm({
                 productName={productName}
                 quantity={quantity}
                 form={formState}
+                cartLines={cartLines}
+                sendCartLines={sendCartLines}
               />
             </CheckoutStripeElementsProvider>
           </div>
@@ -432,7 +446,13 @@ function CheckoutCardLegacyForm({
   productImageSrc,
   quantity,
   backHref,
-}: Props & { backHref: string }) {
+  cartLines,
+  sendCartLines,
+}: Props & {
+  backHref: string;
+  cartLines: ReturnType<typeof parseCheckoutLines>;
+  sendCartLines: boolean;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -475,6 +495,7 @@ function CheckoutCardLegacyForm({
           email: email.trim() || undefined,
           emirate,
           address: fullAddress,
+          ...(sendCartLines ? { cartLines } : {}),
         }),
       });
 
@@ -571,7 +592,14 @@ export function CheckoutCardConfirmClient({
   stripeEnabled = false,
   stripeBootstrap = null,
 }: Props) {
-  const backHref = buildCheckoutPaymentStepPath({ product: productSlug, quantity }, "card");
+  const searchParams = useSearchParams();
+  const cartItemsParam = searchParams.get("items") ?? undefined;
+  const cartLines = parseCheckoutLines(cartItemsParam, productSlug, quantity);
+  const sendCartLines = Boolean(cartItemsParam);
+  const backHref = buildCheckoutPaymentStepPath(
+    { product: productSlug, quantity, items: cartItemsParam },
+    "card",
+  );
 
   if (stripeEnabled) {
     return (
@@ -582,6 +610,8 @@ export function CheckoutCardConfirmClient({
         quantity={quantity}
         backHref={backHref}
         stripeBootstrap={stripeBootstrap}
+        cartLines={cartLines}
+        sendCartLines={sendCartLines}
       />
     );
   }
@@ -593,6 +623,8 @@ export function CheckoutCardConfirmClient({
       productImageSrc={productImageSrc}
       quantity={quantity}
       backHref={backHref}
+      cartLines={cartLines}
+      sendCartLines={sendCartLines}
     />
   );
 }

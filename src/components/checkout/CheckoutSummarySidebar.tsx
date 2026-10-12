@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { CheckoutTrustCard } from "@/components/checkout/CheckoutTrustCard";
+import { encodeCartItemsParam } from "@/lib/cart/cartSerialization";
+import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import {
   cardBundlePrices,
   codFee,
@@ -19,7 +21,12 @@ import {
   buildCheckoutPath,
   buildCheckoutPaymentStepPath,
 } from "@/lib/checkoutRoutes";
-import { getAllProductsWithPages, getProductPath } from "@/lib/productCatalog";
+import {
+  addComplementaryLine,
+  parseCheckoutLines,
+  upsellSlugsNotInCart,
+} from "@/lib/checkoutUpsell";
+import { getAllProductsWithPages, getProductBySlug, getProductPath } from "@/lib/productCatalog";
 
 type Props = {
   productName: string;
@@ -30,7 +37,6 @@ type Props = {
   totalLabel?: string;
   footer?: ReactNode;
   showTrust?: boolean;
-  /** Quantity +/- and upsell links (checkout card/COD). */
   editableBasket?: boolean;
 };
 
@@ -46,18 +52,52 @@ export function CheckoutSummarySidebar({
   editableBasket = false,
 }: Props) {
   const router = useRouter();
-  const subtotal = cardBundlePrices[quantity];
-  const deliveryFee = paymentMethod === "cod" ? codFee : 0;
-  const total = getCheckoutTotal(quantity, paymentMethod);
-
-  const upsellProducts =
-    editableBasket && productSlug
-      ? getAllProductsWithPages().filter((p) => p.slug !== productSlug)
+  const searchParams = useSearchParams();
+  const cartItemsParam = searchParams.get("items") ?? undefined;
+  const lines =
+    productSlug && editableBasket
+      ? parseCheckoutLines(cartItemsParam, productSlug, quantity)
       : [];
+  const mixedCart = Boolean(cartItemsParam?.trim());
+  const validated = mixedCart ? validateCartForCheckout(lines) : null;
+  const displayName = validated?.ok ? validated.cart.productName : productName;
+  const bundleQty = validated?.ok ? validated.cart.bundleQuantity : quantity;
+
+  const subtotal = cardBundlePrices[bundleQty];
+  const deliveryFee = paymentMethod === "cod" ? codFee : 0;
+  const total = getCheckoutTotal(bundleQty, paymentMethod);
+
+  const upsellSlugs =
+    editableBasket && productSlug ? upsellSlugsNotInCart(lines) : [];
+  const upsellProducts = upsellSlugs
+    .map((slug) => getAllProductsWithPages().find((p) => p.slug === slug))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+
+  const canAddMore = lines.reduce((s, l) => s + l.quantity, 0) < 3;
+
+  function checkoutQueryFromLines(nextLines: typeof lines, bundleQuantity: BundleQuantity) {
+    const v = validateCartForCheckout(nextLines);
+    if (!v.ok || !productSlug) return null;
+    const items = encodeCartItemsParam(nextLines);
+    return {
+      product: v.cart.productSlug,
+      quantity: bundleQuantity,
+      items,
+    };
+  }
 
   function setQuantity(next: BundleQuantity) {
-    if (!productSlug || next === quantity) return;
+    if (!productSlug || next === quantity || mixedCart) return;
     router.push(buildCheckoutPath(paymentMethod, { product: productSlug, quantity: next }));
+  }
+
+  function addUpsell(addSlug: string) {
+    if (!productSlug) return;
+    const result = addComplementaryLine(lines, addSlug);
+    if (!result.ok) return;
+    const query = checkoutQueryFromLines(result.lines, result.bundleQuantity);
+    if (!query) return;
+    router.push(buildCheckoutPath(paymentMethod, query));
   }
 
   return (
@@ -82,13 +122,25 @@ export function CheckoutSummarySidebar({
             )}
           </div>
           <div className="min-w-0 flex-1 text-right">
-            <p className="text-sm font-bold leading-snug text-neutral-900">{productName}</p>
-            <p className="mt-1 text-xs text-neutral-500">{bundleOfferLabel(quantity)}</p>
+            <p className="text-sm font-bold leading-snug text-neutral-900">{displayName}</p>
+            <p className="mt-1 text-xs text-neutral-500">{bundleOfferLabel(bundleQty)}</p>
+            {mixedCart && lines.length > 1 ? (
+              <ul className="mt-1 space-y-0.5 text-[10px] text-neutral-500">
+                {lines.map((l) => {
+                  const p = getProductBySlug(l.slug);
+                  return (
+                    <li key={l.slug}>
+                      {p?.name ?? l.slug} ×{l.quantity}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
             <p className="mt-2 text-sm font-extrabold tabular-nums text-neutral-900">
               {formatPrice(subtotal)}
             </p>
           </div>
-          {editableBasket && productSlug ? (
+          {editableBasket && productSlug && !mixedCart ? (
             <div className="flex shrink-0 flex-col items-center gap-1">
               <span className="text-[10px] font-bold text-neutral-400">الكمية</span>
               <div className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-neutral-50 p-0.5">
@@ -118,7 +170,7 @@ export function CheckoutSummarySidebar({
           ) : (
             <div className="flex shrink-0 flex-col items-center justify-center rounded-md border border-neutral-200 px-2 py-1">
               <span className="text-[10px] font-bold text-neutral-400">الكمية</span>
-              <span className="text-sm font-extrabold text-neutral-900">{quantity}</span>
+              <span className="text-sm font-extrabold text-neutral-900">{bundleQty}</span>
             </div>
           )}
         </div>
@@ -154,7 +206,10 @@ export function CheckoutSummarySidebar({
         {editableBasket && productSlug ? (
           <nav className="mt-4 space-y-2 border-t border-neutral-100 pt-4 text-sm" aria-label="تعديل الطلب">
             <Link
-              href={buildCheckoutPaymentStepPath({ product: productSlug, quantity })}
+              href={buildCheckoutPaymentStepPath(
+                { product: productSlug, quantity: bundleQty, items: cartItemsParam },
+                paymentMethod,
+              )}
               className="block font-semibold text-[#134E3A] underline-offset-2 hover:underline"
             >
               ← تغيير طريقة الدفع (بطاقة / COD)
@@ -168,15 +223,20 @@ export function CheckoutSummarySidebar({
           </nav>
         ) : null}
 
-        {upsellProducts.length > 0 ? (
+        {upsellProducts.length > 0 && canAddMore ? (
           <div className="mt-4 border-t border-neutral-100 pt-4">
             <p className="text-xs font-extrabold text-neutral-800">أكملي روتين VELORA</p>
+            <p className="mt-1 text-[10px] leading-relaxed text-neutral-500">
+              تبقين على {paymentMethod === "card" ? "الدفع بالبطاقة" : "الدفع عند الاستلام"} — بلا
+              إعادة الاختيار.
+            </p>
             <ul className="mt-2 space-y-2">
               {upsellProducts.map((p) => (
                 <li key={p.slug}>
-                  <Link
-                    href={buildCheckoutPaymentStepPath({ product: p.slug, quantity: 2 })}
-                    className="flex items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/80 p-2 transition hover:border-[#134E3A]/30 hover:bg-white"
+                  <button
+                    type="button"
+                    onClick={() => addUpsell(p.slug)}
+                    className="flex w-full items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/80 p-2 text-right transition hover:border-[#134E3A]/30 hover:bg-white"
                   >
                     <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-white">
                       {p.image.src ? (
@@ -189,11 +249,11 @@ export function CheckoutSummarySidebar({
                         />
                       ) : null}
                     </div>
-                    <span className="min-w-0 flex-1 text-right text-[11px] font-bold leading-snug text-neutral-800">
+                    <span className="min-w-0 flex-1 text-[11px] font-bold leading-snug text-neutral-800">
                       {p.name}
                     </span>
                     <span className="shrink-0 text-[10px] font-extrabold text-[#134E3A]">+ أضيفي</span>
-                  </Link>
+                  </button>
                 </li>
               ))}
             </ul>

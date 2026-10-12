@@ -3,6 +3,7 @@ import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
 export type CheckoutQuery = {
   product: string;
   quantity: BundleQuantity;
+  items?: string;
 };
 
 export function parseCheckoutQuantity(raw: string | null | undefined): BundleQuantity | null {
@@ -10,14 +11,12 @@ export function parseCheckoutQuantity(raw: string | null | undefined): BundleQua
   return null;
 }
 
-export function buildCheckoutPath(
-  method: PaymentMethod,
-  { product, quantity }: CheckoutQuery,
-): string {
+export function buildCheckoutPath(method: PaymentMethod, query: CheckoutQuery): string {
   const params = new URLSearchParams({
-    product,
-    quantity: String(quantity),
+    product: query.product,
+    quantity: String(query.quantity),
   });
+  if (query.items) params.set("items", query.items);
   return `/checkout/${method}?${params.toString()}`;
 }
 
@@ -30,6 +29,7 @@ export function buildCheckoutPaymentStepPath(
     product: query.product,
     quantity: String(query.quantity),
   });
+  if (query.items) params.set("items", query.items);
   if (preferredMethod) {
     params.set("method", preferredMethod);
   }
