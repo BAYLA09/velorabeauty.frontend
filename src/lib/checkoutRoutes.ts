@@ -35,3 +35,9 @@ export function buildCheckoutPaymentStepPath(
   }
   return `/checkout?${params.toString()}`;
 }
+
+export function buildCartCheckoutPath(itemsParam: string, preferredMethod?: PaymentMethod): string {
+  const params = new URLSearchParams({ items: itemsParam });
+  if (preferredMethod) params.set("method", preferredMethod);
+  return `/checkout?${params.toString()}`;
+}

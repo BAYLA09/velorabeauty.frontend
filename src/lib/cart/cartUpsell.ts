@@ -36,15 +36,15 @@ export function getUpsellOfferCopy(eligibleUnits: number): {
   if (targetTotal === null || delta === null) return null;
   if (eligibleUnits === 1) {
     return {
-      title: "Passez à 249 AED",
-      body: `Ajoutez un produit éligible — votre total produits passe à ${targetTotal} AED (au lieu de 398 AED à l’unité).`,
+      title: "انتقلي إلى 249 د.إ",
+      body: `أضيفي منتجاً ثانياً — المجموع ${targetTotal} د.إ (بدلاً من 398 د.إ بالتجزئة).`,
       targetTotal,
       delta,
     };
   }
   return {
-    title: "Complétez le trio à 339 AED",
-    body: `Ajoutez un troisième produit éligible — total produits ${targetTotal} AED pour votre routine complète.`,
+    title: "أكملي الثلاثة بـ 339 د.إ",
+    body: `أضيفي منتجاً ثالثاً — المجموع ${targetTotal} د.إ لروتينك الكامل.`,
     targetTotal,
     delta,
   };

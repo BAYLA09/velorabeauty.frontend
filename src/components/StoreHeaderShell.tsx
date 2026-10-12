@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useCart } from "@/context/CartProvider";
 import { VeloraLogo } from "@/components/ui/VeloraLogo";
 
 export type StoreNavLink = { label: string; href: string };
@@ -15,7 +16,9 @@ type Props = {
 
 export function StoreHeaderShell({ theme, links, overlay = false }: Props) {
   const [open, setOpen] = useState(false);
+  const cart = useCart();
   const isDark = theme === "dark";
+  const cartCount = cart.eligibleUnits;
 
   const headerClass = overlay && isDark
     ? "border-white/10 bg-velora-burgundy/40 backdrop-blur-md"
@@ -59,14 +62,28 @@ export function StoreHeaderShell({ theme, links, overlay = false }: Props) {
 
         {/* inline-end = يسار — السلة */}
         <div className="relative z-10 flex flex-1 items-center justify-end gap-0.5">
-          <Link href="/#products" className={cartClass} aria-label="السلة">
+          <button
+            type="button"
+            className={`relative ${cartClass}`}
+            aria-label={`السلة، ${cartCount} منتج`}
+            onClick={cart.openCart}
+          >
             <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M6 7h15l-1.5 9h-12z" />
               <path d="M6 7L5 4H2" />
               <circle cx="9" cy="19" r="1" fill="currentColor" />
               <circle cx="17" cy="19" r="1" fill="currentColor" />
             </svg>
-          </Link>
+            {cartCount > 0 ? (
+              <span
+                className={`absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold ${
+                  isDark ? "bg-[#D6AD65] text-[#291A1C]" : "bg-[#650D20] text-white"
+                }`}
+              >
+                {cartCount}
+              </span>
+            ) : null}
+          </button>
           <button type="button" className={menuClass} aria-label="القائمة" onClick={() => setOpen((v) => !v)}>
             <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M4 12h16M4 18h16M4 6h16" />
@@ -91,13 +108,16 @@ export function StoreHeaderShell({ theme, links, overlay = false }: Props) {
               {item.label}
             </Link>
           ))}
-          <Link
-            href="/#products"
-            className={`block py-2.5 font-bold ${isDark ? "text-velora-champagne" : "text-velora-burgundy-dark"}`}
-            onClick={() => setOpen(false)}
+          <button
+            type="button"
+            className={`block w-full py-2.5 text-right font-bold ${isDark ? "text-velora-champagne" : "text-velora-burgundy-dark"}`}
+            onClick={() => {
+              setOpen(false);
+              cart.openCart();
+            }}
           >
-            المنتجات
-          </Link>
+            السلة ({cartCount})
+          </button>
         </nav>
       )}
     </header>

@@ -8,6 +8,7 @@ import {
   cardOfferPrice,
   ProductPaymentMethodsInfo,
 } from "@/components/product/ProductPaymentMethodsInfo";
+import { useCart } from "@/context/CartProvider";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import {
   codFee,
@@ -175,6 +176,7 @@ export function ProductPurchasePanel({
   funnelOffers = false,
 }: Props) {
   const router = useRouter();
+  const { addItem, openCart } = useCart();
   const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(2);
   const quantity = quantityProp ?? quantityInternal;
 
@@ -199,6 +201,10 @@ export function ProductPurchasePanel({
 
   function goToCheckout() {
     router.push(buildCheckoutPaymentStepPath({ product: productSlug, quantity }));
+  }
+
+  function addSelectionToCart() {
+    if (addItem(productSlug, quantity)) openCart();
   }
 
   return (
@@ -298,6 +304,14 @@ export function ProductPurchasePanel({
           >
             ←
           </span>
+        </button>
+        <button
+          type="button"
+          onClick={addSelectionToCart}
+          className="mt-3 w-full rounded-2xl border-2 border-velora-burgundy/25 bg-white py-3 text-sm font-bold text-velora-burgundy transition hover:border-velora-burgundy/50 hover:bg-velora-cream-dark/50"
+        >
+          أضيفي للسلة — أكملي روتينك ({quantity}{" "}
+          {form === "serum" ? "عبوة" : "علبة"})
         </button>
         {funnelOffers && (
           <p className="mt-2.5 text-center text-[11px] font-semibold leading-relaxed text-velora-burgundy/60">
