@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/context/CartProvider";
+import { ShoppingBagIcon } from "@/components/ui/ShoppingBagIcon";
 import { VeloraLogo } from "@/components/ui/VeloraLogo";
 
 export type StoreNavLink = { label: string; href: string };
@@ -68,12 +69,7 @@ export function StoreHeaderShell({ theme, links, overlay = false }: Props) {
             aria-label={`السلة، ${cartCount} منتج`}
             onClick={cart.openCart}
           >
-            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M6 7h15l-1.5 9h-12z" />
-              <path d="M6 7L5 4H2" />
-              <circle cx="9" cy="19" r="1" fill="currentColor" />
-              <circle cx="17" cy="19" r="1" fill="currentColor" />
-            </svg>
+            <ShoppingBagIcon className="h-6 w-6" />
             {cartCount > 0 ? (
               <span
                 className={`absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold ${
