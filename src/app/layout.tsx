@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { El_Messiri, Tajawal } from "next/font/google";
+import { CartRoot } from "@/components/cart/CartRoot";
 import { brand } from "@/config/brand";
 import "./globals.css";
 
@@ -46,7 +47,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className={`${display.variable} ${sansArabic.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <CartRoot>{children}</CartRoot>
+      </body>
     </html>
   );
 }
