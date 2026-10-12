@@ -28,6 +28,24 @@ export function parseCheckoutLines(
   return linesFromSingleProductCheckout(productSlug, quantity);
 }
 
+export function setCheckoutLineQuantity(
+  current: CartLine[],
+  slug: string,
+  nextQuantity: number,
+): { ok: true; lines: CartLine[]; bundleQuantity: BundleQuantity } | { ok: false } {
+  const nextLines =
+    nextQuantity < 1
+      ? normalizeCartLines(current.filter((l) => l.slug !== slug))
+      : normalizeCartLines(
+          current.map((l) => (l.slug === slug ? { ...l, quantity: nextQuantity } : l)),
+        );
+  if (countEligibleUnits(nextLines) === 0) return { ok: false };
+  if (countEligibleUnits(nextLines) > MAX_BUNDLE_UNITS) return { ok: false };
+  const validated = validateCartForCheckout(nextLines);
+  if (!validated.ok) return { ok: false };
+  return { ok: true, lines: nextLines, bundleQuantity: validated.cart.bundleQuantity };
+}
+
 export function addComplementaryLine(
   current: CartLine[],
   addSlug: string,

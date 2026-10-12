@@ -28,8 +28,11 @@ import {
 import {
   addComplementaryLine,
   parseCheckoutLines,
+  setCheckoutLineQuantity,
   upsellSlugsNotInCart,
 } from "@/lib/checkoutUpsell";
+import { countEligibleUnits } from "@/lib/cart/cartPricing";
+import { MAX_BUNDLE_UNITS } from "@/lib/cart/cartTypes";
 import { getAllProductsWithPages, getProductBySlug, getProductPath } from "@/lib/productCatalog";
 
 type Props = {
@@ -91,10 +94,31 @@ export function CheckoutSummarySidebar({
     };
   }
 
-  function setQuantity(next: BundleQuantity) {
+  function setBundleQuantity(next: BundleQuantity) {
     if (!productSlug || next === quantity || mixedCart) return;
     router.push(buildCheckoutPath(paymentMethod, { product: productSlug, quantity: next }));
   }
+
+  function adjustLineQuantity(slug: string, delta: number) {
+    if (!productSlug || !editableBasket) return;
+    const line = lines.find((l) => l.slug === slug);
+    if (!line) return;
+    const nextQty = line.quantity + delta;
+
+    if (singleLineBasket && !mixedCart) {
+      if (nextQty < 1 || nextQty > MAX_BUNDLE_UNITS) return;
+      setBundleQuantity(nextQty as BundleQuantity);
+      return;
+    }
+
+    const result = setCheckoutLineQuantity(lines, slug, nextQty);
+    if (!result.ok) return;
+    const query = checkoutQueryFromLines(result.lines, result.bundleQuantity);
+    if (!query) return;
+    router.push(buildCheckoutPath(paymentMethod, query));
+  }
+
+  const totalUnits = countEligibleUnits(lines);
 
   function addUpsell(addSlug: string) {
     if (!productSlug) return;
@@ -152,16 +176,19 @@ export function CheckoutSummarySidebar({
                       {formatPrice(lineTotal)}
                     </p>
                   </div>
-                  {editableBasket && singleLineBasket ? (
+                  {editableBasket ? (
                     <div className="flex shrink-0 flex-col items-center gap-1">
                       <span className="text-[10px] font-bold text-neutral-400">الكمية</span>
                       <div className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-neutral-50 p-0.5">
                         <button
                           type="button"
-                          aria-label="نقصان الكمية"
-                          disabled={quantity <= 1}
-                          onClick={() => setQuantity((quantity - 1) as BundleQuantity)}
-                          className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 disabled:opacity-30"
+                          aria-label={`نقصان — ${product?.name ?? line.slug}`}
+                          disabled={
+                            line.quantity <= 1 &&
+                            (lines.length <= 1 || totalUnits <= 1)
+                          }
+                          onClick={() => adjustLineQuantity(line.slug, -1)}
+                          className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 transition hover:bg-white disabled:opacity-30"
                         >
                           −
                         </button>
@@ -170,10 +197,10 @@ export function CheckoutSummarySidebar({
                         </span>
                         <button
                           type="button"
-                          aria-label="زيادة الكمية"
-                          disabled={quantity >= 3}
-                          onClick={() => setQuantity((quantity + 1) as BundleQuantity)}
-                          className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 disabled:opacity-30"
+                          aria-label={`زيادة — ${product?.name ?? line.slug}`}
+                          disabled={totalUnits >= MAX_BUNDLE_UNITS}
+                          onClick={() => adjustLineQuantity(line.slug, 1)}
+                          className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 transition hover:bg-white disabled:opacity-30"
                         >
                           +
                         </button>
