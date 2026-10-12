@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { BundleQuantity } from "@/config/pricing";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { getProductPath } from "@/lib/productCatalog";
+import { MIXED_CART_PRODUCT_SLUG } from "@/lib/cart/cartTypes";
 import { HOMEPAGE_PRODUCT_SLUG } from "@/lib/resolveCheckoutContext";
 
 type BackTarget = "product" | "payment";
@@ -11,12 +12,16 @@ type BackTarget = "product" | "payment";
 type Props = {
   productSlug: string;
   quantity: BundleQuantity;
+  cartItemsParam?: string;
   /** Step 3 → payment picker · Step 2 → product page */
   backTo: BackTarget;
   className?: string;
 };
 
 function productReturnHref(productSlug: string): string {
+  if (productSlug === MIXED_CART_PRODUCT_SLUG) {
+    return "/#products";
+  }
   if (productSlug === HOMEPAGE_PRODUCT_SLUG) {
     return "/#products";
   }
@@ -43,12 +48,14 @@ function ChevronBackIcon({ className }: { className?: string }) {
 export function CheckoutBackActions({
   productSlug,
   quantity,
+  cartItemsParam,
   backTo,
   className = "",
 }: Props) {
+  const query = { product: productSlug, quantity, items: cartItemsParam };
   const href =
     backTo === "payment"
-      ? buildCheckoutPaymentStepPath({ product: productSlug, quantity })
+      ? buildCheckoutPaymentStepPath(query)
       : productReturnHref(productSlug);
 
   const label =

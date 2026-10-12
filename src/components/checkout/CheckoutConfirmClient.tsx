@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
 import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
@@ -17,6 +17,7 @@ import {
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
+import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 
@@ -35,6 +36,9 @@ export function CheckoutConfirmClient({
   productImageSrc,
   quantity,
 }: Props) {
+  const searchParams = useSearchParams();
+  const cartItemsParam = searchParams.get("items") ?? undefined;
+  const cartLines = parseCheckoutLines(cartItemsParam, productSlug, quantity);
   const router = useRouter();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -74,6 +78,7 @@ export function CheckoutConfirmClient({
           phone: trimmedPhone,
           emirate: "دبي",
           address: isCod ? trimmedAddress : "يُؤكَّد بعد التواصل",
+          ...(cartItemsParam ? { cartLines } : {}),
         }),
       });
 
