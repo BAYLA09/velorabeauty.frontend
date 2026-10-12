@@ -11,6 +11,7 @@ export type CheckoutContext = {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  eligibleUnits: number;
   cartItemsParam?: string;
 };
 
@@ -27,6 +28,7 @@ export function resolveCheckoutContext(
       productSlug: validated.cart.productSlug,
       productName: validated.cart.productName,
       quantity: validated.cart.bundleQuantity,
+      eligibleUnits: validated.cart.eligibleUnits,
       cartItemsParam: rawItems.trim(),
     };
   }
@@ -47,5 +49,5 @@ export function resolveCheckoutContext(
     catalog?.name ??
     (productSlug === HOMEPAGE_PRODUCT_SLUG ? "عرض فيلورا بيوتي" : "طلب فيلورا بيوتي");
 
-  return { productSlug, productName, quantity };
+  return { productSlug, productName, quantity, eligibleUnits: quantity };
 }

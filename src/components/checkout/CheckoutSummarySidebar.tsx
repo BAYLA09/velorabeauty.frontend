@@ -14,6 +14,8 @@ import {
   currencyLabel,
   formatPrice,
   getCheckoutTotal,
+  getCheckoutTotalForUnits,
+  getMerchandiseAedForUnits,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
@@ -32,7 +34,7 @@ import {
   setCheckoutLineQuantity,
 } from "@/lib/checkoutUpsell";
 import { countEligibleUnits } from "@/lib/cart/cartPricing";
-import { MAX_BUNDLE_UNITS } from "@/lib/cart/cartTypes";
+import { MAX_BUNDLE_UNITS, MAX_CART_UNITS } from "@/lib/cart/cartTypes";
 import { getProductBySlug, getProductPath } from "@/lib/productCatalog";
 
 type Props = {
@@ -69,11 +71,20 @@ export function CheckoutSummarySidebar({
   const validated = mixedCart ? validateCartForCheckout(lines) : null;
   const bundleQty = validated?.ok ? validated.cart.bundleQuantity : quantity;
 
-  const subtotal = cardBundlePrices[bundleQty];
+  const totalUnits = countEligibleUnits(lines);
+  const subtotal =
+    validated?.ok && mixedCart
+      ? validated.cart.merchandiseAed
+      : mixedCart && totalUnits > 0
+        ? getMerchandiseAedForUnits(totalUnits) ?? cardBundlePrices[bundleQty]
+        : cardBundlePrices[bundleQty];
   const linePrices = allocateCartLinePrices(lines, subtotal);
   const singleLineBasket = lines.length === 1 && !mixedCart;
   const deliveryFee = paymentMethod === "cod" ? codFee : 0;
-  const total = getCheckoutTotal(bundleQty, paymentMethod);
+  const total =
+    totalUnits > 0
+      ? (getCheckoutTotalForUnits(totalUnits, paymentMethod) ?? getCheckoutTotal(bundleQty, paymentMethod))
+      : getCheckoutTotal(bundleQty, paymentMethod);
 
   function checkoutQueryFromLines(nextLines: typeof lines, bundleQuantity: BundleQuantity) {
     const v = validateCartForCheckout(nextLines);
@@ -98,7 +109,7 @@ export function CheckoutSummarySidebar({
     const nextQty = line.quantity + delta;
 
     if (singleLineBasket && !mixedCart) {
-      if (nextQty < 1 || nextQty > MAX_BUNDLE_UNITS) return;
+      if (nextQty < 1 || nextQty > MAX_CART_UNITS) return;
       setBundleQuantity(nextQty as BundleQuantity);
       return;
     }
@@ -109,8 +120,6 @@ export function CheckoutSummarySidebar({
     if (!query) return;
     router.push(buildCheckoutPath(paymentMethod, query));
   }
-
-  const totalUnits = countEligibleUnits(lines);
 
   function addUpsell(addSlug: string) {
     if (!productSlug) return;
@@ -190,7 +199,7 @@ export function CheckoutSummarySidebar({
                         <button
                           type="button"
                           aria-label={`زيادة — ${product?.name ?? line.slug}`}
-                          disabled={totalUnits >= MAX_BUNDLE_UNITS}
+                          disabled={totalUnits >= MAX_CART_UNITS}
                           onClick={() => adjustLineQuantity(line.slug, 1)}
                           className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 transition hover:bg-white disabled:opacity-30"
                         >

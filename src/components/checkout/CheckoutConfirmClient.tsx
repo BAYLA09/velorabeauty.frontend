@@ -13,7 +13,7 @@ import {
   codFee,
   currencyLabel,
   formatPrice,
-  getCheckoutTotal,
+  resolveCheckoutTotalAed,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
@@ -27,6 +27,7 @@ type Props = {
   productName: string;
   productImageSrc?: string;
   quantity: BundleQuantity;
+  eligibleUnits: number;
 };
 
 export function CheckoutConfirmClient({
@@ -35,6 +36,7 @@ export function CheckoutConfirmClient({
   productName,
   productImageSrc,
   quantity,
+  eligibleUnits,
 }: Props) {
   const searchParams = useSearchParams();
   const cartItemsParam = searchParams.get("items") ?? undefined;
@@ -46,7 +48,7 @@ export function CheckoutConfirmClient({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const total = getCheckoutTotal(quantity, paymentMethod);
+  const total = resolveCheckoutTotalAed(quantity, paymentMethod, eligibleUnits);
   const isCod = paymentMethod === "cod";
 
   async function handleSubmit(e: FormEvent) {

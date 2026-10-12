@@ -19,6 +19,7 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
         productSlug: ctx.productSlug,
         productName: ctx.productName,
         quantity: ctx.quantity,
+        eligibleUnits: ctx.eligibleUnits,
       })
     : null;
 
@@ -28,6 +29,7 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
       productName={ctx.productName}
       productImageSrc={productImageSrc}
       quantity={ctx.quantity}
+      eligibleUnits={ctx.eligibleUnits}
       stripeEnabled={stripeEnabled}
       stripeBootstrap={stripeBootstrap}
     />

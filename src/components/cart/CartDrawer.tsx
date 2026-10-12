@@ -203,6 +203,11 @@ export function CartDrawer() {
               {t.bundleComplete(formatPrice(339))}
             </p>
           ) : null}
+          {lines.length > 0 && eligibleUnits === 4 ? (
+            <p className="mt-6 rounded-2xl border border-emerald-200/80 bg-emerald-50/90 px-4 py-3 text-sm leading-relaxed text-emerald-950">
+              {t.cartFull(formatPrice(pricing.ok ? pricing.merchandiseAed : 538))}
+            </p>
+          ) : null}
 
           {lines.length > 0 ? (
             <CartUpsellSection

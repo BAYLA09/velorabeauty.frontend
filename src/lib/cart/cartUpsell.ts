@@ -45,7 +45,7 @@ export function getBundleSavingsVsRetail(
 
 /** Savings vs buying the next tier as separate singles (Lara-style «وفّري»). */
 export function getNextTierSavings(eligibleUnits: number): number | null {
-  if (eligibleUnits >= 3) return null;
+  if (eligibleUnits >= 4) return null;
   const nextUnits = eligibleUnits + 1;
   const target = targetBundleTotalAfterUpsell(eligibleUnits);
   if (target === null) return null;
@@ -59,7 +59,19 @@ export function getUpsellOfferCopy(eligibleUnits: number): {
   targetTotal: number | null;
   delta: number | null;
 } | null {
-  if (eligibleUnits >= 3) return null;
+  if (eligibleUnits >= 4) return null;
+  if (eligibleUnits === 3) {
+    const targetTotal = targetBundleTotalAfterUpsell(3);
+    const delta = upsellMerchandiseDelta(3);
+    if (targetTotal === null || delta === null) return null;
+    const retailFour = singleProductPrice * 4;
+    return {
+      title: `منتج رابع — +${delta} د.إ على عرض 339`,
+      body: `أضيفي خطوة إضافية — المجموع ${targetTotal} د.إ (بدل ${retailFour} د.إ بالتجزئة).`,
+      targetTotal,
+      delta,
+    };
+  }
   if (eligibleUnits === 0) {
     return {
       title: "كمّلي الروتين — عرض لمرة واحدة",
@@ -90,5 +102,5 @@ export function getUpsellOfferCopy(eligibleUnits: number): {
 }
 
 export function canAddMoreUnits(lines: CartLine[]): boolean {
-  return countEligibleUnits(lines) < 3;
+  return countEligibleUnits(lines) < 4;
 }

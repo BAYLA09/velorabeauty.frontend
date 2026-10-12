@@ -18,6 +18,7 @@ export default async function CodCheckoutPage({ searchParams }: PageProps) {
       productName={ctx.productName}
       productImageSrc={productImageSrc}
       quantity={ctx.quantity}
+      eligibleUnits={ctx.eligibleUnits}
     />
   );
 }

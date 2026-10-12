@@ -9,7 +9,7 @@ import {
   codFee,
   currencyLabel,
   formatPrice,
-  getCheckoutTotal,
+  resolveCheckoutTotalAed,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
@@ -20,6 +20,7 @@ type Props = {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  eligibleUnits: number;
   cartItemsParam?: string;
   initialMethod?: PaymentMethod;
 };
@@ -82,13 +83,14 @@ export function CheckoutPaymentStepClient({
   productSlug,
   productName,
   quantity,
+  eligibleUnits,
   cartItemsParam,
   initialMethod = "card",
 }: Props) {
   const router = useRouter();
   const [method, setMethod] = useState<PaymentMethod>(initialMethod);
   const query = { product: productSlug, quantity, items: cartItemsParam };
-  const total = getCheckoutTotal(quantity, method);
+  const total = resolveCheckoutTotalAed(quantity, method, eligibleUnits);
   useStripeWarmup(true);
 
   function continueCheckout() {

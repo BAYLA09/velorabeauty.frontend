@@ -16,6 +16,7 @@ export async function bootstrapStripeCardCheckout(input: {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  eligibleUnits?: number;
 }): Promise<StripeCardBootstrap | null> {
   if (!isStripeCardCheckoutEnabled()) return null;
 

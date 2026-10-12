@@ -2,7 +2,8 @@
 export const cartDrawerCopy = {
   title: "سلتك",
   empty: "سلتك فارغة",
-  pricingHint: "منتج 199 د.إ · منتجان 249 د.إ · 3 منتجات 339 د.إ (مختلط).",
+  pricingHint:
+    "منتج 199 د.إ · منتجان 249 د.إ · 3 منتجات 339 د.إ · الرابع +199 د.إ (مختلط).",
   add: "أضيفي",
   remove: "حذف",
   upsellSection: "أكملي روتين VELORA",
@@ -11,14 +12,15 @@ export const cartDrawerCopy = {
   saveAmount: (aed: number) => `وفّري ${aed} د.إ`,
   addForDelta: (price: string) => `زيادة بـ ${price} فقط للانتقال للعرض التالي`,
   bundleComplete: (price: string) =>
-    `عرض 3 منتجات مكتمل — ${price} · جاهزة للدفع.`,
+    `عرض 3 منتجات مكتمل — ${price} · أضيفي رابعاً بـ 199 د.إ أو أكملي الدفع.`,
+  cartFull: (price: string) => `4 منتجات — ${price} · جاهزة للدفع.`,
   subtotal: (n: number) => `مجموع المنتجات (${n})`,
   shipping: "التوصيل",
   shippingHint: (card: string, cod: string) =>
     `يُحدَّد عند الدفع — ${card} بالبطاقة · ${cod} COD`,
   bundleNote: "السعر حسب عدد المنتجات في السلة (يمكن خلط الشعر، البشرة، والعين).",
   checkout: "إتمام الطلب",
-  maxProducts: "الحد 3 منتجات — احذفي منتجاً للمتابعة.",
+  maxProducts: "الحد 4 منتجات — احذفي منتجاً للمتابعة.",
   invalid: "سلة غير صالحة.",
   close: "إغلاق السلة",
   closeBtn: "إغلاق",

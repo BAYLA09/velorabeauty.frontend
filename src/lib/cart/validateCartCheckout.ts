@@ -5,6 +5,7 @@ import { buildMixedCartSummary } from "@/lib/cart/cartCheckoutMeta";
 
 export type ValidatedCartCheckout = {
   lines: CartLine[];
+  eligibleUnits: number;
   bundleQuantity: BundleQuantity;
   productSlug: string;
   productName: string;
@@ -20,7 +21,7 @@ export function validateCartForCheckout(
     if (pricing.reason === "too_many_units") {
       return {
         ok: false,
-        error: "Maximum 3 produits éligibles par commande. Ajustez votre panier.",
+        error: "الحد 4 منتجات — 3 بعرض الباقة + الرابع بـ 199 د.إ.",
       };
     }
     if (pricing.reason === "empty") {
@@ -33,6 +34,7 @@ export function validateCartForCheckout(
     ok: true,
     cart: {
       lines: normalized,
+      eligibleUnits: pricing.eligibleUnits,
       bundleQuantity: pricing.bundleQuantity,
       productSlug: meta.productSlug,
       productName: meta.productName,

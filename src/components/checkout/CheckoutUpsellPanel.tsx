@@ -33,17 +33,18 @@ export function CheckoutUpsellPanel({
   const nextTierSavings = getNextTierSavings(eligibleUnits);
   const recommendations = getUpsellRecommendations(lines);
 
-  if (eligibleUnits >= 3) {
+  if (eligibleUnits >= 4) {
     return (
       <div className="mt-4 overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-sm">
         <p className="text-center text-[11px] font-bold uppercase tracking-wide text-emerald-800/80">
-          أقوى عرض — روتينك مكتمل
+          روتينك + منتج إضافي — أقصى قيمة
         </p>
         <p className="mt-1 text-center text-2xl font-black tabular-nums text-emerald-800">
           وفّرتِ {savedSoFar} د.إ
         </p>
         <p className="mt-1 text-center text-xs leading-relaxed text-emerald-900/75">
-          بدل {formatPrice(singleProductPrice * 3)} بالتجزئة — دفعتي {formatPrice(merchandiseAed)} فقط.
+          بدل {formatPrice(singleProductPrice * eligibleUnits)} بالتجزئة — دفعتي{" "}
+          {formatPrice(merchandiseAed)}.
         </p>
       </div>
     );

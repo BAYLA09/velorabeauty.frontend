@@ -38,6 +38,7 @@ type Props = {
   productSlug: string;
   productName: string;
   quantity: BundleQuantity;
+  eligibleUnits?: number;
   bootstrap: StripeCardBootstrap | null;
   children: ReactNode;
 };
@@ -46,6 +47,7 @@ export function CheckoutStripeElementsProvider({
   productSlug,
   productName,
   quantity,
+  eligibleUnits,
   bootstrap,
   children,
 }: Props) {
@@ -86,6 +88,7 @@ export function CheckoutStripeElementsProvider({
               productSlug,
               productName,
               quantity,
+              eligibleUnits,
               paymentIntentId: piRef.current || undefined,
             }),
           }),
@@ -128,7 +131,7 @@ export function CheckoutStripeElementsProvider({
     return () => {
       cancelled = true;
     };
-  }, [bootstrap, productSlug, productName, quantity]);
+  }, [bootstrap, productSlug, productName, quantity, eligibleUnits]);
 
   const ctx = useMemo<StripeCtx>(
     () => ({
