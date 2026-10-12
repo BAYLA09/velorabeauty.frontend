@@ -1,0 +1,152 @@
+"use client";
+
+import { CheckoutFormSection } from "@/components/checkout/CheckoutFormSection";
+import {
+  checkoutFieldLabelClass,
+  checkoutInputClass,
+} from "@/components/checkout/checkoutFieldStyles";
+import { checkoutEmirates } from "@/config/productCheckout";
+
+export type DeliveryFormState = {
+  email: string;
+  name: string;
+  phone: string;
+  emirate: string;
+  address: string;
+  building: string;
+};
+
+export function CheckoutDeliveryFields(props: {
+  email: string;
+  setEmail: (v: string) => void;
+  name: string;
+  setName: (v: string) => void;
+  phone: string;
+  setPhone: (v: string) => void;
+  emirate: string;
+  setEmirate: (v: string) => void;
+  address: string;
+  setAddress: (v: string) => void;
+  building: string;
+  setBuilding: (v: string) => void;
+}) {
+  const {
+    email,
+    setEmail,
+    name,
+    setName,
+    phone,
+    setPhone,
+    emirate,
+    setEmirate,
+    address,
+    setAddress,
+    building,
+    setBuilding,
+  } = props;
+
+  return (
+    <>
+      <CheckoutFormSection
+        title="معلومات التواصل"
+        subtitle="لإرسال تأكيد الطلب وتحديثات التوصيل"
+      >
+        <div>
+          <label htmlFor="email" className={checkoutFieldLabelClass}>
+            البريد الإلكتروني{" "}
+            <span className="font-normal text-neutral-400">(اختياري)</span>
+          </label>
+          <input
+            id="email"
+            type="email"
+            dir="ltr"
+            value={email}
+            onChange={(ev) => setEmail(ev.target.value)}
+            placeholder="name@email.com"
+            className={checkoutInputClass}
+            autoComplete="email"
+          />
+        </div>
+        <div>
+          <label htmlFor="name" className={checkoutFieldLabelClass}>
+            الاسم الكامل
+          </label>
+          <input
+            id="name"
+            required
+            value={name}
+            onChange={(ev) => setName(ev.target.value)}
+            placeholder="مثال: نورة العتيبي"
+            className={checkoutInputClass}
+            autoComplete="name"
+          />
+        </div>
+        <div>
+          <label htmlFor="phone" className={checkoutFieldLabelClass}>
+            رقم الهاتف
+          </label>
+          <input
+            id="phone"
+            required
+            type="tel"
+            dir="ltr"
+            value={phone}
+            onChange={(ev) => setPhone(ev.target.value)}
+            placeholder="0501234567"
+            className={checkoutInputClass}
+            autoComplete="tel"
+          />
+        </div>
+      </CheckoutFormSection>
+
+      <CheckoutFormSection title="عنوان التوصيل">
+        <div>
+          <label htmlFor="area" className={checkoutFieldLabelClass}>
+            المنطقة
+          </label>
+          <select
+            id="area"
+            required
+            value={emirate}
+            onChange={(ev) => setEmirate(ev.target.value)}
+            className={checkoutInputClass}
+          >
+            <option value="">اختاري الإمارة</option>
+            {checkoutEmirates.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="address" className={checkoutFieldLabelClass}>
+            العنوان / تفاصيل التوصيل
+          </label>
+          <input
+            id="address"
+            required
+            value={address}
+            onChange={(ev) => setAddress(ev.target.value)}
+            placeholder="مثال: دبي مارينا، برج …"
+            className={checkoutInputClass}
+            autoComplete="street-address"
+          />
+        </div>
+        <div>
+          <label htmlFor="building" className={checkoutFieldLabelClass}>
+            رقم المبنى / الشقة{" "}
+            <span className="font-normal text-neutral-400">(اختياري)</span>
+          </label>
+          <input
+            id="building"
+            value={building}
+            onChange={(ev) => setBuilding(ev.target.value)}
+            placeholder="مثال: برج 5، شقة 1204"
+            className={checkoutInputClass}
+          />
+        </div>
+      </CheckoutFormSection>
+    </>
+  );
+}
