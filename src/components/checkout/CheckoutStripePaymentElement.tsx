@@ -3,7 +3,9 @@
 import { PaymentElement } from "@stripe/react-stripe-js";
 import { useCheckoutStripe } from "@/components/checkout/CheckoutStripeElementsProvider";
 import { PaymentBrandStrip } from "@/components/checkout/PaymentBrandStrip";
+import { PaymentFieldsInstantShell } from "@/components/checkout/PaymentFieldsInstantShell";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
+import { removePaymentInstantShell } from "@/lib/removePaymentInstantShell";
 
 function IconLockSmall({ className }: { className?: string }) {
   return (
@@ -13,11 +15,24 @@ function IconLockSmall({ className }: { className?: string }) {
   );
 }
 
-export function CheckoutStripePaymentElement() {
+type Props = {
+  /** True when matching server HTML is already on screen */
+  serverPainted?: boolean;
+};
+
+export function CheckoutStripePaymentElement({ serverPainted = false }: Props) {
   const { setPaymentReady, paymentReady } = useCheckoutStripe();
 
+  function handleReady() {
+    setPaymentReady(true);
+    removePaymentInstantShell();
+    document.documentElement.dataset.paymentReady = "true";
+  }
+
+  const showClientInstant = !serverPainted && !paymentReady;
+
   return (
-    <section>
+    <section data-payment-ready={paymentReady ? "true" : "false"}>
       <div className="mb-3">
         <h2 className="text-base font-extrabold text-neutral-900">الدفع</h2>
         <p className="mt-0.5 text-sm text-neutral-500">جميع المعاملات آمنة ومشفّرة</p>
@@ -37,22 +52,25 @@ export function CheckoutStripePaymentElement() {
           </div>
         </div>
 
-        <div
-          className={`min-h-[168px] bg-white p-4 transition-opacity duration-200 sm:p-5 ${
-            paymentReady ? "opacity-100" : "opacity-90"
-          }`}
-        >
-          <PaymentElement
-            id="card-payment-element"
-            options={{
-              layout: "tabs",
-              wallets: { applePay: "auto", googlePay: "auto" },
-              fields: { billingDetails: { address: "never" } },
-              terms: { card: "never" },
-            }}
-            onReady={() => setPaymentReady(true)}
-            onLoadError={() => setPaymentReady(false)}
-          />
+        <div className="relative min-h-[168px] bg-white p-4 sm:p-5">
+          {showClientInstant ? (
+            <div className="absolute inset-0 z-0 bg-white p-4 sm:p-5">
+              <PaymentFieldsInstantShell />
+            </div>
+          ) : null}
+          <div className="relative z-[1] min-h-[140px]">
+            <PaymentElement
+              id="card-payment-element"
+              options={{
+                layout: "tabs",
+                wallets: { applePay: "auto", googlePay: "auto" },
+                fields: { billingDetails: { address: "never" } },
+                terms: { card: "never" },
+              }}
+              onReady={handleReady}
+              onLoadError={() => setPaymentReady(false)}
+            />
+          </div>
         </div>
       </div>
 
