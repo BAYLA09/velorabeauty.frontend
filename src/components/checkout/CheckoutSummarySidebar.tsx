@@ -34,7 +34,7 @@ import {
   setCheckoutLineQuantity,
 } from "@/lib/checkoutUpsell";
 import { countEligibleUnits } from "@/lib/cart/cartPricing";
-import { MAX_BUNDLE_UNITS, MAX_CART_UNITS } from "@/lib/cart/cartTypes";
+import { MAX_CART_UNITS } from "@/lib/cart/cartTypes";
 import { getProductBySlug, getProductPath } from "@/lib/productCatalog";
 
 type Props = {

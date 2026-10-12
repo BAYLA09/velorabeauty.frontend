@@ -22,6 +22,7 @@ import { checkoutEmirates } from "@/config/productCheckout";
 import { resolveCheckoutTotalAed, type BundleQuantity } from "@/config/pricing";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
+import { useStripeCheckoutPrefetch } from "@/components/checkout/useStripeCheckoutPrefetch";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
@@ -335,8 +336,6 @@ function StripeCardPaymentAndSubmit({
 
   return (
     <>
-      <CheckoutStripePaymentElement />
-
       {error ? (
         <p className="mt-4 text-sm font-bold text-rose-700" role="alert">
           {error}
@@ -367,11 +366,21 @@ function CheckoutCardStripeForm({
   stripeBootstrap,
   cartLines,
   sendCartLines,
+  cartItemsParam,
 }: Props & {
   backHref: string;
   cartLines: ReturnType<typeof parseCheckoutLines>;
   sendCartLines: boolean;
+  cartItemsParam?: string;
 }) {
+  useStripeCheckoutPrefetch({
+    productSlug,
+    productName,
+    quantity,
+    eligibleUnits,
+    itemsParam: cartItemsParam,
+  });
+
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -391,7 +400,7 @@ function CheckoutCardStripeForm({
   return (
     <CheckoutLaraShell
       title="إتمام الطلب"
-      subtitle="أكملي معلومات التوصيل ثم أدخلي بيانات البطاقة"
+      subtitle="بيانات البطاقة تظهر فوراً — أكملي التوصيل ثم أكّدي الدفع"
       backHref={backHref}
     >
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:gap-8">
@@ -400,28 +409,31 @@ function CheckoutCardStripeForm({
           className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="space-y-8">
-            <CheckoutDeliveryFields
-              email={email}
-              setEmail={setEmail}
-              name={name}
-              setName={setName}
-              phone={phone}
-              setPhone={setPhone}
-              emirate={emirate}
-              setEmirate={setEmirate}
-              address={address}
-              setAddress={setAddress}
-              building={building}
-              setBuilding={setBuilding}
-            />
-
             <CheckoutStripeElementsProvider
               productSlug={productSlug}
               productName={productName}
               quantity={quantity}
               eligibleUnits={eligibleUnits}
+              itemsParam={cartItemsParam}
               bootstrap={stripeBootstrap ?? null}
             >
+              <CheckoutStripePaymentElement />
+
+              <CheckoutDeliveryFields
+                email={email}
+                setEmail={setEmail}
+                name={name}
+                setName={setName}
+                phone={phone}
+                setPhone={setPhone}
+                emirate={emirate}
+                setEmirate={setEmirate}
+                address={address}
+                setAddress={setAddress}
+                building={building}
+                setBuilding={setBuilding}
+              />
+
               <StripeCardPaymentAndSubmit
                 productSlug={productSlug}
                 productName={productName}
@@ -621,6 +633,7 @@ export function CheckoutCardConfirmClient({
         stripeBootstrap={stripeBootstrap}
         cartLines={cartLines}
         sendCartLines={sendCartLines}
+        cartItemsParam={cartItemsParam}
       />
     );
   }
