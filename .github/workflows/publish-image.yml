@@ -23,6 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx (classic driver)
+        uses: docker/setup-buildx-action@v3
+        with:
+          # Avoid pulling moby/buildkit from Docker Hub (often 504 on GHA).
+          driver: docker
+
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -37,15 +43,27 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=
 
-      - name: Build and push (Easypanel Dockerfile)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            GIT_SHA=${{ github.sha }}
+      - name: Build and push (Easypanel Dockerfile, retries)
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          tag_args=""
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            tag_args="$tag_args -t $tag"
+          done <<< "$TAGS"
+          for attempt in 1 2 3 4; do
+            echo "=== docker buildx push attempt $attempt ==="
+            if docker buildx build --push $tag_args \
+              --build-arg "GIT_SHA=${{ github.sha }}" \
+              .; then
+              exit 0
+            fi
+            sleep $((attempt * 45))
+          done
+          echo "::error::Docker build failed after 4 attempts (Docker Hub / network)."
+          exit 1
 
       - name: Ensure GHCR package is public (anonymous Easypanel pull)
         continue-on-error: true
