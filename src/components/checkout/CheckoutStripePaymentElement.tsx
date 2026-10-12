@@ -3,7 +3,6 @@
 import { PaymentElement } from "@stripe/react-stripe-js";
 import { useCheckoutStripe } from "@/components/checkout/CheckoutStripeElementsProvider";
 import { PaymentBrandStrip } from "@/components/checkout/PaymentBrandStrip";
-import { PaymentFieldsSkeleton } from "@/components/checkout/PaymentFieldsSkeleton";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
 
 function IconLockSmall({ className }: { className?: string }) {
@@ -13,6 +12,19 @@ function IconLockSmall({ className }: { className?: string }) {
     </svg>
   );
 }
+
+/** Stripe Payment Element — card only, Link off (faster iframe). */
+export const stripePaymentElementOptions = {
+  layout: "accordion" as const,
+  paymentMethodOrder: ["card"],
+  wallets: {
+    applePay: "never" as const,
+    googlePay: "never" as const,
+    link: "never" as const,
+  },
+  fields: { billingDetails: { address: "never" as const } },
+  terms: { card: "never" as const },
+};
 
 export function CheckoutStripePaymentElement() {
   const { setPaymentReady, elementsLoading } = useCheckoutStripe();
@@ -38,22 +50,15 @@ export function CheckoutStripePaymentElement() {
           </div>
         </div>
 
-        <div className="min-h-[168px] bg-white p-4 sm:p-5">
-          {elementsLoading ? (
-            <PaymentFieldsSkeleton />
-          ) : (
+        <div className="min-h-[168px] bg-white p-4 sm:p-5" aria-busy={elementsLoading}>
+          {!elementsLoading ? (
             <PaymentElement
               id="card-payment-element"
-              options={{
-                layout: "tabs",
-                wallets: { applePay: "auto", googlePay: "auto" },
-                fields: { billingDetails: { address: "never" } },
-                terms: { card: "never" },
-              }}
+              options={stripePaymentElementOptions}
               onReady={() => setPaymentReady(true)}
               onLoadError={() => setPaymentReady(false)}
             />
-          )}
+          ) : null}
         </div>
       </div>
 

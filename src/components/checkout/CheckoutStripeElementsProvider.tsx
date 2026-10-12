@@ -11,7 +11,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { PaymentFieldsSkeleton } from "@/components/checkout/PaymentFieldsSkeleton";
 import { stripeElementsAppearance } from "@/components/checkout/stripeAppearance";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
 import {

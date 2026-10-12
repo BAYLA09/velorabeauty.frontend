@@ -1,13 +1,13 @@
 "use client";
 
 import { useElements, useStripe } from "@stripe/react-stripe-js";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { CheckoutCardPaymentBlock } from "@/components/checkout/CheckoutCardPaymentBlock";
 import { CheckoutFormSection } from "@/components/checkout/CheckoutFormSection";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
-import { CheckoutSummarySidebar } from "@/components/checkout/CheckoutSummarySidebar";
 import {
   CheckoutStripeElementsProvider,
   useCheckoutStripe,
@@ -27,6 +27,22 @@ import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
+
+const CheckoutSummarySidebar = dynamic(
+  () =>
+    import("@/components/checkout/CheckoutSummarySidebar").then(
+      (mod) => mod.CheckoutSummarySidebar,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <aside
+        className="hidden min-h-[280px] rounded-xl border border-[#d9d9d9] bg-neutral-50 lg:block lg:min-w-[280px]"
+        aria-hidden
+      />
+    ),
+  },
+);
 
 type Props = {
   productSlug: string;
