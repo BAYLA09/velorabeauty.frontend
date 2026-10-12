@@ -34,6 +34,15 @@ export function getUpsellRecommendations(lines: CartLine[]): UpsellProduct[] {
     }));
 }
 
+/** Savings vs paying single-product price × units (display at checkout). */
+export function getBundleSavingsVsRetail(
+  eligibleUnits: number,
+  merchandiseAed: number,
+): number {
+  if (eligibleUnits <= 0) return 0;
+  return Math.max(0, singleProductPrice * eligibleUnits - merchandiseAed);
+}
+
 /** Savings vs buying the next tier as separate singles (Lara-style «وفّري»). */
 export function getNextTierSavings(eligibleUnits: number): number | null {
   if (eligibleUnits >= 3) return null;
@@ -63,16 +72,18 @@ export function getUpsellOfferCopy(eligibleUnits: number): {
   const delta = upsellMerchandiseDelta(eligibleUnits);
   if (targetTotal === null || delta === null) return null;
   if (eligibleUnits === 1) {
+    const saveTwo = singleProductPrice * 2 - targetTotal;
     return {
-      title: "علبة ثانية — عرض الروتين المزدوج",
-      body: `أضيفي منتجاً من فيلورا — المجموع ${targetTotal} د.إ (بدلاً من 398 د.إ).`,
+      title: `زيدي منتجاً — وفّري ${saveTwo} د.إ`,
+      body: `عرض منتجان بـ ${targetTotal} د.إ بدل ${singleProductPrice * 2} د.إ — اختاري الشعر، البشرة، أو العين.`,
       targetTotal,
       delta,
     };
   }
+  const saveThree = singleProductPrice * 3 - targetTotal;
   return {
-    title: "أكملي الثلاثة — أقوى توفير",
-    body: `أضيفي خطوة أخيرة — المجموع ${targetTotal} د.إ لروتينك الكامل.`,
+    title: `خطوة أخيرة — وفّري ${saveThree} د.إ`,
+    body: `أكملي 3 منتجات بـ ${targetTotal} د.إ (بدل ${singleProductPrice * 3} د.إ) — أقوى توفير في فيلورا.`,
     targetTotal,
     delta,
   };
