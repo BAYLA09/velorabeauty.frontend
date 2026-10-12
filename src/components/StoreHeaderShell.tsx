@@ -66,14 +66,14 @@ export function StoreHeaderShell({ theme, links, overlay = false }: Props) {
           <button
             type="button"
             className={`relative ${cartClass}`}
-            aria-label={`السلة، ${cartCount} منتج`}
+            aria-label={`السلة (${cartCount} عناصر)`}
             onClick={cart.openCart}
           >
             <ShoppingBagIcon className="h-6 w-6" />
             {cartCount > 0 ? (
               <span
                 className={`absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold ${
-                  isDark ? "bg-[#D6AD65] text-[#291A1C]" : "bg-[#650D20] text-white"
+                  isDark ? "bg-[#D6AD65] text-[#291A1C]" : "bg-[#D6AD65] text-[#291A1C]"
                 }`}
               >
                 {cartCount}

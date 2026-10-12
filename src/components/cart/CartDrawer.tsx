@@ -14,6 +14,7 @@ import { CartUpsellSection } from "@/components/cart/CartUpsellSection";
 import { buildCartCheckoutPath } from "@/lib/checkoutRoutes";
 import { getProductBySlug } from "@/lib/productCatalog";
 import { cartDrawerCopy as t } from "@/components/cart/cartDrawerCopy";
+import { ShoppingBagIcon } from "@/components/ui/ShoppingBagIcon";
 
 function QuantityStepper({
   value,
@@ -105,13 +106,18 @@ export function CartDrawer() {
         className="relative flex h-full w-full max-w-md flex-col bg-[#FFF9F5] shadow-[-8px_0_40px_rgba(41,26,28,0.18)] motion-safe:animate-[cartSlideIn_0.32s_ease-out] max-sm:max-w-none"
       >
         <header className="flex items-center justify-between border-b border-[#650D20]/10 px-5 py-4">
-          <div>
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 rounded-full bg-[#FCE8E5] p-2 text-[#650D20]">
+              <ShoppingBagIcon className="h-5 w-5" />
+            </span>
+            <div>
             <h2 id={titleId} className="text-xl font-bold tracking-tight text-[#650D20]">
               {t.title}
             </h2>
             <p className="mt-0.5 text-sm text-[#291A1C]/65">
               {itemCount === 0 ? t.none : t.productCount(itemCount)}
             </p>
+            </div>
           </div>
           <button
             type="button"
