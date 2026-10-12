@@ -51,9 +51,15 @@ ghcr.io/bayla09/velorabeauty.frontend:74e4538
 
 ## 3) Compose (إلا كتستعمل Git repo)
 
-- استعمل **`compose.yaml`** أو **`deploy/easypanel-docker-image.compose.yaml`**
-- **ما تفعّلش build** — غير `image:` + `pull_policy: always`
+- **Compose file path:** `docker-compose.yml` (الافتراضي ف Easypanel)
+- أو `compose.yaml` / `deploy/easypanel-docker-image.compose.yaml`
+- **Build: OFF** — غير pull من `image:` + `pull_policy: always`
 - Domain → service **`velora-web`** → port **3000**
+
+## 3b) Deploy كيخلص ف 1 ثانية؟
+
+- **GitHub Secret** `EASYPANEL_DEPLOY_WEBHOOK` كيضرب خدمة **Git** معطلة → **حذفو** أو بدّل webhook من خدمة **Docker Image** فقط.
+- Source خاصو يكون **Docker Image** ماشي GitHub Dockerfile.
 
 ---
 
