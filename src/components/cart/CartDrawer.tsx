@@ -9,7 +9,10 @@ import {
   computeCartPricing,
   targetBundleTotalAfterUpsell,
 } from "@/lib/cart/cartPricing";
+import { buildMixedCartSummary } from "@/lib/cart/cartCheckoutMeta";
 import { encodeCartItemsParam } from "@/lib/cart/cartSerialization";
+import { normalizeCartLines } from "@/lib/cart/cartPricing";
+import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
 import { CartUpsellSection } from "@/components/cart/CartUpsellSection";
 import { buildCartCheckoutPath } from "@/lib/checkoutRoutes";
 import { getProductBySlug } from "@/lib/productCatalog";
@@ -252,6 +255,30 @@ export function CartDrawer() {
               <Link
                 href={buildCartCheckoutPath(encodeCartItemsParam(lines))}
                 onClick={closeCart}
+                onMouseEnter={() => {
+                  if (!pricing.ok) return;
+                  const itemsParam = encodeCartItemsParam(lines);
+                  const meta = buildMixedCartSummary(normalizeCartLines(lines));
+                  void prefetchStripeCardCheckout({
+                    productSlug: meta.productSlug,
+                    productName: meta.productName,
+                    quantity: pricing.bundleQuantity,
+                    eligibleUnits: pricing.eligibleUnits,
+                    itemsParam,
+                  });
+                }}
+                onFocus={() => {
+                  if (!pricing.ok) return;
+                  const itemsParam = encodeCartItemsParam(lines);
+                  const meta = buildMixedCartSummary(normalizeCartLines(lines));
+                  void prefetchStripeCardCheckout({
+                    productSlug: meta.productSlug,
+                    productName: meta.productName,
+                    quantity: pricing.bundleQuantity,
+                    eligibleUnits: pricing.eligibleUnits,
+                    itemsParam,
+                  });
+                }}
                 className="mt-4 flex w-full items-center justify-center rounded-full bg-[#650D20] py-3.5 text-base font-bold text-[#FFF9F5] shadow-[0_8px_24px_rgba(101,13,32,0.35)] transition hover:bg-[#291A1C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65]"
               >
                 {t.checkout}

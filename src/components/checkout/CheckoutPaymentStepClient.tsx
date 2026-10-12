@@ -13,7 +13,7 @@ import {
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
-import { useStripeWarmup } from "@/components/checkout/useStripeWarmup";
+import { useStripeCheckoutPrefetch } from "@/components/checkout/useStripeCheckoutPrefetch";
 import { buildCheckoutPath } from "@/lib/checkoutRoutes";
 
 type Props = {
@@ -91,7 +91,13 @@ export function CheckoutPaymentStepClient({
   const [method, setMethod] = useState<PaymentMethod>(initialMethod);
   const query = { product: productSlug, quantity, items: cartItemsParam };
   const total = resolveCheckoutTotalAed(quantity, method, eligibleUnits);
-  useStripeWarmup(true);
+  useStripeCheckoutPrefetch({
+    productSlug,
+    productName,
+    quantity,
+    eligibleUnits,
+    itemsParam: cartItemsParam,
+  });
 
   function continueCheckout() {
     router.push(buildCheckoutPath(method, query));

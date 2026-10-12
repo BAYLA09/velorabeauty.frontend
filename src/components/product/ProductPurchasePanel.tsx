@@ -10,6 +10,7 @@ import {
 } from "@/components/product/ProductPaymentMethodsInfo";
 import { useCart } from "@/context/CartProvider";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
+import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
 import {
   codFee,
   currencyLabel,
@@ -199,7 +200,17 @@ export function ProductPurchasePanel({
     onChange?.({ quantity, total: displayTotal, ctaLabel });
   }, [quantity, displayTotal, ctaLabel, onChange]);
 
+  function warmStripeCheckout() {
+    void prefetchStripeCardCheckout({
+      productSlug,
+      productName,
+      quantity,
+      eligibleUnits: quantity,
+    });
+  }
+
   function goToCheckout() {
+    warmStripeCheckout();
     router.push(buildCheckoutPaymentStepPath({ product: productSlug, quantity }));
   }
 
@@ -295,6 +306,8 @@ export function ProductPurchasePanel({
         <button
           type="button"
           onClick={goToCheckout}
+          onMouseEnter={warmStripeCheckout}
+          onFocus={warmStripeCheckout}
           className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#3a1820] to-[#2c1318] py-4 text-base font-black text-white shadow-[0_12px_32px_rgba(44,19,24,0.35)] transition hover:from-velora-burgundy hover:to-[#2c1318] active:scale-[0.99] sm:text-lg"
         >
           {ctaLabel}

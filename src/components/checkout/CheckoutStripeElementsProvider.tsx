@@ -5,6 +5,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -13,6 +14,11 @@ import {
 import { PaymentFieldsSkeleton } from "@/components/checkout/PaymentFieldsSkeleton";
 import { stripeElementsAppearance } from "@/components/checkout/stripeAppearance";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
+import {
+  readStripeCheckoutPrefetch,
+  writeStripeCheckoutPrefetch,
+  type StripePrefetchParams,
+} from "@/lib/stripeCheckoutPrefetch";
 import { preloadStripeJs } from "@/lib/stripeJsLoader";
 import type { BundleQuantity } from "@/config/pricing";
 
@@ -39,6 +45,7 @@ type Props = {
   productName: string;
   quantity: BundleQuantity;
   eligibleUnits?: number;
+  itemsParam?: string;
   bootstrap: StripeCardBootstrap | null;
   children: ReactNode;
 };
@@ -48,9 +55,20 @@ export function CheckoutStripeElementsProvider({
   productName,
   quantity,
   eligibleUnits,
+  itemsParam,
   bootstrap,
   children,
 }: Props) {
+  const prefetchParams = useMemo<StripePrefetchParams>(
+    () => ({
+      productSlug,
+      productName,
+      quantity,
+      eligibleUnits,
+      itemsParam,
+    }),
+    [productSlug, productName, quantity, eligibleUnits, itemsParam],
+  );
   const [publishableKey, setPublishableKey] = useState<string | null>(
     bootstrap?.publishableKey ?? null,
   );
@@ -63,14 +81,24 @@ export function CheckoutStripeElementsProvider({
   const [error, setError] = useState<string | null>(null);
   const piRef = useRef(bootstrap?.paymentIntentId ?? "");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (bootstrap?.publishableKey) {
+      writeStripeCheckoutPrefetch(prefetchParams, bootstrap);
       void preloadStripeJs(bootstrap.publishableKey);
+      return;
     }
-  }, [bootstrap?.publishableKey]);
+    const cached = readStripeCheckoutPrefetch(prefetchParams);
+    if (cached) {
+      piRef.current = cached.paymentIntentId;
+      setPublishableKey(cached.publishableKey);
+      setClientSecret(cached.clientSecret);
+      setPaymentIntentId(cached.paymentIntentId);
+      void preloadStripeJs(cached.publishableKey);
+    }
+  }, [bootstrap, prefetchParams]);
 
   useEffect(() => {
-    if (bootstrap) return;
+    if (clientSecret) return;
 
     let cancelled = false;
 
@@ -120,6 +148,11 @@ export function CheckoutStripeElementsProvider({
         setPublishableKey(config.publishableKey);
         setClientSecret(piData.clientSecret);
         setPaymentIntentId(piData.paymentIntentId);
+        writeStripeCheckoutPrefetch(prefetchParams, {
+          publishableKey: config.publishableKey,
+          clientSecret: piData.clientSecret,
+          paymentIntentId: piData.paymentIntentId,
+        });
       } catch {
         if (!cancelled) setError("stripe_payment_intent_failed");
       } finally {
@@ -131,7 +164,7 @@ export function CheckoutStripeElementsProvider({
     return () => {
       cancelled = true;
     };
-  }, [bootstrap, productSlug, productName, quantity, eligibleUnits]);
+  }, [clientSecret, prefetchParams, productSlug, productName, quantity, eligibleUnits]);
 
   const ctx = useMemo<StripeCtx>(
     () => ({
@@ -176,7 +209,7 @@ export function CheckoutStripeElementsProvider({
             clientSecret,
             appearance: stripeElementsAppearance,
             locale: "ar",
-            loader: "auto",
+            loader: "never",
           }}
         >
           {children}
