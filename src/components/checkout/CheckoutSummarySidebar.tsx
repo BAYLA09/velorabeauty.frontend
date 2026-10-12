@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { CheckoutTrustCard } from "@/components/checkout/CheckoutTrustCard";
+import { CheckoutUpsellPanel } from "@/components/checkout/CheckoutUpsellPanel";
 import { encodeCartItemsParam } from "@/lib/cart/cartSerialization";
 import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import {
@@ -29,11 +30,10 @@ import {
   addComplementaryLine,
   parseCheckoutLines,
   setCheckoutLineQuantity,
-  upsellSlugsNotInCart,
 } from "@/lib/checkoutUpsell";
 import { countEligibleUnits } from "@/lib/cart/cartPricing";
 import { MAX_BUNDLE_UNITS } from "@/lib/cart/cartTypes";
-import { getAllProductsWithPages, getProductBySlug, getProductPath } from "@/lib/productCatalog";
+import { getProductBySlug, getProductPath } from "@/lib/productCatalog";
 
 type Props = {
   productName: string;
@@ -74,14 +74,6 @@ export function CheckoutSummarySidebar({
   const singleLineBasket = lines.length === 1 && !mixedCart;
   const deliveryFee = paymentMethod === "cod" ? codFee : 0;
   const total = getCheckoutTotal(bundleQty, paymentMethod);
-
-  const upsellSlugs =
-    editableBasket && productSlug ? upsellSlugsNotInCart(lines) : [];
-  const upsellProducts = upsellSlugs
-    .map((slug) => getAllProductsWithPages().find((p) => p.slug === slug))
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
-
-  const canAddMore = lines.reduce((s, l) => s + l.quantity, 0) < 3;
 
   function checkoutQueryFromLines(nextLines: typeof lines, bundleQuantity: BundleQuantity) {
     const v = validateCartForCheckout(nextLines);
@@ -218,7 +210,19 @@ export function CheckoutSummarySidebar({
               );
             })}
           </ul>
-        ) : (
+        ) : null}
+
+        {editableBasket && productSlug && lines.length > 0 ? (
+          <CheckoutUpsellPanel
+            lines={lines}
+            eligibleUnits={totalUnits}
+            merchandiseAed={subtotal}
+            paymentMethod={paymentMethod}
+            onAdd={addUpsell}
+          />
+        ) : null}
+
+        {!(productSlug && lines.length > 0) ? (
           <div className="mt-4 flex gap-3 border-b border-neutral-100 pb-4">
             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-50">
               {productImageSrc ? (
@@ -238,7 +242,7 @@ export function CheckoutSummarySidebar({
               </p>
             </div>
           </div>
-        )}
+        ) : null}
 
         <dl className="mt-4 space-y-2.5 text-sm">
           <div className="flex justify-between gap-3">
@@ -286,43 +290,6 @@ export function CheckoutSummarySidebar({
               ← العودة إلى صفحة المنتج
             </Link>
           </nav>
-        ) : null}
-
-        {upsellProducts.length > 0 && canAddMore ? (
-          <div className="mt-4 border-t border-neutral-100 pt-4">
-            <p className="text-xs font-extrabold text-neutral-800">أكملي روتين VELORA</p>
-            <p className="mt-1 text-[10px] leading-relaxed text-neutral-500">
-              تبقين على {paymentMethod === "card" ? "الدفع بالبطاقة" : "الدفع عند الاستلام"} — بلا
-              إعادة الاختيار.
-            </p>
-            <ul className="mt-2 space-y-2">
-              {upsellProducts.map((p) => (
-                <li key={p.slug}>
-                  <button
-                    type="button"
-                    onClick={() => addUpsell(p.slug)}
-                    className="flex w-full items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/80 p-2 text-right transition hover:border-[#134E3A]/30 hover:bg-white"
-                  >
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-white">
-                      {p.image.src ? (
-                        <Image
-                          src={p.image.src}
-                          alt=""
-                          fill
-                          className="object-contain p-0.5"
-                          sizes="40px"
-                        />
-                      ) : null}
-                    </div>
-                    <span className="min-w-0 flex-1 text-[11px] font-bold leading-snug text-neutral-800">
-                      {p.name}
-                    </span>
-                    <span className="shrink-0 text-[10px] font-extrabold text-[#134E3A]">+ أضيفي</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
         ) : null}
 
         {footer ? <div className="mt-4">{footer}</div> : null}
