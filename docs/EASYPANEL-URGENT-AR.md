@@ -1,14 +1,17 @@
 # Easypanel — باقي ما كيدپloyش؟ (2026-10-12)
 
-## ✅ GitHub جاهز دابا (2026-10-12 — PR #121 merged)
+## ✅ GitHub جاهز دابا (2026-10-12)
 
-- **Publish container** على `main` → **✅ ناجح** (آخر merge: **4 produits** — 3×339 + 4ème +199)
-- Image جديدة (Easypanel خاصو **pull**):
+- **Publish container** كيتشغّل **غير من push على `main`** (merge PR → image جديدة على GHCR).
+- **ما كاينش image** ل commit/branch إلا **merged** — مثلاً `:902bc8a` **ما غاديش يخدم** حتى PR #128 يmerge.
+- Image (بعد آخر merge على main):
 
 ```text
 ghcr.io/bayla09/velorabeauty.frontend:latest
-ghcr.io/bayla09/velorabeauty.frontend:b1ddd2e
+ghcr.io/bayla09/velorabeauty.frontend:364bcf5
 ```
+
+الموقع الحي دابا (تحقق): `curl -s https://www.velorabeauty.world/api/health` → `version` فيها **`364bcf5`** = deploy خدام؛ ila bghiti fix Stripe 6s → merge **#128** ثم Deploy `:latest` أو SHA جديد.
 
 الموقع الحي **ما كيتبدّلش** من GitHub وحدو — **Deploy يدوي ف Easypanel** (1–3 دقائق). Secret `EASYPANEL_DEPLOY_WEBHOOK` **ماشي مفعّل** → ما كاينش auto-deploy.
 
@@ -69,10 +72,10 @@ ghcr.io/bayla09/velorabeauty.frontend:b1ddd2e
 curl -s https://www.velorabeauty.world/api/health
 ```
 
-خاص `version` يبدا بـ **`b1ddd2e`** (أو أحدث commit على main).
+خاص `version` يطابق **آخر SHA merged** على main (دابا مثلاً **`364bcf5`**).
 
-إلا بقى `f141bae` أو أقدم → Easypanel **ما سحبش** image:
-- بدّل Image إلى `:b1ddd2e` بالضبط
+إلا بقى SHA قديم → Easypanel **ما سحبش** image:
+- Image: `ghcr.io/bayla09/velorabeauty.frontend:latest` + **pull_policy always** (compose)
 - **Redeploy** / **Recreate container**
 - تأكد Source ماشي Git
 
@@ -80,7 +83,8 @@ curl -s https://www.velorabeauty.world/api/health
 
 ## 5) « Deploy ما خدام » — 3 أسباب شائعة
 
-1. **PR ما mergedش** → GitHub ma kaybni image. دابا **#121 merged** — dir **Deploy** f Easypanel.
-2. **Deploy 1 ثانية** → Source = Git (غلط). بدّl l **Docker Image** (`ghcr.io/bayla09/velorabeauty.frontend:b1ddd2e`).
-3. **Deploy ناجح ولكن نفس المحتوى** → `curl …/api/health` — ila `version` qdima, pin `:b1ddd2e` w **Recreate container**.
+1. **PR ma mergedch** → **ما كاينش tag** f GHCR. Merge PR f GitHub, استنى **Publish container ✅**, من بعد Deploy f Easypanel.
+2. **Deploy 1 ثانية** → Source = Git (غلط). بدّل ل **Docker Image** + image `ghcr.io/bayla09/velorabeauty.frontend:latest`.
+3. **Deploy ناجح ولكن نفس المحتوى** → `curl …/api/health` — ila `version` qdima: **Recreate container** w تأكد **pull layers** f logs (1–3 min).
+4. **Tag `:902bc8a` pull denied / not found** → normal — merge **#128** (Stripe vanilla) أولاً.
 4. **GitHub ✅ ولكن site ma tbdlch** → ma kaynch `EASYPANEL_DEPLOY_WEBHOOK` — **كل merge** khass **Deploy** يدوي (1–3 min, logs fiha pull layers).
