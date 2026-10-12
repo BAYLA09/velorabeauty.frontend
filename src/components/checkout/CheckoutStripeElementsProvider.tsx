@@ -19,7 +19,7 @@ import {
   writeStripeCheckoutPrefetch,
   type StripePrefetchParams,
 } from "@/lib/stripeCheckoutPrefetch";
-import { preloadStripeJs } from "@/lib/stripeJsLoader";
+import { preloadStripeJs, primeStripeJsSync } from "@/lib/stripeJsLoader";
 import type { BundleQuantity } from "@/config/pricing";
 
 type StripeCtx = {
@@ -69,19 +69,39 @@ export function CheckoutStripeElementsProvider({
     }),
     [productSlug, productName, quantity, eligibleUnits, itemsParam],
   );
-  const [publishableKey, setPublishableKey] = useState<string | null>(
-    bootstrap?.publishableKey ?? null,
-  );
-  const [clientSecret, setClientSecret] = useState<string | null>(
-    bootstrap?.clientSecret ?? null,
-  );
-  const [paymentIntentId, setPaymentIntentId] = useState(bootstrap?.paymentIntentId ?? "");
+  const [publishableKey, setPublishableKey] = useState<string | null>(() => {
+    if (bootstrap?.publishableKey) return bootstrap.publishableKey;
+    if (typeof window !== "undefined" && window.__VELORA_STRIPE_BOOT?.publishableKey) {
+      return window.__VELORA_STRIPE_BOOT.publishableKey;
+    }
+    return null;
+  });
+  const [clientSecret, setClientSecret] = useState<string | null>(() => {
+    if (bootstrap?.clientSecret) return bootstrap.clientSecret;
+    if (typeof window !== "undefined" && window.__VELORA_STRIPE_BOOT?.clientSecret) {
+      return window.__VELORA_STRIPE_BOOT.clientSecret;
+    }
+    return null;
+  });
+  const [paymentIntentId, setPaymentIntentId] = useState(() => {
+    if (bootstrap?.paymentIntentId) return bootstrap.paymentIntentId;
+    if (typeof window !== "undefined" && window.__VELORA_STRIPE_BOOT?.paymentIntentId) {
+      return window.__VELORA_STRIPE_BOOT.paymentIntentId;
+    }
+    return "";
+  });
   const [paymentReady, setPaymentReady] = useState(false);
   const [elementsLoading, setElementsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const piRef = useRef(bootstrap?.paymentIntentId ?? "");
 
   useLayoutEffect(() => {
+    const pk =
+      bootstrap?.publishableKey ??
+      publishableKey ??
+      (typeof window !== "undefined" ? window.__VELORA_STRIPE_BOOT?.publishableKey : null);
+    if (pk) primeStripeJsSync(pk);
+
     if (bootstrap?.publishableKey) {
       writeStripeCheckoutPrefetch(prefetchParams, bootstrap);
       void preloadStripeJs(bootstrap.publishableKey);

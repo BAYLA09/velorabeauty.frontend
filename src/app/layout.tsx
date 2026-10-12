@@ -47,6 +47,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className={`${display.variable} ${sansArabic.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.stripe.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://js.stripe.com" />
+      </head>
       <body className="antialiased">
         <CartRoot>{children}</CartRoot>
       </body>
