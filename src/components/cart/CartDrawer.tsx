@@ -10,11 +10,7 @@ import {
   targetBundleTotalAfterUpsell,
 } from "@/lib/cart/cartPricing";
 import { encodeCartItemsParam } from "@/lib/cart/cartSerialization";
-import {
-  canAddMoreUnits,
-  getUpsellOfferCopy,
-  getUpsellRecommendations,
-} from "@/lib/cart/cartUpsell";
+import { CartUpsellSection } from "@/components/cart/CartUpsellSection";
 import { buildCartCheckoutPath } from "@/lib/checkoutRoutes";
 import { getProductBySlug } from "@/lib/productCatalog";
 import { cartDrawerCopy as t } from "@/components/cart/cartDrawerCopy";
@@ -68,8 +64,6 @@ export function CartDrawer() {
   } = useCart();
 
   const pricing = computeCartPricing(lines, null);
-  const offer = getUpsellOfferCopy(eligibleUnits);
-  const recommendations = getUpsellRecommendations(lines).slice(0, 3);
   const canCheckout = pricing.ok;
   const itemCount = eligibleUnits;
 
@@ -144,38 +138,14 @@ export function CartDrawer() {
           ) : null}
 
           {lines.length === 0 ? (
-            <div className="py-6">
-              <p className="text-center text-base font-semibold text-[#291A1C]">{t.empty}</p>
+            <div className="pb-2 pt-2">
+              <p className="text-center text-base font-extrabold text-[#291A1C]">{t.empty}</p>
               <p className="mt-2 text-center text-sm text-[#291A1C]/60">{t.pricingHint}</p>
-              <ul className="mt-6 space-y-3">
-                {getUpsellRecommendations([]).map((rec) => (
-                  <li
-                    key={rec.slug}
-                    className="flex items-center gap-3 rounded-2xl border border-[#650D20]/10 bg-white p-3"
-                  >
-                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[#FCE8E5]">
-                      <Image
-                        src={rec.imageSrc}
-                        alt={rec.imageAlt}
-                        fill
-                        className="object-contain p-0.5"
-                        sizes="56px"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-[#291A1C]">{rec.name}</p>
-                      <p className="line-clamp-2 text-xs text-[#291A1C]/55">{rec.description}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => addItem(rec.slug, 1)}
-                      className="shrink-0 rounded-full bg-[#650D20] px-3 py-2 text-xs font-bold text-[#FFF9F5]"
-                    >
-                      {t.add}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <CartUpsellSection
+                lines={lines}
+                eligibleUnits={eligibleUnits}
+                onAdd={(slug) => addItem(slug, 1)}
+              />
             </div>
           ) : (
             <ul className="space-y-4">
@@ -228,53 +198,12 @@ export function CartDrawer() {
             </p>
           ) : null}
 
-          {lines.length > 0 && offer && canAddMoreUnits(lines) ? (
-            <section className="mt-8" aria-labelledby="cart-upsell-title">
-              <h3
-                id="cart-upsell-title"
-                className="text-base font-bold text-[#650D20]"
-              >
-                {t.upsellSection}
-              </h3>
-              <div className="mt-3 rounded-2xl border border-[#D6AD65]/35 bg-gradient-to-br from-[#FCE8E5] to-[#FFF9F5] p-4">
-                <p className="text-sm font-bold text-[#650D20]">{offer.title}</p>
-                <p className="mt-1.5 text-xs leading-relaxed text-[#291A1C]/75">{offer.body}</p>
-              </div>
-              <ul className="mt-4 space-y-3">
-                {recommendations.map((rec) => (
-                  <li
-                    key={rec.slug}
-                    className="flex items-center gap-3 rounded-2xl border border-[#650D20]/10 bg-white p-3"
-                  >
-                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[#FCE8E5]">
-                      <Image
-                        src={rec.imageSrc}
-                        alt={rec.imageAlt}
-                        fill
-                        className="object-contain p-0.5"
-                        sizes="56px"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-[#291A1C]">{rec.name}</p>
-                      <p className="truncate text-xs text-[#291A1C]/55">{rec.description}</p>
-                      {offer.targetTotal ? (
-                        <p className="mt-1 text-[10px] font-semibold text-[#650D20]">
-                          {t.afterAddTotal(formatPrice(offer.targetTotal))}
-                        </p>
-                      ) : null}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => addItem(rec.slug, 1)}
-                      className="shrink-0 rounded-full bg-[#650D20] px-3 py-2 text-xs font-bold text-[#FFF9F5] transition hover:bg-[#291A1C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D6AD65]"
-                    >
-                      {t.add}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
+          {lines.length > 0 ? (
+            <CartUpsellSection
+              lines={lines}
+              eligibleUnits={eligibleUnits}
+              onAdd={(slug) => addItem(slug, 1)}
+            />
           ) : null}
         </div>
 

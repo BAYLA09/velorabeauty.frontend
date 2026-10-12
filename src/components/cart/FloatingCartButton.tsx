@@ -19,7 +19,7 @@ export function FloatingCartButton() {
       type="button"
       onClick={openCart}
       aria-label={`السلة، ${eligibleUnits} منتج`}
-      className="fixed bottom-6 left-4 z-[90] flex h-14 w-14 items-center justify-center rounded-full bg-[#650D20] text-white shadow-[0_8px_28px_rgba(101,13,32,0.45)] transition hover:scale-105 hover:bg-[#291A1C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65] motion-safe:animate-[cartFabPulse_2.5s_ease-in-out_infinite] sm:bottom-8 sm:left-6"
+      className="fixed bottom-6 end-4 z-[90] flex h-14 w-14 items-center justify-center rounded-full bg-[#650D20] text-white shadow-[0_8px_28px_rgba(101,13,32,0.45)] transition hover:scale-105 hover:bg-[#291A1C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65] motion-safe:animate-[cartFabPulse_2.5s_ease-in-out_infinite] sm:bottom-8 sm:end-6"
     >
       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M6 7h15l-1.5 9h-12z" />

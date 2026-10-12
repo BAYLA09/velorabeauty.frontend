@@ -6,6 +6,10 @@ export const cartDrawerCopy = {
   add: "أضيفي",
   remove: "حذف",
   upsellSection: "أكملي روتين VELORA",
+  upsellHint: "اضغطي على المنتج — تبقين في السلة، بلا إعادة اختيار العرض.",
+  addPlus: "+ أضيفي",
+  saveAmount: (aed: number) => `وفّري ${aed} د.إ`,
+  addForDelta: (price: string) => `زيادة بـ ${price} فقط للانتقال للعرض التالي`,
   bundleComplete: (price: string) =>
     `عرض 3 منتجات مكتمل — ${price} · جاهزة للدفع.`,
   subtotal: (n: number) => `مجموع المنتجات (${n})`,
