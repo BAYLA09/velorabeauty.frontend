@@ -13,6 +13,7 @@ export default function CheckoutLayout({ children }: { children: ReactNode }) {
       <link rel="preconnect" href="https://api.stripe.com" crossOrigin="anonymous" />
       <link rel="dns-prefetch" href="https://js.stripe.com" />
       <link rel="dns-prefetch" href="https://api.stripe.com" />
+      <link rel="preload" href="https://js.stripe.com/v3/" as="script" crossOrigin="anonymous" />
       <Script src="https://js.stripe.com/v3/" strategy="beforeInteractive" />
       <StripeEarlyInit publishableKey={publishableKey} />
       {children}

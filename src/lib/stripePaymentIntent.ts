@@ -49,7 +49,7 @@ export async function createOrUpdateCardPaymentIntent(input: {
   const intent = await stripe.paymentIntents.create({
     amount: amountFils,
     currency: "aed",
-    automatic_payment_methods: { enabled: true },
+    payment_method_types: ["card"],
     metadata: {
       productSlug,
       productName,
