@@ -2,7 +2,7 @@
 
 import { useElements, useStripe } from "@stripe/react-stripe-js";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState, type ReactNode } from "react";
+import { FormEvent, useState } from "react";
 import { CheckoutCardPaymentBlock } from "@/components/checkout/CheckoutCardPaymentBlock";
 import { CheckoutFormSection } from "@/components/checkout/CheckoutFormSection";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
@@ -36,9 +36,6 @@ type Props = {
   eligibleUnits: number;
   stripeEnabled?: boolean;
   stripeBootstrap?: StripeCardBootstrap | null;
-  /** Server HTML payment block — visible before hydration */
-  serverPaymentInstant?: boolean;
-  paymentInstantSlot?: ReactNode;
 };
 
 type DeliveryFormState = {
@@ -217,18 +214,49 @@ function CheckoutSummaryColumn({
   );
 }
 
-function CheckoutPaymentLiveLayer({
-  serverPainted,
-  children,
+function CheckoutCardPaySection({
+  productSlug,
+  productName,
+  quantity,
+  eligibleUnits,
+  form,
+  cartLines,
+  sendCartLines,
 }: {
-  serverPainted: boolean;
-  children: React.ReactNode;
+  productSlug: string;
+  productName: string;
+  quantity: BundleQuantity;
+  eligibleUnits: number;
+  form: DeliveryFormState;
+  cartLines: ReturnType<typeof parseCheckoutLines>;
+  sendCartLines: boolean;
 }) {
-  const { paymentReady } = useCheckoutStripe();
-  if (serverPainted && !paymentReady) {
-    return null;
+  const { elementsLoading } = useCheckoutStripe();
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits);
+
+  if (elementsLoading) {
+    return (
+      <div className="border-t border-neutral-100 pt-6">
+        <CheckoutPayButton
+          totalAed={total}
+          disabled
+          hint="جاري تحميل الدفع…"
+        />
+      </div>
+    );
   }
-  return <div className="relative">{children}</div>;
+
+  return (
+    <StripeCardPaymentAndSubmit
+      productSlug={productSlug}
+      productName={productName}
+      quantity={quantity}
+      eligibleUnits={eligibleUnits}
+      form={form}
+      cartLines={cartLines}
+      sendCartLines={sendCartLines}
+    />
+  );
 }
 
 function StripeCardPaymentAndSubmit({
@@ -384,8 +412,6 @@ function CheckoutCardStripeForm({
   cartLines,
   sendCartLines,
   cartItemsParam,
-  serverPaymentInstant = false,
-  paymentInstantSlot,
 }: Props & {
   backHref: string;
   cartLines: ReturnType<typeof parseCheckoutLines>;
@@ -419,7 +445,7 @@ function CheckoutCardStripeForm({
   return (
     <CheckoutLaraShell
       title="إتمام الطلب"
-      subtitle="أكملي معلومات التوصيل ثم أدخلي بيانات البطاقة"
+      subtitle="أدخلي بيانات البطاقة ثم أكملي عنوان التوصيل"
       backHref={backHref}
     >
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:gap-8">
@@ -428,21 +454,6 @@ function CheckoutCardStripeForm({
           className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="space-y-8">
-            <CheckoutDeliveryFields
-              email={email}
-              setEmail={setEmail}
-              name={name}
-              setName={setName}
-              phone={phone}
-              setPhone={setPhone}
-              emirate={emirate}
-              setEmirate={setEmirate}
-              address={address}
-              setAddress={setAddress}
-              building={building}
-              setBuilding={setBuilding}
-            />
-
             <CheckoutStripeElementsProvider
               productSlug={productSlug}
               productName={productName}
@@ -451,14 +462,24 @@ function CheckoutCardStripeForm({
               itemsParam={cartItemsParam}
               bootstrap={stripeBootstrap ?? null}
             >
-              <div className="relative">
-                {paymentInstantSlot}
-                <CheckoutPaymentLiveLayer serverPainted={serverPaymentInstant}>
-                  <CheckoutStripePaymentElement serverPainted={serverPaymentInstant} />
-                </CheckoutPaymentLiveLayer>
-              </div>
+              <CheckoutStripePaymentElement />
 
-              <StripeCardPaymentAndSubmit
+              <CheckoutDeliveryFields
+                email={email}
+                setEmail={setEmail}
+                name={name}
+                setName={setName}
+                phone={phone}
+                setPhone={setPhone}
+                emirate={emirate}
+                setEmirate={setEmirate}
+                address={address}
+                setAddress={setAddress}
+                building={building}
+                setBuilding={setBuilding}
+              />
+
+              <CheckoutCardPaySection
                 productSlug={productSlug}
                 productName={productName}
                 quantity={quantity}
@@ -635,8 +656,6 @@ export function CheckoutCardConfirmClient({
   eligibleUnits,
   stripeEnabled = false,
   stripeBootstrap = null,
-  serverPaymentInstant = false,
-  paymentInstantSlot,
 }: Props) {
   const searchParams = useSearchParams();
   const cartItemsParam = searchParams.get("items") ?? undefined;
@@ -660,8 +679,6 @@ export function CheckoutCardConfirmClient({
         cartLines={cartLines}
         sendCartLines={sendCartLines}
         cartItemsParam={cartItemsParam}
-        serverPaymentInstant={serverPaymentInstant}
-        paymentInstantSlot={paymentInstantSlot}
       />
     );
   }

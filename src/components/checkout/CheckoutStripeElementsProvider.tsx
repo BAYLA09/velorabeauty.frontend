@@ -235,9 +235,7 @@ export function CheckoutStripeElementsProvider({
           {children}
         </Elements>
       ) : (
-        <div className="rounded-lg border border-[#d9d9d9] bg-white p-4 sm:p-5">
-          <PaymentFieldsSkeleton />
-        </div>
+        children
       )}
     </CheckoutStripeContext.Provider>
   );
