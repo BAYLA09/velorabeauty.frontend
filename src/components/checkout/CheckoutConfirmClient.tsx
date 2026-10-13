@@ -3,6 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
+import { MarketingConsentField } from "@/components/checkout/MarketingConsentField";
+import {
+  clearStoredCheckoutExternalId,
+  useCaptureBackendCheckout,
+} from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
 import { CheckoutSummarySidebar } from "@/components/checkout/CheckoutSummarySidebar";
 import {
@@ -44,8 +49,21 @@ export function CheckoutConfirmClient({
   const router = useRouter();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const externalCheckoutId = useCaptureBackendCheckout({
+    email,
+    marketingConsent,
+    customerName: name,
+    phone,
+    paymentMethod,
+    productSlug,
+    quantity,
+    cartLines,
+    sendCartLines: Boolean(cartItemsParam),
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const total = resolveCheckoutTotalAed(quantity, paymentMethod, eligibleUnits);
@@ -78,6 +96,9 @@ export function CheckoutConfirmClient({
           paymentMethod,
           customerName: trimmedName,
           phone: trimmedPhone,
+          email: email.trim() || undefined,
+          marketingConsent,
+          externalCheckoutId,
           emirate: "دبي",
           address: isCod ? trimmedAddress : "يُؤكَّد بعد التواصل",
           ...(cartItemsParam ? { cartLines } : {}),
@@ -91,6 +112,7 @@ export function CheckoutConfirmClient({
       }
 
       const order = data.order;
+      clearStoredCheckoutExternalId();
       saveOrderDraft({
         orderId: order.id,
         productSlug: order.productSlug,
@@ -136,6 +158,21 @@ export function CheckoutConfirmClient({
           </header>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <label className="block">
+              <span className={checkoutLabelClass}>
+                البريد الإلكتروني <span className="font-normal text-neutral-400">(اختياري)</span>
+              </span>
+              <input
+                type="email"
+                dir="ltr"
+                value={email}
+                onChange={(ev) => setEmail(ev.target.value)}
+                placeholder="name@email.com"
+                className={checkoutInputClass}
+                autoComplete="email"
+              />
+            </label>
+            <MarketingConsentField checked={marketingConsent} onChange={setMarketingConsent} />
             <label className="block">
               <span className={checkoutLabelClass}>الاسم الكامل</span>
               <input

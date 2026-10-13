@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { CheckoutCardPaymentBlock } from "@/components/checkout/CheckoutCardPaymentBlock";
 import { CheckoutDeliveryFields } from "@/components/checkout/CheckoutDeliveryFields";
+import {
+  clearStoredCheckoutExternalId,
+  useCaptureBackendCheckout,
+} from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
@@ -58,7 +62,20 @@ export function CheckoutCardLegacyCheckout({
   const [emirate, setEmirate] = useState("");
   const [address, setAddress] = useState("");
   const [building, setBuilding] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const externalCheckoutId = useCaptureBackendCheckout({
+    email,
+    marketingConsent,
+    customerName: name,
+    phone,
+    emirate,
+    paymentMethod: "card",
+    productSlug,
+    quantity,
+    cartLines,
+    sendCartLines,
+  });
   const [submitting, setSubmitting] = useState(false);
   const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits);
 
@@ -91,6 +108,8 @@ export function CheckoutCardLegacyCheckout({
           customerName: trimmedName,
           phone: trimmedPhone,
           email: email.trim() || undefined,
+          marketingConsent,
+          externalCheckoutId,
           emirate,
           address: fullAddress,
           ...(sendCartLines ? { cartLines } : {}),
@@ -104,6 +123,7 @@ export function CheckoutCardLegacyCheckout({
       }
 
       const order = data.order;
+      clearStoredCheckoutExternalId();
       saveOrderDraft({
         orderId: order.id,
         productSlug: order.productSlug,
@@ -151,6 +171,8 @@ export function CheckoutCardLegacyCheckout({
               setAddress={setAddress}
               building={building}
               setBuilding={setBuilding}
+              marketingConsent={marketingConsent}
+              setMarketingConsent={setMarketingConsent}
             />
 
             <CheckoutCardPaymentBlock stripeEnabled={false} />

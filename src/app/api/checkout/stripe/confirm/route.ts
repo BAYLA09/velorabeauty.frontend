@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recoverPaidOrderCheckout } from "@/lib/backendCheckout/capture";
 import { getOrderById, markOrderPaid } from "@/lib/ordersRepository";
 import { getStripe, isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
 
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "الطلب غير موجود." }, { status: 404 });
     }
     if (order.status === "paid") {
+      recoverPaidOrderCheckout(order);
       return NextResponse.json({ paid: true, order });
     }
 
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
       if (intent.status === "succeeded") {
         markOrderPaid(orderId);
         const updated = getOrderById(orderId);
+        if (updated) recoverPaidOrderCheckout(updated);
         return NextResponse.json({ paid: true, order: updated });
       }
       return NextResponse.json({ paid: false, order });
@@ -67,6 +70,7 @@ export async function POST(request: Request) {
     if (paid) {
       markOrderPaid(orderId);
       const updated = getOrderById(orderId);
+      if (updated) recoverPaidOrderCheckout(updated);
       return NextResponse.json({ paid: true, order: updated });
     }
 

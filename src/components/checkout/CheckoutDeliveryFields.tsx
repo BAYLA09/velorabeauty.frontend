@@ -5,6 +5,7 @@ import {
   checkoutFieldLabelClass,
   checkoutInputClass,
 } from "@/components/checkout/checkoutFieldStyles";
+import { MarketingConsentField } from "@/components/checkout/MarketingConsentField";
 import { checkoutEmirates } from "@/config/productCheckout";
 
 export type DeliveryFormState = {
@@ -14,6 +15,7 @@ export type DeliveryFormState = {
   emirate: string;
   address: string;
   building: string;
+  marketingConsent: boolean;
 };
 
 export function CheckoutDeliveryFields(props: {
@@ -29,6 +31,8 @@ export function CheckoutDeliveryFields(props: {
   setAddress: (v: string) => void;
   building: string;
   setBuilding: (v: string) => void;
+  marketingConsent: boolean;
+  setMarketingConsent: (v: boolean) => void;
 }) {
   const {
     email,
@@ -43,6 +47,8 @@ export function CheckoutDeliveryFields(props: {
     setAddress,
     building,
     setBuilding,
+    marketingConsent,
+    setMarketingConsent,
   } = props;
 
   return (
@@ -67,6 +73,7 @@ export function CheckoutDeliveryFields(props: {
             autoComplete="email"
           />
         </div>
+        <MarketingConsentField checked={marketingConsent} onChange={setMarketingConsent} />
         <div>
           <label htmlFor="name" className={checkoutFieldLabelClass}>
             الاسم الكامل

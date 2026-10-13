@@ -4,6 +4,11 @@ import type { BundleQuantity } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import {
+  checkoutLinesForSync,
+  enqueueStorefrontCheckout,
+} from "@/lib/backendCheckout/capture";
+import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
+import {
   createOrder,
   setOrderStripePaymentIntent,
 } from "@/lib/ordersRepository";
@@ -31,6 +36,9 @@ export async function POST(request: Request) {
     const emirate = String(body.emirate ?? "").trim();
     const address = String(body.address ?? "").trim();
     const email = String(body.email ?? "").trim();
+    const marketingConsent = readMarketingConsent(body.marketingConsent);
+    const externalCheckoutId = String(body.externalCheckoutId ?? "").trim();
+    let syncLines: CartLine[] | null = null;
 
     if (!paymentIntentId) {
       return NextResponse.json({ error: "جلسة الدفع غير جاهزة." }, { status: 400 });
@@ -46,6 +54,7 @@ export async function POST(request: Request) {
           };
         })
         .filter((l): l is CartLine => Boolean(l?.slug && l.quantity >= 1));
+      syncLines = lines;
       const validated = validateCartForCheckout(lines);
       if (!validated.ok) {
         return NextResponse.json({ error: validated.error }, { status: 400 });
@@ -80,6 +89,12 @@ export async function POST(request: Request) {
       phone,
       emirate: resolvedEmirate,
       address,
+      customerEmail: email || undefined,
+      marketingConsent,
+      id: isStorefrontOrderId(externalCheckoutId) ? externalCheckoutId : undefined,
+      backendExternalCheckoutId: isStorefrontOrderId(externalCheckoutId)
+        ? externalCheckoutId
+        : undefined,
     });
 
     setOrderStripePaymentIntent(order.id, paymentIntentId);
@@ -97,6 +112,26 @@ export async function POST(request: Request) {
       metadata,
       ...(email ? { receipt_email: email } : {}),
     });
+
+    if (email) {
+      enqueueStorefrontCheckout({
+        email,
+        marketingConsent,
+        customerName,
+        phone,
+        emirate: resolvedEmirate,
+        paymentMethod: "card",
+        externalCheckoutId: order.backendExternalCheckoutId ?? order.id,
+        orderId: order.id,
+        stripePaymentIntentId: paymentIntentId,
+        lines: checkoutLinesForSync({
+          productSlug,
+          quantity,
+          cartLines: syncLines,
+        }),
+        phase: "order_open",
+      });
+    }
 
     return NextResponse.json({ orderId: order.id, order });
   } catch (err) {
