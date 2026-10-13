@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  beaconBackendCheckoutSync,
+  postBackendCheckoutSync,
+  type BrowserBackendSyncPayload,
+} from "@/lib/backendCheckout/browserSync";
 import {
   readStableCheckoutExternalId,
   resolveCheckoutExternalId,
@@ -13,6 +18,8 @@ export {
   clearStoredCheckoutExternalId,
   resolveCheckoutExternalId,
 } from "@/lib/backendCheckout/checkoutExternalId";
+
+const SYNC_DEBOUNCE_MS = 500;
 
 export type CaptureBackendCheckoutInput = {
   email: string;
@@ -29,21 +36,26 @@ export type CaptureBackendCheckoutInput = {
   paymentIntentId?: string;
 };
 
+export type CaptureBackendCheckoutResult = {
+  externalCheckoutId: string;
+  /** Call on email blur or before submit so sync is not lost to debounce/tab close. */
+  syncNow: () => void;
+};
+
 /**
  * Posts the checkout once a valid email is known, and again when the cart,
- * consent, or payment method changes. The debounce only batches keystrokes.
- * It does not poll. The backend sweep marks a quiet checkout abandoned.
+ * consent, or payment method changes. Debounce batches keystrokes only.
+ * pagehide uses sendBeacon when the shopper leaves before the timer fires.
  */
-export function useCaptureBackendCheckout(input: CaptureBackendCheckoutInput): string {
+export function useCaptureBackendCheckout(
+  input: CaptureBackendCheckoutInput,
+): CaptureBackendCheckoutResult {
   const [externalCheckoutId, setExternalCheckoutId] = useState("");
 
   useLayoutEffect(() => {
     setExternalCheckoutId(readStableCheckoutExternalId());
   }, []);
 
-  const cartKey = input.sendCartLines
-    ? (input.cartLines ?? []).map((line) => `${line.slug}:${line.quantity}`).join(",")
-    : "";
   const cartLinesRef = useRef(input.cartLines);
   cartLinesRef.current = input.cartLines;
   const detailsRef = useRef({
@@ -59,35 +71,25 @@ export function useCaptureBackendCheckout(input: CaptureBackendCheckoutInput): s
     paymentIntentId: input.paymentIntentId ?? "",
   };
 
-  useEffect(() => {
-    if (!isCheckoutEmail(input.email)) return;
-    const timer = window.setTimeout(() => {
-      const details = detailsRef.current;
-      const syncExternalCheckoutId = resolveCheckoutExternalId(externalCheckoutId);
-      if (!syncExternalCheckoutId) return;
-      void fetch("/api/checkout/backend-sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: input.email.trim(),
-          marketingConsent: input.marketingConsent === true,
-          customerName: details.customerName.trim(),
-          phone: details.phone.trim(),
-          emirate: details.emirate,
-          paymentMethod: input.paymentMethod,
-          productSlug: input.productSlug,
-          quantity: input.quantity,
-          externalCheckoutId: syncExternalCheckoutId,
-          paymentIntentId: details.paymentIntentId || undefined,
-          ...(input.sendCartLines ? { cartLines: cartLinesRef.current } : {}),
-        }),
-      }).catch(() => {
-        /* checkout must continue if the sync request fails */
-      });
-    }, 800);
-    return () => window.clearTimeout(timer);
+  const buildPayload = useCallback((): BrowserBackendSyncPayload | null => {
+    if (!isCheckoutEmail(input.email)) return null;
+    const syncExternalCheckoutId = resolveCheckoutExternalId(externalCheckoutId);
+    if (!syncExternalCheckoutId) return null;
+    const details = detailsRef.current;
+    return {
+      email: input.email.trim(),
+      marketingConsent: input.marketingConsent === true,
+      customerName: details.customerName.trim(),
+      phone: details.phone.trim(),
+      emirate: details.emirate,
+      paymentMethod: input.paymentMethod,
+      productSlug: input.productSlug,
+      quantity: input.quantity,
+      externalCheckoutId: syncExternalCheckoutId,
+      paymentIntentId: details.paymentIntentId || undefined,
+      ...(input.sendCartLines ? { cartLines: cartLinesRef.current } : {}),
+    };
   }, [
-    cartKey,
     externalCheckoutId,
     input.email,
     input.marketingConsent,
@@ -97,5 +99,32 @@ export function useCaptureBackendCheckout(input: CaptureBackendCheckoutInput): s
     input.sendCartLines,
   ]);
 
-  return resolveCheckoutExternalId(externalCheckoutId);
+  const syncNow = useCallback(() => {
+    const payload = buildPayload();
+    if (!payload) return;
+    void postBackendCheckoutSync(payload).catch(() => {
+      /* checkout must continue if the sync request fails */
+    });
+  }, [buildPayload]);
+
+  useEffect(() => {
+    if (!isCheckoutEmail(input.email)) return;
+    const timer = window.setTimeout(syncNow, SYNC_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [input.email, syncNow]);
+
+  useEffect(() => {
+    const onPageHide = () => {
+      const payload = buildPayload();
+      if (!payload) return;
+      beaconBackendCheckoutSync(payload);
+    };
+    window.addEventListener("pagehide", onPageHide);
+    return () => window.removeEventListener("pagehide", onPageHide);
+  }, [buildPayload]);
+
+  return {
+    externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),
+    syncNow,
+  };
 }

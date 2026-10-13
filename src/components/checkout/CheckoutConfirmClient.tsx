@@ -54,7 +54,7 @@ export function CheckoutConfirmClient({
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const externalCheckoutId = useCaptureBackendCheckout({
+  const { externalCheckoutId, syncNow } = useCaptureBackendCheckout({
     email,
     marketingConsent,
     customerName: name,
@@ -168,12 +168,17 @@ export function CheckoutConfirmClient({
                 dir="ltr"
                 value={email}
                 onChange={(ev) => setEmail(ev.target.value)}
+                onBlur={syncNow}
                 placeholder="name@email.com"
                 className={checkoutInputClass}
                 autoComplete="email"
               />
             </label>
-            <MarketingConsentField checked={marketingConsent} onChange={setMarketingConsent} />
+            <MarketingConsentField
+              checked={marketingConsent}
+              onChange={setMarketingConsent}
+              data-testid="marketing-consent"
+            />
             <label className="block">
               <span className={checkoutLabelClass}>الاسم الكامل</span>
               <input
