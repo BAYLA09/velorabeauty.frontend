@@ -3,12 +3,17 @@
 export function MarketingConsentField({
   checked,
   onChange,
+  "data-testid": dataTestId,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
+  "data-testid"?: string;
 }) {
   return (
-    <label className="flex items-start gap-3 rounded-md border border-[#ece7df] bg-[#faf8f5] px-3 py-3 text-sm leading-6 text-neutral-800">
+    <label
+      data-testid={dataTestId}
+      className="flex items-start gap-3 rounded-md border border-[#ece7df] bg-[#faf8f5] px-3 py-3 text-sm leading-6 text-neutral-800"
+    >
       <input
         type="checkbox"
         name="marketingConsent"

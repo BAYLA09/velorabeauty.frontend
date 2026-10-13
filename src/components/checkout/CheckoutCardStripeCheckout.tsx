@@ -310,7 +310,7 @@ export function CheckoutCardStripeCheckout({
   const [address, setAddress] = useState("");
   const [building, setBuilding] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
-  const externalCheckoutId = useCaptureBackendCheckout({
+  const { externalCheckoutId, syncNow } = useCaptureBackendCheckout({
     email,
     marketingConsent,
     customerName: name,
@@ -372,6 +372,7 @@ export function CheckoutCardStripeCheckout({
                 setBuilding={setBuilding}
                 marketingConsent={marketingConsent}
                 setMarketingConsent={setMarketingConsent}
+                onEmailBlur={syncNow}
               />
 
               <CheckoutCardPaySection

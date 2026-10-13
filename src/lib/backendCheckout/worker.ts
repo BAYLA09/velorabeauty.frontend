@@ -192,6 +192,16 @@ async function drain(): Promise<void> {
   }
 }
 
+/** Run pending checkout HTTP jobs before the API route returns. */
+export async function flushBackendCheckoutWorker(): Promise<number> {
+  const config = readBackendCheckoutConfig();
+  if (!config.enabled) return 0;
+  const before = listDueBackendCheckoutLinks(new Date().toISOString()).length;
+  await drain();
+  const after = listDueBackendCheckoutLinks(new Date().toISOString()).length;
+  return Math.max(0, before - after);
+}
+
 export function kickBackendCheckoutWorker(): void {
   kickAgain = true;
   if (draining) return;

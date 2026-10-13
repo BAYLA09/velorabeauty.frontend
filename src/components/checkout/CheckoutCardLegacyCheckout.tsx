@@ -65,7 +65,7 @@ export function CheckoutCardLegacyCheckout({
   const [building, setBuilding] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const externalCheckoutId = useCaptureBackendCheckout({
+  const { externalCheckoutId, syncNow } = useCaptureBackendCheckout({
     email,
     marketingConsent,
     customerName: name,
@@ -174,6 +174,7 @@ export function CheckoutCardLegacyCheckout({
               setBuilding={setBuilding}
               marketingConsent={marketingConsent}
               setMarketingConsent={setMarketingConsent}
+              onEmailBlur={syncNow}
             />
 
             <CheckoutCardPaymentBlock stripeEnabled={false} />

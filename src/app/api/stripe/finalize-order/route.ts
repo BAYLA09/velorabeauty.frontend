@@ -5,7 +5,7 @@ import type { CartLine } from "@/lib/cart/cartTypes";
 import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import {
   checkoutLinesForSync,
-  enqueueStorefrontCheckout,
+  enqueueStorefrontCheckoutAndFlush,
 } from "@/lib/backendCheckout/capture";
 import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import {
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
     });
 
     if (email) {
-      enqueueStorefrontCheckout({
+      await enqueueStorefrontCheckoutAndFlush({
         email,
         marketingConsent,
         customerName,

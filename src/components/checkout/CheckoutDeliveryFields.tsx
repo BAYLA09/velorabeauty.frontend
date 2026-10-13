@@ -33,6 +33,7 @@ export function CheckoutDeliveryFields(props: {
   setBuilding: (v: string) => void;
   marketingConsent: boolean;
   setMarketingConsent: (v: boolean) => void;
+  onEmailBlur?: () => void;
 }) {
   const {
     email,
@@ -49,6 +50,7 @@ export function CheckoutDeliveryFields(props: {
     setBuilding,
     marketingConsent,
     setMarketingConsent,
+    onEmailBlur,
   } = props;
 
   return (
@@ -68,12 +70,17 @@ export function CheckoutDeliveryFields(props: {
             dir="ltr"
             value={email}
             onChange={(ev) => setEmail(ev.target.value)}
+            onBlur={() => onEmailBlur?.()}
             placeholder="name@email.com"
             className={checkoutInputClass}
             autoComplete="email"
           />
         </div>
-        <MarketingConsentField checked={marketingConsent} onChange={setMarketingConsent} />
+        <MarketingConsentField
+          checked={marketingConsent}
+          onChange={setMarketingConsent}
+          data-testid="marketing-consent"
+        />
         <div>
           <label htmlFor="name" className={checkoutFieldLabelClass}>
             الاسم الكامل

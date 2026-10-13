@@ -22,7 +22,11 @@ import {
   saveBackendCheckoutProgress,
   upsertBackendCheckoutLink,
 } from "@/lib/backendCheckout/store";
-import { kickBackendCheckoutWorker, startBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
+import {
+  flushBackendCheckoutWorker,
+  kickBackendCheckoutWorker,
+  startBackendCheckoutWorker,
+} from "@/lib/backendCheckout/worker";
 
 export type CheckoutSyncPhase = "browsing" | "order_open" | "paid" | "cod_placed";
 
@@ -147,6 +151,14 @@ export function enqueueStorefrontCheckout(input: EnqueueCheckoutInput): void {
       error: err instanceof Error ? err.message : "unknown",
     });
   }
+}
+
+/** Enqueue then await the worker so the backend call finishes in this request. */
+export async function enqueueStorefrontCheckoutAndFlush(
+  input: EnqueueCheckoutInput,
+): Promise<void> {
+  enqueueStorefrontCheckout(input);
+  await flushBackendCheckoutWorker();
 }
 
 export function checkoutLinesForSync(input: {

@@ -107,7 +107,7 @@ export function CheckoutCardVanillaCheckout({
   const [building, setBuilding] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const externalCheckoutId = useCaptureBackendCheckout({
+  const { externalCheckoutId, syncNow } = useCaptureBackendCheckout({
     email,
     marketingConsent,
     customerName: name,
@@ -251,6 +251,7 @@ export function CheckoutCardVanillaCheckout({
               setBuilding={setBuilding}
               marketingConsent={marketingConsent}
               setMarketingConsent={setMarketingConsent}
+              onEmailBlur={syncNow}
             />
 
             {error ? (
