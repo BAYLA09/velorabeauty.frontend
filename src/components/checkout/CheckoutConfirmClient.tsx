@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
-import { MarketingConsentField } from "@/components/checkout/MarketingConsentField";
+import { CheckoutEmailMarketingFields } from "@/components/checkout/CheckoutEmailMarketingFields";
 import {
   clearStoredCheckoutExternalId,
   resolveCheckoutExternalId,
@@ -159,25 +159,12 @@ export function CheckoutConfirmClient({
           </header>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-            <label className="block">
-              <span className={checkoutLabelClass}>
-                البريد الإلكتروني <span className="font-normal text-neutral-400">(اختياري)</span>
-              </span>
-              <input
-                type="email"
-                dir="ltr"
-                value={email}
-                onChange={(ev) => setEmail(ev.target.value)}
-                onBlur={syncNow}
-                placeholder="name@email.com"
-                className={checkoutInputClass}
-                autoComplete="email"
-              />
-            </label>
-            <MarketingConsentField
-              checked={marketingConsent}
-              onChange={setMarketingConsent}
-              data-testid="marketing-consent"
+            <CheckoutEmailMarketingFields
+              email={email}
+              setEmail={setEmail}
+              marketingConsent={marketingConsent}
+              setMarketingConsent={setMarketingConsent}
+              onEmailBlur={syncNow}
             />
             <label className="block">
               <span className={checkoutLabelClass}>الاسم الكامل</span>

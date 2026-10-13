@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { CheckoutDeliveryFields } from "@/components/checkout/CheckoutDeliveryFields";
+import { CheckoutEmailMarketingFields } from "@/components/checkout/CheckoutEmailMarketingFields";
 import {
   clearStoredCheckoutExternalId,
   resolveCheckoutExternalId,
@@ -234,9 +235,18 @@ export function CheckoutCardVanillaCheckout({
           className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="space-y-8">
+            <CheckoutEmailMarketingFields
+              email={email}
+              setEmail={setEmail}
+              marketingConsent={marketingConsent}
+              setMarketingConsent={setMarketingConsent}
+              onEmailBlur={syncNow}
+            />
+
             {paymentSlot}
 
             <CheckoutDeliveryFields
+              hideEmailMarketing
               email={email}
               setEmail={setEmail}
               name={name}

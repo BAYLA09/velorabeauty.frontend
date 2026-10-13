@@ -5,7 +5,7 @@ import {
   checkoutFieldLabelClass,
   checkoutInputClass,
 } from "@/components/checkout/checkoutFieldStyles";
-import { MarketingConsentField } from "@/components/checkout/MarketingConsentField";
+import { CheckoutEmailMarketingFields } from "@/components/checkout/CheckoutEmailMarketingFields";
 import { checkoutEmirates } from "@/config/productCheckout";
 
 export type DeliveryFormState = {
@@ -34,6 +34,8 @@ export function CheckoutDeliveryFields(props: {
   marketingConsent: boolean;
   setMarketingConsent: (v: boolean) => void;
   onEmailBlur?: () => void;
+  /** Card checkout renders email + consent above the payment block. */
+  hideEmailMarketing?: boolean;
 }) {
   const {
     email,
@@ -51,6 +53,7 @@ export function CheckoutDeliveryFields(props: {
     marketingConsent,
     setMarketingConsent,
     onEmailBlur,
+    hideEmailMarketing = false,
   } = props;
 
   return (
@@ -59,28 +62,15 @@ export function CheckoutDeliveryFields(props: {
         title="معلومات التواصل"
         subtitle="لإرسال تأكيد الطلب وتحديثات التوصيل"
       >
-        <div>
-          <label htmlFor="email" className={checkoutFieldLabelClass}>
-            البريد الإلكتروني{" "}
-            <span className="font-normal text-neutral-400">(اختياري)</span>
-          </label>
-          <input
-            id="email"
-            type="email"
-            dir="ltr"
-            value={email}
-            onChange={(ev) => setEmail(ev.target.value)}
-            onBlur={() => onEmailBlur?.()}
-            placeholder="name@email.com"
-            className={checkoutInputClass}
-            autoComplete="email"
+        {!hideEmailMarketing ? (
+          <CheckoutEmailMarketingFields
+            email={email}
+            setEmail={setEmail}
+            marketingConsent={marketingConsent}
+            setMarketingConsent={setMarketingConsent}
+            onEmailBlur={onEmailBlur}
           />
-        </div>
-        <MarketingConsentField
-          checked={marketingConsent}
-          onChange={setMarketingConsent}
-          data-testid="marketing-consent"
-        />
+        ) : null}
         <div>
           <label htmlFor="name" className={checkoutFieldLabelClass}>
             الاسم الكامل
