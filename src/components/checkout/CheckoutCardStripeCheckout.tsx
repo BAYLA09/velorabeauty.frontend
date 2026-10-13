@@ -348,14 +348,6 @@ export function CheckoutCardStripeCheckout({
           className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="space-y-8">
-            <CheckoutEmailMarketingFields
-              email={email}
-              setEmail={setEmail}
-              marketingConsent={marketingConsent}
-              setMarketingConsent={setMarketingConsent}
-              onEmailBlur={syncNow}
-            />
-
             <CheckoutStripeElementsProvider
               productSlug={productSlug}
               productName={productName}
@@ -365,6 +357,14 @@ export function CheckoutCardStripeCheckout({
               bootstrap={stripeBootstrap ?? null}
             >
               <CheckoutStripePaymentElement />
+
+              <CheckoutEmailMarketingFields
+                email={email}
+                setEmail={setEmail}
+                marketingConsent={marketingConsent}
+                setMarketingConsent={setMarketingConsent}
+                onEmailBlur={syncNow}
+              />
 
               <CheckoutDeliveryFields
                 hideEmailMarketing

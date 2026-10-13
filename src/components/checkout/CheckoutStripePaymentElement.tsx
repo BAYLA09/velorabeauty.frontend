@@ -22,7 +22,9 @@ export const stripePaymentElementOptions = {
     googlePay: "never" as const,
     link: "never" as const,
   },
-  fields: { billingDetails: { address: "never" as const } },
+  fields: {
+    billingDetails: { address: "never" as const, email: "never" as const },
+  },
   terms: { card: "never" as const },
 };
 
