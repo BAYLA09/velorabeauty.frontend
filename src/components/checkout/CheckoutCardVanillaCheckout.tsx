@@ -235,6 +235,8 @@ export function CheckoutCardVanillaCheckout({
           className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="space-y-8">
+            {paymentSlot}
+
             <CheckoutEmailMarketingFields
               email={email}
               setEmail={setEmail}
@@ -242,8 +244,6 @@ export function CheckoutCardVanillaCheckout({
               setMarketingConsent={setMarketingConsent}
               onEmailBlur={syncNow}
             />
-
-            {paymentSlot}
 
             <CheckoutDeliveryFields
               hideEmailMarketing

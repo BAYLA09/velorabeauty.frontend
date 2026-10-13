@@ -6,7 +6,7 @@ import {
 } from "@/components/checkout/checkoutFieldStyles";
 import { MarketingConsentField } from "@/components/checkout/MarketingConsentField";
 
-/** Email + marketing consent, kept together at the top of card checkout on mobile. */
+/** Email + marketing consent — directly under card payment block. */
 export function CheckoutEmailMarketingFields(props: {
   email: string;
   setEmail: (v: string) => void;

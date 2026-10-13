@@ -31,7 +31,7 @@ export function buildStripeVanillaMountScript(bootstrap: StripeCardBootstrap): s
         layout: "accordion",
         paymentMethodOrder: ["card"],
         wallets: { applePay: "never", googlePay: "never", link: "never" },
-        fields: { billingDetails: { address: "never" } },
+        fields: { billingDetails: { address: "never", email: "never" } },
         terms: { card: "never" },
       });
       pe.on("ready", function () {
