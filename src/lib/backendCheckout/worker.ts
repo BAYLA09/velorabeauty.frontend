@@ -1,5 +1,4 @@
 import {
-  abandonBackendCheckout,
   createBackendCheckout,
   createBackendOrder,
   recoverBackendCheckout,
@@ -15,7 +14,6 @@ import {
 } from "@/lib/backendCheckout/contract";
 import {
   listDueBackendCheckoutLinks,
-  listScheduledAbandons,
   saveBackendCheckoutProgress,
   type BackendCheckoutLink,
 } from "@/lib/backendCheckout/store";
@@ -131,11 +129,8 @@ async function processLink(link: BackendCheckoutLink, config: EnabledConfig, now
   }
 
   const action = nextRemoteAction({
-    abandonMode: config.abandonMode,
     desired: link.desiredStatus,
     remoteStatus: remote,
-    abandonAfterMs: link.abandonAfter ? Date.parse(link.abandonAfter) : null,
-    nowMs: now.getTime(),
   });
 
   if (action === "done") {
@@ -147,89 +142,32 @@ async function processLink(link: BackendCheckoutLink, config: EnabledConfig, now
     return;
   }
 
-  if (action === "wait") {
-    const abandonAfter =
-      link.abandonAfter ??
-      new Date(now.getTime() + config.abandonDelayMinutes * 60_000).toISOString();
-    saveBackendCheckoutProgress(link.externalCheckoutId, {
-      syncStatus: "settled",
-      remoteStatus: "active",
-      backendCheckoutId: backendId,
-      abandonAfter,
-      lastError: null,
-      updatedAt: nowIso,
-    });
-    return;
-  }
-
   if (!backendId) {
     fail(link, "missing_checkout_id", now);
     return;
   }
 
-  if (action === "recover") {
-    const recovered = await recoverBackendCheckout(config, backendId);
-    if (recovered.action === "retry") {
-      if (recovered.status === 404) {
-        saveBackendCheckoutProgress(link.externalCheckoutId, {
-          backendCheckoutId: null,
-          remoteStatus: "none",
-          syncStatus: "pending",
-          updatedAt: nowIso,
-        });
-      }
-      scheduleRetry({ ...link, attempts: link.attempts }, recovered, now);
-      return;
+  const recovered = await recoverBackendCheckout(config, backendId);
+  if (recovered.action === "retry") {
+    if (recovered.status === 404) {
+      saveBackendCheckoutProgress(link.externalCheckoutId, {
+        backendCheckoutId: null,
+        remoteStatus: "none",
+        syncStatus: "pending",
+        updatedAt: nowIso,
+      });
     }
-    if (recovered.action === "stop") {
-      fail(link, recovered.reason, now);
-      return;
-    }
-    saveBackendCheckoutProgress(link.externalCheckoutId, {
-      backendCheckoutId: backendId,
-      remoteStatus: "recovered",
-      desiredStatus: "recovered",
-      syncStatus: "settled",
-      lastError: null,
-      abandonAfter: null,
-      updatedAt: nowIso,
-    });
+    scheduleRetry({ ...link, attempts: link.attempts }, recovered, now);
     return;
   }
-
-  if (action !== "abandon") {
-    saveBackendCheckoutProgress(link.externalCheckoutId, {
-      backendCheckoutId: backendId,
-      remoteStatus: remote,
-      syncStatus: "settled",
-      updatedAt: nowIso,
-    });
-    return;
-  }
-
-  const abandoned = await abandonBackendCheckout(config, backendId);
-  if (abandoned.action === "already_recovered") {
-    saveBackendCheckoutProgress(link.externalCheckoutId, {
-      backendCheckoutId: backendId,
-      remoteStatus: "recovered",
-      desiredStatus: "recovered",
-      syncStatus: "settled",
-      lastError: null,
-      updatedAt: nowIso,
-    });
-    return;
-  }
-  if (abandoned.action === "retry") {
-    scheduleRetry(link, abandoned, now);
-    return;
-  }
-  if (abandoned.action === "stop") {
-    fail(link, abandoned.reason, now);
+  if (recovered.action === "stop") {
+    fail(link, recovered.reason, now);
     return;
   }
   saveBackendCheckoutProgress(link.externalCheckoutId, {
     backendCheckoutId: backendId,
-    remoteStatus: "abandoned",
+    remoteStatus: "recovered",
+    desiredStatus: "recovered",
     syncStatus: "settled",
     lastError: null,
     abandonAfter: null,
@@ -241,17 +179,7 @@ async function drain(): Promise<void> {
   const config = readBackendCheckoutConfig();
   if (!config.enabled) return;
   const now = new Date();
-  const nowIso = now.toISOString();
-
-  for (const scheduled of listScheduledAbandons(nowIso)) {
-    saveBackendCheckoutProgress(scheduled.externalCheckoutId, {
-      syncStatus: "pending",
-      nextAttemptAt: nowIso,
-      updatedAt: nowIso,
-    });
-  }
-
-  const due = listDueBackendCheckoutLinks(nowIso);
+  const due = listDueBackendCheckoutLinks(now.toISOString());
   for (const link of due) {
     try {
       await processLink(link, config, now);
@@ -292,6 +220,7 @@ export function startBackendCheckoutWorker(): void {
     return;
   }
   kickBackendCheckoutWorker();
+  // Retries pending HTTP jobs. Abandonment is a backend sweep, not this interval.
   const timer = setInterval(() => kickBackendCheckoutWorker(), 30_000);
   timer.unref?.();
 }

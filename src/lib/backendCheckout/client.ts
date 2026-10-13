@@ -19,7 +19,7 @@ async function postBackend(input: {
   config: Extract<BackendCheckoutConfig, { enabled: true }>;
   url: string;
   body?: unknown;
-  op: "create" | "abandon" | "recover" | "order";
+  op: "create" | "recover" | "order";
 }): Promise<BackendCallResult> {
   const { config, url, op } = input;
   try {
@@ -60,17 +60,6 @@ export function createBackendCheckout(
     url: checkoutCollectionUrl(config.baseUrl),
     body,
     op: "create",
-  });
-}
-
-export function abandonBackendCheckout(
-  config: Extract<BackendCheckoutConfig, { enabled: true }>,
-  checkoutId: string,
-): Promise<BackendCallResult> {
-  return postBackend({
-    config,
-    url: checkoutActionUrl(config.baseUrl, checkoutId, "abandon"),
-    op: "abandon",
   });
 }
 

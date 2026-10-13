@@ -46,9 +46,9 @@ export function clearStoredCheckoutExternalId(): void {
 }
 
 /**
- * Tells our server about the checkout once an email is present.
- * Abandonment itself is scheduled on the server — this debounce only avoids
- * a request on every keystroke.
+ * Posts the checkout once a valid email is known, and again when the cart,
+ * consent, or payment method changes. The debounce only batches keystrokes.
+ * It does not poll. The backend sweep marks a quiet checkout abandoned.
  */
 export function useCaptureBackendCheckout(input: CaptureBackendCheckoutInput): string {
   const [externalCheckoutId, setExternalCheckoutId] = useState("");

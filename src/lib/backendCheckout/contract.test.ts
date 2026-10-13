@@ -12,6 +12,8 @@ import {
 } from "./contract.ts";
 import { checkoutActionUrl, checkoutCollectionUrl, readBackendCheckoutConfig } from "./config.ts";
 
+const orderUuid = "11111111-1111-4111-8111-111111111111";
+
 const draft = {
   email: " BaylaAmine@Gmail.com ",
   marketingConsent: false,
@@ -19,8 +21,8 @@ const draft = {
   phone: "0501234567",
   emirate: "دبي",
   paymentMethod: "card" as const,
-  externalCheckoutId: "pi_test_checkout_123",
-  orderId: "order-1234",
+  externalCheckoutId: orderUuid,
+  orderId: orderUuid,
   eligibleUnits: 1,
   subtotalAmount: 199,
   deliveryFeeAmount: 0,
@@ -39,21 +41,19 @@ describe("backend checkout contract", () => {
     assert.equal(body.currency, "AED");
     assert.equal(body.totalAmount, 199);
     assert.equal(body.country, "AE");
-    assert.equal(body.externalCheckoutId, "pi_test_checkout_123");
+    assert.equal(body.externalCheckoutId, orderUuid);
     assert.deepEqual(body.cartData.items, draft.items);
     const withStripe = buildCreateCheckoutBody({
       ...draft,
-      externalCheckoutId: "0f1c2a3b-4d5e-6789-aaaa-bbbbbbbbbbbb",
       stripePaymentIntentId: "pi_test_checkout_123",
     });
     assert.equal(withStripe?.cartData.stripePaymentIntentId, "pi_test_checkout_123");
-    assert.equal(withStripe?.externalCheckoutId, "0f1c2a3b-4d5e-6789-aaaa-bbbbbbbbbbbb");
-    const order = buildBackendOrderBody(
-      { ...draft, externalCheckoutId: "0f1c2a3b-4d5e-6789-aaaa-bbbbbbbbbbbb", orderId: "0f1c2a3b-4d5e-6789-aaaa-bbbbbbbbbbbb" },
-      "paid",
-    );
+    assert.equal(withStripe?.externalCheckoutId, orderUuid);
+    const order = buildBackendOrderBody({ ...draft, orderId: "not-the-uuid" }, "paid");
     assert.equal(order?.status, "paid");
-    assert.equal(order?.externalOrderId, order?.externalCheckoutId);
+    assert.equal(order?.externalOrderId, orderUuid);
+    assert.equal(order?.externalCheckoutId, orderUuid);
+    assert.equal(order?.totalAmount, 199);
     assert.equal(order?.currency, "AED");
     assert.equal(body.cartData.paymentMethod, "card");
     assert.equal(readMarketingConsent(undefined), false);
@@ -65,73 +65,19 @@ describe("backend checkout contract", () => {
     assert.equal(isCheckoutEmail("nope"), false);
     assert.equal(buildCreateCheckoutBody({ ...draft, email: "nope" }), null);
     assert.equal(buildCreateCheckoutBody({ ...draft, externalCheckoutId: "short" }), null);
+    assert.equal(
+      buildCreateCheckoutBody({ ...draft, externalCheckoutId: "pi_test_checkout_123" }),
+      null,
+    );
     assert.equal(buildCreateCheckoutBody({ ...draft, items: [] }), null);
   });
 
-  it("recovers a completed checkout and does not abandon it", () => {
-    assert.equal(
-      nextRemoteAction({
-        abandonMode: "immediate",
-        desired: "recovered",
-        remoteStatus: "active",
-        abandonAfterMs: null,
-        nowMs: 0,
-      }),
-      "recover",
-    );
-    assert.equal(
-      nextRemoteAction({
-        abandonMode: "immediate",
-        desired: "recovered",
-        remoteStatus: "abandoned",
-        abandonAfterMs: null,
-        nowMs: 0,
-      }),
-      "recover",
-    );
-    assert.equal(
-      nextRemoteAction({
-        abandonMode: "immediate",
-        desired: "recovered",
-        remoteStatus: "recovered",
-        abandonAfterMs: null,
-        nowMs: 0,
-      }),
-      "done",
-    );
-  });
-
-  it("follows the configured abandon mode", () => {
-    const base = {
-      desired: "active" as const,
-      remoteStatus: "active" as const,
-      nowMs: 1_000,
-    };
-    assert.equal(
-      nextRemoteAction({ ...base, abandonMode: "immediate", abandonAfterMs: null }),
-      "abandon",
-    );
-    assert.equal(
-      nextRemoteAction({ ...base, abandonMode: "none", abandonAfterMs: null }),
-      "done",
-    );
-    assert.equal(
-      nextRemoteAction({ ...base, abandonMode: "delayed", abandonAfterMs: 5_000 }),
-      "wait",
-    );
-    assert.equal(
-      nextRemoteAction({ ...base, abandonMode: "delayed", abandonAfterMs: 500 }),
-      "abandon",
-    );
-    assert.equal(
-      nextRemoteAction({
-        ...base,
-        abandonMode: "immediate",
-        remoteStatus: "abandoned",
-        abandonAfterMs: null,
-      }),
-      "done",
-    );
+  it("recovers a finished checkout and leaves an open one for the backend sweep", () => {
+    assert.equal(nextRemoteAction({ desired: "recovered", remoteStatus: "active" }), "recover");
+    assert.equal(nextRemoteAction({ desired: "recovered", remoteStatus: "abandoned" }), "recover");
+    assert.equal(nextRemoteAction({ desired: "recovered", remoteStatus: "recovered" }), "done");
+    assert.equal(nextRemoteAction({ desired: "active", remoteStatus: "active" }), "done");
+    assert.equal(nextRemoteAction({ desired: "active", remoteStatus: "none" }), "done");
   });
 
   it("treats abandon-after-recover as success and retries only safe failures", () => {
@@ -166,17 +112,11 @@ describe("backend checkout contract", () => {
     const configured = readBackendCheckoutConfig({
       BACKEND_API_BASE_URL: "https://api.velorabeauty.world/",
       STORE_API_KEY: "store-key-at-least-16",
-      BACKEND_CHECKOUT_ABANDON_MODE: "none",
     });
     assert.equal(configured.enabled, true);
     if (!configured.enabled) return;
     assert.equal(configured.baseUrl, "https://api.velorabeauty.world");
-    assert.equal(configured.abandonMode, "none");
-    const defaults = readBackendCheckoutConfig({
-      BACKEND_API_BASE_URL: "https://api.velorabeauty.world",
-      STORE_API_KEY: "store-key-at-least-16",
-    });
-    assert.equal(defaults.enabled && defaults.abandonMode, "none");
+    assert.equal("abandonMode" in configured, false);
     assert.equal(
       checkoutCollectionUrl(configured.baseUrl),
       "https://api.velorabeauty.world/api/checkouts",

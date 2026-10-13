@@ -5,6 +5,7 @@ import {
   buildCreateCheckoutBody,
   isCheckoutEmail,
   isExternalCheckoutId,
+  isStorefrontOrderId,
   normalizeCheckoutEmail,
   redactEmail,
   type BackendOrderStatus,
@@ -40,8 +41,8 @@ export type EnqueueCheckoutInput = {
   /**
    * browsing: email captured, no order yet.
    * order_open: order row exists, payment not captured.
-   * paid: Stripe payment succeeded.
-   * cod_placed: cash on delivery submitted; recover so abandonment mail stops.
+   * paid: Stripe payment succeeded. POST /api/orders with status "paid".
+   * cod_placed: cash on delivery. POST /api/orders pending, then /recover.
    */
   phase: CheckoutSyncPhase;
 };
@@ -158,10 +159,12 @@ export function checkoutLinesForSync(input: {
 }
 
 export function recoverPaidOrderCheckout(order: OrderRecord): void {
-  const externalCheckoutId =
-    order.backendExternalCheckoutId && isExternalCheckoutId(order.backendExternalCheckoutId)
+  const externalCheckoutId = isStorefrontOrderId(order.id)
+    ? order.id
+    : order.backendExternalCheckoutId && isExternalCheckoutId(order.backendExternalCheckoutId)
       ? order.backendExternalCheckoutId
-      : order.id;
+      : "";
+  if (!externalCheckoutId) return;
   if (!order.customerEmail) {
     requestBackendCheckoutRecovery({ externalCheckoutId });
     return;

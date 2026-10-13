@@ -255,19 +255,3 @@ export function listDueBackendCheckoutLinks(nowIso: string, limit = 20): Backend
   return rows.map(rowToLink);
 }
 
-export function listScheduledAbandons(nowIso: string, limit = 20): BackendCheckoutLink[] {
-  ensureLinkSchema();
-  const rows = getDb()
-    .prepare(
-      `SELECT * FROM backend_checkout_links
-       WHERE desired_status = 'active'
-         AND remote_status = 'active'
-         AND abandon_after IS NOT NULL
-         AND abandon_after <= ?
-         AND sync_status != 'failed'
-       ORDER BY abandon_after ASC
-       LIMIT ?`,
-    )
-    .all(nowIso, limit) as LinkRow[];
-  return rows.map(rowToLink);
-}

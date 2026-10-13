@@ -1,20 +1,11 @@
-import type { AbandonMode } from "@/lib/backendCheckout/contract";
-
 export type BackendCheckoutConfig =
   | { enabled: false; reason: string }
   | {
       enabled: true;
       baseUrl: string;
       apiKey: string;
-      abandonMode: AbandonMode;
-      abandonDelayMinutes: number;
       timeoutMs: number;
     };
-
-function readAbandonMode(value: string | undefined): AbandonMode {
-  if (value === "delayed" || value === "none" || value === "immediate") return value;
-  return "none";
-}
 
 export function readBackendCheckoutConfig(
   env: Record<string, string | undefined> = process.env,
@@ -37,16 +28,10 @@ export function readBackendCheckoutConfig(
     return { enabled: false, reason: "STORE_API_KEY must be at least 16 characters" };
   }
 
-  const delayRaw = Number(env.BACKEND_ABANDON_DELAY_MINUTES ?? "30");
-  const abandonDelayMinutes =
-    Number.isFinite(delayRaw) && delayRaw >= 1 ? Math.floor(delayRaw) : 30;
-
   return {
     enabled: true,
     baseUrl: parsed.origin,
     apiKey,
-    abandonMode: readAbandonMode(env.BACKEND_CHECKOUT_ABANDON_MODE?.trim()),
-    abandonDelayMinutes,
     timeoutMs: 4000,
   };
 }
@@ -62,7 +47,7 @@ export function orderCollectionUrl(baseUrl: string): string {
 export function checkoutActionUrl(
   baseUrl: string,
   checkoutId: string,
-  action: "abandon" | "recover",
+  action: "recover",
 ): string {
   return `${baseUrl}/api/checkouts/${encodeURIComponent(checkoutId)}/${action}`;
 }

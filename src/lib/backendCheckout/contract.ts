@@ -4,10 +4,10 @@
  *
  * POST /api/checkouts                 Bearer STORE_API_KEY — upsert by externalCheckoutId
  * POST /api/orders                    same external id; status "paid" recovers the checkout
- * POST /api/checkouts/:id/recover     COD, and a safety net after payment
- * POST /api/checkouts/:id/abandon     optional; the backend sweep owns the 30-minute quiet period
+ * POST /api/checkouts/:id/recover     COD, and a safety net after a paid order
+ * POST /api/checkouts/:id/abandon     optional. This app does not call it and has no timer.
  *
- * `:id` on abandon/recover is the backend checkout id, not the storefront order UUID.
+ * `:id` on recover is the backend checkout id, not the storefront order UUID.
  * externalCheckoutId and externalOrderId are that order UUID.
  * Emails require marketingConsent. Do not poll /api/checkouts; each call refreshes activity.
  */
@@ -17,10 +17,6 @@ export const CHECKOUT_CURRENCY = "AED";
 /** Same shape the backend validates before `isValidEmail`. */
 const EMAIL_REGEX =
   /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/;
-
-const EXTERNAL_ID_REGEX = /^[A-Za-z0-9_-]{8,200}$/;
-
-export type AbandonMode = "immediate" | "delayed" | "none";
 
 export type CheckoutCartItem = {
   slug: string;
@@ -103,8 +99,9 @@ export function isCheckoutEmail(email: string): boolean {
   return normalized.length >= 3 && EMAIL_REGEX.test(normalized);
 }
 
+/** The backend external id is the storefront order UUID. Stripe ids belong in cartData. */
 export function isExternalCheckoutId(value: string): boolean {
-  return EXTERNAL_ID_REGEX.test(value);
+  return isStorefrontOrderId(value);
 }
 
 /** Storefront order id. The backend contract uses this as externalCheckoutId and externalOrderId. */
@@ -132,7 +129,7 @@ export function readMarketingConsent(value: unknown): boolean {
 export function buildCreateCheckoutBody(draft: CaptureDraft): CreateCheckoutBody | null {
   const email = normalizeCheckoutEmail(draft.email);
   if (!isCheckoutEmail(email)) return null;
-  if (!isExternalCheckoutId(draft.externalCheckoutId)) return null;
+  if (!isStorefrontOrderId(draft.externalCheckoutId)) return null;
   if (!Number.isFinite(draft.totalAmount) || draft.totalAmount < 0) return null;
   if (draft.items.length === 0) return null;
 
@@ -186,7 +183,7 @@ export function buildBackendOrderBody(
     ...(checkout.lastName ? { lastName: checkout.lastName } : {}),
     ...(checkout.phone ? { phone: checkout.phone } : {}),
     country: "AE",
-    externalOrderId: draft.orderId?.trim() || checkout.externalCheckoutId,
+    externalOrderId: checkout.externalCheckoutId,
     externalCheckoutId: checkout.externalCheckoutId,
     totalAmount: checkout.totalAmount,
     currency: CHECKOUT_CURRENCY,
@@ -209,31 +206,15 @@ export function readStoredCheckoutJob(raw: unknown): StoredCheckoutJob | null {
 export type RemoteCheckoutStatus = "none" | "active" | "abandoned" | "recovered";
 
 /**
- * What to do after a successful upsert.
- * `complete` means the customer finished (Stripe paid, or COD order placed):
- * recover, and never abandon.
- *
- * `immediate` calls /abandon right after upsert. The backend then waits
- * ABANDONED_CHECKOUT_MIN_AGE_MINUTES (default 30) before the checkout is
- * eligible for email. Delaying the storefront call would stack a second wait.
- * `none` (the default) leaves the checkout ACTIVE so the backend sweep can
- * mark it abandoned 30 minutes after the last upsert.
+ * After upsert, an open checkout stays ACTIVE. The backend sweep abandons it.
+ * A finished checkout (paid, or cash on delivery) is recovered once.
  */
 export function nextRemoteAction(input: {
-  abandonMode: AbandonMode;
   desired: "active" | "recovered";
   remoteStatus: RemoteCheckoutStatus;
-  abandonAfterMs: number | null;
-  nowMs: number;
-}): "abandon" | "recover" | "wait" | "done" {
-  if (input.desired === "recovered") {
-    return input.remoteStatus === "recovered" ? "done" : "recover";
-  }
-  if (input.remoteStatus === "recovered" || input.remoteStatus === "abandoned") return "done";
-  if (input.abandonMode === "none") return "done";
-  if (input.abandonMode === "immediate") return "abandon";
-  if (input.abandonAfterMs === null || input.abandonAfterMs > input.nowMs) return "wait";
-  return "abandon";
+}): "recover" | "done" {
+  if (input.desired === "recovered" && input.remoteStatus !== "recovered") return "recover";
+  return "done";
 }
 
 export type BackendCallInterpretation =
