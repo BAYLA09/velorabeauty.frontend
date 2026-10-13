@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { isCheckoutEmail, isExternalCheckoutId } from "@/lib/backendCheckout/contract";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  readStableCheckoutExternalId,
+  resolveCheckoutExternalId,
+} from "@/lib/backendCheckout/checkoutExternalId";
+import { isCheckoutEmail } from "@/lib/backendCheckout/contract";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import type { PaymentMethod } from "@/config/pricing";
 
-const STORAGE_KEY = "velora-checkout-external-id";
+export {
+  clearStoredCheckoutExternalId,
+  resolveCheckoutExternalId,
+} from "@/lib/backendCheckout/checkoutExternalId";
 
 export type CaptureBackendCheckoutInput = {
   email: string;
@@ -22,29 +29,6 @@ export type CaptureBackendCheckoutInput = {
   paymentIntentId?: string;
 };
 
-function readStableExternalId(explicit?: string): string {
-  if (explicit && isExternalCheckoutId(explicit)) return explicit;
-  if (typeof window === "undefined") return "";
-  try {
-    const existing = window.sessionStorage.getItem(STORAGE_KEY);
-    if (existing && isExternalCheckoutId(existing)) return existing;
-    const created = window.crypto.randomUUID();
-    window.sessionStorage.setItem(STORAGE_KEY, created);
-    return created;
-  } catch {
-    return "";
-  }
-}
-
-export function clearStoredCheckoutExternalId(): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* private mode */
-  }
-}
-
 /**
  * Posts the checkout once a valid email is known, and again when the cart,
  * consent, or payment method changes. The debounce only batches keystrokes.
@@ -53,8 +37,8 @@ export function clearStoredCheckoutExternalId(): void {
 export function useCaptureBackendCheckout(input: CaptureBackendCheckoutInput): string {
   const [externalCheckoutId, setExternalCheckoutId] = useState("");
 
-  useEffect(() => {
-    setExternalCheckoutId(readStableExternalId());
+  useLayoutEffect(() => {
+    setExternalCheckoutId(readStableCheckoutExternalId());
   }, []);
 
   const cartKey = input.sendCartLines
@@ -76,9 +60,11 @@ export function useCaptureBackendCheckout(input: CaptureBackendCheckoutInput): s
   };
 
   useEffect(() => {
-    if (!externalCheckoutId || !isCheckoutEmail(input.email)) return;
+    if (!isCheckoutEmail(input.email)) return;
     const timer = window.setTimeout(() => {
       const details = detailsRef.current;
+      const syncExternalCheckoutId = resolveCheckoutExternalId(externalCheckoutId);
+      if (!syncExternalCheckoutId) return;
       void fetch("/api/checkout/backend-sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,7 +77,7 @@ export function useCaptureBackendCheckout(input: CaptureBackendCheckoutInput): s
           paymentMethod: input.paymentMethod,
           productSlug: input.productSlug,
           quantity: input.quantity,
-          externalCheckoutId,
+          externalCheckoutId: syncExternalCheckoutId,
           paymentIntentId: details.paymentIntentId || undefined,
           ...(input.sendCartLines ? { cartLines: cartLinesRef.current } : {}),
         }),
@@ -111,5 +97,5 @@ export function useCaptureBackendCheckout(input: CaptureBackendCheckoutInput): s
     input.sendCartLines,
   ]);
 
-  return externalCheckoutId;
+  return resolveCheckoutExternalId(externalCheckoutId);
 }

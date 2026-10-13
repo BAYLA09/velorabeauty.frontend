@@ -7,6 +7,7 @@ import { CheckoutCardPaymentBlock } from "@/components/checkout/CheckoutCardPaym
 import { CheckoutDeliveryFields } from "@/components/checkout/CheckoutDeliveryFields";
 import {
   clearStoredCheckoutExternalId,
+  resolveCheckoutExternalId,
   useCaptureBackendCheckout,
 } from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
@@ -109,7 +110,7 @@ export function CheckoutCardLegacyCheckout({
           phone: trimmedPhone,
           email: email.trim() || undefined,
           marketingConsent,
-          externalCheckoutId,
+          externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),
           emirate,
           address: fullAddress,
           ...(sendCartLines ? { cartLines } : {}),

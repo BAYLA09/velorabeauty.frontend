@@ -7,6 +7,7 @@ import { useState } from "react";
 import { CheckoutDeliveryFields } from "@/components/checkout/CheckoutDeliveryFields";
 import {
   clearStoredCheckoutExternalId,
+  resolveCheckoutExternalId,
   useCaptureBackendCheckout,
 } from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
@@ -197,7 +198,7 @@ function StripeCardPaymentAndSubmit({
           phone: trimmedPhone,
           email: form.email.trim() || undefined,
           marketingConsent: form.marketingConsent,
-          externalCheckoutId: form.externalCheckoutId,
+          externalCheckoutId: resolveCheckoutExternalId(form.externalCheckoutId),
           emirate: form.emirate,
           address: fullAddress,
           ...(sendCartLines ? { cartLines } : {}),

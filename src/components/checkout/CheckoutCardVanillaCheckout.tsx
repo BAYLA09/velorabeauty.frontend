@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { CheckoutDeliveryFields } from "@/components/checkout/CheckoutDeliveryFields";
 import {
   clearStoredCheckoutExternalId,
+  resolveCheckoutExternalId,
   useCaptureBackendCheckout,
 } from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
@@ -157,7 +158,7 @@ export function CheckoutCardVanillaCheckout({
           phone: trimmedPhone,
           email: email.trim() || undefined,
           marketingConsent,
-          externalCheckoutId,
+          externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),
           emirate,
           address: fullAddress,
           ...(sendCartLines ? { cartLines } : {}),

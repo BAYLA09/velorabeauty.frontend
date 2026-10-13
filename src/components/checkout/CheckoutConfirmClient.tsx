@@ -6,6 +6,7 @@ import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
 import { MarketingConsentField } from "@/components/checkout/MarketingConsentField";
 import {
   clearStoredCheckoutExternalId,
+  resolveCheckoutExternalId,
   useCaptureBackendCheckout,
 } from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
@@ -98,7 +99,7 @@ export function CheckoutConfirmClient({
           phone: trimmedPhone,
           email: email.trim() || undefined,
           marketingConsent,
-          externalCheckoutId,
+          externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),
           emirate: "دبي",
           address: isCod ? trimmedAddress : "يُؤكَّد بعد التواصل",
           ...(cartItemsParam ? { cartLines } : {}),

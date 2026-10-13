@@ -76,6 +76,12 @@ export async function POST(request: Request) {
     if (!address) {
       return NextResponse.json({ error: "أدخلي عنوان التوصيل." }, { status: 400 });
     }
+    if (email && !isStorefrontOrderId(externalCheckoutId)) {
+      return NextResponse.json(
+        { error: "تعذّر ربط الطلب بجلسة الشراء. أعدي تحميل الصفحة." },
+        { status: 400 },
+      );
+    }
 
     const resolvedEmirate =
       emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
