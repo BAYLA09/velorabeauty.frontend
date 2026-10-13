@@ -27,7 +27,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "الطلب غير موجود." }, { status: 404 });
     }
     if (order.status === "paid") {
-      recoverPaidOrderCheckout(order);
+      try {
+        recoverPaidOrderCheckout(order);
+      } catch (err) {
+        console.error(
+          "[api/checkout/stripe/confirm] backend checkout sync failed",
+          err instanceof Error ? err.message : err,
+        );
+      }
       return NextResponse.json({ paid: true, order });
     }
 
@@ -43,7 +50,16 @@ export async function POST(request: Request) {
       if (intent.status === "succeeded") {
         markOrderPaid(orderId);
         const updated = getOrderById(orderId);
-        if (updated) recoverPaidOrderCheckout(updated);
+        if (updated) {
+          try {
+            recoverPaidOrderCheckout(updated);
+          } catch (err) {
+            console.error(
+              "[api/checkout/stripe/confirm] backend checkout sync failed",
+              err instanceof Error ? err.message : err,
+            );
+          }
+        }
         return NextResponse.json({ paid: true, order: updated });
       }
       return NextResponse.json({ paid: false, order });
@@ -70,7 +86,16 @@ export async function POST(request: Request) {
     if (paid) {
       markOrderPaid(orderId);
       const updated = getOrderById(orderId);
-      if (updated) recoverPaidOrderCheckout(updated);
+      if (updated) {
+        try {
+          recoverPaidOrderCheckout(updated);
+        } catch (err) {
+          console.error(
+            "[api/checkout/stripe/confirm] backend checkout sync failed",
+            err instanceof Error ? err.message : err,
+          );
+        }
+      }
       return NextResponse.json({ paid: true, order: updated });
     }
 

@@ -49,7 +49,16 @@ export async function POST(request: Request) {
         }
       }
       const paidOrder = paidOrderId ? getOrderById(paidOrderId) : null;
-      if (paidOrder) recoverPaidOrderCheckout(paidOrder);
+      if (paidOrder) {
+        try {
+          recoverPaidOrderCheckout(paidOrder);
+        } catch (err) {
+          console.error(
+            "[stripe/webhook] backend checkout sync failed",
+            err instanceof Error ? err.message : err,
+          );
+        }
+      }
     } else if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.payment_status === "paid" || session.status === "complete") {
@@ -66,7 +75,16 @@ export async function POST(request: Request) {
           }
         }
         const paidOrder = paidOrderId ? getOrderById(paidOrderId) : null;
-        if (paidOrder) recoverPaidOrderCheckout(paidOrder);
+        if (paidOrder) {
+          try {
+            recoverPaidOrderCheckout(paidOrder);
+          } catch (err) {
+            console.error(
+              "[stripe/webhook] backend checkout sync failed",
+              err instanceof Error ? err.message : err,
+            );
+          }
+        }
       }
     }
   } catch (err) {
