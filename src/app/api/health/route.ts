@@ -1,3 +1,4 @@
+import { readBackendCheckoutConfig } from "@/lib/backendCheckout/config";
 import { startBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
 import {
   getStripePublishableKey,
@@ -13,6 +14,7 @@ export async function GET() {
 
   const buildSha = process.env.BUILD_SHA?.trim() || "local";
   const shortSha = buildSha.length >= 7 ? buildSha.slice(0, 7) : buildSha;
+  const backendCheckout = readBackendCheckoutConfig();
 
   return Response.json({
     ok: true,
@@ -35,14 +37,24 @@ export async function GET() {
         /** Use App → Docker Image OR Compose with docker-compose.yml — never Git Dockerfile build */
         source: "docker-image",
         composeFile: "docker-compose.yml",
+        envTemplate: "deploy/easypanel.env.example",
+        quickGuide: "docs/EASYPANEL-DEPLOY-NOW-AR.md",
         port: 3000,
         volume: "/app/data",
         registryAuth: "none (public GHCR) — or BAYLA09 + read:packages token if unauthorized",
         deployTooFastHint:
           "Deploy <2s = Git/webhook failed — switch Source to Docker Image",
         expectDeployDuration: "1–3 minutes",
+        stepsAfterMerge: [
+          "GitHub Actions → Publish container ✅",
+          "Easypanel → Docker Image → Deploy (1–3 min, pull layers in logs)",
+          "curl /api/health → version matches main SHA",
+        ],
       },
     },
+    backendCheckout: backendCheckout.enabled
+      ? { enabled: true, baseUrl: backendCheckout.baseUrl }
+      : { enabled: false, reason: backendCheckout.reason },
     payments: {
       stripeSecretConfigured: stripeSecret,
       stripePublishableConfigured: Boolean(getStripePublishableKey()),
