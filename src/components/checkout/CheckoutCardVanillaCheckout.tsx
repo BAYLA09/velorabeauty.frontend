@@ -4,6 +4,11 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { CheckoutDeliveryFields } from "@/components/checkout/CheckoutDeliveryFields";
+import {
+  clearStoredCheckoutExternalId,
+  resolveCheckoutExternalId,
+  useCaptureBackendCheckout,
+} from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
 import { useStripeCheckoutPrefetch } from "@/components/checkout/useStripeCheckoutPrefetch";
@@ -100,7 +105,21 @@ export function CheckoutCardVanillaCheckout({
   const [emirate, setEmirate] = useState("");
   const [address, setAddress] = useState("");
   const [building, setBuilding] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const externalCheckoutId = useCaptureBackendCheckout({
+    email,
+    marketingConsent,
+    customerName: name,
+    phone,
+    emirate,
+    paymentMethod: "card",
+    productSlug,
+    quantity,
+    cartLines,
+    sendCartLines,
+    paymentIntentId: stripeBootstrap.paymentIntentId,
+  });
   const [submitting, setSubmitting] = useState(false);
 
   async function handlePay() {
@@ -138,6 +157,8 @@ export function CheckoutCardVanillaCheckout({
           customerName: trimmedName,
           phone: trimmedPhone,
           email: email.trim() || undefined,
+          marketingConsent,
+          externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),
           emirate,
           address: fullAddress,
           ...(sendCartLines ? { cartLines } : {}),
@@ -154,6 +175,7 @@ export function CheckoutCardVanillaCheckout({
       }
 
       const order = finalizeData.order;
+      clearStoredCheckoutExternalId();
       saveOrderDraft({
         orderId: order.id,
         productSlug: order.productSlug,
@@ -227,6 +249,8 @@ export function CheckoutCardVanillaCheckout({
               setAddress={setAddress}
               building={building}
               setBuilding={setBuilding}
+              marketingConsent={marketingConsent}
+              setMarketingConsent={setMarketingConsent}
             />
 
             {error ? (

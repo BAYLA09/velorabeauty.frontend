@@ -5,6 +5,11 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CheckoutDeliveryFields } from "@/components/checkout/CheckoutDeliveryFields";
+import {
+  clearStoredCheckoutExternalId,
+  resolveCheckoutExternalId,
+  useCaptureBackendCheckout,
+} from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
 import {
@@ -43,6 +48,8 @@ type DeliveryFormState = {
   emirate: string;
   address: string;
   building: string;
+  marketingConsent: boolean;
+  externalCheckoutId: string;
 };
 
 export type CheckoutCardStripeCheckoutProps = {
@@ -190,6 +197,8 @@ function StripeCardPaymentAndSubmit({
           customerName: trimmedName,
           phone: trimmedPhone,
           email: form.email.trim() || undefined,
+          marketingConsent: form.marketingConsent,
+          externalCheckoutId: resolveCheckoutExternalId(form.externalCheckoutId),
           emirate: form.emirate,
           address: fullAddress,
           ...(sendCartLines ? { cartLines } : {}),
@@ -206,6 +215,7 @@ function StripeCardPaymentAndSubmit({
       }
 
       const order = finalizeData.order;
+      clearStoredCheckoutExternalId();
       saveOrderDraft({
         orderId: order.id,
         productSlug: order.productSlug,
@@ -299,6 +309,20 @@ export function CheckoutCardStripeCheckout({
   const [emirate, setEmirate] = useState("");
   const [address, setAddress] = useState("");
   const [building, setBuilding] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const externalCheckoutId = useCaptureBackendCheckout({
+    email,
+    marketingConsent,
+    customerName: name,
+    phone,
+    emirate,
+    paymentMethod: "card",
+    productSlug,
+    quantity,
+    cartLines,
+    sendCartLines,
+    paymentIntentId: stripeBootstrap?.paymentIntentId,
+  });
 
   const formState: DeliveryFormState = {
     email,
@@ -307,6 +331,8 @@ export function CheckoutCardStripeCheckout({
     emirate,
     address,
     building,
+    marketingConsent,
+    externalCheckoutId,
   };
 
   return (
@@ -344,6 +370,8 @@ export function CheckoutCardStripeCheckout({
                 setAddress={setAddress}
                 building={building}
                 setBuilding={setBuilding}
+                marketingConsent={marketingConsent}
+                setMarketingConsent={setMarketingConsent}
               />
 
               <CheckoutCardPaySection

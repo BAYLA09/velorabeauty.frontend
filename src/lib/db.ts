@@ -46,6 +46,15 @@ function ensureSchema(database: Database.Database): void {
   database.exec(
     `CREATE INDEX IF NOT EXISTS idx_orders_stripe_pi ON orders (stripe_payment_intent_id)`,
   );
+  if (!names.has("customer_email")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN customer_email TEXT`);
+  }
+  if (!names.has("marketing_consent")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN marketing_consent INTEGER NOT NULL DEFAULT 0`);
+  }
+  if (!names.has("backend_external_checkout_id")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN backend_external_checkout_id TEXT`);
+  }
 }
 
 export function getDb(): Database.Database {

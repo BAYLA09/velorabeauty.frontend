@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { checkoutEmirates } from "@/config/productCheckout";
 import type { BundleQuantity } from "@/config/pricing";
 import {
+  checkoutLinesForSync,
+  enqueueStorefrontCheckout,
+} from "@/lib/backendCheckout/capture";
+import { readMarketingConsent } from "@/lib/backendCheckout/contract";
+import {
   createOrder,
   setOrderStripeSession,
 } from "@/lib/ordersRepository";
@@ -28,6 +33,7 @@ export async function POST(request: Request) {
     const emirate = String(body.emirate ?? "").trim();
     const address = String(body.address ?? "").trim();
     const email = String(body.email ?? "").trim();
+    const marketingConsent = readMarketingConsent(body.marketingConsent);
 
     if (!productSlug || !productName) {
       return NextResponse.json({ error: "المنتج غير معروف." }, { status: 400 });
@@ -53,6 +59,8 @@ export async function POST(request: Request) {
       phone,
       emirate: resolvedEmirate,
       address,
+      customerEmail: email || undefined,
+      marketingConsent,
     });
 
     const base = getSiteUrl();
@@ -93,6 +101,22 @@ export async function POST(request: Request) {
     }
 
     setOrderStripeSession(order.id, session.id);
+
+    if (email) {
+      enqueueStorefrontCheckout({
+        email,
+        marketingConsent,
+        customerName,
+        phone,
+        emirate: resolvedEmirate,
+        paymentMethod: "card",
+        externalCheckoutId: order.id,
+        orderId: order.id,
+        stripeCheckoutSessionId: session.id,
+        lines: checkoutLinesForSync({ productSlug, quantity }),
+        phase: "order_open",
+      });
+    }
 
     return NextResponse.json({
       orderId: order.id,

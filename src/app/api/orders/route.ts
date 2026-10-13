@@ -3,6 +3,11 @@ import { checkoutEmirates } from "@/config/productCheckout";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
+import {
+  checkoutLinesForSync,
+  enqueueStorefrontCheckout,
+} from "@/lib/backendCheckout/capture";
+import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import { createOrder } from "@/lib/ordersRepository";
 
 function isBundleQuantity(n: unknown): n is BundleQuantity {
@@ -27,6 +32,10 @@ export async function POST(request: Request) {
     const phone = String(body.phone ?? "").trim();
     const emirate = String(body.emirate ?? "").trim();
     const address = String(body.address ?? "").trim();
+    const email = String(body.email ?? "").trim();
+    const marketingConsent = readMarketingConsent(body.marketingConsent);
+    const externalCheckoutId = String(body.externalCheckoutId ?? "").trim();
+    let syncLines: CartLine[] | null = null;
 
     if (Array.isArray(rawCartLines) && rawCartLines.length > 0) {
       const lines: CartLine[] = rawCartLines
@@ -39,6 +48,7 @@ export async function POST(request: Request) {
           };
         })
         .filter((l): l is CartLine => Boolean(l?.slug && l.quantity >= 1));
+      syncLines = lines;
       const validated = validateCartForCheckout(lines);
       if (!validated.ok) {
         return NextResponse.json({ error: validated.error }, { status: 400 });
@@ -66,6 +76,12 @@ export async function POST(request: Request) {
     if (!address) {
       return NextResponse.json({ error: "أدخلي عنوان التوصيل." }, { status: 400 });
     }
+    if (email && !isStorefrontOrderId(externalCheckoutId)) {
+      return NextResponse.json(
+        { error: "تعذّر ربط الطلب بجلسة الشراء. أعدي تحميل الصفحة." },
+        { status: 400 },
+      );
+    }
 
     const resolvedEmirate =
       emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
@@ -84,7 +100,32 @@ export async function POST(request: Request) {
       phone,
       emirate: resolvedEmirate,
       address: resolvedAddress,
+      customerEmail: email || undefined,
+      marketingConsent,
+      id: isStorefrontOrderId(externalCheckoutId) ? externalCheckoutId : undefined,
+      backendExternalCheckoutId: isStorefrontOrderId(externalCheckoutId)
+        ? externalCheckoutId
+        : undefined,
     });
+
+    if (email) {
+      enqueueStorefrontCheckout({
+        email,
+        marketingConsent,
+        customerName,
+        phone,
+        emirate: resolvedEmirate,
+        paymentMethod,
+        externalCheckoutId: order.backendExternalCheckoutId ?? order.id,
+        orderId: order.id,
+        lines: checkoutLinesForSync({
+          productSlug,
+          quantity,
+          cartLines: syncLines,
+        }),
+        phase: paymentMethod === "cod" ? "cod_placed" : "order_open",
+      });
+    }
 
     return NextResponse.json({ order });
   } catch (err) {

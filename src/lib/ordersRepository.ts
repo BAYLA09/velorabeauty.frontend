@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { isStorefrontOrderId } from "@/lib/backendCheckout/contract";
 import {
   getCheckoutTotalForUnits,
   getMerchandiseAedForUnits,
@@ -23,6 +24,9 @@ export type OrderRecord = {
   status: string;
   stripeCheckoutSessionId: string | null;
   stripePaymentIntentId: string | null;
+  customerEmail: string | null;
+  marketingConsent: boolean;
+  backendExternalCheckoutId: string | null;
   createdAt: string;
 };
 
@@ -35,6 +39,11 @@ export type CreateOrderInput = {
   phone: string;
   emirate: string;
   address: string;
+  customerEmail?: string;
+  marketingConsent?: boolean;
+  backendExternalCheckoutId?: string;
+  /** When this is a fresh UUID, it becomes the order id and the backend external id. */
+  id?: string;
 };
 
 type OrderRow = {
@@ -53,6 +62,9 @@ type OrderRow = {
   status: string;
   stripe_checkout_session_id?: string | null;
   stripe_payment_intent_id?: string | null;
+  customer_email?: string | null;
+  marketing_consent?: number | null;
+  backend_external_checkout_id?: string | null;
   created_at: string;
 };
 
@@ -73,6 +85,9 @@ function rowToRecord(row: OrderRow): OrderRecord {
     status: row.status,
     stripeCheckoutSessionId: row.stripe_checkout_session_id ?? null,
     stripePaymentIntentId: row.stripe_payment_intent_id ?? null,
+    customerEmail: row.customer_email ?? null,
+    marketingConsent: row.marketing_consent === 1,
+    backendExternalCheckoutId: row.backend_external_checkout_id ?? null,
     createdAt: row.created_at,
   };
 }
@@ -103,7 +118,9 @@ export function createOrder(
     input.paymentMethod,
   );
 
-  const id = randomUUID();
+  const requestedId = input.id?.trim() ?? "";
+  const id =
+    isStorefrontOrderId(requestedId) && !getOrderById(requestedId) ? requestedId : randomUUID();
   const createdAt = new Date().toISOString();
 
   getDb()
@@ -111,8 +128,9 @@ export function createOrder(
       `INSERT INTO orders (
         id, product_slug, product_name, quantity, payment_method,
         subtotal_aed, delivery_fee_aed, total_aed,
-        customer_name, phone, emirate, address, status, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+        customer_name, phone, emirate, address, status, created_at,
+        customer_email, marketing_consent, backend_external_checkout_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)`,
     )
     .run(
       id,
@@ -128,6 +146,9 @@ export function createOrder(
       input.emirate.trim(),
       input.address.trim(),
       createdAt,
+      input.customerEmail?.trim() || null,
+      input.marketingConsent ? 1 : 0,
+      input.backendExternalCheckoutId?.trim() || id,
     );
 
   const row = getDb()
@@ -146,7 +167,9 @@ export function getOrderById(id: string): OrderRecord | null {
 
 export function setOrderStripeSession(orderId: string, sessionId: string): void {
   getDb()
-    .prepare(`UPDATE orders SET stripe_checkout_session_id = ?, status = 'awaiting_payment' WHERE id = ?`)
+    .prepare(
+      `UPDATE orders SET stripe_checkout_session_id = ?, status = 'awaiting_payment' WHERE id = ?`,
+    )
     .run(sessionId, orderId);
 }
 

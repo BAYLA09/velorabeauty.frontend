@@ -1,9 +1,13 @@
+import { startBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
 import {
   getStripePublishableKey,
   isStripeCardCheckoutEnabled,
 } from "@/lib/stripeServer";
 
+export const runtime = "nodejs";
+
 export async function GET() {
+  startBackendCheckoutWorker();
   const stripeSecret = Boolean(process.env.STRIPE_SECRET_KEY?.trim());
   const cardEnabled = isStripeCardCheckoutEnabled();
 
