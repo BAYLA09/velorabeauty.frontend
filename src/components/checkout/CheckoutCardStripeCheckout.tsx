@@ -348,14 +348,6 @@ export function CheckoutCardStripeCheckout({
           className="rounded-xl border border-[#d9d9d9] bg-white p-5 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="space-y-8">
-            <CheckoutEmailMarketingFields
-              email={email}
-              setEmail={setEmail}
-              marketingConsent={marketingConsent}
-              setMarketingConsent={setMarketingConsent}
-              onEmailBlur={syncNow}
-            />
-
             <CheckoutStripeElementsProvider
               productSlug={productSlug}
               productName={productName}
@@ -366,34 +358,44 @@ export function CheckoutCardStripeCheckout({
             >
               <CheckoutStripePaymentElement />
 
-              <CheckoutDeliveryFields
-                hideEmailMarketing
-                email={email}
-                setEmail={setEmail}
-                name={name}
-                setName={setName}
-                phone={phone}
-                setPhone={setPhone}
-                emirate={emirate}
-                setEmirate={setEmirate}
-                address={address}
-                setAddress={setAddress}
-                building={building}
-                setBuilding={setBuilding}
-                marketingConsent={marketingConsent}
-                setMarketingConsent={setMarketingConsent}
-                onEmailBlur={syncNow}
-              />
+              <div className="mt-8 space-y-8">
+                <CheckoutEmailMarketingFields
+                  email={email}
+                  setEmail={setEmail}
+                  marketingConsent={marketingConsent}
+                  setMarketingConsent={setMarketingConsent}
+                  onEmailBlur={syncNow}
+                />
 
-              <CheckoutCardPaySection
-                productSlug={productSlug}
-                productName={productName}
-                quantity={quantity}
-                eligibleUnits={eligibleUnits}
-                form={formState}
-                cartLines={cartLines}
-                sendCartLines={sendCartLines}
-              />
+                <CheckoutDeliveryFields
+                  hideEmailMarketing
+                  email={email}
+                  setEmail={setEmail}
+                  name={name}
+                  setName={setName}
+                  phone={phone}
+                  setPhone={setPhone}
+                  emirate={emirate}
+                  setEmirate={setEmirate}
+                  address={address}
+                  setAddress={setAddress}
+                  building={building}
+                  setBuilding={setBuilding}
+                  marketingConsent={marketingConsent}
+                  setMarketingConsent={setMarketingConsent}
+                  onEmailBlur={syncNow}
+                />
+
+                <CheckoutCardPaySection
+                  productSlug={productSlug}
+                  productName={productName}
+                  quantity={quantity}
+                  eligibleUnits={eligibleUnits}
+                  form={formState}
+                  cartLines={cartLines}
+                  sendCartLines={sendCartLines}
+                />
+              </div>
             </CheckoutStripeElementsProvider>
           </div>
         </form>
