@@ -1,21 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo } from "react";
-import { codThankYouCopy } from "@/config/codThankYouCopy";
 import { codFee } from "@/config/pricing";
 import type { BundleQuantity } from "@/config/pricing";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
 import { codTimelineSteps } from "@/lib/order/codThankYouTimeline";
 import { resolveOrderProductImage } from "@/lib/order/resolveOrderProductImage";
 import type { OrderDraft } from "@/lib/orderStorage";
-import { CodThankYouBeforeDelivery } from "@/components/order/cod-thank-you/CodThankYouBeforeDelivery";
-import { CodThankYouConfirmSection } from "@/components/order/cod-thank-you/CodThankYouConfirmSection";
+import { CodThankYouFooterBar } from "@/components/order/cod-thank-you/CodThankYouFooterBar";
 import { CodThankYouHero } from "@/components/order/cod-thank-you/CodThankYouHero";
+import { CodThankYouOrderMetaBar } from "@/components/order/cod-thank-you/CodThankYouOrderMetaBar";
 import { CodThankYouOrderSummary } from "@/components/order/cod-thank-you/CodThankYouOrderSummary";
-import { CodThankYouSupport } from "@/components/order/cod-thank-you/CodThankYouSupport";
+import { CodThankYouQuickTrust } from "@/components/order/cod-thank-you/CodThankYouQuickTrust";
+import { CodThankYouReachableAlert } from "@/components/order/cod-thank-you/CodThankYouReachableAlert";
 import { CodThankYouTimeline } from "@/components/order/cod-thank-you/CodThankYouTimeline";
-import { CodThankYouTrustStrip } from "@/components/order/cod-thank-you/CodThankYouTrustStrip";
+import { CodThankYouValues } from "@/components/order/cod-thank-you/CodThankYouValues";
 
 export type CodThankYouOrder = OrderDraft & {
   subtotalAed?: number;
@@ -44,27 +43,28 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
   }, []);
 
   return (
-    <div className="mx-auto max-w-lg space-y-5 pb-8">
-      <CodThankYouHero
-        customerName={order.customerName}
-        orderRef={orderRef}
-        createdAt={createdAt}
-        totalAed={order.totalAed}
-      />
+    <article className="mx-auto max-w-[440px] overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_48px_rgba(58,24,32,0.12)] ring-1 ring-velora-burgundy/8">
+      <CodThankYouHero customerName={order.customerName} />
+
+      <div className="mt-4">
+        <CodThankYouOrderMetaBar orderRef={orderRef} createdAt={createdAt} />
+      </div>
 
       <CodThankYouTimeline steps={timeline} />
+      <CodThankYouQuickTrust />
 
-      <CodThankYouConfirmSection
-        orderRef={orderRef}
-        customerName={order.customerName}
-        phone={order.phone}
-      />
+      <div className="pb-5 pt-2">
+        <CodThankYouReachableAlert
+          orderRef={orderRef}
+          customerName={order.customerName}
+          phone={order.phone}
+        />
+      </div>
 
-      <CodThankYouTrustStrip />
+      <CodThankYouValues />
 
       <CodThankYouOrderSummary
         productName={order.productName}
-        productSlug={order.productSlug}
         quantity={order.quantity as BundleQuantity}
         image={productImage}
         emirate={order.emirate}
@@ -74,19 +74,7 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
         totalAed={order.totalAed}
       />
 
-      <CodThankYouBeforeDelivery />
-
-      <CodThankYouSupport orderRef={orderRef} />
-
-      <div className="flex justify-center pt-2">
-        <Link
-          href="/"
-          className="rounded-full border border-velora-burgundy/15 bg-white px-8 py-3 text-sm font-bold text-velora-burgundy transition hover:bg-velora-cream"
-          onClick={onNavigateAway}
-        >
-          {codThankYouCopy.homeCta}
-        </Link>
-      </div>
-    </div>
+      <CodThankYouFooterBar orderRef={orderRef} onHome={onNavigateAway} />
+    </article>
   );
 }
