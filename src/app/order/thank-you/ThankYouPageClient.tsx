@@ -107,7 +107,7 @@ export function ThankYouPageClient() {
   return (
     <>
       <ProductStoreHeader />
-      <main className="min-h-[70vh] bg-velora-cream px-4 py-10 sm:py-14">
+      <main className="min-h-[75vh] bg-gradient-to-b from-velora-cream via-velora-cream to-velora-cream-dark/40 px-4 py-12 sm:py-16">
         {loading ? (
           <div className="mx-auto max-w-xl text-center">
             <p className="text-base text-velora-burgundy/70">جاري تحميل تفاصيل الطلب…</p>
