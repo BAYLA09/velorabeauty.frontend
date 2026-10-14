@@ -4,7 +4,7 @@
 
 ```text
 ghcr.io/bayla09/velorabeauty.frontend:latest
-ghcr.io/bayla09/velorabeauty.frontend:8ab607e
+ghcr.io/bayla09/velorabeauty.frontend:89709ec
 ```
 
 GitHub → **Actions** → **Publish container** → ✅ (2–3 دقائق). من بعد **Easypanel ما كيسحبش وحدو** — خاصك **Deploy** يدوي.
@@ -25,19 +25,6 @@ GitHub → **Actions** → **Publish container** → ✅ (2–3 دقائق). م�
 ### Deploy كيخلص ف 1 ثانية؟
 
 Source = **Git** (غلط). احذف الخدمة أو بدّل Source ل **Docker Image**.
-
-### «ما قدرتش نـ deploy» — تشخيص سريع
-
-فـ terminal (أو Cloud Agent):
-
-```bash
-chmod +x scripts/easypanel-diagnose.sh
-./scripts/easypanel-diagnose.sh
-```
-
-أو GitHub → **Actions** → **Publish container** → **Run workflow** (branch `main`) — من بعد Easypanel → **Deploy** (1–3 دق).
-
-**Secret اختياري:** `EASYPANEL_DEPLOY_WEBHOOK` = *Deployment Trigger URL* من خدمة **Docker Image** (ماشي Git).
 
 ---
 
