@@ -19,10 +19,10 @@ import {
   codFee,
   currencyLabel,
   formatPrice,
-  resolveCheckoutTotalAed,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
+import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
@@ -67,7 +67,12 @@ export function CheckoutConfirmClient({
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const total = resolveCheckoutTotalAed(quantity, paymentMethod, eligibleUnits);
+  const total = resolveCheckoutTotalAed(
+    quantity,
+    paymentMethod,
+    eligibleUnits,
+    cartLines,
+  );
   const isCod = paymentMethod === "cod";
 
   async function handleSubmit(e: FormEvent) {

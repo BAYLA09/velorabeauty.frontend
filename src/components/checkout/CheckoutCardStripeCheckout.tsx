@@ -19,7 +19,8 @@ import {
 } from "@/components/checkout/CheckoutStripeElementsProvider";
 import { CheckoutStripePaymentElement } from "@/components/checkout/CheckoutStripePaymentElement";
 import { useStripeCheckoutPrefetch } from "@/components/checkout/useStripeCheckoutPrefetch";
-import { resolveCheckoutTotalAed, type BundleQuantity } from "@/config/pricing";
+import type { BundleQuantity } from "@/config/pricing";
+import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { saveOrderDraft } from "@/lib/orderStorage";
@@ -116,7 +117,7 @@ function CheckoutCardPaySection({
   sendCartLines: boolean;
 }) {
   const { elementsLoading } = useCheckoutStripe();
-  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits);
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
 
   if (elementsLoading) {
     return (
@@ -162,7 +163,7 @@ function StripeCardPaymentAndSubmit({
   const { paymentIntentId, paymentReady } = useCheckoutStripe();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits);
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
 
   async function handlePay() {
     setError(null);

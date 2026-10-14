@@ -14,11 +14,15 @@ import {
   currencyLabel,
   formatPrice,
   getCheckoutTotal,
-  getCheckoutTotalForUnits,
-  getMerchandiseAedForUnits,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
+import {
+  countEligibleUnits,
+  getCheckoutTotalForCart,
+  getMerchandiseAedForCart,
+} from "@/lib/cart/cartPricing";
+import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import {
   allocateCartLinePrices,
   bundleOfferLabel,
@@ -33,7 +37,6 @@ import {
   parseCheckoutLines,
   setCheckoutLineQuantity,
 } from "@/lib/checkoutUpsell";
-import { countEligibleUnits } from "@/lib/cart/cartPricing";
 import { MAX_CART_UNITS } from "@/lib/cart/cartTypes";
 import { getProductBySlug, getProductPath } from "@/lib/productCatalog";
 
@@ -76,14 +79,15 @@ export function CheckoutSummarySidebar({
     validated?.ok && mixedCart
       ? validated.cart.merchandiseAed
       : mixedCart && totalUnits > 0
-        ? getMerchandiseAedForUnits(totalUnits) ?? cardBundlePrices[bundleQty]
+        ? (getMerchandiseAedForCart(lines) ?? cardBundlePrices[bundleQty])
         : cardBundlePrices[bundleQty];
-  const linePrices = allocateCartLinePrices(lines, subtotal);
+  const linePrices = allocateCartLinePrices(lines);
   const singleLineBasket = lines.length === 1 && !mixedCart;
   const deliveryFee = paymentMethod === "cod" ? codFee : 0;
   const total =
-    totalUnits > 0
-      ? (getCheckoutTotalForUnits(totalUnits, paymentMethod) ?? getCheckoutTotal(bundleQty, paymentMethod))
+    totalUnits > 0 && mixedCart
+      ? (getCheckoutTotalForCart(lines, paymentMethod) ??
+        resolveCheckoutTotalAed(bundleQty, paymentMethod, totalUnits, lines))
       : getCheckoutTotal(bundleQty, paymentMethod);
 
   function checkoutQueryFromLines(nextLines: typeof lines, bundleQuantity: BundleQuantity) {

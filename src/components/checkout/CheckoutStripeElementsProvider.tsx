@@ -20,6 +20,7 @@ import {
 } from "@/lib/stripeCheckoutPrefetch";
 import { preloadStripeJs, primeStripeJsSync } from "@/lib/stripeJsLoader";
 import type { BundleQuantity } from "@/config/pricing";
+import { parseCartItemsParam } from "@/lib/cart/cartSerialization";
 
 type StripeCtx = {
   paymentIntentId: string;
@@ -136,6 +137,9 @@ export function CheckoutStripeElementsProvider({
               productName,
               quantity,
               eligibleUnits,
+              cartLines: itemsParam?.trim()
+                ? parseCartItemsParam(itemsParam.trim())
+                : undefined,
               paymentIntentId: piRef.current || undefined,
             }),
           }),

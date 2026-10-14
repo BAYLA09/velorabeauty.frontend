@@ -31,8 +31,8 @@ export function getCheckoutTotal(
   return method === "card" ? cardBundlePrices[quantity] : codBundlePrices[quantity];
 }
 
-/** Totals for mixed cart (4 units = 339 + 199) or single-SKU checkout. */
-export function resolveCheckoutTotalAed(
+/** Totals for single-SKU checkout or legacy unit count (prefer {@link resolveCheckoutTotalAed} in checkoutTotals). */
+export function resolveCheckoutTotalAedLegacy(
   quantity: BundleQuantity,
   method: PaymentMethod,
   eligibleUnits?: number,
@@ -70,3 +70,19 @@ export function getCheckoutTotalForUnits(
 }
 
 export const bundleQuantities: BundleQuantity[] = [1, 2, 3];
+
+/** Card merchandise for one SKU line (1→199, 2→249, 3→339, 4→339+199). */
+export function getMerchandiseAedForLineQuantity(units: number): number | null {
+  if (!Number.isFinite(units) || units < 1 || units > 4) return null;
+  if (units <= MAX_BUNDLE_TIER_UNITS) {
+    const tier = bundleQuantityFromUnitCount(units);
+    return tier ? cardBundlePrices[tier] : null;
+  }
+  const base = cardBundlePrices[3];
+  return base + (units - MAX_BUNDLE_TIER_UNITS) * singleProductPrice;
+}
+
+/** Merchandise subtotal for one line (COD fee is added once per order). */
+export function getCodMerchandiseAedForLineQuantity(units: number): number | null {
+  return getMerchandiseAedForLineQuantity(units);
+}

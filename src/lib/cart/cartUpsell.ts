@@ -1,9 +1,13 @@
-import { cardBundlePrices, singleProductPrice } from "@/config/pricing";
+import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductId } from "@/config/products";
 import { getAllProductsWithPages } from "@/lib/productCatalog";
 import type { CartLine } from "@/lib/cart/cartTypes";
-import { countEligibleUnits } from "@/lib/cart/cartPricing";
-import { targetBundleTotalAfterUpsell, upsellMerchandiseDelta } from "@/lib/cart/cartPricing";
+import {
+  countEligibleUnits,
+  getMerchandiseAedForCart,
+  normalizeCartLines,
+  upsellDeltaAddingProduct,
+} from "@/lib/cart/cartPricing";
 
 const ROUTINE_LABEL: Record<ProductId, string> = {
   hair: "روتين الشعر",
@@ -34,7 +38,7 @@ export function getUpsellRecommendations(lines: CartLine[]): UpsellProduct[] {
     }));
 }
 
-/** Savings vs paying single-product price × units (display at checkout). */
+/** Savings vs paying 199 × units (display at checkout). */
 export function getBundleSavingsVsRetail(
   eligibleUnits: number,
   merchandiseAed: number,
@@ -43,62 +47,83 @@ export function getBundleSavingsVsRetail(
   return Math.max(0, singleProductPrice * eligibleUnits - merchandiseAed);
 }
 
-/** Savings vs buying the next tier as separate singles (Lara-style «وفّري»). */
-export function getNextTierSavings(eligibleUnits: number): number | null {
-  if (eligibleUnits >= 4) return null;
-  const nextUnits = eligibleUnits + 1;
-  const target = targetBundleTotalAfterUpsell(eligibleUnits);
-  if (target === null) return null;
-  const retail = singleProductPrice * nextUnits;
-  return Math.max(0, retail - target);
+export function getNextTierSavingsForAdd(lines: CartLine[], addSlug: string): number | null {
+  const delta = upsellDeltaAddingProduct(lines, addSlug);
+  if (delta === null) return null;
+  return Math.max(0, singleProductPrice - delta);
 }
 
-export function getUpsellOfferCopy(eligibleUnits: number): {
+export function getUpsellOfferCopy(lines: CartLine[]): {
   title: string;
   body: string;
   targetTotal: number | null;
   delta: number | null;
 } | null {
+  const eligibleUnits = countEligibleUnits(lines);
   if (eligibleUnits >= 4) return null;
-  if (eligibleUnits === 3) {
-    const targetTotal = targetBundleTotalAfterUpsell(3);
-    const delta = upsellMerchandiseDelta(3);
-    if (targetTotal === null || delta === null) return null;
-    const retailFour = singleProductPrice * 4;
-    return {
-      title: `منتج رابع — +${delta} د.إ على عرض 339`,
-      body: `أضيفي خطوة إضافية — المجموع ${targetTotal} د.إ (بدل ${retailFour} د.إ بالتجزئة).`,
-      targetTotal,
-      delta,
-    };
-  }
+
+  const normalized = normalizeCartLines(lines);
+  const distinctSkus = normalized.length;
+  const currentTotal = getMerchandiseAedForCart(lines);
+  if (currentTotal === null) return null;
+
+  const sampleSlug = getUpsellRecommendations(lines)[0]?.slug;
+  const delta = sampleSlug ? upsellDeltaAddingProduct(lines, sampleSlug) : singleProductPrice;
+  const targetTotal =
+    sampleSlug && delta !== null ? currentTotal + delta : currentTotal + singleProductPrice;
+
   if (eligibleUnits === 0) {
     return {
-      title: "كمّلي الروتين — عرض لمرة واحدة",
-      body: `منتج ${cardBundlePrices[1]} · منتجان ${cardBundlePrices[2]} · 3 منتجات ${cardBundlePrices[3]} — يمكن خلط الشعر، البشرة، والعين.`,
+      title: "كمّلي روتين VELORA",
+      body: `كل منتج مختلف يُضاف بـ ${formatPrice(singleProductPrice)} (مثال: شعر + بشرة = ${formatPrice(singleProductPrice * 2)}). عروض 249 / 339 لنفس المنتج من «اختاري الكمية» في صفحة المنتج.`,
       targetTotal: cardBundlePrices[1],
       delta: null,
     };
   }
-  const targetTotal = targetBundleTotalAfterUpsell(eligibleUnits);
-  const delta = upsellMerchandiseDelta(eligibleUnits);
-  if (targetTotal === null || delta === null) return null;
-  if (eligibleUnits === 1) {
-    const saveTwo = singleProductPrice * 2 - targetTotal;
+
+  const primary = normalized[0];
+  const sameSkuOnly = distinctSkus === 1 && primary;
+
+  if (sameSkuOnly && primary.quantity === 2) {
     return {
-      title: `زيدي منتجاً — وفّري ${saveTwo} د.إ`,
-      body: `عرض منتجان بـ ${targetTotal} د.إ بدل ${singleProductPrice * 2} د.إ — اختاري الشعر، البشرة، أو العين.`,
+      title: `أضيفي منتجاً مختلفاً — ${formatPrice(targetTotal)}`,
+      body: `عندك ${formatPrice(currentTotal)} (علبتان من نفس المنتج). أضيفي skincare أو غيره — +${formatPrice(delta ?? singleProductPrice)} → المجموع ${formatPrice(targetTotal)}.`,
       targetTotal,
       delta,
     };
   }
-  const saveThree = singleProductPrice * 3 - targetTotal;
+
+  if (sameSkuOnly && primary.quantity >= 3) {
+    return {
+      title: `خطوة إضافية — +${formatPrice(delta ?? singleProductPrice)}`,
+      body: `عندك عرض 3 علب (${formatPrice(currentTotal)}). منتج مختلف رابع يُضاف بـ ${formatPrice(singleProductPrice)}.`,
+      targetTotal,
+      delta,
+    };
+  }
+
+  if (sameSkuOnly && primary.quantity === 1) {
+    return {
+      title: `منتج مختلف — +${formatPrice(delta ?? singleProductPrice)}`,
+      body: `علبة واحدة ${formatPrice(currentTotal)}. للتوفير على نفس المنتج: 249 / 339 من صفحة المنتج. هنا: أضيفي خطوة أخرى من فيلورا → ${formatPrice(targetTotal)}.`,
+      targetTotal,
+      delta,
+    };
+  }
+
   return {
-    title: `خطوة أخيرة — وفّري ${saveThree} د.إ`,
-    body: `أكملي 3 منتجات بـ ${targetTotal} د.إ (بدل ${singleProductPrice * 3} د.إ) — أقوى توفير في فيلورا.`,
+    title: `أضيفي خطوة — ${formatPrice(targetTotal)}`,
+    body: `المجموع الحالي ${formatPrice(currentTotal)} — كل منتج جديد مختلف +${formatPrice(delta ?? singleProductPrice)}.`,
     targetTotal,
     delta,
   };
+}
+
+export function targetTotalAfterAddingSlug(lines: CartLine[], slug: string): number | null {
+  const delta = upsellDeltaAddingProduct(lines, slug);
+  const current = getMerchandiseAedForCart(lines);
+  if (current === null || delta === null) return null;
+  return current + delta;
 }
 
 export function canAddMoreUnits(lines: CartLine[]): boolean {

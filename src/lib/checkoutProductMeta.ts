@@ -1,25 +1,15 @@
 import type { BundleQuantity } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
+import { getMerchandiseAedForLineQuantity } from "@/config/pricing";
+import { normalizeCartLines } from "@/lib/cart/cartPricing";
 import { getProductBySlug } from "@/lib/productCatalog";
 
-/** Split bundle merchandise across lines (display only; order total unchanged). */
-export function allocateCartLinePrices(
-  lines: CartLine[],
-  merchandiseAed: number,
-): Map<string, number> {
-  const units = lines.reduce((sum, l) => sum + l.quantity, 0);
-  if (units <= 0) return new Map();
+/** Per-line bundle price (2× hair = 249, 1× skin = 199, …). */
+export function allocateCartLinePrices(lines: CartLine[]): Map<string, number> {
   const out = new Map<string, number>();
-  let allocated = 0;
-  lines.forEach((line, index) => {
-    if (index === lines.length - 1) {
-      out.set(line.slug, merchandiseAed - allocated);
-      return;
-    }
-    const part = Math.round((line.quantity / units) * merchandiseAed);
-    out.set(line.slug, part);
-    allocated += part;
-  });
+  for (const line of normalizeCartLines(lines)) {
+    out.set(line.slug, getMerchandiseAedForLineQuantity(line.quantity) ?? 0);
+  }
   return out;
 }
 

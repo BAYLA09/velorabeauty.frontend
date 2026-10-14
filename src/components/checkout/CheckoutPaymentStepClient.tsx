@@ -9,12 +9,13 @@ import {
   codFee,
   currencyLabel,
   formatPrice,
-  resolveCheckoutTotalAed,
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
 import { useStripeCheckoutPrefetch } from "@/components/checkout/useStripeCheckoutPrefetch";
 import { buildCheckoutPath } from "@/lib/checkoutRoutes";
+import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
+import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 
 type Props = {
   productSlug: string;
@@ -93,7 +94,13 @@ export function CheckoutPaymentStepClient({
     () => ({ product: productSlug, quantity, items: cartItemsParam }),
     [productSlug, quantity, cartItemsParam],
   );
-  const total = resolveCheckoutTotalAed(quantity, method, eligibleUnits);
+  const cartLines = parseCheckoutLines(cartItemsParam, productSlug, quantity);
+  const total = resolveCheckoutTotalAed(
+    quantity,
+    method,
+    eligibleUnits,
+    cartItemsParam ? cartLines : undefined,
+  );
   useStripeCheckoutPrefetch({
     productSlug,
     productName,

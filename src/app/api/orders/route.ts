@@ -95,6 +95,7 @@ export async function POST(request: Request) {
       productName,
       quantity,
       eligibleUnits,
+      cartLines: syncLines ?? undefined,
       paymentMethod,
       customerName,
       phone,

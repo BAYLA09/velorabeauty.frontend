@@ -6,6 +6,8 @@ import {
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
+import type { CartLine } from "@/lib/cart/cartTypes";
+import { getCheckoutTotalForCart, getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
 import { getDb } from "@/lib/db";
 
 export type OrderRecord = {
@@ -109,14 +111,26 @@ export function computeOrderAmountsForUnits(
   return { subtotalAed, deliveryFeeAed, totalAed };
 }
 
+export function computeOrderAmountsForCart(
+  lines: CartLine[],
+  paymentMethod: PaymentMethod,
+): { subtotalAed: number; deliveryFeeAed: number; totalAed: number } {
+  const subtotalAed = getMerchandiseAedForCart(lines) ?? 0;
+  const totalAed = getCheckoutTotalForCart(lines, paymentMethod) ?? subtotalAed;
+  const deliveryFeeAed = totalAed - subtotalAed;
+  return { subtotalAed, deliveryFeeAed, totalAed };
+}
+
 export function createOrder(
-  input: CreateOrderInput & { eligibleUnits?: number },
+  input: CreateOrderInput & { eligibleUnits?: number; cartLines?: CartLine[] },
 ): OrderRecord {
-  const units = input.eligibleUnits ?? input.quantity;
-  const { subtotalAed, deliveryFeeAed, totalAed } = computeOrderAmountsForUnits(
-    units,
-    input.paymentMethod,
-  );
+  const { subtotalAed, deliveryFeeAed, totalAed } =
+    input.cartLines && input.cartLines.length > 0
+      ? computeOrderAmountsForCart(input.cartLines, input.paymentMethod)
+      : computeOrderAmountsForUnits(
+          input.eligibleUnits ?? input.quantity,
+          input.paymentMethod,
+        );
 
   const requestedId = input.id?.trim() ?? "";
   const id =

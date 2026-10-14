@@ -7,8 +7,8 @@ import type { CartLine } from "@/lib/cart/cartTypes";
 import {
   canAddMoreUnits,
   getBundleSavingsVsRetail,
-  getNextTierSavings,
   getUpsellOfferCopy,
+  targetTotalAfterAddingSlug,
   getUpsellRecommendations,
 } from "@/lib/cart/cartUpsell";
 import type { PaymentMethod } from "@/config/pricing";
@@ -29,8 +29,7 @@ export function CheckoutUpsellPanel({
   onAdd,
 }: Props) {
   const savedSoFar = getBundleSavingsVsRetail(eligibleUnits, merchandiseAed);
-  const offer = getUpsellOfferCopy(eligibleUnits);
-  const nextTierSavings = getNextTierSavings(eligibleUnits);
+  const offer = getUpsellOfferCopy(lines);
   const recommendations = getUpsellRecommendations(lines);
 
   if (eligibleUnits >= 4) {
@@ -74,11 +73,6 @@ export function CheckoutUpsellPanel({
         <p className="mt-1 text-xs leading-relaxed text-[#291A1C]/75">{offer.body}</p>
 
         <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-          {nextTierSavings !== null && nextTierSavings > 0 ? (
-            <span className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-extrabold text-white shadow-sm">
-              وفّري {nextTierSavings} د.إ
-            </span>
-          ) : null}
           {offer.targetTotal ? (
             <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#650D20] ring-1 ring-[#650D20]/15">
               المجموع {formatPrice(offer.targetTotal)}
@@ -122,9 +116,10 @@ export function CheckoutUpsellPanel({
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-extrabold text-[#D6AD65]">{rec.routineLabel}</p>
                 <p className="text-[12px] font-extrabold leading-snug text-[#291A1C]">{rec.name}</p>
-                {offer.targetTotal ? (
+                {targetTotalAfterAddingSlug(lines, rec.slug) ? (
                   <p className="mt-0.5 text-[10px] font-bold text-[#650D20]">
-                    المجموع بعد الإضافة: {formatPrice(offer.targetTotal)}
+                    المجموع بعد الإضافة:{" "}
+                    {formatPrice(targetTotalAfterAddingSlug(lines, rec.slug)!)}
                   </p>
                 ) : null}
               </div>

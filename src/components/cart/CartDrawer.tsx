@@ -201,7 +201,7 @@ export function CartDrawer() {
             </ul>
           )}
 
-          {lines.length > 0 && eligibleUnits === 3 ? (
+          {lines.length === 1 && lines[0]?.quantity === 3 ? (
             <p className="mt-6 rounded-2xl border border-[#D6AD65]/40 bg-[#FCE8E5]/80 px-4 py-3 text-sm leading-relaxed text-[#291A1C]">
               {t.bundleComplete(formatPrice(339))}
             </p>
