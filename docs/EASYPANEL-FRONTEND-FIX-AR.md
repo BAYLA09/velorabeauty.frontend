@@ -1,5 +1,7 @@
 # Easypanel — Frontend ma kaydeployich (حل نهائي)
 
+> **Deploy f 1–2 ثانية؟** → اقرأ أولاً: **[EASYPANEL-DEPLOY-1-SECONDE-AR.md](./EASYPANEL-DEPLOY-1-SECONDE-AR.md)** (حذف Git/webhook + App Docker Image).
+
 الموقع **يمكن يبقى خدام** (`/api/health` → `ok: true`) بينما زر **Deploy** فـ Easypanel **ما كيسحبش image** أو **كيخلص ف ثانية**. هاد الدليل كيصلّح 90% ديال الحالات.
 
 ---
