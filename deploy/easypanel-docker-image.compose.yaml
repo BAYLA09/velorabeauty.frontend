@@ -24,8 +24,9 @@ services:
       # (NEXT_PUBLIC_CARD_PAYMENT_ENABLED only if you rebuild the image — prefer CARD_PAYMENT_ENABLED)
     volumes:
       - velora-orders:/app/data
-    expose:
-      - "3000"
+    # Easypanel / reverse proxies need published port — "expose" alone often breaks routing.
+    ports:
+      - "3000:3000"
     healthcheck:
       test:
         [

@@ -1,5 +1,7 @@
 # Easypanel — deploy frontend (2026-10-13)
 
+**Deploy ma kheddamch?** → [EASYPANEL-FRONTEND-FIX-AR.md](./EASYPANEL-FRONTEND-FIX-AR.md)
+
 ## Image جاهزة على GitHub (بعد merge `main`)
 
 ```text
