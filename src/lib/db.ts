@@ -55,6 +55,15 @@ function ensureSchema(database: Database.Database): void {
   if (!names.has("backend_external_checkout_id")) {
     database.exec(`ALTER TABLE orders ADD COLUMN backend_external_checkout_id TEXT`);
   }
+  if (!names.has("order_lines_json")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN order_lines_json TEXT`);
+  }
+  if (!names.has("sheet_cod_exported_at")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN sheet_cod_exported_at TEXT`);
+  }
+  if (!names.has("sheet_card_exported_at")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN sheet_card_exported_at TEXT`);
+  }
 }
 
 export function getDb(): Database.Database {

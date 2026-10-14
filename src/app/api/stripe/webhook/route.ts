@@ -7,6 +7,7 @@ import {
   getOrderByStripeSessionId,
   markOrderPaid,
 } from "@/lib/ordersRepository";
+import { queueOrderSheetExportById } from "@/lib/ordersSheets/exportOrder";
 import { getStripe } from "@/lib/stripeServer";
 
 export const runtime = "nodejs";
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
       }
       const paidOrder = paidOrderId ? getOrderById(paidOrderId) : null;
       if (paidOrder) {
+        queueOrderSheetExportById({ orderId: paidOrder.id, channel: "card" });
         try {
           recoverPaidOrderCheckout(paidOrder);
         } catch (err) {
@@ -76,6 +78,7 @@ export async function POST(request: Request) {
         }
         const paidOrder = paidOrderId ? getOrderById(paidOrderId) : null;
         if (paidOrder) {
+          queueOrderSheetExportById({ orderId: paidOrder.id, channel: "card" });
           try {
             recoverPaidOrderCheckout(paidOrder);
           } catch (err) {

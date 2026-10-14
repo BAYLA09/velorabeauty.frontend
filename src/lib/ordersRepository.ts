@@ -137,14 +137,25 @@ export function createOrder(
     isStorefrontOrderId(requestedId) && !getOrderById(requestedId) ? requestedId : randomUUID();
   const createdAt = new Date().toISOString();
 
+  const orderLinesJson =
+    input.cartLines && input.cartLines.length > 0
+      ? JSON.stringify(
+          input.cartLines.map((line) => ({
+            slug: line.slug,
+            quantity: line.quantity,
+          })),
+        )
+      : null;
+
   getDb()
     .prepare(
       `INSERT INTO orders (
         id, product_slug, product_name, quantity, payment_method,
         subtotal_aed, delivery_fee_aed, total_aed,
         customer_name, phone, emirate, address, status, created_at,
-        customer_email, marketing_consent, backend_external_checkout_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)`,
+        customer_email, marketing_consent, backend_external_checkout_id,
+        order_lines_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?)`,
     )
     .run(
       id,
@@ -163,6 +174,7 @@ export function createOrder(
       input.customerEmail?.trim() || null,
       input.marketingConsent ? 1 : 0,
       input.backendExternalCheckoutId?.trim() || id,
+      orderLinesJson,
     );
 
   const row = getDb()
@@ -211,4 +223,45 @@ export function getOrderByStripePaymentIntentId(paymentIntentId: string): OrderR
     .prepare(`SELECT * FROM orders WHERE stripe_payment_intent_id = ?`)
     .get(paymentIntentId) as OrderRow | undefined;
   return row ? rowToRecord(row) : null;
+}
+
+export function getOrderCartLines(orderId: string): CartLine[] | null {
+  const row = getDb()
+    .prepare(`SELECT order_lines_json FROM orders WHERE id = ?`)
+    .get(orderId) as { order_lines_json?: string | null } | undefined;
+  if (!row?.order_lines_json) return null;
+  try {
+    const parsed = JSON.parse(row.order_lines_json) as unknown;
+    if (!Array.isArray(parsed)) return null;
+    const lines: CartLine[] = [];
+    for (const item of parsed) {
+      if (!item || typeof item !== "object") continue;
+      const r = item as Record<string, unknown>;
+      const slug = String(r.slug ?? "").trim();
+      const quantity = Number(r.quantity);
+      if (slug && quantity >= 1) lines.push({ slug, quantity });
+    }
+    return lines.length > 0 ? lines : null;
+  } catch {
+    return null;
+  }
+}
+
+export function wasOrderSheetExported(
+  orderId: string,
+  channel: "cod" | "card",
+): boolean {
+  const column = channel === "cod" ? "sheet_cod_exported_at" : "sheet_card_exported_at";
+  const row = getDb()
+    .prepare(`SELECT ${column} AS exported_at FROM orders WHERE id = ?`)
+    .get(orderId) as { exported_at?: string | null } | undefined;
+  return Boolean(row?.exported_at);
+}
+
+export function markOrderSheetExported(orderId: string, channel: "cod" | "card"): void {
+  const column = channel === "cod" ? "sheet_cod_exported_at" : "sheet_card_exported_at";
+  const at = new Date().toISOString();
+  getDb()
+    .prepare(`UPDATE orders SET ${column} = ? WHERE id = ?`)
+    .run(at, orderId);
 }
