@@ -36,13 +36,13 @@ export function CodThankYouOrderSummary(props: Props) {
             key={`${line.slug}-${line.quantity}-${line.name}`}
             className="flex items-center gap-3 rounded-2xl border border-velora-burgundy/10 bg-gradient-to-b from-white to-velora-cream/40 p-3 shadow-sm"
           >
-            <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-velora-cream ring-1 ring-velora-burgundy/10">
+            <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-[#FFF9F5] ring-1 ring-velora-burgundy/10">
               {line.image ? (
                 <Image
                   src={line.image.src}
                   alt={line.image.alt}
                   fill
-                  className="object-cover"
+                  className="object-contain p-1"
                   sizes="72px"
                 />
               ) : (

@@ -49,7 +49,7 @@ export function buildOrderDisplayLines(input: {
         name: product?.name ?? line.slug,
         quantity: qty,
         lineMerchandiseAed: getMerchandiseAedForLineQuantity(qty) ?? 0,
-        image: resolveOrderProductImage(line.slug),
+        image: resolveOrderProductImage(line.slug, qty),
       };
     });
   }
@@ -63,7 +63,7 @@ export function buildOrderDisplayLines(input: {
         name: part.name,
         quantity: part.quantity,
         lineMerchandiseAed: getMerchandiseAedForLineQuantity(part.quantity) ?? 0,
-        image: slug ? resolveOrderProductImage(slug) : null,
+        image: slug ? resolveOrderProductImage(slug, part.quantity) : null,
       };
     });
   }
@@ -79,7 +79,7 @@ export function buildOrderDisplayLines(input: {
       name: product?.name ?? input.productName,
       quantity: qty,
       lineMerchandiseAed: merchandise,
-      image: resolveOrderProductImage(input.productSlug),
+      image: resolveOrderProductImage(input.productSlug, qty),
     },
   ];
 }
