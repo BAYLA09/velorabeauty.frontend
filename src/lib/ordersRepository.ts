@@ -223,6 +223,21 @@ export function getOrderById(id: string): OrderRecord | null {
   return row ? rowToRecord(row) : null;
 }
 
+/** COD orders not yet marked exported to Google Sheets (for manual reconcile). */
+export function listOrdersPendingCodSheetExport(limit = 50): OrderRecord[] {
+  const capped = Math.min(Math.max(1, limit), 200);
+  const rows = getDb()
+    .prepare(
+      `SELECT * FROM orders
+       WHERE payment_method = 'cod'
+         AND (sheet_cod_exported_at IS NULL OR TRIM(sheet_cod_exported_at) = '')
+       ORDER BY created_at DESC
+       LIMIT ?`,
+    )
+    .all(capped) as OrderRow[];
+  return rows.map(rowToRecord);
+}
+
 export function setOrderStripeSession(orderId: string, sessionId: string): void {
   getDb()
     .prepare(

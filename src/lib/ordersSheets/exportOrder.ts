@@ -1,4 +1,6 @@
+import { after } from "next/server";
 import type { CartLine } from "@/lib/cart/cartTypes";
+import { isAppsScriptWebhookSuccess } from "@/lib/ordersSheets/webhookResponse";
 import {
   buildCodSheetRows,
   buildLegacyCardSheetRow,
@@ -84,29 +86,15 @@ async function postToAppsScriptWebhook(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+    redirect: "follow",
     signal: AbortSignal.timeout(15_000),
   });
   const text = await res.text().catch(() => "");
-  let parsed: { ok?: boolean; error?: string; duplicate?: boolean } | null = null;
-  try {
-    parsed = JSON.parse(text) as { ok?: boolean; error?: string; duplicate?: boolean };
-  } catch {
-    parsed = null;
+  const ok = isAppsScriptWebhookSuccess(res, text);
+  if (!ok) {
+    console.error("[orders-sheets] webhook failed", { channel: payload.channel });
   }
-  if (parsed?.ok === true || parsed?.duplicate === true) return true;
-  if (!res.ok) {
-    console.error("[orders-sheets] webhook failed", {
-      channel: payload.channel,
-      status: res.status,
-      body: text.slice(0, 200),
-    });
-    return false;
-  }
-  if (parsed?.ok === false) {
-    console.error("[orders-sheets] webhook rejected", parsed.error);
-    return false;
-  }
-  return true;
+  return ok;
 }
 
 /**
@@ -119,7 +107,16 @@ export async function exportOrderToGoogleSheets(input: {
   cartLines?: CartLine[] | null;
 }): Promise<void> {
   const config = readOrdersSheetsConfig();
-  if (!config.enabled || !config.webhookSecret) return;
+  if (!config.enabled || !config.webhookSecret) {
+    console.warn("[orders-sheets] export skipped (config)", {
+      orderId: input.order.id,
+      channel: input.channel,
+      reason: config.reason ?? "disabled",
+      codUrlConfigured: Boolean(config.codWebhookUrl),
+      secretConfigured: Boolean(config.webhookSecret),
+    });
+    return;
+  }
 
   if (wasOrderSheetExported(input.order.id, input.channel)) return;
 
@@ -184,13 +181,13 @@ export async function exportOrderToGoogleSheetsById(input: {
   });
 }
 
-/** Fire-and-forget wrapper for API routes. */
+/** Schedule export after the HTTP response (Stripe webhooks). COD uses await in /api/orders. */
 export function queueOrderSheetExport(input: {
   order: OrderRecord;
   channel: OrdersSheetChannel;
   cartLines?: CartLine[] | null;
 }): void {
-  void exportOrderToGoogleSheets(input);
+  scheduleOrderSheetExport(() => exportOrderToGoogleSheets(input));
 }
 
 export function queueOrderSheetExportById(input: {
@@ -198,5 +195,9 @@ export function queueOrderSheetExportById(input: {
   channel: OrdersSheetChannel;
   cartLines?: CartLine[] | null;
 }): void {
-  void exportOrderToGoogleSheetsById(input);
+  scheduleOrderSheetExport(() => exportOrderToGoogleSheetsById(input));
+}
+
+function scheduleOrderSheetExport(task: () => Promise<void>): void {
+  after(task);
 }

@@ -10,7 +10,7 @@ import {
 import { parseOrderAttributionFromBody } from "@/lib/attribution/orderAttribution";
 import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import { createOrder } from "@/lib/ordersRepository";
-import { queueOrderSheetExport } from "@/lib/ordersSheets/exportOrder";
+import { exportOrderToGoogleSheets } from "@/lib/ordersSheets/exportOrder";
 import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 
 function isBundleQuantity(n: unknown): n is BundleQuantity {
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
     });
 
     if (paymentMethod === "cod") {
-      queueOrderSheetExport({
+      await exportOrderToGoogleSheets({
         order,
         channel: "cod",
         cartLines: syncLines,

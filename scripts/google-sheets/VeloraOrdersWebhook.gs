@@ -10,6 +10,9 @@
  * Easypanel → ORDERS_SHEETS_COD_WEBHOOK_URL = deployment URL (/exec)
  */
 
+/** Default tab for Velora COD (override with Script property SHEET_GID). */
+var DEFAULT_SHEET_GID = 469291840;
+
 var COD_HEADER = [
   "OrderDate",
   "country",
@@ -41,12 +44,13 @@ function jsonResponse_(obj) {
 function getTargetSheet_() {
   var props = PropertiesService.getScriptProperties();
   var spreadsheetId = props.getProperty("SPREADSHEET_ID");
-  var gid = props.getProperty("SHEET_GID");
+  var gidProp = props.getProperty("SHEET_GID");
   var ss = spreadsheetId
     ? SpreadsheetApp.openById(spreadsheetId)
     : SpreadsheetApp.getActiveSpreadsheet();
   if (!ss) throw new Error("Spreadsheet not found");
 
+  var gid = gidProp !== null && gidProp !== "" ? gidProp : String(DEFAULT_SHEET_GID);
   if (gid) {
     var targetGid = Number(gid);
     var sheets = ss.getSheets();
@@ -84,6 +88,10 @@ function appendCodOrder_(sheet, orderId, rows) {
     sheet.appendRow(row);
   }
   return { ok: true };
+}
+
+function doGet() {
+  return jsonResponse_({ ok: true, service: "velora-cod-orders-webhook" });
 }
 
 function doPost(e) {

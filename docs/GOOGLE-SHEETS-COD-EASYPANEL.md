@@ -88,7 +88,25 @@ The storefront reads `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, 
 
 ---
 
-## 4) Code entry points (for review)
+## 4) Verify production
+
+1. `GET https://www.velorabeauty.world/api/health` → `ordersSheets.enabled` must be **true**. If `false`, read `reason` (`missing_webhook_urls` / `missing_webhook_secret`).
+2. Open your Apps Script **Web app URL** in the browser (GET) → should return JSON `{ "ok": true, "service": "velora-cod-orders-webhook" }`.
+3. After a COD test order, check Easypanel logs for `[orders-sheets]` — no `export skipped` or `webhook failed`.
+
+**Backfill** (orders saved in SQLite but sheet empty):
+
+```bash
+curl -sS -X POST 'https://www.velorabeauty.world/api/orders/sheets/reconcile' \
+  -H 'Content-Type: application/json' \
+  -d '{"secret":"YOUR_ORDERS_SHEETS_WEBHOOK_SECRET","limit":30}'
+```
+
+Re-deploy Apps Script after updating `VeloraOrdersWebhook.gs` (default tab gid `469291840`).
+
+---
+
+## 5) Code entry points (for review)
 
 - COD export trigger: `src/app/api/orders/route.ts` → `queueOrderSheetExport({ channel: "cod" })`
 - Row builder: `src/lib/ordersSheets/buildSheetRow.ts` → `buildCodSheetRows`
