@@ -17,6 +17,7 @@ import type { BundleQuantity } from "@/config/pricing";
 import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
+import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 
@@ -91,6 +92,11 @@ export function CheckoutCardLegacyCheckout({
       setError("أكملي الاسم والهاتف والإمارة وعنوان التوصيل.");
       return;
     }
+    const phoneCheck = validateUaeMobilePhone(trimmedPhone);
+    if (!phoneCheck.ok) {
+      setError(phoneCheck.error);
+      return;
+    }
 
     const buildingPart = building.trim();
     const fullAddress = buildingPart
@@ -108,7 +114,7 @@ export function CheckoutCardLegacyCheckout({
           quantity,
           paymentMethod: "card",
           customerName: trimmedName,
-          phone: trimmedPhone,
+          phone: phoneCheck.normalized,
           email: email.trim() || undefined,
           marketingConsent,
           externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),

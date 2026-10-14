@@ -10,6 +10,7 @@ import { CheckoutSummary } from "@/components/CheckoutSummary";
 import { checkoutExperience } from "@/config/checkoutExperience";
 import { checkoutEmirates } from "@/config/productCheckout";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
+import { uaePhoneHint, validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 
@@ -61,6 +62,11 @@ export function CheckoutOrderForm({
       setError("عفواً — أكملي الاسم والهاتف والعنوان.");
       return;
     }
+    const phoneCheck = validateUaeMobilePhone(trimmedPhone);
+    if (!phoneCheck.ok) {
+      setError(phoneCheck.error);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -73,7 +79,7 @@ export function CheckoutOrderForm({
           quantity,
           paymentMethod,
           customerName: trimmedName,
-          phone: trimmedPhone,
+          phone: phoneCheck.normalized,
           emirate,
           address: trimmedAddress,
           attribution: getCheckoutAttributionForOrder(),
@@ -141,8 +147,11 @@ export function CheckoutOrderForm({
               onChange={(ev) => setPhone(ev.target.value)}
               className="mt-1.5 w-full rounded-xl border border-velora-burgundy/15 bg-white px-3 py-3 text-sm text-velora-burgundy-dark outline-none ring-velora-champagne/40 focus:ring-2"
               autoComplete="tel"
-              placeholder="+971"
+              placeholder="0501234567 أو +971501234567"
+              inputMode="tel"
+              maxLength={14}
             />
+            <p className="mt-1 text-[11px] text-velora-burgundy/55">{uaePhoneHint}</p>
           </label>
           <label className="block">
             <span className="text-xs font-semibold text-velora-burgundy/70">

@@ -28,6 +28,7 @@ import {
 } from "@/config/pricing";
 import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
+import { uaePhoneHint, validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 
@@ -93,6 +94,11 @@ export function CheckoutConfirmClient({
       setError("أكملي الاسم ورقم الهاتف.");
       return;
     }
+    const phoneCheck = validateUaeMobilePhone(trimmedPhone);
+    if (!phoneCheck.ok) {
+      setError(phoneCheck.error);
+      return;
+    }
     if (isCod && !trimmedAddress) {
       setError("أدخلي عنوان التوصيل.");
       return;
@@ -109,7 +115,7 @@ export function CheckoutConfirmClient({
           quantity,
           paymentMethod,
           customerName: trimmedName,
-          phone: trimmedPhone,
+          phone: phoneCheck.normalized,
           email: email.trim() || undefined,
           marketingConsent,
           externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),
@@ -192,10 +198,16 @@ export function CheckoutConfirmClient({
                 dir="ltr"
                 value={phone}
                 onChange={(ev) => setPhone(ev.target.value)}
-                placeholder="0501234567"
+                placeholder="0501234567 أو +971501234567"
                 className={checkoutInputClass}
                 autoComplete="tel"
+                inputMode="tel"
+                maxLength={14}
+                aria-describedby="checkout-phone-hint"
               />
+              <p id="checkout-phone-hint" className="mt-1.5 text-[11px] text-neutral-500">
+                {uaePhoneHint}
+              </p>
             </label>
             {isCod && (
               <label className="block">
