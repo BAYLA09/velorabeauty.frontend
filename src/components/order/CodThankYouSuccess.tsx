@@ -5,7 +5,7 @@ import { codFee } from "@/config/pricing";
 import type { BundleQuantity } from "@/config/pricing";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
 import { codTimelineSteps } from "@/lib/order/codThankYouTimeline";
-import { resolveOrderProductImage } from "@/lib/order/resolveOrderProductImage";
+import { buildOrderDisplayLines } from "@/lib/order/buildOrderDisplayLines";
 import type { OrderDraft } from "@/lib/orderStorage";
 import { CodThankYouFooterBar } from "@/components/order/cod-thank-you/CodThankYouFooterBar";
 import { CodThankYouHero } from "@/components/order/cod-thank-you/CodThankYouHero";
@@ -19,6 +19,7 @@ import { CodThankYouValues } from "@/components/order/cod-thank-you/CodThankYouV
 export type CodThankYouOrder = OrderDraft & {
   subtotalAed?: number;
   status?: string;
+  cartLines?: OrderDraft["cartLines"];
 };
 
 type Props = {
@@ -32,9 +33,15 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
   const deliveryFee = order.deliveryFeeAed ?? codFee;
   const subtotalAed = order.subtotalAed ?? Math.max(0, order.totalAed - deliveryFee);
   const timeline = useMemo(() => codTimelineSteps(order.status), [order.status]);
-  const productImage = useMemo(
-    () => resolveOrderProductImage(order.productSlug),
-    [order.productSlug],
+  const displayLines = useMemo(
+    () =>
+      buildOrderDisplayLines({
+        productSlug: order.productSlug,
+        productName: order.productName,
+        quantity: order.quantity as BundleQuantity,
+        cartLines: order.cartLines,
+      }),
+    [order.productSlug, order.productName, order.quantity, order.cartLines],
   );
 
   useEffect(() => {
@@ -62,9 +69,7 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
       </div>
 
       <CodThankYouOrderSummary
-        productName={order.productName}
-        quantity={order.quantity as BundleQuantity}
-        image={productImage}
+        lines={displayLines}
         emirate={order.emirate}
         address={order.address}
         subtotalAed={subtotalAed}

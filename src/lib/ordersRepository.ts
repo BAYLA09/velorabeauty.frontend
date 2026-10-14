@@ -32,6 +32,7 @@ export type OrderRecord = {
   marketingConsent: boolean;
   backendExternalCheckoutId: string | null;
   createdAt: string;
+  cartLines: CartLine[];
 };
 
 export type CreateOrderInput = {
@@ -71,7 +72,28 @@ type OrderRow = {
   marketing_consent?: number | null;
   backend_external_checkout_id?: string | null;
   created_at: string;
+  order_lines_json?: string | null;
 };
+
+function parseOrderLinesJson(raw: string | null | undefined): CartLine[] {
+  if (!raw?.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((row) => {
+        if (!row || typeof row !== "object") return null;
+        const r = row as Record<string, unknown>;
+        const slug = String(r.slug ?? "").trim();
+        const quantity = Number(r.quantity);
+        if (!slug || quantity < 1) return null;
+        return { slug, quantity };
+      })
+      .filter((l): l is CartLine => Boolean(l));
+  } catch {
+    return [];
+  }
+}
 
 function rowToRecord(row: OrderRow): OrderRecord {
   return {
@@ -94,6 +116,7 @@ function rowToRecord(row: OrderRow): OrderRecord {
     marketingConsent: row.marketing_consent === 1,
     backendExternalCheckoutId: row.backend_external_checkout_id ?? null,
     createdAt: row.created_at,
+    cartLines: parseOrderLinesJson(row.order_lines_json),
   };
 }
 

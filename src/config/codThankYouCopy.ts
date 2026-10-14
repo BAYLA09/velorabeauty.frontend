@@ -52,6 +52,7 @@ export const codThankYouCopy = {
     shipping: "رسوم التوصيل",
     totalCod: "المبلغ عند الاستلام",
     offer: "العرض",
+    singleQty: "قطعة واحدة",
   },
   footer: {
     help: "تحتاجين مساعدة؟ فريقنا موجود لك.",

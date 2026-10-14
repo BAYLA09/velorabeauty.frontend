@@ -1,14 +1,12 @@
 import Image from "next/image";
 import { codThankYouCopy } from "@/config/codThankYouCopy";
 import { codFee, currencyLabel, formatPrice } from "@/config/pricing";
-import type { BundleQuantity } from "@/config/pricing";
+import type { OrderDisplayLine } from "@/lib/order/buildOrderDisplayLines";
 import { CodThankYouIconFrame } from "./CodThankYouIconFrame";
 import { IconPackage, IconTruck } from "./CodThankYouIcons";
 
 type Props = {
-  productName: string;
-  quantity: BundleQuantity;
-  image: { src: string; alt: string } | null;
+  lines: OrderDisplayLine[];
   emirate: string;
   address: string;
   subtotalAed: number;
@@ -18,8 +16,6 @@ type Props = {
 
 export function CodThankYouOrderSummary(props: Props) {
   const { summary } = codThankYouCopy;
-  const qtyLabel =
-    props.quantity === 1 ? "قطعة واحدة" : props.quantity === 2 ? "عرض ×2" : "عرض ×3";
 
   return (
     <section className="border-t border-velora-burgundy/8 px-5 py-5">
@@ -34,25 +30,44 @@ export function CodThankYouOrderSummary(props: Props) {
         {summary.promise}
       </p>
 
-      <div className="mt-4 rounded-2xl border border-velora-burgundy/10 bg-gradient-to-b from-white to-velora-cream/40 p-4 text-right text-sm shadow-sm">
-        <div className="flex gap-3">
-          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-velora-cream ring-1 ring-velora-burgundy/10">
-            {props.image ? (
-              <Image src={props.image.src} alt={props.image.alt} fill className="object-cover" sizes="80px" />
-            ) : (
-              <div className="flex h-full items-center justify-center text-[9px] text-velora-burgundy/35">VELORA</div>
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-bold text-velora-burgundy-dark">{props.productName}</p>
-            <p className="mt-1 text-xs text-velora-burgundy/55">
-              {summary.offer}: {qtyLabel}
+      <div className="mt-4 space-y-3">
+        {props.lines.map((line) => (
+          <div
+            key={`${line.slug}-${line.quantity}-${line.name}`}
+            className="flex items-center gap-3 rounded-2xl border border-velora-burgundy/10 bg-gradient-to-b from-white to-velora-cream/40 p-3 shadow-sm"
+          >
+            <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-velora-cream ring-1 ring-velora-burgundy/10">
+              {line.image ? (
+                <Image
+                  src={line.image.src}
+                  alt={line.image.alt}
+                  fill
+                  className="object-cover"
+                  sizes="72px"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-[8px] text-velora-burgundy/35">
+                  VELORA
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1 text-right">
+              <p className="text-sm font-bold text-velora-burgundy-dark">{line.name}</p>
+              <p className="mt-0.5 text-[11px] text-velora-burgundy/55">
+                {line.quantity > 1 ? `الكمية: ×${line.quantity}` : summary.singleQty}
+              </p>
+            </div>
+            <p className="shrink-0 text-base font-black tabular-nums text-velora-burgundy">
+              {formatPrice(line.lineMerchandiseAed)}
             </p>
-            <p className="mt-2 text-xs leading-relaxed text-velora-burgundy/65">
-              {props.emirate} · {props.address}
-            </p>
           </div>
-        </div>
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-velora-burgundy/10 bg-white p-4 text-right text-sm shadow-sm">
+        <p className="text-xs leading-relaxed text-velora-burgundy/65">
+          {props.emirate} · {props.address}
+        </p>
 
         <dl className="mt-4 space-y-2 border-t border-velora-burgundy/10 pt-3 text-xs">
           <div className="flex justify-between gap-2">

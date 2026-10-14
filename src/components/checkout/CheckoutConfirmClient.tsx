@@ -147,11 +147,18 @@ export function CheckoutConfirmClient({
         method: order.paymentMethod,
         totalAed: order.totalAed,
         deliveryFeeAed: order.deliveryFeeAed,
+        subtotalAed: order.subtotalAed,
+        status: order.status,
         customerName: order.customerName,
         phone: order.phone,
         emirate: order.emirate,
         address: order.address,
         createdAt: order.createdAt,
+        ...(order.cartLines?.length
+          ? { cartLines: order.cartLines }
+          : cartItemsParam
+            ? { cartLines }
+            : {}),
       });
       router.push(`/order/thank-you?id=${encodeURIComponent(order.id)}`);
     } catch {

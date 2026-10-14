@@ -1,4 +1,5 @@
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
+import type { CartLine } from "@/lib/cart/cartTypes";
 
 export type OrderDraft = {
   orderId?: string;
@@ -15,6 +16,7 @@ export type OrderDraft = {
   createdAt: string;
   subtotalAed?: number;
   status?: string;
+  cartLines?: CartLine[];
 };
 
 const KEY = "velora_last_order";

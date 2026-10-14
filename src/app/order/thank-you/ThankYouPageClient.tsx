@@ -7,6 +7,7 @@ import { FooterSection } from "@/components/FooterSection";
 import { CodThankYouSuccess } from "@/components/order/CodThankYouSuccess";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
 import { formatPrice } from "@/config/pricing";
+import type { CartLine } from "@/lib/cart/cartTypes";
 import {
   clearOrderDraft,
   readOrderDraft,
@@ -63,9 +64,16 @@ export function ThankYouPageClient() {
                 subtotalAed: number;
                 createdAt: string;
                 status: string;
+                cartLines?: CartLine[];
               };
             };
             if (!cancelled) {
+              const draftCartLines =
+                draft?.orderId === data.order.id ? draft.cartLines : undefined;
+              const cartLines =
+                data.order.cartLines && data.order.cartLines.length > 0
+                  ? data.order.cartLines
+                  : draftCartLines;
               setOrderStatus(data.order.status);
               setOrder({
                 orderId: data.order.id,
@@ -82,6 +90,7 @@ export function ThankYouPageClient() {
                 emirate: data.order.emirate,
                 address: data.order.address,
                 createdAt: data.order.createdAt,
+                ...(cartLines?.length ? { cartLines } : {}),
               });
             }
             setLoading(false);

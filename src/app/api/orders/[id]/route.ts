@@ -27,6 +27,7 @@ export async function GET(_request: Request, { params }: Params) {
       stripeCheckoutSessionId: order.stripeCheckoutSessionId,
       stripePaymentIntentId: order.stripePaymentIntentId,
       createdAt: order.createdAt,
+      cartLines: order.cartLines,
     },
   });
 }
