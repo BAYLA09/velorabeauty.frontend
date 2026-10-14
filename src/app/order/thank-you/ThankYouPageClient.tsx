@@ -60,6 +60,7 @@ export function ThankYouPageClient() {
                 phone: string;
                 emirate: string;
                 address: string;
+                subtotalAed: number;
                 createdAt: string;
                 status: string;
               };
@@ -74,6 +75,8 @@ export function ThankYouPageClient() {
                 method: data.order.paymentMethod,
                 totalAed: data.order.totalAed,
                 deliveryFeeAed: data.order.deliveryFeeAed,
+                subtotalAed: data.order.subtotalAed,
+                status: data.order.status,
                 customerName: data.order.customerName,
                 phone: data.order.phone,
                 emirate: data.order.emirate,
@@ -111,6 +114,18 @@ export function ThankYouPageClient() {
         {loading ? (
           <div className="mx-auto max-w-xl text-center">
             <p className="text-base text-velora-burgundy/70">جاري تحميل تفاصيل الطلب…</p>
+          </div>
+        ) : isCod && !order ? (
+          <div className="mx-auto max-w-md text-center">
+            <p className="text-base text-velora-burgundy/75">
+              ما لقينا تفاصيل الطلب. إذا أكملتِ الطلب للتو، انتظري لحظات أو راجعي رسائل الجوال.
+            </p>
+            <Link
+              href="/"
+              className="mt-6 inline-block rounded-full bg-velora-burgundy px-6 py-3 text-sm font-bold text-velora-cream"
+            >
+              الصفحة الرئيسية
+            </Link>
           </div>
         ) : isCod && order ? (
           <CodThankYouSuccess order={order} onNavigateAway={() => clearOrderDraft()} />

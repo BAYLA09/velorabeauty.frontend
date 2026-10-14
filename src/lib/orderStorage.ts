@@ -13,6 +13,8 @@ export type OrderDraft = {
   emirate: string;
   address: string;
   createdAt: string;
+  subtotalAed?: number;
+  status?: string;
 };
 
 const KEY = "velora_last_order";
