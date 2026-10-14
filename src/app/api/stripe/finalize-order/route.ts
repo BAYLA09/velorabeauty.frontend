@@ -90,6 +90,7 @@ export async function POST(request: Request) {
       productName,
       quantity,
       eligibleUnits,
+      cartLines: syncLines ?? undefined,
       paymentMethod: "card",
       customerName,
       phone,

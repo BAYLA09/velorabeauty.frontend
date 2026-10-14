@@ -1,4 +1,5 @@
 import type { BundleQuantity } from "@/config/pricing";
+import { parseCartItemsParam } from "@/lib/cart/cartSerialization";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
 import { preloadStripeJs } from "@/lib/stripeJsLoader";
 
@@ -94,6 +95,9 @@ export async function prefetchStripeCardCheckout(
           productName: params.productName,
           quantity: params.quantity,
           eligibleUnits: params.eligibleUnits ?? params.quantity,
+          cartLines: params.itemsParam?.trim()
+            ? parseCartItemsParam(params.itemsParam.trim())
+            : undefined,
         }),
       }),
     ]);

@@ -13,7 +13,8 @@ import {
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
 import { useStripeCheckoutPrefetch } from "@/components/checkout/useStripeCheckoutPrefetch";
-import { resolveCheckoutTotalAed, type BundleQuantity } from "@/config/pricing";
+import type { BundleQuantity } from "@/config/pricing";
+import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { saveOrderDraft } from "@/lib/orderStorage";
@@ -90,7 +91,7 @@ export function CheckoutCardVanillaCheckout({
 }: Props) {
   const router = useRouter();
   const paymentReady = useVanillaStripeReady();
-  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits);
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
 
   useStripeCheckoutPrefetch({
     productSlug,

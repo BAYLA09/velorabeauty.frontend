@@ -5,8 +5,8 @@ import { formatPrice } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import {
   canAddMoreUnits,
-  getNextTierSavings,
   getUpsellOfferCopy,
+  targetTotalAfterAddingSlug,
   getUpsellRecommendations,
   type UpsellProduct,
 } from "@/lib/cart/cartUpsell";
@@ -68,13 +68,12 @@ export function CartUpsellSection({
   lines,
   eligibleUnits,
   onAdd,
-  showProgress = true,
+  showProgress = false,
 }: Props) {
   if (!canAddMoreUnits(lines)) return null;
 
-  const offer = getUpsellOfferCopy(eligibleUnits);
+  const offer = getUpsellOfferCopy(lines);
   const recommendations = getUpsellRecommendations(lines);
-  const savings = getNextTierSavings(eligibleUnits);
 
   if (recommendations.length === 0) return null;
 
@@ -98,11 +97,6 @@ export function CartUpsellSection({
               <p className="text-sm font-extrabold text-[#650D20]">{offer.title}</p>
               <p className="mt-1 text-xs leading-relaxed text-[#291A1C]/75">{offer.body}</p>
             </div>
-            {savings !== null && savings > 0 ? (
-              <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-extrabold text-emerald-800 ring-1 ring-emerald-200/80">
-                {t.saveAmount(savings)}
-              </span>
-            ) : null}
           </div>
           {offer.delta !== null ? (
             <p className="mt-2 text-[11px] font-bold text-[#650D20]/85">
@@ -117,9 +111,7 @@ export function CartUpsellSection({
           <UpsellProductRow
             key={rec.slug}
             rec={rec}
-            targetTotal={
-              eligibleUnits > 0 && offer?.targetTotal ? offer.targetTotal : null
-            }
+            targetTotal={targetTotalAfterAddingSlug(lines, rec.slug)}
             onAdd={() => onAdd(rec.slug)}
           />
         ))}

@@ -13,7 +13,8 @@ import {
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
-import { resolveCheckoutTotalAed, type BundleQuantity } from "@/config/pricing";
+import type { BundleQuantity } from "@/config/pricing";
+import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { saveOrderDraft } from "@/lib/orderStorage";
@@ -78,7 +79,7 @@ export function CheckoutCardLegacyCheckout({
     sendCartLines,
   });
   const [submitting, setSubmitting] = useState(false);
-  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits);
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

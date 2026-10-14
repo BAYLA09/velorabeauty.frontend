@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { BundleQuantity } from "@/config/pricing";
+import type { CartLine } from "@/lib/cart/cartTypes";
 import { createOrUpdateCardPaymentIntent } from "@/lib/stripePaymentIntent";
 import { isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
 
@@ -23,6 +24,20 @@ export async function POST(request: Request) {
         ? rawEligible
         : undefined;
     const existingPi = String(body.paymentIntentId ?? "").trim();
+    const rawCartLines = body.cartLines;
+    let cartLines: CartLine[] | undefined;
+    if (Array.isArray(rawCartLines) && rawCartLines.length > 0) {
+      cartLines = rawCartLines
+        .map((row) => {
+          if (!row || typeof row !== "object") return null;
+          const r = row as Record<string, unknown>;
+          return {
+            slug: String(r.slug ?? "").trim(),
+            quantity: Number(r.quantity),
+          };
+        })
+        .filter((l): l is CartLine => Boolean(l?.slug && l.quantity >= 1));
+    }
 
     if (!productSlug || !productName || !isBundleQuantity(quantity)) {
       return NextResponse.json({ error: "بيانات المنتج غير صالحة." }, { status: 400 });
@@ -33,6 +48,7 @@ export async function POST(request: Request) {
       productName,
       quantity,
       eligibleUnits,
+      cartLines,
       paymentIntentId: existingPi || undefined,
     });
 
