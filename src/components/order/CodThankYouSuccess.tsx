@@ -43,7 +43,7 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
   }, []);
 
   return (
-    <article className="mx-auto max-w-[440px] overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_48px_rgba(58,24,32,0.12)] ring-1 ring-velora-burgundy/8">
+    <article className="relative mx-auto max-w-[440px] overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_48px_rgba(58,24,32,0.12)] ring-1 ring-velora-burgundy/8">
       <CodThankYouHero customerName={order.customerName} />
 
       <div className="mt-4">
