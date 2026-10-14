@@ -1,7 +1,8 @@
 import { codThankYouCopy } from "@/config/codThankYouCopy";
-import { IconBox, IconClock, IconRefresh, IconShield } from "./CodThankYouIcons";
+import { CodThankYouIconFrame } from "./CodThankYouIconFrame";
+import { IconBox, IconClock, IconGem, IconMapPin, IconShield } from "./CodThankYouIcons";
 
-const icons = [IconClock, IconShield, IconBox, IconRefresh] as const;
+const icons = [IconClock, IconShield, IconBox, IconGem] as const;
 
 export function CodThankYouQuickTrust() {
   return (
@@ -10,13 +11,14 @@ export function CodThankYouQuickTrust() {
         const Icon = icons[index] ?? IconShield;
         return (
           <div key={item.id} className="flex flex-col items-center text-center">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-velora-burgundy/8 text-velora-burgundy">
-              <Icon className="h-5 w-5" />
-            </span>
+            <CodThankYouIconFrame variant="muted" size="sm">
+              <Icon />
+            </CodThankYouIconFrame>
             <p className="mt-2 text-[9px] font-bold text-velora-burgundy-dark">{item.label}</p>
             <p className="mt-0.5 text-[9px] leading-tight text-velora-burgundy/55">{item.value}</p>
             {"badge" in item && item.badge && (
-              <span className="mt-1 rounded-full bg-velora-champagne/30 px-1.5 py-0.5 text-[7px] font-bold text-velora-burgundy">
+              <span className="mt-1 inline-flex items-center gap-0.5 rounded-full bg-velora-champagne/25 px-2 py-0.5 text-[7px] font-semibold text-velora-burgundy-dark">
+                <IconMapPin className="opacity-70" />
                 {item.badge}
               </span>
             )}

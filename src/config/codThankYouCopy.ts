@@ -21,7 +21,7 @@ export const codThankYouCopy = {
     },
   },
   quickTrust: [
-    { id: "time", label: "التوصيل المتوقع", value: "2–4 أيام عمل", badge: "داخل الإمارات 🇦🇪" },
+    { id: "time", label: "التوصيل المتوقع", value: "2–4 أيام عمل", badge: "داخل الإمارات" },
     { id: "cod", label: "الدفع", value: "عند الاستلام" },
     { id: "check", label: "استلام آمن", value: "راجعي الطرد قبل الدفع" },
     { id: "quality", label: "ثقة فيلورا", value: "منتجات مختارة بعناية" },
@@ -69,7 +69,7 @@ export const codThankYouCopy = {
 } as const;
 
 export function codWhatsAppConfirmMessage(orderRef: string, customerFirstName: string): string {
-  return `السلام عليكم، أبغى أأكد طلب COD في ${brand.nameEn}.\nمرجع: ${orderRef}\nالاسم: ${customerFirstName}\nشكراً 🌸`;
+  return `السلام عليكم، أبغى أأكد طلب COD في ${brand.nameEn}.\nمرجع: ${orderRef}\nالاسم: ${customerFirstName}\nشكراً.`;
 }
 
 export function codWhatsAppSupportMessage(orderRef: string): string {

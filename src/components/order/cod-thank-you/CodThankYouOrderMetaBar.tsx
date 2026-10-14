@@ -1,4 +1,5 @@
 import { codThankYouCopy } from "@/config/codThankYouCopy";
+import { CodThankYouIconFrame } from "./CodThankYouIconFrame";
 import { IconCalendar, IconPackage } from "./CodThankYouIcons";
 
 type Props = {
@@ -25,22 +26,26 @@ export function CodThankYouOrderMetaBar({ orderRef, createdAt }: Props) {
   return (
     <div className="mx-5 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-velora-burgundy/10">
       <div className="flex items-start gap-3 bg-velora-cream-dark/90 p-4 text-right">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-velora-burgundy shadow-sm">
+        <CodThankYouIconFrame variant="soft" size="sm">
           <IconPackage />
-        </span>
+        </CodThankYouIconFrame>
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold text-velora-burgundy/50">{meta.orderNumber}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-velora-burgundy/45">
+            {meta.orderNumber}
+          </p>
           <p className="mt-0.5 truncate text-sm font-bold tabular-nums text-velora-burgundy-dark" dir="ltr">
             #{orderRef}
           </p>
         </div>
       </div>
       <div className="flex items-start gap-3 bg-velora-cream-dark/90 p-4 text-right">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-velora-burgundy shadow-sm">
+        <CodThankYouIconFrame variant="soft" size="sm">
           <IconCalendar />
-        </span>
+        </CodThankYouIconFrame>
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold text-velora-burgundy/50">{meta.orderDate}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-velora-burgundy/45">
+            {meta.orderDate}
+          </p>
           <p className="mt-0.5 text-xs font-bold leading-snug text-velora-burgundy-dark">
             {formatOrderDate(createdAt)}
           </p>

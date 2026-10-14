@@ -5,6 +5,7 @@ import { useState } from "react";
 import { codThankYouCopy } from "@/config/codThankYouCopy";
 import { codFee, currencyLabel, formatPrice } from "@/config/pricing";
 import type { BundleQuantity } from "@/config/pricing";
+import { IconChevronEnd } from "./CodThankYouIcons";
 
 type Props = {
   productName: string;
@@ -32,7 +33,9 @@ export function CodThankYouOrderSummary(props: Props) {
         aria-expanded={open}
       >
         {summary.toggle}
-        <span className="text-velora-burgundy/50">{open ? "▲" : "▼"}</span>
+        <IconChevronEnd
+          className={`shrink-0 text-velora-burgundy/45 transition ${open ? "-rotate-90" : "rotate-90"}`}
+        />
       </button>
 
       {open && (

@@ -1,5 +1,6 @@
 import { codThankYouCopy } from "@/config/codThankYouCopy";
 import type { CodTimelineStep } from "@/lib/order/codThankYouTimeline";
+import { CodThankYouIconFrame } from "./CodThankYouIconFrame";
 import { IconBox, IconCart, IconPhone, IconTruck } from "./CodThankYouIcons";
 
 const stepIcons = {
@@ -18,14 +19,16 @@ export function CodThankYouTimeline({ steps }: Props) {
 
   return (
     <section className="border-t border-velora-burgundy/8 px-5 py-6">
-      <h2 className="flex items-center justify-end gap-2 text-right text-sm font-bold text-velora-burgundy-dark">
-        <span aria-hidden>🚚</span>
-        {timeline.heading}
-      </h2>
+      <div className="flex items-center justify-end gap-2.5 text-right">
+        <CodThankYouIconFrame variant="muted" size="sm">
+          <IconTruck />
+        </CodThankYouIconFrame>
+        <h2 className="text-sm font-bold text-velora-burgundy-dark">{timeline.heading}</h2>
+      </div>
 
       <div className="relative mt-8">
         <div
-          className="absolute top-[1.35rem] right-[10%] left-[10%] h-[3px] rounded-full bg-velora-burgundy/12"
+          className="absolute top-[1.35rem] right-[10%] left-[10%] h-px bg-gradient-to-l from-transparent via-velora-burgundy/25 to-transparent"
           aria-hidden
         />
         <ol className="relative flex justify-between gap-1" aria-label={timeline.heading}>
@@ -38,15 +41,19 @@ export function CodThankYouTimeline({ steps }: Props) {
 
             return (
               <li key={step.id} className="flex w-[23%] flex-col items-center text-center">
-                <span
-                  className={`relative z-[1] flex h-11 w-11 items-center justify-center rounded-full border-2 transition ${
-                    filled
-                      ? "border-velora-burgundy bg-velora-burgundy text-velora-cream shadow-md shadow-velora-burgundy/25"
-                      : "border-velora-burgundy/20 bg-white text-velora-burgundy/35"
-                  } ${active ? "ring-4 ring-velora-champagne/35" : ""}`}
+                <CodThankYouIconFrame
+                  variant={filled ? "solid" : "soft"}
+                  size="md"
+                  className={
+                    active
+                      ? "ring-2 ring-velora-champagne/50 ring-offset-2 ring-offset-white"
+                      : filled
+                        ? ""
+                        : "opacity-90"
+                  }
                 >
-                  <Icon className="h-5 w-5" />
-                </span>
+                  <Icon />
+                </CodThankYouIconFrame>
                 <p
                   className={`mt-2 text-[10px] font-bold leading-tight ${
                     filled ? "text-velora-burgundy-dark" : "text-velora-burgundy/45"
