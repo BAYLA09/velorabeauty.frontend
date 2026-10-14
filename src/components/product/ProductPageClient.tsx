@@ -16,6 +16,7 @@ import { ProductRitualSection } from "@/components/product/ProductRitualSection"
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
 import { ProductTrustBar } from "@/components/product/ProductTrustBar";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
+import { ProductPdpCrossSell } from "@/components/product/ProductPdpCrossSell";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductWithPage } from "@/lib/productCatalog";
@@ -26,7 +27,7 @@ type Props = {
 };
 
 export function ProductPageClient({ product, allProducts }: Props) {
-  const [quantity, setQuantity] = useState<BundleQuantity>(2);
+  const [quantity, setQuantity] = useState<BundleQuantity>(1);
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
@@ -89,6 +90,8 @@ export function ProductPageClient({ product, allProducts }: Props) {
                       onQuantityChange={setQuantity}
                       onChange={setPurchase}
                     />
+
+                    <ProductPdpCrossSell productSlug={product.slug} />
 
                     <ProductTrustBar prominent />
 

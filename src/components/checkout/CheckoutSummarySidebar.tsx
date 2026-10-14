@@ -35,6 +35,10 @@ import {
 } from "@/lib/checkoutUpsell";
 import { countEligibleUnits } from "@/lib/cart/cartPricing";
 import { MAX_CART_UNITS } from "@/lib/cart/cartTypes";
+import {
+  allowSameSkuMultiUnitBundles,
+  maxUnitsPerProductSlug,
+} from "@/config/merchandising";
 import { getProductBySlug, getProductPath } from "@/lib/productCatalog";
 
 type Props = {
@@ -109,6 +113,7 @@ export function CheckoutSummarySidebar({
     const nextQty = line.quantity + delta;
 
     if (singleLineBasket && !mixedCart) {
+      if (!allowSameSkuMultiUnitBundles) return;
       if (nextQty < 1 || nextQty > MAX_CART_UNITS) return;
       setBundleQuantity(nextQty as BundleQuantity);
       return;
@@ -170,7 +175,7 @@ export function CheckoutSummarySidebar({
                     ) : null}
                     {!mixedCart && lines.length === 1 ? (
                       <p className="mt-0.5 text-[11px] text-neutral-500">
-                        {bundleOfferLabel(bundleQty)}
+                        {bundleOfferLabel(bundleQty, lines.length)}
                       </p>
                     ) : null}
                     <p className="mt-2 text-sm font-extrabold tabular-nums text-neutral-900">
@@ -199,7 +204,11 @@ export function CheckoutSummarySidebar({
                         <button
                           type="button"
                           aria-label={`زيادة — ${product?.name ?? line.slug}`}
-                          disabled={totalUnits >= MAX_CART_UNITS}
+                          disabled={
+                            totalUnits >= MAX_CART_UNITS ||
+                            (!allowSameSkuMultiUnitBundles &&
+                              line.quantity >= maxUnitsPerProductSlug)
+                          }
                           onClick={() => adjustLineQuantity(line.slug, 1)}
                           className="flex h-8 w-8 items-center justify-center rounded-md text-lg font-bold text-neutral-700 transition hover:bg-white disabled:opacity-30"
                         >
