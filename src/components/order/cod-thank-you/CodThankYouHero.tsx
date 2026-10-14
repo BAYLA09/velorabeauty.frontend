@@ -12,9 +12,9 @@ export function CodThankYouHero({ customerName }: Props) {
 
   return (
     <header className="relative px-5 pb-2 pt-8 text-center">
-      <div className="relative mx-auto flex h-[5.75rem] w-[5.75rem] items-center justify-center">
-        <IconSuccessHalo className="pointer-events-none absolute text-velora-champagne-dark" />
-        <CodThankYouIconFrame variant="solid" size="hero" className="relative shadow-[0_12px_36px_rgba(92,42,50,0.28)]">
+      <div className="relative mx-auto flex h-[6rem] w-[6rem] items-center justify-center">
+        <IconSuccessHalo className="pointer-events-none absolute text-velora-champagne" />
+        <CodThankYouIconFrame variant="solid" size="hero" className="relative ring-4 ring-velora-champagne/30">
           <IconCheck />
         </CodThankYouIconFrame>
       </div>

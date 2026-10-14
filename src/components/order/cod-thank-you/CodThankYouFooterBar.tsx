@@ -5,7 +5,12 @@ import { codThankYouCopy, codWhatsAppSupportMessage } from "@/config/codThankYou
 import { isSupportWhatsAppConfigured, supportWhatsAppUrl } from "@/config/storeContact";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
 import { CodThankYouIconFrame } from "./CodThankYouIconFrame";
-import { IconChat, IconChevronEnd, IconWhatsApp } from "./CodThankYouIcons";
+import {
+  CodThankYouButtonIconBadge,
+  IconChevronEnd,
+  IconLuxuryMessage,
+  IconSupport,
+} from "./CodThankYouIcons";
 
 type Props = {
   orderRef: string;
@@ -19,10 +24,10 @@ export function CodThankYouFooterBar({ orderRef, onHome }: Props) {
   return (
     <footer className="mt-2 border-t border-velora-burgundy/10 bg-velora-cream-dark/50 px-5 py-5">
       <div className="flex items-start gap-3 text-right text-xs text-velora-burgundy/75">
-        <CodThankYouIconFrame variant="soft" size="sm" className="mt-0.5">
-          <IconChat />
+        <CodThankYouIconFrame variant="luxury" size="md" className="mt-0.5">
+          <IconSupport />
         </CodThankYouIconFrame>
-        <p className="pt-1.5">{footer.help}</p>
+        <p className="pt-2 font-medium">{footer.help}</p>
       </div>
 
       {waReady ? (
@@ -31,11 +36,15 @@ export function CodThankYouFooterBar({ orderRef, onHome }: Props) {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackStoreEvent({ event: "whatsapp_click", placement: "support" })}
-          className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-2xl bg-velora-burgundy py-3.5 text-sm font-bold text-velora-cream shadow-lg shadow-velora-burgundy/20 transition hover:bg-velora-burgundy-dark"
+          className="mt-4 flex w-full items-center justify-between gap-2 rounded-2xl bg-gradient-to-r from-velora-burgundy to-velora-burgundy-dark py-3.5 pe-5 ps-4 text-sm font-bold text-velora-cream shadow-lg shadow-velora-burgundy/25 transition hover:brightness-105"
         >
-          <IconWhatsApp className="h-5 w-5" />
-          {footer.whatsapp}
-          <IconChevronEnd className="opacity-80" />
+          <span className="flex items-center gap-3">
+            <CodThankYouButtonIconBadge>
+              <IconLuxuryMessage className="h-[18px] w-[18px] text-velora-cream" />
+            </CodThankYouButtonIconBadge>
+            {footer.whatsapp}
+          </span>
+          <IconChevronEnd className="opacity-85" />
         </a>
       ) : (
         <p className="mt-3 text-center text-[10px] text-velora-burgundy/45">{footer.whatsappMissing}</p>

@@ -1,6 +1,11 @@
-/** Thank-you page icons — single stroke weight, 24×24, no emoji. */
+/**
+ * Luxury line icons — stroke only, no emoji / no WhatsApp blob logo.
+ * Use IconLuxuryMessage on «واتساب» buttons (text says WhatsApp; icon = premium chat).
+ */
 
-const S = 1.5;
+import type { ReactNode } from "react";
+
+const S = 1.65;
 
 type IconProps = { className?: string };
 
@@ -53,19 +58,25 @@ export function IconTruck({ className = "h-5 w-5" }: IconProps) {
   );
 }
 
-/** Monochrome — on burgundy buttons */
-export function IconWhatsApp({ className = "h-5 w-5" }: IconProps) {
+/** Premium chat — for WhatsApp CTAs (not the WA emoji logo). */
+export function IconLuxuryMessage({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={S} aria-hidden>
-      <path
-        d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.2 9.4c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .5.4l.7 1.6c.1.2 0 .5-.2.7l-.4.4c-.2.2-.2.4 0 .7.8 1.4 2 2.5 3.5 3.2.2.1.5.1.6-.1l.5-.5c.2-.2.4-.2.7-.1l1.6.7c.3.1.3.3.3.5v.5c0 .2-.1.4-.5.6-.5.3-1.2.6-2 .6-.9 0-2-.4-3.4-1.8-2.4-2.4-2.5-4.3-2.5-4.7 0-.4.3-1.1.6-1.6z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <rect x="4" y="5" width="16" height="14" rx="3" strokeLinejoin="round" />
+      <path d="M8 10h8M8 13.5h5.5" strokeLinecap="round" />
+      <path d="M9 19.5 6 22v-3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Support / help — headset (not speech-bubble emoji). */
+export function IconSupport({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={S} aria-hidden>
+      <path d="M4 14a8 8 0 0 1 16 0" strokeLinecap="round" />
+      <rect x="3" y="14" width="5" height="6" rx="1.5" />
+      <rect x="16" y="14" width="5" height="6" rx="1.5" />
+      <path d="M12 6v2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -117,13 +128,7 @@ export function IconPackage({ className = "h-5 w-5" }: IconProps) {
 }
 
 export function IconHeadset({ className = "h-5 w-5" }: IconProps) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={S} aria-hidden>
-      <path d="M4 14a8 8 0 0 1 16 0" strokeLinecap="round" />
-      <rect x="3" y="14" width="5" height="6" rx="1.5" />
-      <rect x="16" y="14" width="5" height="6" rx="1.5" />
-    </svg>
-  );
+  return <IconSupport className={className} />;
 }
 
 export function IconHeart({ className = "h-5 w-5" }: IconProps) {
@@ -137,18 +142,7 @@ export function IconHeart({ className = "h-5 w-5" }: IconProps) {
   );
 }
 
-export function IconChat({ className = "h-5 w-5" }: IconProps) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={S} aria-hidden>
-      <path
-        d="M5 6a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-5l-4 3v-3H8a3 3 0 0 1-3-3V6z"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-export function IconMapPin({ className = "h-3 w-3" }: IconProps) {
+export function IconMapPin({ className = "h-3.5 w-3.5" }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={S} aria-hidden>
       <path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z" strokeLinejoin="round" />
@@ -165,12 +159,20 @@ export function IconChevronEnd({ className = "h-4 w-4" }: IconProps) {
   );
 }
 
-/** Soft halo behind hero check — no confetti */
 export function IconSuccessHalo({ className = "h-28 w-28" }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 120 120" fill="none" aria-hidden>
-      <circle cx="60" cy="60" r="54" stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
-      <circle cx="60" cy="60" r="44" stroke="currentColor" strokeOpacity={0.12} strokeWidth={1} />
+      <circle cx="60" cy="60" r="54" stroke="currentColor" strokeOpacity={0.1} strokeWidth={1} />
+      <circle cx="60" cy="60" r="44" stroke="currentColor" strokeOpacity={0.18} strokeWidth={1.2} />
     </svg>
+  );
+}
+
+/** Medallion on burgundy WhatsApp-action buttons */
+export function CodThankYouButtonIconBadge({ children }: { children: ReactNode }) {
+  return (
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-velora-cream/15 ring-1 ring-velora-cream/35">
+      {children}
+    </span>
   );
 }

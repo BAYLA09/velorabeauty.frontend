@@ -19,16 +19,16 @@ export function CodThankYouTimeline({ steps }: Props) {
 
   return (
     <section className="border-t border-velora-burgundy/8 px-5 py-6">
-      <div className="flex items-center justify-end gap-2.5 text-right">
-        <CodThankYouIconFrame variant="muted" size="sm">
+      <div className="flex items-center justify-end gap-3 text-right">
+        <CodThankYouIconFrame variant="luxury" size="md">
           <IconTruck />
         </CodThankYouIconFrame>
         <h2 className="text-sm font-bold text-velora-burgundy-dark">{timeline.heading}</h2>
       </div>
 
-      <div className="relative mt-8">
+      <div className="relative mt-9">
         <div
-          className="absolute top-[1.35rem] right-[10%] left-[10%] h-px bg-gradient-to-l from-transparent via-velora-burgundy/25 to-transparent"
+          className="absolute top-[1.65rem] right-[8%] left-[8%] h-px bg-gradient-to-l from-transparent via-velora-champagne/70 to-transparent"
           aria-hidden
         />
         <ol className="relative flex justify-between gap-1" aria-label={timeline.heading}>
@@ -42,28 +42,22 @@ export function CodThankYouTimeline({ steps }: Props) {
             return (
               <li key={step.id} className="flex w-[23%] flex-col items-center text-center">
                 <CodThankYouIconFrame
-                  variant={filled ? "solid" : "soft"}
-                  size="md"
+                  variant={filled ? "solid" : "luxury"}
+                  size="lg"
                   className={
-                    active
-                      ? "ring-2 ring-velora-champagne/50 ring-offset-2 ring-offset-white"
-                      : filled
-                        ? ""
-                        : "opacity-90"
+                    active ? "ring-2 ring-velora-champagne ring-offset-2 ring-offset-white" : undefined
                   }
                 >
                   <Icon />
                 </CodThankYouIconFrame>
                 <p
-                  className={`mt-2 text-[10px] font-bold leading-tight ${
+                  className={`mt-2.5 text-[10px] font-bold leading-tight ${
                     filled ? "text-velora-burgundy-dark" : "text-velora-burgundy/45"
                   }`}
                 >
                   {copy.label}
                 </p>
-                <p className="mt-0.5 hidden text-[8px] leading-tight text-velora-burgundy/50 sm:block">
-                  {copy.sub}
-                </p>
+                <p className="mt-0.5 text-[8px] leading-tight text-velora-burgundy/50">{copy.sub}</p>
               </li>
             );
           })}

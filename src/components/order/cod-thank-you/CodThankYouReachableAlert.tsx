@@ -5,7 +5,11 @@ import { codThankYouCopy, codWhatsAppConfirmMessage } from "@/config/codThankYou
 import { isSupportWhatsAppConfigured, supportWhatsAppUrl } from "@/config/storeContact";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
 import { CodThankYouIconFrame } from "./CodThankYouIconFrame";
-import { IconPhone, IconWhatsApp } from "./CodThankYouIcons";
+import {
+  CodThankYouButtonIconBadge,
+  IconLuxuryMessage,
+  IconPhone,
+} from "./CodThankYouIcons";
 
 type Props = {
   orderRef: string;
@@ -30,9 +34,9 @@ export function CodThankYouReachableAlert({ orderRef, customerName, phone }: Pro
   }, [customerName, orderRef]);
 
   return (
-    <section className="mx-5 rounded-2xl border border-velora-champagne/45 bg-gradient-to-br from-velora-champagne/22 to-white p-4 text-right">
+    <section className="mx-5 rounded-2xl border border-velora-champagne/50 bg-gradient-to-br from-velora-champagne/28 via-velora-champagne/12 to-white p-4 text-right shadow-sm">
       <div className="flex items-start gap-3">
-        <CodThankYouIconFrame variant="accent" size="md">
+        <CodThankYouIconFrame variant="accent" size="lg">
           <IconPhone />
         </CodThankYouIconFrame>
         <div className="min-w-0 flex-1">
@@ -51,9 +55,11 @@ export function CodThankYouReachableAlert({ orderRef, customerName, phone }: Pro
           <button
             type="button"
             onClick={onWhatsApp}
-            className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-xl bg-velora-burgundy py-3.5 text-sm font-bold text-velora-cream shadow-md shadow-velora-burgundy/15 transition hover:bg-velora-burgundy-dark"
+            className="mt-4 flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-velora-burgundy to-velora-burgundy-dark py-3.5 pe-4 ps-3 text-sm font-bold text-velora-cream shadow-lg shadow-velora-burgundy/20 transition hover:brightness-105"
           >
-            <IconWhatsApp className="h-5 w-5" />
+            <CodThankYouButtonIconBadge>
+              <IconLuxuryMessage className="h-[18px] w-[18px] text-velora-cream" />
+            </CodThankYouButtonIconBadge>
             {reachable.whatsappCta}
           </button>
           <p className="mt-2 text-center text-[9px] leading-relaxed text-velora-burgundy/50">

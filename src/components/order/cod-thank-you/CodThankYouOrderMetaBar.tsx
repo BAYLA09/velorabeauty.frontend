@@ -24,9 +24,9 @@ export function CodThankYouOrderMetaBar({ orderRef, createdAt }: Props) {
   const { meta } = codThankYouCopy;
 
   return (
-    <div className="mx-5 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-velora-burgundy/10">
-      <div className="flex items-start gap-3 bg-velora-cream-dark/90 p-4 text-right">
-        <CodThankYouIconFrame variant="soft" size="sm">
+    <div className="mx-5 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-velora-champagne/30 ring-1 ring-velora-champagne/35">
+      <div className="flex items-start gap-3 bg-gradient-to-br from-white to-velora-cream/80 p-4 text-right">
+        <CodThankYouIconFrame variant="luxury" size="md">
           <IconPackage />
         </CodThankYouIconFrame>
         <div className="min-w-0">
@@ -38,8 +38,8 @@ export function CodThankYouOrderMetaBar({ orderRef, createdAt }: Props) {
           </p>
         </div>
       </div>
-      <div className="flex items-start gap-3 bg-velora-cream-dark/90 p-4 text-right">
-        <CodThankYouIconFrame variant="soft" size="sm">
+      <div className="flex items-start gap-3 bg-gradient-to-br from-white to-velora-cream/80 p-4 text-right">
+        <CodThankYouIconFrame variant="luxury" size="md">
           <IconCalendar />
         </CodThankYouIconFrame>
         <div className="min-w-0">
