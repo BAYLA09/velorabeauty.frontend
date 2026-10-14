@@ -13,8 +13,8 @@ services:
       SITE_URL: https://www.velorabeauty.world
     volumes:
       - velora-orders:/app/data
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
     healthcheck:
       test:
         [

@@ -1,6 +1,6 @@
 # Easypanel — deploy frontend (مختصر)
 
-**دليل خطوة بخطوة:** [EASYPANEL-DEPLOY-NOW-AR.md](./EASYPANEL-DEPLOY-NOW-AR.md)
+**Deploy mkhdamch:** [EASYPANEL-FRONTEND-FIX-AR.md](./EASYPANEL-FRONTEND-FIX-AR.md) · **دليل عام:** [EASYPANEL-DEPLOY-NOW-AR.md](./EASYPANEL-DEPLOY-NOW-AR.md)
 
 ## Image دابا (Publish container ✅)
 
