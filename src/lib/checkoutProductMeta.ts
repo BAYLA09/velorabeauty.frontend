@@ -1,4 +1,5 @@
 import type { BundleQuantity } from "@/config/pricing";
+import { normalizeCartLines } from "@/lib/cart/cartPricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { getProductBySlug } from "@/lib/productCatalog";
 
@@ -32,8 +33,23 @@ export function getCheckoutProductImage(slug: string): string | undefined {
   return product.pageImage.src?.trim() || undefined;
 }
 
-export function bundleOfferLabel(quantity: BundleQuantity): string {
-  if (quantity === 1) return "منتج واحد";
-  if (quantity === 2) return "منتجان · شهرين";
-  return "٣ منتجات · أقوى توفير";
+export function bundleOfferLabel(quantity: BundleQuantity, lines: CartLine[] = []): string {
+  const normalized = normalizeCartLines(lines);
+  if (quantity === 1) return "وحدة واحدة";
+
+  if (normalized.length > 1) {
+    if (quantity === 2) return "منتجان مختلفان · 249";
+    return "٣ منتجات مختلفة · 339";
+  }
+
+  if (normalized.length === 1) {
+    const form = getProductBySlug(normalized[0].slug)?.page.form;
+    const unitPair = form === "serum" ? "عبواتان" : "علبتان";
+    const unitThree = form === "serum" ? "3 عبوات" : "3 علب";
+    if (quantity === 2) return `${unitPair} · نفس المنتج · 249`;
+    return `${unitThree} · نفس المنتج · 339`;
+  }
+
+  if (quantity === 2) return "عرض منتجين · 249";
+  return "عرض 3 منتجات · 339";
 }

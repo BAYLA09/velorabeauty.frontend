@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { CartBundleProgress } from "@/components/cart/CartBundleProgress";
 import { formatPrice, singleProductPrice } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import {
@@ -29,7 +28,7 @@ export function CheckoutUpsellPanel({
   onAdd,
 }: Props) {
   const savedSoFar = getBundleSavingsVsRetail(eligibleUnits, merchandiseAed);
-  const offer = getUpsellOfferCopy(eligibleUnits);
+  const offer = getUpsellOfferCopy(lines, eligibleUnits);
   const nextTierSavings = getNextTierSavings(eligibleUnits);
   const recommendations = getUpsellRecommendations(lines);
 
@@ -63,10 +62,6 @@ export function CheckoutUpsellPanel({
       className="mt-4 overflow-hidden rounded-2xl border-2 border-[#D6AD65]/45 bg-gradient-to-br from-[#FCE8E5] via-[#FFF9F5] to-white shadow-sm"
       aria-labelledby="checkout-upsell-title"
     >
-      <div className="border-b border-[#650D20]/8 px-4 py-3">
-        <CartBundleProgress eligibleUnits={eligibleUnits} />
-      </div>
-
       <div className="px-4 py-3.5">
         <h3 id="checkout-upsell-title" className="text-sm font-extrabold text-[#650D20]">
           {offer.title}

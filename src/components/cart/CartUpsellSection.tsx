@@ -11,7 +11,6 @@ import {
   type UpsellProduct,
 } from "@/lib/cart/cartUpsell";
 import { cartDrawerCopy as t } from "@/components/cart/cartDrawerCopy";
-import { CartBundleProgress } from "@/components/cart/CartBundleProgress";
 
 function UpsellProductRow({
   rec,
@@ -60,19 +59,16 @@ type Props = {
   lines: CartLine[];
   eligibleUnits: number;
   onAdd: (slug: string) => void;
-  /** Show tier strip (Lara-style) */
-  showProgress?: boolean;
 };
 
 export function CartUpsellSection({
   lines,
   eligibleUnits,
   onAdd,
-  showProgress = true,
 }: Props) {
   if (!canAddMoreUnits(lines)) return null;
 
-  const offer = getUpsellOfferCopy(eligibleUnits);
+  const offer = getUpsellOfferCopy(lines, eligibleUnits);
   const recommendations = getUpsellRecommendations(lines);
   const savings = getNextTierSavings(eligibleUnits);
 
@@ -80,12 +76,6 @@ export function CartUpsellSection({
 
   return (
     <section className="mt-6 border-t border-[#650D20]/10 pt-6" aria-labelledby="cart-upsell-title">
-      {showProgress ? (
-        <div className="mb-5">
-          <CartBundleProgress eligibleUnits={eligibleUnits} />
-        </div>
-      ) : null}
-
       <h3 id="cart-upsell-title" className="text-xs font-extrabold text-[#291A1C]">
         {t.upsellSection}
       </h3>

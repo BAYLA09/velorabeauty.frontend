@@ -1,8 +1,8 @@
-import { cardBundlePrices, singleProductPrice } from "@/config/pricing";
+import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductId } from "@/config/products";
 import { getAllProductsWithPages } from "@/lib/productCatalog";
 import type { CartLine } from "@/lib/cart/cartTypes";
-import { countEligibleUnits } from "@/lib/cart/cartPricing";
+import { countEligibleUnits, normalizeCartLines } from "@/lib/cart/cartPricing";
 import { targetBundleTotalAfterUpsell, upsellMerchandiseDelta } from "@/lib/cart/cartPricing";
 
 const ROUTINE_LABEL: Record<ProductId, string> = {
@@ -53,49 +53,82 @@ export function getNextTierSavings(eligibleUnits: number): number | null {
   return Math.max(0, retail - target);
 }
 
-export function getUpsellOfferCopy(eligibleUnits: number): {
+function cartDistinctSkuCount(lines: CartLine[]): number {
+  return normalizeCartLines(lines).length;
+}
+
+/** Upsell = منتجات مختلفة فقط (مثال شعر + عين = 249). عروض نفس المنتج = صفحة المنتج. */
+export function getUpsellOfferCopy(
+  lines: CartLine[],
+  eligibleUnits: number,
+): {
   title: string;
   body: string;
   targetTotal: number | null;
   delta: number | null;
 } | null {
   if (eligibleUnits >= 4) return null;
+
+  const distinct = cartDistinctSkuCount(lines);
+  const singleSkuOnly = distinct === 1 && lines.length > 0;
+
   if (eligibleUnits === 3) {
     const targetTotal = targetBundleTotalAfterUpsell(3);
     const delta = upsellMerchandiseDelta(3);
     if (targetTotal === null || delta === null) return null;
     const retailFour = singleProductPrice * 4;
     return {
-      title: `منتج رابع — +${delta} د.إ على عرض 339`,
-      body: `أضيفي خطوة إضافية — المجموع ${targetTotal} د.إ (بدل ${retailFour} د.إ بالتجزئة).`,
+      title: `منتج رابع مختلف — +${delta} د.إ`,
+      body: `أضيفي خطوة أخرى من فيلورا (شعر، بشرة، أو عين) — المجموع ${formatPrice(targetTotal)} (بدل ${formatPrice(retailFour)}).`,
       targetTotal,
       delta,
     };
   }
+
   if (eligibleUnits === 0) {
     return {
-      title: "كمّلي الروتين — عرض لمرة واحدة",
-      body: `منتج ${cardBundlePrices[1]} · منتجان ${cardBundlePrices[2]} · 3 منتجات ${cardBundlePrices[3]} — يمكن خلط الشعر، البشرة، والعين.`,
+      title: "كمّلي روتين VELORA",
+      body: "العروض هنا لمنتجات مختلفة (مثال: علكة شعر + سيروم عين = 249 د.إ). علبتين أو 3 من نفس المنتج تختارينها من صفحة المنتج.",
       targetTotal: cardBundlePrices[1],
       delta: null,
     };
   }
+
   const targetTotal = targetBundleTotalAfterUpsell(eligibleUnits);
   const delta = upsellMerchandiseDelta(eligibleUnits);
   if (targetTotal === null || delta === null) return null;
+
   if (eligibleUnits === 1) {
     const saveTwo = singleProductPrice * 2 - targetTotal;
+    if (singleSkuOnly) {
+      return {
+        title: `أضيفي منتجاً آخر — ${formatPrice(targetTotal)}`,
+        body: `مثال: شعر + عين أو شعر + بشرة = ${formatPrice(targetTotal)} (وفّري ${saveTwo} د.إ). هذا العرض لمنتجين مختلفين — علبتين من نفس المنتج (${formatPrice(targetTotal)}) من «اختاري الكمية» في صفحة المنتج.`,
+        targetTotal,
+        delta,
+      };
+    }
     return {
-      title: `زيدي منتجاً — وفّري ${saveTwo} د.إ`,
-      body: `عرض منتجان بـ ${targetTotal} د.إ بدل ${singleProductPrice * 2} د.إ — اختاري الشعر، البشرة، أو العين.`,
+      title: `زيدي خطوة من فيلورا — ${formatPrice(targetTotal)}`,
+      body: `منتج ثانٍ مختلف — المجموع ${formatPrice(targetTotal)} (بدل ${formatPrice(singleProductPrice * 2)}).`,
       targetTotal,
       delta,
     };
   }
+
   const saveThree = singleProductPrice * 3 - targetTotal;
+  if (singleSkuOnly) {
+    return {
+      title: `خطوة ثالثة مختلفة — ${formatPrice(targetTotal)}`,
+      body: `عندك وحدتان من نفس المنتج. أضيفي منتجاً آخر (شعر، بشرة، أو عين) للوصول إلى ${formatPrice(targetTotal)} — وفّري ${saveThree} د.إ. (3 علب من نفس المنتج = ${formatPrice(cardBundlePrices[3])} من صفحة المنتج.)`,
+      targetTotal,
+      delta,
+    };
+  }
+
   return {
-    title: `خطوة أخيرة — وفّري ${saveThree} د.إ`,
-    body: `أكملي 3 منتجات بـ ${targetTotal} د.إ (بدل ${singleProductPrice * 3} د.إ) — أقوى توفير في فيلورا.`,
+    title: `خطوة أخيرة — ${formatPrice(targetTotal)}`,
+    body: `أكملي 3 منتجات مختلفة من فيلورا بـ ${formatPrice(targetTotal)} (بدل ${formatPrice(singleProductPrice * 3)}).`,
     targetTotal,
     delta,
   };

@@ -170,7 +170,7 @@ export function CheckoutSummarySidebar({
                     ) : null}
                     {!mixedCart && lines.length === 1 ? (
                       <p className="mt-0.5 text-[11px] text-neutral-500">
-                        {bundleOfferLabel(bundleQty)}
+                        {bundleOfferLabel(bundleQty, lines)}
                       </p>
                     ) : null}
                     <p className="mt-2 text-sm font-extrabold tabular-nums text-neutral-900">

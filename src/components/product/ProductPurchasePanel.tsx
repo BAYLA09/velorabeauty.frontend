@@ -53,7 +53,10 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
     if (qty === 2) {
       return {
         title: form === "serum" ? "عبواتين" : "علبتين",
-        subtitle: form === "serum" ? "شهران — للاستمرار" : "شهران — القيمة الأنسب",
+        subtitle:
+          form === "serum"
+            ? "نفس المنتج — عبواتان · شهران"
+            : "نفس المنتج — علبتان · القيمة الأنسب",
         badge: { text: "الأكثر طلباً", variant: "popular" },
         compareAt,
         price: cardPrice,
@@ -63,7 +66,8 @@ function getOfferUi(form: ProductForm, qty: BundleQuantity, funnelOffers: boolea
     }
     return {
       title: form === "serum" ? "3 عبوات" : "3 علب",
-      subtitle: form === "serum" ? "3 عبوات — أقصى وفور" : "3 علب — أقصى وفور",
+      subtitle:
+        form === "serum" ? "نفس المنتج — 3 عبوات · أقصى وفور" : "نفس المنتج — 3 علب · أقصى وفور",
       badge: { text: "أفضل قيمة", variant: "bundle" },
       compareAt,
       price: cardPrice,
