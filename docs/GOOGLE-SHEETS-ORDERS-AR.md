@@ -1,6 +1,22 @@
 # طلبات Velora → Google Sheets (COD + بطاقة)
 
-الموقع يرسل كل طلب إلى **Webhook** (Google Apps Script). عندك **جدولين**:
+## ابدأ بـ COD فقط (مرحلة 1)
+
+يمكنك تشغيل **جدول COD** وحدَه — **لا حاجة** لجدول البطاقة الآن.
+
+1. أنشئ Google Sheet واحد (`Velora COD`) + Apps Script + Web app (الخطوات 1–2 أدناه).
+2. في Easypanel ضع فقط:
+   ```env
+   ORDERS_SHEETS_WEBHOOK_SECRET=...
+   ORDERS_SHEETS_COD_WEBHOOK_URL=https://script.google.com/macros/s/.../exec
+   ```
+3. **لا تضع** `ORDERS_SHEETS_CARD_WEBHOOK_URL` حتى تجهّز جدول البطاقة لاحقاً — طلبات البطاقة لن تُرسل للـ Sheets إلى أن تضيف الرابط.
+
+**مهم:** هذه الميزة في **PR #140** — بعد الدمج في `main` ونشر Docker (`ghcr.io/.../latest`) يشتغل الإرسال على السيرفر.
+
+---
+
+الموقع ير sends كل طلب إلى **Webhook** (Google Apps Script). يمكنك **جدولين** (COD + بطاقة):
 
 | الجدول | متى يُضاف الصف | متغير Easypanel |
 |--------|----------------|-----------------|
