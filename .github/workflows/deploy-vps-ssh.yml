@@ -1,0 +1,89 @@
+# Optional: deploy GHCR image on your VPS without Easypanel "Deploy" button.
+# One-time setup (GitHub repo → Settings → Secrets → Actions):
+#   VPS_HOST          = IP or hostname of Easypanel server
+#   VPS_USER          = ssh user (e.g. root)
+#   VPS_SSH_KEY       = private key (PEM) with access to the server
+#   VPS_CONTAINER     = optional, default velora-frontend
+#
+# Runs after Publish container on main, or manually: Actions → Deploy VPS (SSH) → Run workflow
+
+name: Deploy VPS (SSH)
+
+on:
+  workflow_run:
+    workflows: ["Publish container"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag (7-char SHA or latest)"
+        required: false
+        default: "latest"
+
+concurrency:
+  group: deploy-vps-ssh
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Require SSH secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$VPS_SSH_KEY" ]; then
+            echo "::notice::VPS_HOST / VPS_USER / VPS_SSH_KEY not set — skip SSH deploy."
+            echo "Easypanel Git deploy finishing in 1s will NOT update the site."
+            echo "Either add SSH secrets (this workflow) or switch Easypanel to Docker Image."
+            exit 0
+          fi
+
+      - name: Resolve image tag
+        id: tag
+        env:
+          INPUT_TAG: ${{ github.event.inputs.image_tag }}
+          RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            echo "tag=$INPUT_TAG" >> "$GITHUB_OUTPUT"
+          elif [ -n "$RUN_HEAD_SHA" ]; then
+            echo "tag=${RUN_HEAD_SHA:0:7}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull and recreate container on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            IMAGE="ghcr.io/bayla09/velorabeauty.frontend:${{ steps.tag.outputs.tag }}"
+            NAME="${{ secrets.VPS_CONTAINER || 'velora-frontend' }}"
+            echo "Pulling $IMAGE"
+            docker pull "$IMAGE"
+            docker stop "$NAME" 2>/dev/null || true
+            docker rm "$NAME" 2>/dev/null || true
+            docker run -d --name "$NAME" --restart unless-stopped \
+              -p 127.0.0.1:3000:3000 \
+              -v velora-orders:/app/data \
+              -e NODE_ENV=production \
+              -e HOSTNAME=0.0.0.0 \
+              -e PORT=3000 \
+              -e DATABASE_PATH=/app/data/velora.sqlite \
+              -e SITE_URL=https://www.velorabeauty.world \
+              "$IMAGE"
+            docker ps --filter "name=$NAME"
+            curl -sf http://127.0.0.1:3000/api/health | head -c 400 || true
