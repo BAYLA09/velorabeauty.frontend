@@ -164,13 +164,6 @@ export function CheckoutConfirmClient({
           </header>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-            <CheckoutEmailMarketingFields
-              email={email}
-              setEmail={setEmail}
-              marketingConsent={marketingConsent}
-              setMarketingConsent={setMarketingConsent}
-              onEmailBlur={syncNow}
-            />
             <label className="block">
               <span className={checkoutLabelClass}>الاسم الكامل</span>
               <input
@@ -208,6 +201,16 @@ export function CheckoutConfirmClient({
                   autoComplete="street-address"
                 />
               </label>
+            )}
+
+            {isCod && (
+              <CheckoutEmailMarketingFields
+                email={email}
+                setEmail={setEmail}
+                marketingConsent={marketingConsent}
+                setMarketingConsent={setMarketingConsent}
+                onEmailBlur={syncNow}
+              />
             )}
 
             {error && (
