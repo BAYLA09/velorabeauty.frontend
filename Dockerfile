@@ -19,8 +19,6 @@ RUN npm run build
 
 FROM node:22-alpine AS runner
 ARG GIT_SHA=unknown
-LABEL org.opencontainers.image.source="https://github.com/BAYLA09/velorabeauty.frontend"
-LABEL org.opencontainers.image.revision="${GIT_SHA}"
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

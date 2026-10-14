@@ -32,12 +32,8 @@ export function getCheckoutProductImage(slug: string): string | undefined {
   return product.pageImage.src?.trim() || undefined;
 }
 
-export function bundleOfferLabel(quantity: BundleQuantity, distinctSkus = 1): string {
+export function bundleOfferLabel(quantity: BundleQuantity): string {
   if (quantity === 1) return "منتج واحد";
-  if (distinctSkus > 1) {
-    if (quantity === 2) return "منتجان · عرض فيلورا";
-    return "٣ منتجات · عرض فيلورا";
-  }
-  if (quantity === 2) return "منتجان (نفس المنتج)";
-  return "٣ وحدات (نفس المنتج)";
+  if (quantity === 2) return "منتجان · شهرين";
+  return "٣ منتجات · أقوى توفير";
 }

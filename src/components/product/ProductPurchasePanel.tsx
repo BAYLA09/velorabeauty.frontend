@@ -12,14 +12,12 @@ import { useCart } from "@/context/CartProvider";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
 import {
-  cardBundlePrices,
   codFee,
   currencyLabel,
   formatPrice,
   singleProductPrice,
   type BundleQuantity,
 } from "@/config/pricing";
-import { allowSameSkuMultiUnitBundles } from "@/config/merchandising";
 
 const quantities: BundleQuantity[] = [1, 2, 3];
 
@@ -180,12 +178,8 @@ export function ProductPurchasePanel({
 }: Props) {
   const router = useRouter();
   const { addItem, openCart } = useCart();
-  const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(
-    allowSameSkuMultiUnitBundles ? 2 : 1,
-  );
-  const quantity: BundleQuantity = allowSameSkuMultiUnitBundles
-    ? (quantityProp ?? quantityInternal)
-    : 1;
+  const [quantityInternal, setQuantityInternal] = useState<BundleQuantity>(2);
+  const quantity = quantityProp ?? quantityInternal;
 
   const setQuantity = (q: BundleQuantity) => {
     onQuantityChange?.(q);
@@ -224,26 +218,12 @@ export function ProductPurchasePanel({
     if (addItem(productSlug, quantity)) openCart();
   }
 
-  const visibleQuantities: BundleQuantity[] = allowSameSkuMultiUnitBundles
-    ? quantities
-    : [1];
-
   return (
     <div className="space-y-4">
-      <p className="text-lg font-extrabold text-velora-burgundy-dark">
-        {allowSameSkuMultiUnitBundles ? "اختاري الكمية" : "عرض اليوم"}
-      </p>
-
-      {!allowSameSkuMultiUnitBundles ? (
-        <p className="-mt-2 text-[11px] font-semibold leading-relaxed text-velora-burgundy/65">
-          علبة واحدة بـ {formatPrice(singleProductPrice)} — عروض {formatPrice(cardBundlePrices[2])}{" "}
-          و{formatPrice(cardBundlePrices[3])} تُفعَّل عند إضافة منتجات أخرى من فيلورا (في الدفع أو
-          بالأسفل).
-        </p>
-      ) : null}
+      <p className="text-lg font-extrabold text-velora-burgundy-dark">اختاري الكمية</p>
 
       <div className="space-y-3">
-        {visibleQuantities.map((qty) => {
+        {quantities.map((qty) => {
           const active = quantity === qty;
           const offer = getOfferUi(form, qty, funnelOffers);
 
@@ -343,9 +323,8 @@ export function ProductPurchasePanel({
           onClick={addSelectionToCart}
           className="mt-3 w-full rounded-2xl border-2 border-velora-burgundy/25 bg-white py-3 text-sm font-bold text-velora-burgundy transition hover:border-velora-burgundy/50 hover:bg-velora-cream-dark/50"
         >
-          {allowSameSkuMultiUnitBundles
-            ? `أضيفي للسلة — أكملي روتينك (${quantity} ${form === "serum" ? "عبوة" : "علبة"})`
-            : "أضيفي للسلة — كمّلي الروتين بمنتج آخر"}
+          أضيفي للسلة — أكملي روتينك ({quantity}{" "}
+          {form === "serum" ? "عبوة" : "علبة"})
         </button>
         {funnelOffers && (
           <p className="mt-2.5 text-center text-[11px] font-semibold leading-relaxed text-velora-burgundy/60">
