@@ -18,8 +18,16 @@ describe("validateUaeMobilePhone", () => {
     if (r.ok) assert.equal(r.normalized, "+971501234567");
   });
 
-  it("sanitize keeps + at start", () => {
-    assert.equal(sanitizeUaePhoneTyping("+971 50"), "+971 50");
+  it("sanitize keeps + at start and caps intl digits", () => {
+    assert.equal(sanitizeUaePhoneTyping("+971 50"), "+97150");
+    assert.equal(
+      sanitizeUaePhoneTyping("+97150123456789"),
+      "+971501234567",
+    );
+  });
+
+  it("caps local 05 at 10 digits", () => {
+    assert.equal(sanitizeUaePhoneTyping("050123456789"), "0501234567");
   });
 
   it("rejects too short 05", () => {
