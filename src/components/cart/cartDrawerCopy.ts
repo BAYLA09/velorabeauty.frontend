@@ -6,8 +6,11 @@ export const cartDrawerCopy = {
     "نفس المنتج: 199 / 249 / 339 من صفحة المنتج · منتج مختلف يُضاف +199 د.إ (مثال: 2 شعر + 1 بشرة = 448).",
   add: "أضيفي",
   remove: "حذف",
-  upsellSection: "أكملي روتين VELORA",
-  upsellHint: "اضغطي على المنتج — تبقين في السلة، بلا إعادة اختيار العرض.",
+  upsellSection: "🔥 قبل الدفع — كمّلي روتينك",
+  upsellBadge: "ضغطة واحدة",
+  upsellHint: "تبقين في السلة · ما تعيديش اختيار الكمية · أضيفي وكمّلي.",
+  upsellFootnote: (current: string) =>
+    `المجموع الحالي ${current} — الأسعار كما هي (+199 لكل منتج مختلف).`,
   addPlus: "+ أضيفي",
   saveAmount: (aed: number) => `وفّري ${aed} د.إ`,
   addForDelta: (price: string) => `زيادة بـ ${price} فقط للانتقال للعرض التالي`,

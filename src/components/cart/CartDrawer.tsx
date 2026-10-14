@@ -150,11 +150,7 @@ export function CartDrawer() {
             <div className="pb-2 pt-2">
               <p className="text-center text-base font-extrabold text-[#291A1C]">{t.empty}</p>
               <p className="mt-2 text-center text-sm text-[#291A1C]/60">{t.pricingHint}</p>
-              <CartUpsellSection
-                lines={lines}
-                eligibleUnits={eligibleUnits}
-                onAdd={(slug) => addItem(slug, 1)}
-              />
+              <CartUpsellSection lines={lines} onAdd={(slug) => addItem(slug, 1)} />
             </div>
           ) : (
             <ul className="space-y-4">
@@ -213,11 +209,7 @@ export function CartDrawer() {
           ) : null}
 
           {lines.length > 0 ? (
-            <CartUpsellSection
-              lines={lines}
-              eligibleUnits={eligibleUnits}
-              onAdd={(slug) => addItem(slug, 1)}
-            />
+            <CartUpsellSection lines={lines} onAdd={(slug) => addItem(slug, 1)} />
           ) : null}
         </div>
 
