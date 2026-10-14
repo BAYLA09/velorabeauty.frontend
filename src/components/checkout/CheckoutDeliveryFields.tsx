@@ -7,6 +7,7 @@ import {
 } from "@/components/checkout/checkoutFieldStyles";
 import { CheckoutEmailMarketingFields } from "@/components/checkout/CheckoutEmailMarketingFields";
 import { checkoutEmirates } from "@/config/productCheckout";
+import { uaePhoneHint } from "@/lib/phone/uaePhone";
 
 export type DeliveryFormState = {
   email: string;
@@ -96,10 +97,16 @@ export function CheckoutDeliveryFields(props: {
             dir="ltr"
             value={phone}
             onChange={(ev) => setPhone(ev.target.value)}
-            placeholder="0501234567"
+            placeholder="0501234567 أو +971501234567"
             className={checkoutInputClass}
             autoComplete="tel"
+            inputMode="tel"
+            maxLength={14}
+            aria-describedby="delivery-phone-hint"
           />
+          <p id="delivery-phone-hint" className="mt-1.5 text-[11px] text-neutral-500">
+            {uaePhoneHint}
+          </p>
         </div>
       </CheckoutFormSection>
 

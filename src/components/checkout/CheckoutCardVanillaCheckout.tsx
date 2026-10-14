@@ -17,6 +17,7 @@ import type { BundleQuantity } from "@/config/pricing";
 import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
+import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
@@ -140,6 +141,11 @@ export function CheckoutCardVanillaCheckout({
       setError("أكملي الاسم والهاتف والإمارة وعنوان التوصيل.");
       return;
     }
+    const phoneCheck = validateUaeMobilePhone(trimmedPhone);
+    if (!phoneCheck.ok) {
+      setError(phoneCheck.error);
+      return;
+    }
 
     const buildingPart = building.trim();
     const fullAddress = buildingPart
@@ -157,7 +163,7 @@ export function CheckoutCardVanillaCheckout({
           productName,
           quantity,
           customerName: trimmedName,
-          phone: trimmedPhone,
+          phone: phoneCheck.normalized,
           email: email.trim() || undefined,
           marketingConsent,
           externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),
@@ -205,7 +211,7 @@ export function CheckoutCardVanillaCheckout({
             billing_details: {
               name: trimmedName,
               email: email.trim() || undefined,
-              phone: trimmedPhone,
+              phone: phoneCheck.normalized,
             },
           },
         },

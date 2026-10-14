@@ -9,6 +9,7 @@ import {
 } from "@/lib/backendCheckout/capture";
 import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import { createOrder } from "@/lib/ordersRepository";
+import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 
 function isBundleQuantity(n: unknown): n is BundleQuantity {
   return n === 1 || n === 2 || n === 3;
@@ -73,6 +74,11 @@ export async function POST(request: Request) {
     if (!customerName || !phone) {
       return NextResponse.json({ error: "أكملي الاسم ورقم الهاتف." }, { status: 400 });
     }
+    const phoneCheck = validateUaeMobilePhone(phone);
+    if (!phoneCheck.ok) {
+      return NextResponse.json({ error: phoneCheck.error }, { status: 400 });
+    }
+    const resolvedPhone = phoneCheck.normalized;
     if (!address) {
       return NextResponse.json({ error: "أدخلي عنوان التوصيل." }, { status: 400 });
     }
@@ -98,7 +104,7 @@ export async function POST(request: Request) {
       cartLines: syncLines ?? undefined,
       paymentMethod,
       customerName,
-      phone,
+      phone: resolvedPhone,
       emirate: resolvedEmirate,
       address: resolvedAddress,
       customerEmail: email || undefined,
@@ -114,7 +120,7 @@ export async function POST(request: Request) {
         email,
         marketingConsent,
         customerName,
-        phone,
+        phone: resolvedPhone,
         emirate: resolvedEmirate,
         paymentMethod,
         externalCheckoutId: order.backendExternalCheckoutId ?? order.id,

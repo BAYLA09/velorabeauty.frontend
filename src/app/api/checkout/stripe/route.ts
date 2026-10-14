@@ -10,6 +10,7 @@ import {
   createOrder,
   setOrderStripeSession,
 } from "@/lib/ordersRepository";
+import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { getSiteUrl } from "@/lib/siteUrl";
 import { getStripe, isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
 
@@ -44,6 +45,11 @@ export async function POST(request: Request) {
     if (!customerName || !phone || !address) {
       return NextResponse.json({ error: "أكملي الاسم والهاتف وعنوان التوصيل." }, { status: 400 });
     }
+    const phoneCheck = validateUaeMobilePhone(phone);
+    if (!phoneCheck.ok) {
+      return NextResponse.json({ error: phoneCheck.error }, { status: 400 });
+    }
+    const resolvedPhone = phoneCheck.normalized;
 
     const resolvedEmirate =
       emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
@@ -56,7 +62,7 @@ export async function POST(request: Request) {
       quantity,
       paymentMethod: "card",
       customerName,
-      phone,
+      phone: resolvedPhone,
       emirate: resolvedEmirate,
       address,
       customerEmail: email || undefined,
@@ -77,7 +83,7 @@ export async function POST(request: Request) {
       metadata: {
         orderId: order.id,
         productSlug,
-        phone,
+        phone: resolvedPhone,
       },
       line_items: [
         {
