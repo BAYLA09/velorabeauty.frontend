@@ -1,10 +1,13 @@
 import type { CartLine } from "@/lib/cart/cartTypes";
 import {
-  buildOrdersSheetRow,
+  buildCodSheetRows,
+  buildLegacyCardSheetRow,
   type OrdersSheetChannel,
 } from "@/lib/ordersSheets/buildSheetRow";
+import { COD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/codSheetColumns";
 import type { OrderRecord } from "@/lib/ordersRepository";
 import {
+  getOrderAttribution,
   getOrderById,
   getOrderCartLines,
   markOrderSheetExported,
@@ -60,32 +63,54 @@ function webhookForChannel(config: OrdersSheetsConfig, channel: OrdersSheetChann
   return channel === "cod" ? config.codWebhookUrl : config.cardWebhookUrl;
 }
 
-async function postRowToWebhook(
+type CodWebhookPayload = {
+  secret: string;
+  channel: "cod";
+  orderId: string;
+  rows: (string | number)[][];
+};
+
+type LegacyWebhookPayload = {
+  secret: string;
+  channel: OrdersSheetChannel;
+  values: (string | number)[];
+};
+
+async function postToAppsScriptWebhook(
   url: string,
-  secret: string,
-  channel: OrdersSheetChannel,
-  values: (string | number)[],
+  payload: CodWebhookPayload | LegacyWebhookPayload,
 ): Promise<boolean> {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ secret, channel, values }),
+    body: JSON.stringify(payload),
     signal: AbortSignal.timeout(15_000),
   });
+  const text = await res.text().catch(() => "");
+  let parsed: { ok?: boolean; error?: string; duplicate?: boolean } | null = null;
+  try {
+    parsed = JSON.parse(text) as { ok?: boolean; error?: string; duplicate?: boolean };
+  } catch {
+    parsed = null;
+  }
+  if (parsed?.ok === true || parsed?.duplicate === true) return true;
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
     console.error("[orders-sheets] webhook failed", {
-      channel,
+      channel: payload.channel,
       status: res.status,
       body: text.slice(0, 200),
     });
+    return false;
+  }
+  if (parsed?.ok === false) {
+    console.error("[orders-sheets] webhook rejected", parsed.error);
     return false;
   }
   return true;
 }
 
 /**
- * COD → sheet on place. Card → sheet only when status is paid (after Stripe).
+ * COD → Google Sheet on place. Card → sheet only when status is paid (after Stripe).
  * Failures are logged; checkout is never blocked.
  */
 export async function exportOrderToGoogleSheets(input: {
@@ -104,11 +129,37 @@ export async function exportOrderToGoogleSheets(input: {
   if (input.channel === "card" && input.order.status !== "paid") return;
   if (input.channel === "cod" && input.order.paymentMethod !== "cod") return;
 
-  const lines =
-    input.cartLines ?? getOrderCartLines(input.order.id);
-  const values = buildOrdersSheetRow(input.order, lines);
+  const lines = input.cartLines ?? getOrderCartLines(input.order.id);
+  const attribution = getOrderAttribution(input.order.id);
+
   try {
-    const ok = await postRowToWebhook(url, config.webhookSecret, input.channel, values);
+    let ok: boolean;
+    if (input.channel === "cod") {
+      const rows = buildCodSheetRows(input.order, lines, attribution);
+      if (rows.length === 0) return;
+      for (const row of rows) {
+        if (row.length !== COD_ORDERS_SHEET_COLUMN_COUNT) {
+          console.error("[orders-sheets] invalid COD row width", {
+            orderId: input.order.id,
+            width: row.length,
+          });
+          return;
+        }
+      }
+      ok = await postToAppsScriptWebhook(url, {
+        secret: config.webhookSecret,
+        channel: "cod",
+        orderId: input.order.id,
+        rows,
+      });
+    } else {
+      const values = buildLegacyCardSheetRow(input.order, lines);
+      ok = await postToAppsScriptWebhook(url, {
+        secret: config.webhookSecret,
+        channel: "card",
+        values,
+      });
+    }
     if (ok) markOrderSheetExported(input.order.id, input.channel);
   } catch (err) {
     console.error("[orders-sheets] export error", {

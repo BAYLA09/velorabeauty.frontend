@@ -6,6 +6,8 @@ import {
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
+import type { OrderAttribution } from "@/lib/attribution/orderAttribution";
+import { parseStoredOrderAttribution } from "@/lib/attribution/orderAttribution";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { getCheckoutTotalForCart, getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
 import { getDb } from "@/lib/db";
@@ -46,6 +48,7 @@ export type CreateOrderInput = {
   backendExternalCheckoutId?: string;
   /** When this is a fresh UUID, it becomes the order id and the backend external id. */
   id?: string;
+  attribution?: OrderAttribution | null;
 };
 
 type OrderRow = {
@@ -147,6 +150,11 @@ export function createOrder(
         )
       : null;
 
+  const orderAttributionJson =
+    input.attribution && Object.keys(input.attribution).length > 0
+      ? JSON.stringify(input.attribution)
+      : null;
+
   getDb()
     .prepare(
       `INSERT INTO orders (
@@ -154,8 +162,8 @@ export function createOrder(
         subtotal_aed, delivery_fee_aed, total_aed,
         customer_name, phone, emirate, address, status, created_at,
         customer_email, marketing_consent, backend_external_checkout_id,
-        order_lines_json
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?)`,
+        order_lines_json, order_attribution_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       id,
@@ -175,6 +183,7 @@ export function createOrder(
       input.marketingConsent ? 1 : 0,
       input.backendExternalCheckoutId?.trim() || id,
       orderLinesJson,
+      orderAttributionJson,
     );
 
   const row = getDb()
@@ -223,6 +232,13 @@ export function getOrderByStripePaymentIntentId(paymentIntentId: string): OrderR
     .prepare(`SELECT * FROM orders WHERE stripe_payment_intent_id = ?`)
     .get(paymentIntentId) as OrderRow | undefined;
   return row ? rowToRecord(row) : null;
+}
+
+export function getOrderAttribution(orderId: string): OrderAttribution | null {
+  const row = getDb()
+    .prepare(`SELECT order_attribution_json FROM orders WHERE id = ?`)
+    .get(orderId) as { order_attribution_json?: string | null } | undefined;
+  return parseStoredOrderAttribution(row?.order_attribution_json);
 }
 
 export function getOrderCartLines(orderId: string): CartLine[] | null {
