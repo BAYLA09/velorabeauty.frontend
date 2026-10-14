@@ -7,7 +7,11 @@ import {
 } from "@/components/checkout/checkoutFieldStyles";
 import { CheckoutEmailMarketingFields } from "@/components/checkout/CheckoutEmailMarketingFields";
 import { checkoutEmirates } from "@/config/productCheckout";
-import { uaePhoneHint } from "@/lib/phone/uaePhone";
+import {
+  sanitizeUaePhoneTyping,
+  uaePhoneHint,
+  uaePhonePlaceholder,
+} from "@/lib/phone/uaePhone";
 
 export type DeliveryFormState = {
   email: string;
@@ -96,12 +100,12 @@ export function CheckoutDeliveryFields(props: {
             type="tel"
             dir="ltr"
             value={phone}
-            onChange={(ev) => setPhone(ev.target.value)}
-            placeholder="0501234567 أو +971501234567"
-            className={checkoutInputClass}
+            onChange={(ev) => setPhone(sanitizeUaePhoneTyping(ev.target.value))}
+            placeholder={uaePhonePlaceholder}
+            className={`${checkoutInputClass} text-left`}
             autoComplete="tel"
             inputMode="tel"
-            maxLength={14}
+            maxLength={18}
             aria-describedby="delivery-phone-hint"
           />
           <p id="delivery-phone-hint" className="mt-1.5 text-[11px] text-neutral-500">

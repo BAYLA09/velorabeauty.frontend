@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { validateUaeMobilePhone } from "./uaePhone.ts";
+import { sanitizeUaePhoneTyping, validateUaeMobilePhone } from "./uaePhone.ts";
 
 describe("validateUaeMobilePhone", () => {
   it("accepts 05 local 10 digits", () => {
@@ -16,6 +16,10 @@ describe("validateUaeMobilePhone", () => {
     const r = validateUaeMobilePhone("+971 50 123 4567");
     assert.equal(r.ok, true);
     if (r.ok) assert.equal(r.normalized, "+971501234567");
+  });
+
+  it("sanitize keeps + at start", () => {
+    assert.equal(sanitizeUaePhoneTyping("+971 50"), "+971 50");
   });
 
   it("rejects too short 05", () => {

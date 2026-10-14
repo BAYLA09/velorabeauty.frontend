@@ -28,7 +28,12 @@ import {
 } from "@/config/pricing";
 import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
-import { uaePhoneHint, validateUaeMobilePhone } from "@/lib/phone/uaePhone";
+import {
+  sanitizeUaePhoneTyping,
+  uaePhoneHint,
+  uaePhonePlaceholder,
+  validateUaeMobilePhone,
+} from "@/lib/phone/uaePhone";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 
@@ -197,12 +202,12 @@ export function CheckoutConfirmClient({
                 type="tel"
                 dir="ltr"
                 value={phone}
-                onChange={(ev) => setPhone(ev.target.value)}
-                placeholder="0501234567 أو +971501234567"
-                className={checkoutInputClass}
+                onChange={(ev) => setPhone(sanitizeUaePhoneTyping(ev.target.value))}
+                placeholder={uaePhonePlaceholder}
+                className={`${checkoutInputClass} text-left`}
                 autoComplete="tel"
                 inputMode="tel"
-                maxLength={14}
+                maxLength={18}
                 aria-describedby="checkout-phone-hint"
               />
               <p id="checkout-phone-hint" className="mt-1.5 text-[11px] text-neutral-500">

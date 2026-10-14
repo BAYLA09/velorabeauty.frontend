@@ -5,10 +5,33 @@ export type UaePhoneResult =
   | { ok: false; error: string };
 
 const CLIENT_ERROR =
-  "أدخلي رقم إماراتي صحيح: 05xxxxxxxx (10 أرقام) أو +9715xxxxxxxx (13 رقم مع +971).";
+  "أدخلي رقم موبايل إماراتي: ‎05XXXXXXXX (10) أو ‎+9715XXXXXXXX (9 بعد +971).";
+
+/** LTR mark so + stays at the start in RTL Arabic pages. */
+const LTR = "\u200E";
+
+export const uaePhonePlaceholder = `${LTR}+971 50 123 4567`;
+
+export const uaePhoneHint = `مثال: ${LTR}+971501234567 · ${LTR}0501234567 (10 أرقام)`;
 
 export function normalizeUaePhoneInput(raw: string): string {
-  return raw.replace(/[\s\-().]/g, "").trim();
+  const trimmed = raw.trim();
+  const plus = trimmed.startsWith("+");
+  const digits = trimmed.replace(/\D/g, "");
+  return plus ? `+${digits}` : digits;
+}
+
+/** Keeps digits, optional leading +, and spaces while typing. */
+export function sanitizeUaePhoneTyping(raw: string): string {
+  const trimmed = raw.trimStart();
+  if (!trimmed) return "";
+  let out = "";
+  for (const c of trimmed) {
+    if (c >= "0" && c <= "9") out += c;
+    else if (c === "+" && out.length === 0) out += c;
+    else if (c === " " && out.length > 0 && !out.endsWith(" ")) out += c;
+  }
+  return out.length > 18 ? out.slice(0, 18) : out;
 }
 
 export function validateUaeMobilePhone(raw: string): UaePhoneResult {
@@ -49,6 +72,3 @@ export function validateUaeMobilePhone(raw: string): UaePhoneResult {
   const display = `0${nationalNine}`;
   return { ok: true, normalized, display };
 }
-
-export const uaePhoneHint =
-  "10 أرقام (05xxxxxxxx) أو دولي +971 ثم 9 أرقام (5xxxxxxxx)";
