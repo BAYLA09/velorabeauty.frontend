@@ -1,7 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  captureCheckoutAttribution,
+  getCheckoutAttributionForOrder,
+} from "@/lib/attribution/checkoutAttributionClient";
 import { CheckoutSummary } from "@/components/CheckoutSummary";
 import { checkoutExperience } from "@/config/checkoutExperience";
 import { checkoutEmirates } from "@/config/productCheckout";
@@ -31,6 +35,10 @@ export function CheckoutOrderForm({
   const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    captureCheckoutAttribution();
+  }, []);
 
   const copy = checkoutExperience[paymentMethod];
   const productLine = useMemo(
@@ -68,6 +76,7 @@ export function CheckoutOrderForm({
           phone: trimmedPhone,
           emirate,
           address: trimmedAddress,
+          attribution: getCheckoutAttributionForOrder(),
         }),
       });
 

@@ -7,8 +7,10 @@ import {
   checkoutLinesForSync,
   enqueueStorefrontCheckoutAndFlush,
 } from "@/lib/backendCheckout/capture";
+import { parseOrderAttributionFromBody } from "@/lib/attribution/orderAttribution";
 import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import { createOrder } from "@/lib/ordersRepository";
+import { queueOrderSheetExport } from "@/lib/ordersSheets/exportOrder";
 
 function isBundleQuantity(n: unknown): n is BundleQuantity {
   return n === 1 || n === 2 || n === 3;
@@ -90,6 +92,8 @@ export async function POST(request: Request) {
     const resolvedAddress =
       address || (paymentMethod === "card" ? "يُؤكَّد بعد التواصل" : "");
 
+    const attribution = parseOrderAttributionFromBody(body);
+
     const order = createOrder({
       productSlug,
       productName,
@@ -103,11 +107,20 @@ export async function POST(request: Request) {
       address: resolvedAddress,
       customerEmail: email || undefined,
       marketingConsent,
+      attribution,
       id: isStorefrontOrderId(externalCheckoutId) ? externalCheckoutId : undefined,
       backendExternalCheckoutId: isStorefrontOrderId(externalCheckoutId)
         ? externalCheckoutId
         : undefined,
     });
+
+    if (paymentMethod === "cod") {
+      queueOrderSheetExport({
+        order,
+        channel: "cod",
+        cartLines: syncLines,
+      });
+    }
 
     if (email) {
       await enqueueStorefrontCheckoutAndFlush({

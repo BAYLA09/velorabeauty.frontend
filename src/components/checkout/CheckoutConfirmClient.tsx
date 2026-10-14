@@ -1,7 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import {
+  captureCheckoutAttribution,
+  getCheckoutAttributionForOrder,
+} from "@/lib/attribution/checkoutAttributionClient";
 import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
 import { CheckoutEmailMarketingFields } from "@/components/checkout/CheckoutEmailMarketingFields";
 import {
@@ -67,6 +71,10 @@ export function CheckoutConfirmClient({
   });
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    captureCheckoutAttribution();
+  }, []);
+
   const total = resolveCheckoutTotalAed(
     quantity,
     paymentMethod,
@@ -108,6 +116,7 @@ export function CheckoutConfirmClient({
           emirate: "دبي",
           address: isCod ? trimmedAddress : "يُؤكَّد بعد التواصل",
           ...(cartItemsParam ? { cartLines } : {}),
+          attribution: getCheckoutAttributionForOrder(),
         }),
       });
 
