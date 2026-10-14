@@ -14,6 +14,7 @@ import { countEligibleUnits, normalizeCartLines } from "@/lib/cart/cartPricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { MAX_CART_UNITS } from "@/lib/cart/cartTypes";
 import { isEligibleProductSlug } from "@/lib/cart/eligibleCatalog";
+import { maxUnitsPerProductSlug } from "@/config/merchandising";
 import { readCartFromStorage, writeCartToStorage } from "@/lib/cart/cartStorage";
 
 type CartUiState = {
@@ -118,8 +119,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       const next = [...state.lines];
       const idx = next.findIndex((l) => l.slug === slug);
-      if (idx >= 0) next[idx] = { slug, quantity: next[idx].quantity + addQty };
-      else next.push({ slug, quantity: addQty });
+      if (idx >= 0) {
+        const cap = Number.isFinite(maxUnitsPerProductSlug)
+          ? maxUnitsPerProductSlug
+          : Number.MAX_SAFE_INTEGER;
+        const nextQty = Math.min(next[idx].quantity + addQty, cap);
+        if (nextQty === next[idx].quantity) {
+          dispatch({
+            type: "set_status",
+            status: "error",
+            message: "كمّلي الروتين بمنتج آخر — علبة واحدة لكل منتج.",
+          });
+          return false;
+        }
+        next[idx] = { slug, quantity: nextQty };
+      } else next.push({ slug, quantity: addQty });
       applyLines(next, "success");
       return true;
     },
@@ -128,7 +142,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const setLineQuantity = useCallback(
     (slug: string, quantity: number) => {
-      const qty = Math.floor(quantity);
+      let qty = Math.floor(quantity);
+      if (Number.isFinite(maxUnitsPerProductSlug)) {
+        qty = Math.min(qty, maxUnitsPerProductSlug);
+      }
       if (qty < 1) {
         applyLines(state.lines.filter((l) => l.slug !== slug));
         return;

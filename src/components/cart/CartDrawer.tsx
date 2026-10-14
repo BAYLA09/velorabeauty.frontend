@@ -16,6 +16,7 @@ import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
 import { CartUpsellSection } from "@/components/cart/CartUpsellSection";
 import { buildCartCheckoutPath } from "@/lib/checkoutRoutes";
 import { getProductBySlug } from "@/lib/productCatalog";
+import { maxUnitsPerProductSlug } from "@/config/merchandising";
 import { cartDrawerCopy as t } from "@/components/cart/cartDrawerCopy";
 import { ShoppingBagIcon } from "@/components/ui/ShoppingBagIcon";
 
@@ -23,11 +24,14 @@ function QuantityStepper({
   value,
   onChange,
   label,
+  maxValue,
 }: {
   value: number;
   onChange: (n: number) => void;
   label: string;
+  maxValue?: number;
 }) {
+  const atMax = maxValue !== undefined && value >= maxValue;
   return (
     <div className="flex items-center rounded-full border border-[#650D20]/15 bg-[#FFF9F5] p-0.5">
       <button
@@ -44,7 +48,8 @@ function QuantityStepper({
       <button
         type="button"
         aria-label={`${label} — زيادة`}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-[#650D20] transition hover:bg-[#FCE8E5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65]"
+        disabled={atMax}
+        className="flex h-9 w-9 items-center justify-center rounded-full text-[#650D20] transition hover:bg-[#FCE8E5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65] disabled:opacity-30"
         onClick={() => onChange(value + 1)}
       >
         +
@@ -184,6 +189,11 @@ export function CartDrawer() {
                         <QuantityStepper
                           label={product.name}
                           value={line.quantity}
+                          maxValue={
+                            Number.isFinite(maxUnitsPerProductSlug)
+                              ? maxUnitsPerProductSlug
+                              : undefined
+                          }
                           onChange={(n) => setLineQuantity(line.slug, n)}
                         />
                         <button
