@@ -153,7 +153,6 @@ export function CheckoutOrderForm({
               className="mt-1.5 w-full rounded-xl border border-velora-burgundy/15 bg-white px-3 py-3 text-left text-sm text-velora-burgundy-dark outline-none ring-velora-champagne/40 focus:ring-2"
               autoComplete="tel"
               placeholder={uaePhonePlaceholder}
-              dir="ltr"
               inputMode="tel"
               maxLength={18}
             />
