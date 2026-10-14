@@ -2,7 +2,6 @@ import type { BundleQuantity } from "@/config/pricing";
 import { computeCartPricing, normalizeCartLines } from "@/lib/cart/cartPricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { buildMixedCartSummary } from "@/lib/cart/cartCheckoutMeta";
-import { exceedsPerSlugUnitLimit } from "@/lib/cart/enforceLineQuantityLimits";
 
 export type ValidatedCartCheckout = {
   lines: CartLine[];
@@ -17,12 +16,6 @@ export function validateCartForCheckout(
   lines: CartLine[],
 ): { ok: true; cart: ValidatedCartCheckout } | { ok: false; error: string } {
   const normalized = normalizeCartLines(lines);
-  if (exceedsPerSlugUnitLimit(normalized)) {
-    return {
-      ok: false,
-      error: "كل منتج مرة واحدة — كمّلي الروتين بإضافة منتج آخر (شعر، بشرة، أو عين).",
-    };
-  }
   const pricing = computeCartPricing(normalized);
   if (!pricing.ok) {
     if (pricing.reason === "too_many_units") {
