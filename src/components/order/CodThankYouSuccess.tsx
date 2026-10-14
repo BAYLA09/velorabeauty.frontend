@@ -69,17 +69,9 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
           {codThankYouCopy.callWindow}
         </p>
 
-        <div className="relative mt-6 grid grid-cols-2 gap-3">
-          {codThankYouCopy.stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-2xl border border-velora-champagne/50 bg-velora-cream/80 px-3 py-3 text-center"
-            >
-              <p className="text-xl font-black text-velora-burgundy">{stat.value}</p>
-              <p className="mt-1 text-[10px] leading-snug text-velora-burgundy/65">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+        <p className="relative mt-4 rounded-2xl border border-velora-champagne/40 bg-velora-cream/70 px-4 py-3 text-center text-xs leading-relaxed text-velora-burgundy/75">
+          {codThankYouCopy.trustLine}
+        </p>
 
         <div className="relative mt-6 rounded-2xl border-2 border-velora-burgundy/15 bg-velora-burgundy/[0.04] p-4 text-right">
           <p className="text-sm font-black text-velora-burgundy-dark">{codThankYouCopy.answerTitle}</p>
@@ -91,8 +83,11 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
               </li>
             ))}
           </ul>
+          <p className="mt-4 text-[11px] font-bold text-velora-burgundy/55">
+            {codThankYouCopy.phoneLabel}
+          </p>
           <p
-            className="mt-4 rounded-xl bg-white px-4 py-3 text-center text-lg font-black tracking-wide text-velora-burgundy-dark"
+            className="mt-1 rounded-xl bg-white px-4 py-3 text-center text-lg font-black tracking-wide text-velora-burgundy-dark"
             dir="ltr"
           >
             {order.phone}
@@ -118,18 +113,18 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
                 )}
               </div>
               <div className={`pb-6 ${isLast ? "pb-0" : ""}`}>
-                <p
-                  className={`text-sm font-bold ${
+                <div
+                  className={`flex flex-wrap items-center gap-2 text-sm font-bold ${
                     state === "active" ? "text-velora-burgundy" : "text-velora-burgundy-dark"
                   }`}
                 >
-                  {step.label}
+                  <span>{step.label}</span>
                   {state === "active" && (
-                    <span className="mr-2 inline-block rounded-full bg-velora-champagne/60 px-2 py-0.5 text-[10px] font-bold text-velora-burgundy">
-                      الآن
+                    <span className="rounded-full bg-velora-champagne/60 px-2.5 py-0.5 text-[10px] font-bold text-velora-burgundy">
+                      {codThankYouCopy.activeStepBadge}
                     </span>
                   )}
-                </p>
+                </div>
                 <p className="mt-0.5 text-xs text-velora-burgundy/60">{step.detail}</p>
               </div>
             </li>
