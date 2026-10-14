@@ -61,8 +61,6 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
         />
       </div>
 
-      <CodThankYouValues />
-
       <CodThankYouOrderSummary
         productName={order.productName}
         quantity={order.quantity as BundleQuantity}
@@ -73,6 +71,8 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
         deliveryFeeAed={deliveryFee}
         totalAed={order.totalAed}
       />
+
+      <CodThankYouValues />
 
       <CodThankYouFooterBar orderRef={orderRef} onHome={onNavigateAway} />
     </article>

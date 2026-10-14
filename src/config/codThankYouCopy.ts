@@ -17,11 +17,11 @@ export const codThankYouCopy = {
       placed: { label: "تسجيل الطلب", sub: "تم التسجيل" },
       confirm: { label: "مكالمة التأكيد", sub: "فريقنا يتصل فيك" },
       prepare: { label: "تجهيز الطلب", sub: "بعد التأكيد" },
-      deliver: { label: "التوصيل للمنزل", sub: "الدفع عند الاستلام" },
+      deliver: { label: "التوصيل للمنزل", sub: "خلال يومين · كل الإمارات" },
     },
   },
   quickTrust: [
-    { id: "time", label: "التوصيل المتوقع", value: "2–4 أيام عمل", badge: "داخل الإمارات" },
+    { id: "time", label: "التوصيل المتوقع", value: "يومين عمل", badge: "كل الإمارات" },
     { id: "cod", label: "الدفع", value: "عند الاستلام" },
     { id: "check", label: "استلام آمن", value: "راجعي الطرد قبل الدفع" },
     { id: "quality", label: "ثقة فيلورا", value: "منتجات مختارة بعناية" },
@@ -44,7 +44,10 @@ export const codThankYouCopy = {
     ],
   },
   summary: {
-    toggle: "تفاصيل الطلب والمبلغ",
+    title: "تفاصيل طلبك",
+    promise:
+      "بنتصل فيك قريب لتأكيد الطلب — وبعد التأكيد نوصّل لباب بيتك خلال يومين في كل إمارات الدولة.",
+    deliveryNote: "التوصيل لباب المنزل · الدفع عند الاستلام",
     subtotal: "المجموع الفرعي",
     shipping: "رسوم التوصيل",
     totalCod: "المبلغ عند الاستلام",
@@ -53,7 +56,7 @@ export const codThankYouCopy = {
   footer: {
     help: "تحتاجين مساعدة؟ فريقنا موجود لك.",
     whatsapp: "تواصل واتساب",
-    whatsappMissing: "فعّلي NEXT_PUBLIC_SUPPORT_WHATSAPP في إعدادات المتجر.",
+    whatsappMissing: "تواصلي معنا من قسم «تواصل معنا» في الموقع أو انتظري مكالمة التأكيد.",
     homeCta: "الصفحة الرئيسية",
   },
   faq: [
@@ -63,7 +66,7 @@ export const codThankYouCopy = {
     },
     {
       q: "متى يوصل الطلب؟",
-      a: "بعد التأكيد بالهاتف، التجهيز والتوصيل عادة 2–4 أيام عمل داخل الإمارات.",
+      a: "بعد التأكيد بالهاتف، التوصيل لباب بيتك خلال يومين عمل في كل الإمارات.",
     },
   ],
 } as const;
