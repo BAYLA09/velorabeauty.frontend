@@ -86,8 +86,8 @@ export function getUpsellOfferCopy(lines: CartLine[]): {
 
   if (sameSkuOnly && primary.quantity === 2) {
     return {
-      title: `أضيفي منتجاً مختلفاً — ${formatPrice(targetTotal)}`,
-      body: `عندك ${formatPrice(currentTotal)} (علبتان من نفس المنتج). أضيفي skincare أو غيره — +${formatPrice(delta ?? singleProductPrice)} → المجموع ${formatPrice(targetTotal)}.`,
+      title: "كمّلي روتينك — خطوة واحدة",
+      body: `عندك ${formatPrice(currentTotal)} (علبتان). أضيفي بشرة أو عين بـ ${formatPrice(delta ?? singleProductPrice)} — المجموع ${formatPrice(targetTotal)}.`,
       targetTotal,
       delta,
     };
@@ -95,8 +95,8 @@ export function getUpsellOfferCopy(lines: CartLine[]): {
 
   if (sameSkuOnly && primary.quantity >= 3) {
     return {
-      title: `خطوة إضافية — +${formatPrice(delta ?? singleProductPrice)}`,
-      body: `عندك عرض 3 علب (${formatPrice(currentTotal)}). منتج مختلف رابع يُضاف بـ ${formatPrice(singleProductPrice)}.`,
+      title: "أضيفي خطوة أخيرة لروتينك",
+      body: `3 علب = ${formatPrice(currentTotal)}. منتج مختلف إضافي = +${formatPrice(singleProductPrice)} فقط.`,
       targetTotal,
       delta,
     };
@@ -104,16 +104,16 @@ export function getUpsellOfferCopy(lines: CartLine[]): {
 
   if (sameSkuOnly && primary.quantity === 1) {
     return {
-      title: `منتج مختلف — +${formatPrice(delta ?? singleProductPrice)}`,
-      body: `علبة واحدة ${formatPrice(currentTotal)}. للتوفير على نفس المنتج: 249 / 339 من صفحة المنتج. هنا: أضيفي خطوة أخرى من فيلورا → ${formatPrice(targetTotal)}.`,
+      title: "خطوة ثانية = روتين كامل",
+      body: `${formatPrice(currentTotal)} الآن · أضيفي خطوة من فيلورا بـ ${formatPrice(delta ?? singleProductPrice)} → ${formatPrice(targetTotal)}. (249/339 لنفس المنتج من صفحة المنتج.)`,
       targetTotal,
       delta,
     };
   }
 
   return {
-    title: `أضيفي خطوة — ${formatPrice(targetTotal)}`,
-    body: `المجموع الحالي ${formatPrice(currentTotal)} — كل منتج جديد مختلف +${formatPrice(delta ?? singleProductPrice)}.`,
+    title: "لا تكملي الدفع بدون هذي الخطوة",
+    body: `${formatPrice(currentTotal)} في سلتك · كل منتج جديد +${formatPrice(delta ?? singleProductPrice)} — اختاري تحت واضغطي «أضيفي».`,
     targetTotal,
     delta,
   };
