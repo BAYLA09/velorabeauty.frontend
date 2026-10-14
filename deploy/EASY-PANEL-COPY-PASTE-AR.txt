@@ -1,0 +1,49 @@
+═══════════════════════════════════════════════════════════
+  VELORA FRONTEND — Easypanel (Deploy 1s = GHALAT)
+  Image jahza: ghcr.io/bayla09/velorabeauty.frontend:latest
+  Pin (stable): ghcr.io/bayla09/velorabeauty.frontend:c6dc554
+═══════════════════════════════════════════════════════════
+
+【1】 GitHub → repo → Settings → Secrets → Actions
+     → DELETE "EASYPANEL_DEPLOY_WEBHOOK" ila kayn
+
+【2】 Easypanel → DELETE service frontend l9dim (Git/Compose)
+     → New Service → APP (mashi Compose)
+
+【3】 Source = Docker Image ONLY
+     Image (copy):
+     ghcr.io/bayla09/velorabeauty.frontend:c6dc554
+
+     Registry Username: (KHAWI)
+     Registry Password: (KHAWI)
+
+【4】 Port: 3000
+     Volume mount: /app/data  (persistent)
+
+【5】 Domain: www.velorabeauty.world → port 3000
+
+【6】 Environment — paste keys (values mn panel l9dim):
+     NODE_ENV=production
+     HOSTNAME=0.0.0.0
+     PORT=3000
+     DATABASE_PATH=/app/data/velora.sqlite
+     SITE_URL=https://www.velorabeauty.world
+     CARD_PAYMENT_ENABLED=true
+     (+ STRIPE_* + STORE_API_KEY + ORDERS_SHEETS_*)
+
+【7】 Deploy → MUST take 1-3 MINUTES
+     Logs must show: Pulling / Pull complete
+     If still 1 second → Source still wrong (not Docker Image)
+
+【8】 Test:
+     curl -s https://www.velorabeauty.world/api/health
+
+═══════════════════════════════════════════════════════════
+  SSH emergency (ila 3andek access l VPS):
+     docker pull ghcr.io/bayla09/velorabeauty.frontend:c6dc554
+     docker run -d --name velora-test -p 3000:3000 \
+       -v velora-data:/app/data \
+       -e DATABASE_PATH=/app/data/velora.sqlite \
+       -e SITE_URL=https://www.velorabeauty.world \
+       ghcr.io/bayla09/velorabeauty.frontend:c6dc554
+═══════════════════════════════════════════════════════════
