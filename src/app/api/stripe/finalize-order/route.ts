@@ -45,12 +45,6 @@ export async function POST(request: Request) {
     if (!paymentIntentId) {
       return NextResponse.json({ error: "جلسة الدفع غير جاهزة." }, { status: 400 });
     }
-    if (email && !isStorefrontOrderId(externalCheckoutId)) {
-      return NextResponse.json(
-        { error: "تعذّر ربط الطلب بجلسة الشراء. أعدي تحميل الصفحة." },
-        { status: 400 },
-      );
-    }
     if (Array.isArray(rawCartLines) && rawCartLines.length > 0) {
       const lines: CartLine[] = rawCartLines
         .map((row) => {
@@ -118,7 +112,7 @@ export async function POST(request: Request) {
       productSlug,
       productName,
       quantity: String(quantity),
-      phone,
+      phone: resolvedPhone,
     };
     if (email) metadata.email = email;
 

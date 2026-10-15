@@ -5,8 +5,9 @@ import type { CartLine } from "@/lib/cart/cartTypes";
 import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import {
   checkoutLinesForSync,
-  enqueueStorefrontCheckoutAndFlush,
+  enqueueStorefrontCheckout,
 } from "@/lib/backendCheckout/capture";
+import { kickBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
 import { parseOrderAttributionFromBody } from "@/lib/attribution/orderAttribution";
 import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import { createOrder } from "@/lib/ordersRepository";
@@ -84,13 +85,6 @@ export async function POST(request: Request) {
     if (!address) {
       return NextResponse.json({ error: "أدخلي عنوان التوصيل." }, { status: 400 });
     }
-    if (email && !isStorefrontOrderId(externalCheckoutId)) {
-      return NextResponse.json(
-        { error: "تعذّر ربط الطلب بجلسة الشراء. أعدي تحميل الصفحة." },
-        { status: 400 },
-      );
-    }
-
     const resolvedEmirate =
       emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
         ? emirate
@@ -129,22 +123,27 @@ export async function POST(request: Request) {
     }
 
     if (email) {
-      await enqueueStorefrontCheckoutAndFlush({
-        email,
-        marketingConsent,
-        customerName,
-        phone: resolvedPhone,
-        emirate: resolvedEmirate,
-        paymentMethod,
-        externalCheckoutId: order.backendExternalCheckoutId ?? order.id,
-        orderId: order.id,
-        lines: checkoutLinesForSync({
-          productSlug,
-          quantity,
-          cartLines: syncLines,
-        }),
-        phase: paymentMethod === "cod" ? "cod_placed" : "order_open",
-      });
+      try {
+        enqueueStorefrontCheckout({
+          email,
+          marketingConsent,
+          customerName,
+          phone: resolvedPhone,
+          emirate: resolvedEmirate,
+          paymentMethod,
+          externalCheckoutId: order.backendExternalCheckoutId ?? order.id,
+          orderId: order.id,
+          lines: checkoutLinesForSync({
+            productSlug,
+            quantity,
+            cartLines: syncLines,
+          }),
+          phase: paymentMethod === "cod" ? "cod_placed" : "order_open",
+        });
+        kickBackendCheckoutWorker();
+      } catch (syncErr) {
+        console.error("[api/orders POST] backend sync enqueue failed", syncErr);
+      }
     }
 
     return NextResponse.json({ order });

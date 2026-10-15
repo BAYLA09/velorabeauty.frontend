@@ -111,6 +111,7 @@ function CheckoutCardPaySection({
   cartLines,
   sendCartLines,
   syncNow,
+  stripeBootstrap,
 }: {
   productSlug: string;
   productName: string;
@@ -120,6 +121,7 @@ function CheckoutCardPaySection({
   cartLines: ReturnType<typeof parseCheckoutLines>;
   sendCartLines: boolean;
   syncNow: () => void;
+  stripeBootstrap?: StripeCardBootstrap | null;
 }) {
   const { elementsLoading } = useCheckoutStripe();
   const total = resolveCheckoutTotalAed(
@@ -148,6 +150,7 @@ function CheckoutCardPaySection({
       cartLines={cartLines}
       sendCartLines={sendCartLines}
       syncNow={syncNow}
+      stripeBootstrap={stripeBootstrap}
     />
   );
 }
@@ -161,6 +164,7 @@ function StripeCardPaymentAndSubmit({
   cartLines,
   sendCartLines,
   syncNow,
+  stripeBootstrap,
 }: {
   productSlug: string;
   productName: string;
@@ -170,6 +174,7 @@ function StripeCardPaymentAndSubmit({
   cartLines: ReturnType<typeof parseCheckoutLines>;
   sendCartLines: boolean;
   syncNow: () => void;
+  stripeBootstrap?: StripeCardBootstrap | null;
 }) {
   const router = useRouter();
   const stripe = useStripe();
@@ -268,6 +273,7 @@ function StripeCardPaymentAndSubmit({
         typeof window !== "undefined" ? window.location.origin : "https://www.velorabeauty.world";
       const returnUrl = `${origin}/checkout/success?id=${encodeURIComponent(order.id)}`;
       const payment = await submitAndConfirmStripePayment(stripe, elements, {
+        clientSecret: stripeBootstrap?.clientSecret,
         returnUrl,
         billingDetails: {
           name: trimmedName,
@@ -426,6 +432,7 @@ export function CheckoutCardStripeCheckout({
                 cartLines={cartLines}
                 sendCartLines={sendCartLines}
                 syncNow={syncNow}
+                stripeBootstrap={stripeBootstrap}
               />
             </CheckoutStripeElementsProvider>
           </div>
