@@ -1,6 +1,5 @@
 import { PaymentBrandStrip } from "@/components/checkout/PaymentBrandStrip";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
-import { buildStripeVanillaMountScript } from "@/lib/stripeVanillaMountScript";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
 
 function IconLockSmall({ className }: { className?: string }) {
@@ -12,11 +11,11 @@ function IconLockSmall({ className }: { className?: string }) {
 }
 
 type Props = {
-  bootstrap: StripeCardBootstrap;
+  bootstrap?: StripeCardBootstrap;
 };
 
-/** Server HTML + inline mount — real Stripe iframe without waiting for React. */
-export function CheckoutStripePaymentShell({ bootstrap }: Props) {
+/** Payment Element host markup — mount runs once via StripeVanillaMount on the page. */
+export function CheckoutStripePaymentShell(_props: Props) {
   return (
     <section>
       <div className="mb-3">
@@ -51,10 +50,6 @@ export function CheckoutStripePaymentShell({ bootstrap }: Props) {
           {checkoutPaymentCopy.secureStripe}. {checkoutPaymentCopy.noCardStorage}
         </span>
       </div>
-
-      <script
-        dangerouslySetInnerHTML={{ __html: buildStripeVanillaMountScript(bootstrap) }}
-      />
     </section>
   );
 }

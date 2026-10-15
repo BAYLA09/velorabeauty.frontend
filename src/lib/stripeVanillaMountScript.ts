@@ -10,12 +10,17 @@ export function buildStripeVanillaMountScript(bootstrap: StripeCardBootstrap): s
 (function () {
   var boot = ${boot};
   window.__VELORA_STRIPE_BOOT = boot;
-  if (window.__VELORA_PE_MOUNTED) return;
+  if (window.__VELORA_PE_MOUNTED || window.__VELORA_PE_MOUNTING) return;
+  window.__VELORA_PE_MOUNTING = true;
 
   function mount() {
     var host = document.getElementById("velora-stripe-payment-mount");
     if (!host || !window.Stripe) {
       requestAnimationFrame(mount);
+      return;
+    }
+    if (window.__VELORA_PE_MOUNTED) {
+      window.__VELORA_PE_MOUNTING = false;
       return;
     }
     try {
@@ -42,7 +47,10 @@ export function buildStripeVanillaMountScript(bootstrap: StripeCardBootstrap): s
       window.__VELORA_PE_MOUNTED = true;
     } catch (e) {
       console.error("[velora-stripe-mount]", e);
+      window.__VELORA_PE_MOUNTING = false;
+      return;
     }
+    window.__VELORA_PE_MOUNTING = false;
   }
 
   if (document.readyState === "loading") {

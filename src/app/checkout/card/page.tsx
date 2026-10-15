@@ -1,6 +1,7 @@
 import { CheckoutCardConfirmClient } from "@/components/checkout/CheckoutCardConfirmClient";
 import { CheckoutStripePaymentShell } from "@/components/checkout/CheckoutStripePaymentShell";
 import { StripeEarlyInit } from "@/components/checkout/StripeEarlyInit";
+import { StripeVanillaMount } from "@/components/checkout/StripeVanillaMount";
 import { getCheckoutProductImage } from "@/lib/checkoutProductMeta";
 import { resolveCheckoutContext } from "@/lib/resolveCheckoutContext";
 import { bootstrapStripeCardCheckout } from "@/lib/stripeCardBootstrap";
@@ -34,6 +35,7 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
   return (
     <>
       <StripeEarlyInit publishableKey={publishableKey} bootstrap={stripeBootstrap} />
+      {stripeBootstrap ? <StripeVanillaMount bootstrap={stripeBootstrap} /> : null}
       <CheckoutCardConfirmClient
         productSlug={ctx.productSlug}
         productName={ctx.productName}
