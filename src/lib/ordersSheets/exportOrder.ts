@@ -7,6 +7,10 @@ import {
   type OrdersSheetChannel,
 } from "@/lib/ordersSheets/buildSheetRow";
 import { COD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/codSheetColumns";
+import {
+  appendCodRowsViaGoogleSheetsApi,
+  readGoogleSheetsDirectConfig,
+} from "@/lib/ordersSheets/googleSheetsDirect";
 import type { OrderRecord } from "@/lib/ordersRepository";
 import {
   getOrderAttribution,
@@ -61,6 +65,23 @@ export function readOrdersSheetsConfig(): OrdersSheetsConfig {
   };
 }
 
+export function readOrdersSheetsExportStatus(): {
+  enabled: boolean;
+  mode: "google_api" | "apps_script" | "off";
+  direct: ReturnType<typeof readGoogleSheetsDirectConfig>;
+  webhook: OrdersSheetsConfig;
+} {
+  const direct = readGoogleSheetsDirectConfig();
+  const webhook = readOrdersSheetsConfig();
+  const webhookReady = webhook.enabled && Boolean(webhook.webhookSecret);
+  return {
+    enabled: direct.enabled || webhookReady,
+    mode: direct.enabled ? "google_api" : webhookReady ? "apps_script" : "off",
+    direct,
+    webhook,
+  };
+}
+
 function webhookForChannel(config: OrdersSheetsConfig, channel: OrdersSheetChannel): string | null {
   return channel === "cod" ? config.codWebhookUrl : config.cardWebhookUrl;
 }
@@ -106,12 +127,18 @@ export async function exportOrderToGoogleSheets(input: {
   channel: OrdersSheetChannel;
   cartLines?: CartLine[] | null;
 }): Promise<void> {
-  const config = readOrdersSheetsConfig();
-  if (!config.enabled || !config.webhookSecret) {
+  const status = readOrdersSheetsExportStatus();
+  const config = status.webhook;
+  const direct = status.direct;
+  const webhookReady = config.enabled && Boolean(config.webhookSecret);
+
+  if (!status.enabled) {
     console.warn("[orders-sheets] export skipped (config)", {
       orderId: input.order.id,
       channel: input.channel,
-      reason: config.reason ?? "disabled",
+      mode: status.mode,
+      directReason: direct.reason,
+      webhookReason: config.reason ?? "disabled",
       codUrlConfigured: Boolean(config.codWebhookUrl),
       secretConfigured: Boolean(config.webhookSecret),
     });
@@ -119,9 +146,6 @@ export async function exportOrderToGoogleSheets(input: {
   }
 
   if (wasOrderSheetExported(input.order.id, input.channel)) return;
-
-  const url = webhookForChannel(config, input.channel);
-  if (!url) return;
 
   if (input.channel === "card" && input.order.status !== "paid") return;
   if (input.channel === "cod" && input.order.paymentMethod !== "cod") return;
@@ -143,16 +167,27 @@ export async function exportOrderToGoogleSheets(input: {
           return;
         }
       }
-      ok = await postToAppsScriptWebhook(url, {
-        secret: config.webhookSecret,
-        channel: "cod",
-        orderId: input.order.id,
-        rows,
-      });
+      if (direct.enabled) {
+        ok = await appendCodRowsViaGoogleSheetsApi(direct, rows);
+      } else if (webhookReady) {
+        const url = webhookForChannel(config, "cod");
+        if (!url) return;
+        ok = await postToAppsScriptWebhook(url, {
+          secret: config.webhookSecret!,
+          channel: "cod",
+          orderId: input.order.id,
+          rows,
+        });
+      } else {
+        return;
+      }
     } else {
+      if (!webhookReady) return;
+      const url = webhookForChannel(config, "card");
+      if (!url) return;
       const values = buildLegacyCardSheetRow(input.order, lines);
       ok = await postToAppsScriptWebhook(url, {
-        secret: config.webhookSecret,
+        secret: config.webhookSecret!,
         channel: "card",
         values,
       });

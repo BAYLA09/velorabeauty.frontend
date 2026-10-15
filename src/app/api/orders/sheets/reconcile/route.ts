@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { exportOrderToGoogleSheets, readOrdersSheetsConfig } from "@/lib/ordersSheets/exportOrder";
+import {
+  exportOrderToGoogleSheets,
+  readOrdersSheetsExportStatus,
+} from "@/lib/ordersSheets/exportOrder";
 import {
   listOrdersPendingCodSheetExport,
   wasOrderSheetExported,
@@ -9,10 +12,23 @@ export const runtime = "nodejs";
 
 /** Replay COD rows to Google Sheets (orders missing sheet_cod_exported_at). */
 export async function POST(request: Request) {
-  const config = readOrdersSheetsConfig();
-  if (!config.enabled || !config.webhookSecret) {
+  const status = readOrdersSheetsExportStatus();
+  const secret = status.webhook.webhookSecret;
+  if (!status.enabled) {
     return NextResponse.json(
-      { ok: false, error: "orders_sheets_not_configured", reason: config.reason },
+      {
+        ok: false,
+        error: "orders_sheets_not_configured",
+        mode: status.mode,
+        directReason: status.direct.reason,
+        webhookReason: status.webhook.reason,
+      },
+      { status: 503 },
+    );
+  }
+  if (!secret) {
+    return NextResponse.json(
+      { ok: false, error: "missing_webhook_secret_for_reconcile_auth" },
       { status: 503 },
     );
   }
@@ -24,7 +40,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
   }
 
-  if (body.secret?.trim() !== config.webhookSecret) {
+  if (body.secret?.trim() !== secret) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
