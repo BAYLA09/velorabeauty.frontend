@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductPageClient } from "@/components/product/ProductPageClient";
 import { productSlugs } from "@/config/productPages";
+import { isStripeTestProductSlug } from "@/config/stripeTestCheckout";
 import {
   getAllProductsWithPages,
   getProductBySlug,
@@ -25,6 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
+  if (isStripeTestProductSlug(slug)) notFound();
   const product = getProductBySlug(slug);
   if (!product) notFound();
 

@@ -1,5 +1,6 @@
 import { readBackendCheckoutConfig } from "@/lib/backendCheckout/config";
 import { startBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
+import { isStripeTestCheckoutEnabled } from "@/config/stripeTestCheckout";
 import { readOrdersSheetsExportStatus } from "@/lib/ordersSheets/exportOrder";
 import {
   getStripePublishableKey,
