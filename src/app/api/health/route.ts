@@ -3,6 +3,10 @@ import { startBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
 import { isStripeTestCheckoutEnabled } from "@/config/stripeTestCheckout";
 import { readOrdersSheetsExportStatus } from "@/lib/ordersSheets/exportOrder";
 import {
+  buildShaPrefix,
+  fetchGithubMainShaPrefix,
+} from "@/lib/deploy/githubMainHead";
+import {
   getStripePublishableKey,
   isStripeCardCheckoutEnabled,
 } from "@/lib/stripeServer";
@@ -15,7 +19,12 @@ export async function GET() {
   const cardEnabled = isStripeCardCheckoutEnabled();
 
   const buildSha = process.env.BUILD_SHA?.trim() || "local";
-  const shortSha = buildSha.length >= 7 ? buildSha.slice(0, 7) : buildSha;
+  const shortSha = buildShaPrefix(buildSha);
+  const githubMainPrefix = await fetchGithubMainShaPrefix();
+  const inSyncWithMain =
+    githubMainPrefix !== null &&
+    shortSha !== "local" &&
+    shortSha === githubMainPrefix;
   const backendCheckout = readBackendCheckoutConfig();
   const ordersSheets = readOrdersSheetsExportStatus();
 
@@ -36,6 +45,16 @@ export async function GET() {
         shortSha !== "local"
           ? `ghcr.io/bayla09/velorabeauty.frontend:${shortSha}`
           : null,
+      githubMainPrefix,
+      inSyncWithMain,
+      statusMessageAr:
+        githubMainPrefix === null
+          ? null
+          : inSyncWithMain
+            ? "الموقع محدّث مع GitHub main."
+            : `الموقع قديم (${shortSha}) — GitHub main هو ${githubMainPrefix}. Easypanel → Source: Docker Image → ghcr.io/bayla09/velorabeauty.frontend:latest → Deploy (1–3 دقائق، ماشي 1 ثانية).`,
+      autoDeployNoteAr:
+        "Deploy أوتوماتيكي: GitHub → Secret EASYPANEL_DEPLOY_WEBHOOK (URL من Easypanel → Deployments → Webhook). بلا secret، Deploy يدوي فقط.",
       easypanel: {
         /** Use App → Docker Image OR Compose with docker-compose.yml — never Git Dockerfile build */
         source: "docker-image",

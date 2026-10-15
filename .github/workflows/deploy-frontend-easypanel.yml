@@ -60,12 +60,11 @@ jobs:
         run: |
           if [ -z "$WEBHOOK" ]; then
             echo "configured=false" >> "$GITHUB_OUTPUT"
-            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-              echo "::error::Missing EASYPANEL_DEPLOY_WEBHOOK — see docs/EASYPANEL-AUTO-DEPLOY-AR.md"
-              exit 1
-            fi
-            echo "::notice::EASYPANEL_DEPLOY_WEBHOOK not set — skip auto deploy (Easypanel Deploy manual or SSH)."
-            exit 0
+            echo "::error::EASYPANEL_DEPLOY_WEBHOOK not set — production will NOT update after Publish container."
+            echo "Fix: Easypanel → Docker Image service → Deployments → Webhook → copy URL"
+            echo "Then GitHub repo → Settings → Secrets → EASYPANEL_DEPLOY_WEBHOOK"
+            echo "Guide: docs/EASYPANEL-AUTO-DEPLOY-AR.md · manual: docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
+            exit 1
           fi
           echo "configured=true" >> "$GITHUB_OUTPUT"
 
