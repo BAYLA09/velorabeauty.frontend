@@ -73,8 +73,14 @@ export function appsScriptProbeHint(probe: {
   get: AppsScriptWebhookProbe;
   post: AppsScriptWebhookProbe;
 }): string | undefined {
+  if (probe.get.status === 404 || probe.post.status === 404) {
+    return "Apps Script URL is dead (404). Deploy → Manage deployments → New deployment → Web app → copy the NEW /exec URL into Easypanel ORDERS_SHEETS_COD_WEBHOOK_URL.";
+  }
   if (probe.get.redirectToLogin || probe.post.redirectToLogin || probe.post.status === 401) {
     return "Apps Script: Deploy → Web app → Execute as Me + Who has access = Anyone. Test /exec in incognito (no Google login).";
+  }
+  if (probe.post.bodyPreview.includes("WEBHOOK_SECRET not configured")) {
+    return "Apps Script → Project settings → Script properties → WEBHOOK_SECRET = same as ORDERS_SHEETS_WEBHOOK_SECRET in Easypanel.";
   }
   if (!probe.get.ok || !probe.post.ok) {
     return "Webhook reachable but response not ok — check WEBHOOK_SECRET in Apps Script properties matches Easypanel.";
