@@ -99,21 +99,43 @@ type LegacyWebhookPayload = {
   values: (string | number)[];
 };
 
+function normalizeAppsScriptWebhookUrl(url: string): string {
+  return url.trim().replace(/\/macros\/u\/\d+\/s\//, "/macros/s/");
+}
+
 async function postToAppsScriptWebhook(
   url: string,
   payload: CodWebhookPayload | LegacyWebhookPayload,
 ): Promise<boolean> {
-  const res = await fetch(url, {
+  const target = normalizeAppsScriptWebhookUrl(url);
+  const res = await fetch(target, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-    redirect: "follow",
+    redirect: "manual",
     signal: AbortSignal.timeout(15_000),
   });
-  const text = await res.text().catch(() => "");
-  const ok = isAppsScriptWebhookSuccess(res, text);
+  let text = await res.text().catch(() => "");
+  let finalRes = res;
+
+  if (res.status >= 300 && res.status < 400) {
+    const location = res.headers.get("location");
+    if (location?.includes("script.googleusercontent.com")) {
+      const follow = await fetch(location, {
+        method: "GET",
+        signal: AbortSignal.timeout(15_000),
+      });
+      text = await follow.text().catch(() => "");
+      finalRes = follow;
+    }
+  }
+  const ok = isAppsScriptWebhookSuccess(finalRes, text);
   if (!ok) {
-    console.error("[orders-sheets] webhook failed", { channel: payload.channel });
+    console.error("[orders-sheets] webhook failed", {
+      channel: payload.channel,
+      status: finalRes.status,
+      preview: text.slice(0, 120),
+    });
   }
   return ok;
 }
