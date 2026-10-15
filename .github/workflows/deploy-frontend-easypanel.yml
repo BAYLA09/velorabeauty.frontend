@@ -1,0 +1,110 @@
+# Deploy storefront on Easypanel after a new GHCR image is published.
+# One-time: GitHub repo → Settings → Secrets → EASYPANEL_DEPLOY_WEBHOOK
+# Copy URL from Easypanel → your **Docker Image** service → Deployments → Webhook
+# (NOT a Git/GitHub source service — those finish in ~1s and do not pull GHCR).
+
+name: Deploy Frontend (Easypanel)
+
+permissions:
+  contents: read
+
+on:
+  workflow_run:
+    workflows: ["Publish container"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: "Optional 7-char commit SHA to verify on /api/health (default: main HEAD)"
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-frontend-easypanel
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Resolve expected version prefix
+        id: ver
+        env:
+          INPUT_SHA: ${{ github.event.inputs.expected_sha }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          if [ -n "$INPUT_SHA" ]; then
+            echo "prefix=${INPUT_SHA:0:7}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -n "$RUN_SHA" ]; then
+            echo "prefix=${RUN_SHA:0:7}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          SHA="$(curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/main" | jq -r .sha)"
+          echo "prefix=${SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Check Easypanel webhook secret
+        id: hook
+        env:
+          WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "::error::Missing EASYPANEL_DEPLOY_WEBHOOK — see docs/EASYPANEL-AUTO-DEPLOY-AR.md"
+              exit 1
+            fi
+            echo "::notice::EASYPANEL_DEPLOY_WEBHOOK not set — skip auto deploy (Easypanel Deploy manual or SSH)."
+            exit 0
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Easypanel redeploy
+        if: steps.hook.outputs.configured == 'true'
+        env:
+          WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            code=$(curl -sS -o /tmp/ep-deploy.txt -w "%{http_code}" -X POST "$WEBHOOK")
+            echo "Webhook attempt $attempt → HTTP $code"
+            cat /tmp/ep-deploy.txt || true
+            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+              exit 0
+            fi
+            sleep $((attempt * 15))
+          done
+          echo "::error::Easypanel webhook failed. Webhook must target Docker Image service (not Git)."
+          exit 1
+
+      - name: Wait for live /api/health version
+        if: steps.hook.outputs.configured == 'true'
+        env:
+          EXPECT: ${{ steps.ver.outputs.prefix }}
+          HEALTH_URL: https://www.velorabeauty.world/api/health
+        run: |
+          set -euo pipefail
+          echo "Waiting for live version to start with: $EXPECT"
+          for i in $(seq 1 40); do
+            BODY="$(curl -sf "$HEALTH_URL" || true)"
+            LIVE="$(echo "$BODY" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p' | head -c 7)"
+            echo "[$i] live=$LIVE"
+            if [ -n "$LIVE" ] && [ "${LIVE:0:7}" = "$EXPECT" ]; then
+              echo "Deploy verified on production."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::warning::Live version did not match $EXPECT within 10 minutes."
+          echo "Deploy ~1s on Easypanel → wrong Source (Git). See docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
+          exit 1

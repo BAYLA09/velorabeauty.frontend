@@ -79,18 +79,29 @@ jobs:
             set -euo pipefail
             IMAGE="ghcr.io/bayla09/velorabeauty.frontend:${{ steps.tag.outputs.tag }}"
             NAME="${{ secrets.VPS_CONTAINER || 'velora-frontend' }}"
+            ENV_FILE="/tmp/${NAME}.env"
             echo "Pulling $IMAGE"
             docker pull "$IMAGE"
-            docker stop "$NAME" 2>/dev/null || true
-            docker rm "$NAME" 2>/dev/null || true
+            if docker ps -a --format '{{.Names}}' | grep -qx "$NAME"; then
+              echo "Recreating $NAME (preserving env + volume from existing container)"
+              docker inspect "$NAME" --format '{{range .Config.Env}}{{println .}}{{end}}' > "$ENV_FILE"
+              VOL="$(docker inspect "$NAME" --format '{{range .Mounts}}{{if eq .Destination "/app/data"}}{{.Name}}{{end}}{{end}}')"
+              docker rm -f "$NAME"
+            else
+              echo "No existing container — minimal env (set full env in Easypanel or ENV_FILE on VPS)"
+              printf '%s\n' \
+                'NODE_ENV=production' \
+                'HOSTNAME=0.0.0.0' \
+                'PORT=3000' \
+                'DATABASE_PATH=/app/data/velora.sqlite' \
+                'SITE_URL=https://www.velorabeauty.world' > "$ENV_FILE"
+              VOL="velora-orders"
+            fi
+            VOL="${VOL:-velora-orders}"
             docker run -d --name "$NAME" --restart unless-stopped \
               -p 127.0.0.1:3000:3000 \
-              -v velora-orders:/app/data \
-              -e NODE_ENV=production \
-              -e HOSTNAME=0.0.0.0 \
-              -e PORT=3000 \
-              -e DATABASE_PATH=/app/data/velora.sqlite \
-              -e SITE_URL=https://www.velorabeauty.world \
+              -v "${VOL}:/app/data" \
+              --env-file "$ENV_FILE" \
               "$IMAGE"
             docker ps --filter "name=$NAME"
             curl -sf http://127.0.0.1:3000/api/health | head -c 400 || true

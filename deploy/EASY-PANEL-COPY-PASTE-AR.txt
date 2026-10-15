@@ -4,8 +4,10 @@
   Pin (stable): ghcr.io/bayla09/velorabeauty.frontend:c6dc554
 ═══════════════════════════════════════════════════════════
 
-【1】 GitHub → repo → Settings → Secrets → Actions
-     → DELETE "EASYPANEL_DEPLOY_WEBHOOK" ila kayn
+【1】 GitHub → Settings → Secrets → Actions
+     → ADD "EASYPANEL_DEPLOY_WEBHOOK" = URL mn Easypanel (Docker Image service → Deployments → Webhook)
+     → DELETE webhook l9dim ila kan mربوط b Git service (Deploy 1s)
+     → Guide: docs/EASYPANEL-AUTO-DEPLOY-AR.md
 
 【2】 Easypanel → DELETE service frontend l9dim (Git/Compose)
      → New Service → APP (mashi Compose)

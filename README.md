@@ -31,23 +31,30 @@ npm install
 npm run dev
 ```
 
-## Docker (Easypanel)
+## Docker / Easypanel (production)
 
-Build and run locally:
+**Easypanel: استعمل Docker Image فقط** — ماشي GitHub + Dockerfile (Deploy 1s = ما كيسحبش image جديد).
+
+```text
+ghcr.io/bayla09/velorabeauty.frontend:latest
+```
+
+Port **3000** · volume **`/app/data`** · env **`deploy/easypanel.env.example`**
+
+| دليل | متى |
+|------|-----|
+| [EASYPANEL-DEPLOY-1-SECONDE-AR.md](docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md) | Deploy كيخلص f 1–2 ثانية |
+| [EASYPANEL-AUTO-DEPLOY-AR.md](docs/EASYPANEL-AUTO-DEPLOY-AR.md) | ما تقدرش تضغط Deploy — webhook / SSH |
+| [EASYPANEL-DEPLOY-NOW-AR.md](docs/EASYPANEL-DEPLOY-NOW-AR.md) | إعداد أول مرة |
+
+Local build (dev only):
 
 ```bash
 docker build -t velorabeauty-frontend .
 docker run --rm -p 3000:3000 velorabeauty-frontend
 ```
 
-Easypanel (اختر واحد):
-
-1. **GitHub + Dockerfile** — branch **`main`**, port **3000**.
-2. **Docker Registry (GHCR)** — إلا Git فـ Easypanel كيعطي `Git key not found`:  
-   `ghcr.io/bayla09/velorabeauty.frontend:latest` (يبنى تلقائياً من Actions على `main`).
-
-**Deploy Easypanel?** → **[docs/EASYPANEL-DEPLOY-NOW-AR.md](docs/EASYPANEL-DEPLOY-NOW-AR.md)** · Image: `ghcr.io/bayla09/velorabeauty.frontend:latest` أو `:89709ec` · port **3000** · volume **`/app/data`** · env **`deploy/easypanel.env.example`**.  
-Also: [docs/EASYPANEL-DEPLOY.md](docs/EASYPANEL-DEPLOY.md). **Stripe:** [docs/STRIPE-SETUP-AR.md](docs/STRIPE-SETUP-AR.md).
+**Stripe:** [docs/STRIPE-SETUP-AR.md](docs/STRIPE-SETUP-AR.md).
 
 Open [http://localhost:3000](http://localhost:3000).
 

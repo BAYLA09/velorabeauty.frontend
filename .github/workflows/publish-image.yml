@@ -98,19 +98,7 @@ jobs:
             echo "Compose جاهز: \`deploy/easypanel-docker-image.compose.yaml\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Trigger Easypanel redeploy (optional)
-        env:
-          WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
+      - name: Auto deploy hint
         run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "::notice::EASYPANEL_DEPLOY_WEBHOOK not set — Easypanel → Docker Image → Deploy manually"
-            exit 0
-          fi
-          code=$(curl -sS -o /tmp/easypanel-webhook.txt -w "%{http_code}" -X POST "$WEBHOOK")
-          echo "Easypanel webhook HTTP ${code}"
-          cat /tmp/easypanel-webhook.txt || true
-          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
-            echo "::warning::Webhook failed (HTTP ${code}). Delete EASYPANEL_DEPLOY_WEBHOOK if it targets a Git service (1s deploy). Use Docker Image service webhook instead."
-            exit 0
-          fi
-          echo "::notice::If deploy finished in ~1s on Easypanel, webhook points to wrong (Git) service — see docs/EASYPANEL-URGENT-AR.md"
+          echo "After this workflow: **Deploy Frontend (Easypanel)** runs if EASYPANEL_DEPLOY_WEBHOOK is set."
+          echo "Setup: docs/EASYPANEL-AUTO-DEPLOY-AR.md"
