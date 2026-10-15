@@ -1,79 +1,76 @@
-# Sheet — orders payées par carte (Stripe)
+# Sheet **khra** — orders carte payée
 
-Même format que COD (**17 colonnes**, une ligne par produit). Export **seulement** quand `status = paid` (webhook Stripe ou confirm checkout).
+Nfs colonnes b7al COD (17). Export ghir **`paid`**.
 
 ---
 
-## 1) Google Sheet — nouvel onglet
+## Option A — **Spreadsheet jdid** + Apps Script jdid (recommended)
 
-1. Ouvre  
-   `https://docs.google.com/spreadsheets/d/1nasdcXYD5ihxj5QnGMWQ05ug3VqoVfgP8R9ojBnsjXQ`
-2. **+** en bas → nouvel onglet (ex. `Card paid`)
-3. **Ligne 1** (copie exacte de l’onglet COD) :
+### 1) Google Sheet jdid
+
+1. Google Drive → **New** → **Google Sheets**
+2. Ligne 1:
 
 ```text
 OrderDate	country	name	phone	address	url	sku	Product	quantity	price	currency	notes	utm_source	utm_medium	utm_campaign	utm_content	utm_term
 ```
 
-4. Ouvre l’onglet → URL contient `#gid=XXXXXXXX` → note **`CARD_SHEET_GID`**
+3. Men URL `/d/XXXXXXXX/edit` — **`CARD_SPREADSHEET_ID`**
+4. Ila bghiti tab mo3ayyan: `#gid=…` → **`CARD_SHEET_GID`** (optional ila tab wa7ed)
 
----
+### 2) Apps Script **f had sheet**
 
-## 2) Apps Script (même projet que COD)
+1. **Extensions** → **Apps Script**
+2. Paste `scripts/google-sheets/VeloraOrdersWebhook.gs` (kamel)
+3. **Script properties**:
 
-1. Colle le code à jour : `scripts/google-sheets/VeloraOrdersWebhook.gs`
-2. **Script properties** — ajoute / vérifie :
+| Property | Value |
+|----------|--------|
+| `WEBHOOK_SECRET` | nfs secret dyal Easypanel |
+| `SPREADSHEET_ID` | ID dyal **had** sheet (optional ila bound) |
+| `SHEET_GID` | gid tab (optional — ila tab wa7ed, khliha fadya) |
 
-| Property | Exemple |
-|----------|---------|
-| `WEBHOOK_SECRET` | `VeloraCOD-2026-X7mP9qL2-K8vR` |
-| `SPREADSHEET_ID` | `1nasdcXYD5ihxj5QnGMWQ05ug3VqoVfgP8R9ojBnsjXQ` |
-| `SHEET_GID` | `469291840` (COD) |
-| `CARD_SHEET_GID` | **gid du nouvel onglet** |
+**Ma tzidch** `CARD_SPREADSHEET_ID` hna — script mربوط b sheet card.
 
-3. **Deploy** → **Manage deployments** → **Edit** (ou New) → Web app → **Anyone** → même URL `/exec` qu’avant.
+4. **Deploy** → Web app → **Me** + **Anyone** → copy **`/exec` URL dyal CARD**
 
-Colonne `notes` contient : `payment=card`, `status=paid`, `stripe=pi_…`
-
----
-
-## 3) Easypanel
-
-Minimum (même URL que COD) :
+### 3) Easypanel
 
 ```env
-ORDERS_SHEETS_COD_WEBHOOK_URL=https://script.google.com/macros/s/…/exec
+ORDERS_SHEETS_COD_WEBHOOK_URL=https://script.google.com/macros/s/...COD.../exec
+ORDERS_SHEETS_CARD_WEBHOOK_URL=https://script.google.com/macros/s/...CARD.../exec
 ORDERS_SHEETS_WEBHOOK_SECRET=VeloraCOD-2026-X7mP9qL2-K8vR
 ```
 
-Optionnel (explicit) :
-
-```env
-ORDERS_SHEETS_CARD_WEBHOOK_URL=https://script.google.com/macros/s/…/exec
-```
-
-Si tu utilises **Service Account API** au lieu d’Apps Script :
-
-```env
-ORDERS_SHEETS_CARD_SHEET_GID=<gid onglet card>
-```
+Deploy frontend (PR #148 / main).
 
 ---
 
-## 4) Test
+## Option B — **Sheet khra** b nfs Apps Script dyal COD
 
-Après deploy frontend + image :
+1. Sheet jdid + headers (nfs Option A step 1)
+2. F **COD Apps Script** → properties:
 
-```bash
-curl -sS -X POST 'https://www.velorabeauty.world/api/orders/sheets/reconcile' \
-  -H 'Content-Type: application/json' \
-  -d '{"secret":"YOUR_SECRET","channel":"card","limit":20}'
-```
+| Property | Value |
+|----------|--------|
+| `CARD_SPREADSHEET_ID` | ID dyal sheet card |
+| `CARD_SHEET_GID` | gid tab (optional) |
 
-Navigateur :
+3. **Deploy** → edit Web app (nfs `/exec` COD)
+4. Easypanel: **`ORDERS_SHEETS_CARD_WEBHOOK_URL`** = **nfs** URL dyal COD (optional)
+
+---
+
+## Share
+
+Ila service account: share sheet card b **Editor** 3la `client_email` dyal JSON.
+
+---
+
+## Test
 
 ```text
 https://www.velorabeauty.world/api/orders/sheets/reconcile?secret=SECRET&channel=card&run=1
 ```
 
-Nouvelle commande carte payée → export auto (Stripe webhook).
+Order carte payée → rows f **sheet card**, COD f sheet COD.

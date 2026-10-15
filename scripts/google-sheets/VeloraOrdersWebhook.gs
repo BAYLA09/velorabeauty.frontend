@@ -4,8 +4,9 @@
  * Script properties:
  *   WEBHOOK_SECRET   — same as Easypanel ORDERS_SHEETS_WEBHOOK_SECRET
  *   SPREADSHEET_ID   — optional (default: bound spreadsheet)
- *   SHEET_GID        — COD tab (#gid=…)
- *   CARD_SHEET_GID   — paid card tab (#gid=…)
+ *   SHEET_GID            — COD tab (#gid=…)
+ *   CARD_SPREADSHEET_ID  — optional second workbook for card (else CARD_SHEET_GID tab in COD file)
+ *   CARD_SHEET_GID       — card tab gid (optional if card file has one tab)
  *
  * Deploy → Web app → Execute as: Me → Who has access: Anyone
  * Easypanel:
@@ -43,9 +44,10 @@ function jsonResponse_(obj) {
   );
 }
 
-function openSpreadsheet_() {
+function openSpreadsheet_(spreadsheetIdOverride) {
   var props = PropertiesService.getScriptProperties();
-  var spreadsheetId = props.getProperty("SPREADSHEET_ID");
+  var spreadsheetId =
+    spreadsheetIdOverride || props.getProperty("SPREADSHEET_ID");
   var ss = spreadsheetId
     ? SpreadsheetApp.openById(spreadsheetId)
     : SpreadsheetApp.getActiveSpreadsheet();
@@ -53,8 +55,7 @@ function openSpreadsheet_() {
   return ss;
 }
 
-function getSheetByGid_(gidString) {
-  var ss = openSpreadsheet_();
+function findSheetByGid_(ss, gidString) {
   var targetGid = Number(gidString);
   var sheets = ss.getSheets();
   for (var i = 0; i < sheets.length; i++) {
@@ -66,13 +67,17 @@ function getSheetByGid_(gidString) {
 function getTargetSheet_(channel) {
   var props = PropertiesService.getScriptProperties();
   if (channel === "card") {
+    var cardWorkbookId = props.getProperty("CARD_SPREADSHEET_ID");
+    var ss = openSpreadsheet_(cardWorkbookId || null);
     var cardGid = props.getProperty("CARD_SHEET_GID");
-    if (cardGid) return getSheetByGid_(cardGid);
-    throw new Error("CARD_SHEET_GID not configured");
+    if (cardGid) return findSheetByGid_(ss, cardGid);
+    var sheetGid = props.getProperty("SHEET_GID");
+    if (sheetGid) return findSheetByGid_(ss, sheetGid);
+    return ss.getSheets()[0];
   }
   var gidProp = props.getProperty("SHEET_GID");
   var gid = gidProp !== null && gidProp !== "" ? gidProp : String(DEFAULT_SHEET_GID);
-  return getSheetByGid_(gid);
+  return findSheetByGid_(openSpreadsheet_(null), gid);
 }
 
 function orderAlreadyExported_(sheet, orderId) {
