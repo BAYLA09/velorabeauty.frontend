@@ -26,6 +26,7 @@ import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { readCheckoutApiJson } from "@/lib/checkout/readCheckoutApiJson";
 import { formatCheckoutPayError } from "@/lib/checkout/formatCheckoutPayError";
+import { STRIPE_CHECKOUT_BILLING_COUNTRY } from "@/lib/checkout/stripePaymentElementConfig";
 import { submitAndConfirmStripePayment } from "@/lib/checkout/submitAndConfirmStripePayment";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
@@ -288,7 +289,7 @@ function StripeCardPaymentAndSubmit({
           phone: phoneCheck.normalized,
           addressLine1: fullAddress,
           addressCity: form.emirate,
-          addressCountry: "AE",
+          addressCountry: STRIPE_CHECKOUT_BILLING_COUNTRY,
         },
       });
       if (!payment.ok) {

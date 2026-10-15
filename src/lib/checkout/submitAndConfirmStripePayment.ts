@@ -1,5 +1,6 @@
 import type { Stripe, StripeElements } from "@stripe/stripe-js";
 import { formatCheckoutPayError } from "@/lib/checkout/formatCheckoutPayError";
+import { STRIPE_CHECKOUT_BILLING_COUNTRY } from "@/lib/checkout/stripePaymentElementConfig";
 
 export type StripeBillingDetails = {
   name: string;
@@ -20,7 +21,7 @@ export function buildConfirmPaymentBillingDetails(input: StripeBillingDetails) {
     ...(input.email ? { email: input.email } : {}),
     ...(input.phone ? { phone: input.phone } : {}),
     address: {
-      country: (input.addressCountry?.trim() || "AE").toUpperCase(),
+      country: (input.addressCountry?.trim() || STRIPE_CHECKOUT_BILLING_COUNTRY).toUpperCase(),
       ...(line1 ? { line1 } : {}),
       ...(city ? { city, state: city } : {}),
     },

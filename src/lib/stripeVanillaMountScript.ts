@@ -1,9 +1,11 @@
 import { stripeElementsAppearance } from "@/components/checkout/stripeAppearance";
+import { stripePaymentElementCreateOptions } from "@/lib/checkout/stripePaymentElementConfig";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
 
 /** Inline script: mount Stripe Payment Element before React hydrates (~ saves seconds). */
 export function buildStripeVanillaMountScript(bootstrap: StripeCardBootstrap): string {
   const appearance = JSON.stringify(stripeElementsAppearance).replace(/</g, "\\u003c");
+  const peOptions = JSON.stringify(stripePaymentElementCreateOptions).replace(/</g, "\\u003c");
   const boot = JSON.stringify(bootstrap).replace(/</g, "\\u003c");
 
   return `
@@ -32,13 +34,7 @@ export function buildStripeVanillaMountScript(bootstrap: StripeCardBootstrap): s
         appearance: ${appearance},
       });
       window.__VELORA_STRIPE_ELEMENTS = elements;
-      var pe = elements.create("payment", {
-        layout: "accordion",
-        paymentMethodOrder: ["card"],
-        wallets: { applePay: "never", googlePay: "never", link: "never" },
-        fields: { billingDetails: { address: "never", email: "never" } },
-        terms: { card: "never" },
-      });
+      var pe = elements.create("payment", ${peOptions});
       pe.on("ready", function () {
         window.__VELORA_PE_READY = true;
         document.dispatchEvent(new Event("velora-stripe-ready"));
