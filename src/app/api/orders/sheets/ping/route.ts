@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { isAppsScriptWebhookSuccess } from "@/lib/ordersSheets/webhookResponse";
+import {
+  appsScriptProbeHint,
+  probeAppsScriptWebhook,
+} from "@/lib/ordersSheets/probeAppsScriptWebhook";
 import { readOrdersSheetsConfig } from "@/lib/ordersSheets/exportOrder";
 
 export const runtime = "nodejs";
@@ -17,50 +20,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: "missing_cod_webhook_url" }, { status: 503 });
   }
 
-  const getRes = await fetch(url, {
-    method: "GET",
-    redirect: "manual",
-    signal: AbortSignal.timeout(15_000),
-  });
-  const getLocation = getRes.headers.get("location");
-  const getText = await getRes.text().catch(() => "");
-
-  const postRes = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      secret: config.webhookSecret,
-      channel: "cod",
-      orderId: "ping-test",
-      rows: [],
-    }),
-    redirect: "manual",
-    signal: AbortSignal.timeout(15_000),
-  });
-  const postLocation = postRes.headers.get("location");
-  const postText = await postRes.text().catch(() => "");
-
-  const getOk = isAppsScriptWebhookSuccess(getRes, getText);
-  const postOk = isAppsScriptWebhookSuccess(postRes, postText);
+  const probe = await probeAppsScriptWebhook(url, config.webhookSecret);
 
   return NextResponse.json({
-    ok: getOk && postOk,
-    webhookUrl: url.replace(/\/u\/\d+\//, "/"),
-    get: {
-      status: getRes.status,
-      ok: getOk,
-      redirectToLogin: Boolean(getLocation?.includes("accounts.google.com")),
-      bodyPreview: getText.slice(0, 120),
-    },
-    post: {
-      status: postRes.status,
-      ok: postOk,
-      redirectToLogin: Boolean(postLocation?.includes("accounts.google.com")),
-      bodyPreview: postText.slice(0, 120),
-    },
-    hint:
-      getRes.status === 302 || postRes.status === 401
-        ? "Redeploy Apps Script Web app: Execute as Me, Who has access = Anyone (anonymous). Test /exec in incognito without Google login."
-        : undefined,
+    ok: probe.get.ok && probe.post.ok,
+    webhookUrl: probe.webhookUrl,
+    get: probe.get,
+    post: probe.post,
+    hint: appsScriptProbeHint(probe),
   });
 }

@@ -99,9 +99,7 @@ type LegacyWebhookPayload = {
   values: (string | number)[];
 };
 
-function normalizeAppsScriptWebhookUrl(url: string): string {
-  return url.trim().replace(/\/macros\/u\/\d+\/s\//, "/macros/s/");
-}
+import { normalizeAppsScriptWebhookUrl } from "@/lib/ordersSheets/probeAppsScriptWebhook";
 
 async function postToAppsScriptWebhook(
   url: string,
