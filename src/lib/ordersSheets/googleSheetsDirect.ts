@@ -8,6 +8,8 @@ export type GoogleSheetsDirectConfig = {
   enabled: boolean;
   spreadsheetId: string | null;
   sheetGid: number;
+  cardSpreadsheetId: string | null;
+  cardSheetGid: number | null;
   clientEmail: string | null;
   reason?: string;
 };
@@ -54,11 +56,28 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
     10,
   );
 
+  const cardGidRaw =
+    process.env.ORDERS_SHEETS_CARD_SHEET_GID?.trim() ||
+    process.env.CARD_SHEET_GID?.trim() ||
+    "";
+  const cardSheetGidParsed = cardGidRaw ? Number.parseInt(cardGidRaw, 10) : NaN;
+  const cardSheetGid = Number.isFinite(cardSheetGidParsed) ? cardSheetGidParsed : null;
+
+  const cardSpreadsheetIdRaw =
+    process.env.ORDERS_SHEETS_CARD_SPREADSHEET_ID?.trim() ||
+    process.env.CARD_SPREADSHEET_ID?.trim() ||
+    "";
+  const cardSpreadsheetId = isLikelyGoogleSpreadsheetId(cardSpreadsheetIdRaw)
+    ? cardSpreadsheetIdRaw
+    : null;
+
   if (!rawJson) {
     return {
       enabled: false,
       spreadsheetId: null,
       sheetGid,
+      cardSpreadsheetId,
+      cardSheetGid,
       clientEmail: null,
       reason: "missing_service_account_json",
     };
@@ -70,6 +89,8 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
       enabled: false,
       spreadsheetId: null,
       sheetGid,
+      cardSpreadsheetId,
+      cardSheetGid,
       clientEmail: null,
       reason: "invalid_service_account_json",
     };
@@ -80,6 +101,8 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
       enabled: false,
       spreadsheetId: spreadsheetIdRaw,
       sheetGid,
+      cardSpreadsheetId,
+      cardSheetGid,
       clientEmail: sa.client_email ?? null,
       reason: "invalid_spreadsheet_id",
     };
@@ -89,6 +112,8 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
     enabled: true,
     spreadsheetId: spreadsheetIdRaw,
     sheetGid: Number.isFinite(sheetGid) ? sheetGid : VELORA_COD_SHEET_GID,
+    cardSpreadsheetId,
+    cardSheetGid,
     clientEmail: sa.client_email ?? null,
   };
 }
@@ -146,19 +171,35 @@ async function resolveSheetTitle(
   return title;
 }
 
-/** Append COD rows via Google Sheets API (no Apps Script). */
+/** Append COD/card rows via Google Sheets API (no Apps Script). */
 export async function appendCodRowsViaGoogleSheetsApi(
   config: GoogleSheetsDirectConfig,
   rows: (string | number)[][],
+  channel: "cod" | "card" = "cod",
 ): Promise<boolean> {
   if (!config.enabled || !config.spreadsheetId || rows.length === 0) return false;
 
+  const spreadsheetId =
+    channel === "card" && config.cardSpreadsheetId
+      ? config.cardSpreadsheetId
+      : config.spreadsheetId;
+  if (!spreadsheetId) return false;
+
+  const gid =
+    channel === "card" && config.cardSheetGid != null ? config.cardSheetGid : config.sheetGid;
+  if (channel === "card" && !config.cardSpreadsheetId && config.cardSheetGid == null) {
+    console.error(
+      "[orders-sheets] card export needs ORDERS_SHEETS_CARD_SPREADSHEET_ID and/or ORDERS_SHEETS_CARD_SHEET_GID",
+    );
+    return false;
+  }
+
   const token = await getAccessToken();
-  const title = await resolveSheetTitle(config.spreadsheetId, config.sheetGid, token);
+  const title = await resolveSheetTitle(spreadsheetId, gid, token);
   const range = `'${title.replace(/'/g, "''")}'!A:Q`;
 
   const res = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(config.spreadsheetId)}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
     {
       method: "POST",
       headers: {

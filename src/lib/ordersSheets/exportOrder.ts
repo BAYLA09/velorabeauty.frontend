@@ -3,7 +3,6 @@ import type { CartLine } from "@/lib/cart/cartTypes";
 import { isAppsScriptWebhookSuccess } from "@/lib/ordersSheets/webhookResponse";
 import {
   buildCodSheetRows,
-  buildLegacyCardSheetRow,
   type OrdersSheetChannel,
 } from "@/lib/ordersSheets/buildSheetRow";
 import { COD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/codSheetColumns";
@@ -32,7 +31,9 @@ export type OrdersSheetsConfig = {
 export function readOrdersSheetsConfig(): OrdersSheetsConfig {
   const shared = process.env.ORDERS_SHEETS_WEBHOOK_URL?.trim() || null;
   const cod = process.env.ORDERS_SHEETS_COD_WEBHOOK_URL?.trim() || shared;
-  const card = process.env.ORDERS_SHEETS_CARD_WEBHOOK_URL?.trim() || shared;
+  /** Same /exec URL is fine when Apps Script routes cod vs card by `channel` + CARD_SHEET_GID. */
+  const card =
+    process.env.ORDERS_SHEETS_CARD_WEBHOOK_URL?.trim() || shared || cod;
   const secret = process.env.ORDERS_SHEETS_WEBHOOK_SECRET?.trim() || null;
 
   if (!cod && !card) {
@@ -86,9 +87,9 @@ function webhookForChannel(config: OrdersSheetsConfig, channel: OrdersSheetChann
   return channel === "cod" ? config.codWebhookUrl : config.cardWebhookUrl;
 }
 
-type CodWebhookPayload = {
+type RowsWebhookPayload = {
   secret: string;
-  channel: "cod";
+  channel: OrdersSheetChannel;
   orderId: string;
   rows: (string | number)[][];
 };
@@ -103,7 +104,7 @@ import { normalizeAppsScriptWebhookUrl } from "@/lib/ordersSheets/probeAppsScrip
 
 async function postToAppsScriptWebhook(
   url: string,
-  payload: CodWebhookPayload | LegacyWebhookPayload,
+  payload: RowsWebhookPayload | LegacyWebhookPayload,
 ): Promise<boolean> {
   const target = normalizeAppsScriptWebhookUrl(url);
   const res = await fetch(target, {
@@ -202,15 +203,31 @@ export async function exportOrderToGoogleSheets(input: {
         return;
       }
     } else {
-      if (!webhookReady) return;
-      const url = webhookForChannel(config, "card");
-      if (!url) return;
-      const values = buildLegacyCardSheetRow(input.order, lines);
-      ok = await postToAppsScriptWebhook(url, {
-        secret: config.webhookSecret!,
-        channel: "card",
-        values,
-      });
+      const rows = buildCodSheetRows(input.order, lines, attribution);
+      if (rows.length === 0) return;
+      for (const row of rows) {
+        if (row.length !== COD_ORDERS_SHEET_COLUMN_COUNT) {
+          console.error("[orders-sheets] invalid card row width", {
+            orderId: input.order.id,
+            width: row.length,
+          });
+          return;
+        }
+      }
+      if (direct.enabled) {
+        ok = await appendCodRowsViaGoogleSheetsApi(direct, rows, "card");
+      } else if (webhookReady) {
+        const url = webhookForChannel(config, "card");
+        if (!url) return;
+        ok = await postToAppsScriptWebhook(url, {
+          secret: config.webhookSecret!,
+          channel: "card",
+          orderId: input.order.id,
+          rows,
+        });
+      } else {
+        return;
+      }
     }
     if (ok) markOrderSheetExported(input.order.id, input.channel);
   } catch (err) {

@@ -76,8 +76,10 @@ export async function GET() {
       },
       webhook: {
         codUrlConfigured: Boolean(ordersSheets.webhook.codWebhookUrl),
+        cardUrlConfigured: Boolean(ordersSheets.webhook.cardWebhookUrl),
         secretConfigured: Boolean(ordersSheets.webhook.webhookSecret),
       },
+      cardSheetGidConfigured: Boolean(ordersSheets.direct.cardSheetGid),
     },
   });
 }

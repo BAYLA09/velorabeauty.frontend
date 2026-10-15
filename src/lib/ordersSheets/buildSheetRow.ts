@@ -46,6 +46,9 @@ function buildNotes(order: OrderRecord): string {
     `orderTotal=${order.totalAed}`,
     order.deliveryFeeAed ? `delivery=${order.deliveryFeeAed}` : null,
     order.status !== "pending" ? `status=${order.status}` : null,
+    order.paymentMethod === "card" && order.stripePaymentIntentId
+      ? `stripe=${order.stripePaymentIntentId}`
+      : null,
   ]
     .filter(Boolean)
     .join("; ");
