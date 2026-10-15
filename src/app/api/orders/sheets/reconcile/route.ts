@@ -74,7 +74,8 @@ export async function GET(request: Request) {
       : status.webhook.codWebhookUrl;
 
   if (status.mode === "apps_script" && probeUrl && expected) {
-    const probe = await probeAppsScriptWebhook(probeUrl, expected);
+    const probeChannel = channel === "both" ? "cod" : channel;
+    const probe = await probeAppsScriptWebhook(probeUrl, expected, probeChannel);
     payload.webhookProbe = probe;
     payload.webhookOk = probe.get.ok && probe.post.ok;
     payload.hint = appsScriptProbeHint(probe);

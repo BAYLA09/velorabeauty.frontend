@@ -1,3 +1,4 @@
+import type { OrdersSheetChannel } from "@/lib/ordersSheets/buildSheetRow";
 import { isAppsScriptWebhookSuccess } from "@/lib/ordersSheets/webhookResponse";
 
 export function normalizeAppsScriptWebhookUrl(url: string): string {
@@ -21,7 +22,7 @@ async function probeOnce(
     const location = res.headers.get("location");
     if (location?.includes("script.googleusercontent.com")) {
       const follow = await fetch(location, {
-        method: "GET",
+        method: init.method === "POST" ? "GET" : "GET",
         signal: AbortSignal.timeout(15_000),
       });
       text = await follow.text().catch(() => "");
@@ -34,6 +35,7 @@ async function probeOnce(
 export async function probeAppsScriptWebhook(
   url: string,
   webhookSecret: string,
+  channel: OrdersSheetChannel = "cod",
 ): Promise<{ get: AppsScriptWebhookProbe; post: AppsScriptWebhookProbe; webhookUrl: string }> {
   const webhookUrl = normalizeAppsScriptWebhookUrl(url);
 
@@ -43,7 +45,7 @@ export async function probeAppsScriptWebhook(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       secret: webhookSecret,
-      channel: "cod",
+      channel,
       orderId: "probe-test",
       rows: [],
     }),
