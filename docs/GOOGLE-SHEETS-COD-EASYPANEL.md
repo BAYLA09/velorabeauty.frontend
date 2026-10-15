@@ -41,8 +41,10 @@ One COD order with multiple SKUs → **one row per line item** (same `notes` con
 
 4. **Deploy** → **New deployment** → **Web app**  
    - Execute as: **Me**  
-   - Who has access: **Anyone**  
-5. Copy the **Web app URL** (ends with `/exec`). This is the only “webhook URL” for COD export.
+   - Who has access: **Anyone** (required — server has no Google login; **403 Access Denied** if wrong)  
+5. Copy the **Web app URL** (ends with `/exec`). This is the only “webhook URL” for COD export.  
+6. Test in **incognito**: open `/exec` → must show `{"ok":true,"service":"velora-cod-orders-webhook"}`.  
+   If **403** → [GOOGLE-SHEETS-403-FIX-AR.md](./GOOGLE-SHEETS-403-FIX-AR.md)
 
 No Google service account or OAuth keys go in Easypanel — only the shared secret and the Apps Script `/exec` URL.
 
