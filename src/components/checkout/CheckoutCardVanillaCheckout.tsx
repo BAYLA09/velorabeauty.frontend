@@ -208,7 +208,7 @@ export function CheckoutCardVanillaCheckout({
 
       const origin =
         typeof window !== "undefined" ? window.location.origin : "https://www.velorabeauty.world";
-      const returnUrl = `${origin}/order/thank-you?id=${encodeURIComponent(order.id)}`;
+      const returnUrl = `${origin}/checkout/success?id=${encodeURIComponent(order.id)}`;
       const payment = await submitAndConfirmStripePayment(stripe, elements, {
         clientSecret: stripeBootstrap.clientSecret,
         returnUrl,
@@ -223,7 +223,7 @@ export function CheckoutCardVanillaCheckout({
         return;
       }
 
-      router.push(`/order/thank-you?id=${encodeURIComponent(order.id)}`);
+      router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
     } catch (err) {
       const detail = err instanceof Error ? err.message : "";
       setError(
