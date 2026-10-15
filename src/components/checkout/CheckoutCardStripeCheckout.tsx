@@ -24,6 +24,8 @@ import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
+import { readCheckoutApiJson } from "@/lib/checkout/readCheckoutApiJson";
+import { submitAndConfirmStripePayment } from "@/lib/checkout/submitAndConfirmStripePayment";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
@@ -212,11 +214,16 @@ function StripeCardPaymentAndSubmit({
           ...(sendCartLines ? { cartLines } : {}),
         }),
       });
-      const finalizeData = (await finalizeRes.json()) as {
+      const parsed = await readCheckoutApiJson<{
         orderId?: string;
         order?: OrderRecord;
         error?: string;
-      };
+      }>(finalizeRes);
+      if (!parsed.ok) {
+        setError("تعذّر الاتصال بالخادم. تحققي من الشبكة أو أعيدي تحميل الصفحة.");
+        return;
+      }
+      const finalizeData = parsed.data;
       if (!finalizeRes.ok || !finalizeData.orderId || !finalizeData.order) {
         setError(finalizeData.error ?? "تعذّر حفظ الطلب.");
         return;
@@ -241,29 +248,28 @@ function StripeCardPaymentAndSubmit({
 
       const origin =
         typeof window !== "undefined" ? window.location.origin : "https://www.velorabeauty.world";
-      const returnUrl = `${origin}/order/thank-you?id=${encodeURIComponent(order.id)}`;
-      const { error: stripeError } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: returnUrl,
-          payment_method_data: {
-            billing_details: {
-              name: trimmedName,
-              email: form.email.trim() || undefined,
-              phone: phoneCheck.normalized,
-            },
-          },
+      const returnUrl = `${origin}/checkout/success?id=${encodeURIComponent(order.id)}`;
+      const payment = await submitAndConfirmStripePayment(stripe, elements, {
+        returnUrl,
+        billingDetails: {
+          name: trimmedName,
+          email: form.email.trim() || undefined,
+          phone: phoneCheck.normalized,
         },
       });
-
-      if (stripeError) {
-        setError(stripeError.message ?? "تعذّر إتمام الدفع.");
+      if (!payment.ok) {
+        setError(payment.message);
         return;
       }
 
-      router.push(`/order/thank-you?id=${encodeURIComponent(order.id)}`);
-    } catch {
-      setError("تعذّر الاتصال. حاولي مجدداً.");
+      router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "";
+      setError(
+        detail && detail.length < 180
+          ? detail
+          : "تعذّر الاتصال. حاولي مجدداً.",
+      );
     } finally {
       setSubmitting(false);
     }

@@ -1,27 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FooterSection } from "@/components/FooterSection";
 import { CodThankYouSuccess } from "@/components/order/CodThankYouSuccess";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
-import { formatPrice } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import {
   clearOrderDraft,
   readOrderDraft,
   type OrderDraft,
 } from "@/lib/orderStorage";
-import { getProductPath } from "@/lib/productCatalog";
-
 export function ThankYouPageClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const orderIdFromUrl = searchParams.get("id");
   const sessionIdFromUrl = searchParams.get("session_id");
   const paymentIntentFromUrl = searchParams.get("payment_intent");
   const [order, setOrder] = useState<OrderDraft | null>(null);
-  const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,13 +65,19 @@ export function ThankYouPageClient() {
               };
             };
             if (!cancelled) {
+              if (data.order.paymentMethod === "card") {
+                const q = new URLSearchParams({ id: data.order.id });
+                if (sessionIdFromUrl) q.set("session_id", sessionIdFromUrl);
+                if (paymentIntentFromUrl) q.set("payment_intent", paymentIntentFromUrl);
+                router.replace(`/checkout/success?${q.toString()}`);
+                return;
+              }
               const draftCartLines =
                 draft?.orderId === data.order.id ? draft.cartLines : undefined;
               const cartLines =
                 data.order.cartLines && data.order.cartLines.length > 0
                   ? data.order.cartLines
                   : draftCartLines;
-              setOrderStatus(data.order.status);
               setOrder({
                 orderId: data.order.id,
                 productSlug: data.order.productSlug,
@@ -101,6 +104,10 @@ export function ThankYouPageClient() {
         }
       }
       if (!cancelled) {
+        if (draft?.method === "card" && orderIdFromUrl) {
+          router.replace(`/checkout/success?id=${encodeURIComponent(orderIdFromUrl)}`);
+          return;
+        }
         setOrder(draft);
         setLoading(false);
       }
@@ -110,11 +117,7 @@ export function ThankYouPageClient() {
     return () => {
       cancelled = true;
     };
-  }, [orderIdFromUrl, sessionIdFromUrl, paymentIntentFromUrl]);
-
-  const isCod = order?.method === "cod";
-  const methodLabel =
-    order?.method === "cod" ? "الدفع عند الاستلام" : "الدفع بالبطاقة";
+  }, [orderIdFromUrl, sessionIdFromUrl, paymentIntentFromUrl, router]);
 
   return (
     <>
@@ -124,7 +127,7 @@ export function ThankYouPageClient() {
           <div className="mx-auto max-w-xl text-center">
             <p className="text-base text-velora-burgundy/70">جاري تحميل تفاصيل الطلب…</p>
           </div>
-        ) : isCod && !order ? (
+        ) : !order ? (
           <div className="mx-auto max-w-md text-center">
             <p className="text-base text-velora-burgundy/75">
               ما لقينا تفاصيل الطلب. إذا أكملتِ الطلب للتو، انتظري لحظات أو راجعي رسائل الجوال.
@@ -136,78 +139,8 @@ export function ThankYouPageClient() {
               الصفحة الرئيسية
             </Link>
           </div>
-        ) : isCod && order ? (
-          <CodThankYouSuccess order={order} onNavigateAway={() => clearOrderDraft()} />
         ) : (
-          <div className="mx-auto max-w-xl text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-velora-burgundy/10 text-3xl text-velora-burgundy">
-              ✓
-            </div>
-            <h1 className="mt-6 text-2xl font-black text-velora-burgundy-dark sm:text-3xl">
-              شكراً — طلبك وصلنا
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-velora-burgundy/80">
-              {order ? (
-                <>
-                  {order.customerName}، بدأنا نجهّز روتين{" "}
-                  <span className="font-bold">{order.productName}</span>. فريق فيلورا يتصل بك على{" "}
-                  <span dir="ltr" className="font-semibold">
-                    {order.phone}
-                  </span>{" "}
-                  خلال ساعات لتأكيد العنوان — خطوة صغيرة قبل ما يطلع طلبك للتوصيل.
-                </>
-              ) : (
-                <>
-                  إذا أكملتِ الطلب للتو، سيتصل بك فريقنا قريباً. يمكنك العودة للمنتجات أو التواصل
-                  معنا على واتساب.
-                </>
-              )}
-            </p>
-
-            {order && (
-              <div className="mt-8 rounded-2xl border border-velora-burgundy/10 bg-white p-5 text-right text-sm shadow-sm">
-                {order.orderId && (
-                  <p className="text-[11px] font-bold tracking-wide text-velora-burgundy/45">
-                    رقم الطلب · {order.orderId.slice(0, 8).toUpperCase()}
-                  </p>
-                )}
-                <p className="mt-1 font-bold text-velora-burgundy">{order.productName}</p>
-                <p className="mt-2 text-velora-burgundy/70">
-                  {order.emirate} — {order.address}
-                </p>
-                <p className="mt-3 flex flex-wrap justify-between gap-2 border-t border-velora-burgundy/10 pt-3">
-                  <span>{methodLabel}</span>
-                  <span className="text-lg font-black text-velora-burgundy">
-                    {formatPrice(order.totalAed)}
-                  </span>
-                </p>
-                <p className="mt-3 text-xs leading-relaxed text-velora-burgundy/55">
-                  {orderStatus === "paid"
-                    ? "تم استلام الدفع عبر Stripe — شحن مجاني. فريقنا يجهّز طلبك."
-                    : "بعد التأكيد بالهاتف، نرسل لك رابط دفع آمن — شحن مجاني."}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              {order?.productSlug && order.productSlug !== "velora-offer" && (
-                <Link
-                  href={getProductPath(order.productSlug)}
-                  className="rounded-full bg-velora-burgundy px-6 py-3 text-sm font-bold text-velora-cream"
-                  onClick={() => clearOrderDraft()}
-                >
-                  العودة للمنتج
-                </Link>
-              )}
-              <Link
-                href="/"
-                className="rounded-full border border-velora-burgundy/20 bg-white px-6 py-3 text-sm font-bold text-velora-burgundy"
-                onClick={() => clearOrderDraft()}
-              >
-                الصفحة الرئيسية
-              </Link>
-            </div>
-          </div>
+          <CodThankYouSuccess order={order} onNavigateAway={() => clearOrderDraft()} />
         )}
       </main>
       <FooterSection />

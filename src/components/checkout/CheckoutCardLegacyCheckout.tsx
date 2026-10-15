@@ -146,7 +146,7 @@ export function CheckoutCardLegacyCheckout({
         address: order.address,
         createdAt: order.createdAt,
       });
-      router.push(`/order/thank-you?id=${encodeURIComponent(order.id)}`);
+      router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
     } catch {
       setError("تعذّر الاتصال. حاولي مجدداً.");
     } finally {

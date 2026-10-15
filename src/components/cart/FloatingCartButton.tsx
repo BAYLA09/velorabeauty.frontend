@@ -9,7 +9,10 @@ export function FloatingCartButton() {
   const pathname = usePathname();
   const { openCart, eligibleUnits, open } = useCart();
 
-  if (pathname.startsWith("/checkout") || pathname.startsWith("/order/thank-you")) {
+  if (
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/order/thank-you")
+  ) {
     return null;
   }
 

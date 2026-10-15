@@ -98,7 +98,7 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${base}/order/thank-you?id=${encodeURIComponent(order.id)}&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${base}/checkout/success?id=${encodeURIComponent(order.id)}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/checkout/card?${cancelQuery.toString()}`,
     });
 

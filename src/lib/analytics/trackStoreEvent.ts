@@ -2,6 +2,7 @@
 
 export type StoreAnalyticsEvent =
   | { event: "cod_thank_you_page_view" }
+  | { event: "card_thank_you_page_view" }
   | { event: "order_summary_view" }
   | { event: "confirmation_click" }
   | { event: "whatsapp_click"; placement: "confirm" | "support" }
