@@ -1,11 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  STRIPE_CHECKOUT_BILLING_COUNTRY,
+  STRIPE_CHECKOUT_BILLING_POSTAL_CODE,
+} from "./stripePaymentElementConfig.ts";
+import {
   STRIPE_BILLING_POSTAL_CODE_FALLBACK,
   buildConfirmPaymentBillingDetails,
 } from "./stripeBillingDetails.ts";
 
 describe("buildConfirmPaymentBillingDetails", () => {
+  it("uses the same postal fallback as the Payment Element config", () => {
+    assert.equal(STRIPE_BILLING_POSTAL_CODE_FALLBACK, STRIPE_CHECKOUT_BILLING_POSTAL_CODE);
+    assert.equal(STRIPE_CHECKOUT_BILLING_COUNTRY, "AE");
+  });
+
   it("passes the full checkout address, including postal_code", () => {
     const details = buildConfirmPaymentBillingDetails({
       name: "  نورة العتيبي  ",

@@ -20,6 +20,7 @@ import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { readCheckoutApiJson } from "@/lib/checkout/readCheckoutApiJson";
 import { formatCheckoutPayError } from "@/lib/checkout/formatCheckoutPayError";
+import { STRIPE_CHECKOUT_BILLING_COUNTRY } from "@/lib/checkout/stripePaymentElementConfig";
 import { submitAndConfirmStripePayment } from "@/lib/checkout/submitAndConfirmStripePayment";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
@@ -234,7 +235,7 @@ export function CheckoutCardVanillaCheckout({
           addressLine2: buildingPart || undefined,
           addressCity: emirate,
           addressState: emirate,
-          addressCountry: "AE",
+          addressCountry: STRIPE_CHECKOUT_BILLING_COUNTRY,
         },
       });
       if (!payment.ok) {

@@ -4,6 +4,7 @@ import { PaymentElement } from "@stripe/react-stripe-js";
 import { useCheckoutStripe } from "@/components/checkout/CheckoutStripeElementsProvider";
 import { PaymentBrandStrip } from "@/components/checkout/PaymentBrandStrip";
 import { checkoutPaymentCopy } from "@/config/checkoutTrust";
+import { stripePaymentElementCreateOptions } from "@/lib/checkout/stripePaymentElementConfig";
 
 function IconLockSmall({ className }: { className?: string }) {
   return (
@@ -13,22 +14,8 @@ function IconLockSmall({ className }: { className?: string }) {
   );
 }
 
-/** Stripe Payment Element — card only, Link off (faster iframe). */
-export const stripePaymentElementOptions = {
-  layout: "accordion" as const,
-  paymentMethodOrder: ["card"],
-  wallets: {
-    applePay: "never" as const,
-    googlePay: "never" as const,
-    link: "never" as const,
-  },
-  fields: {
-    // Collected on the delivery form instead. confirmPayment must still pass
-    // billing_details.address.postal_code — see buildConfirmPaymentBillingDetails.
-    billingDetails: { address: "never" as const, email: "never" as const },
-  },
-  terms: { card: "never" as const },
-};
+/** Stripe Payment Element — card only; billing collected on delivery form + confirmPayment. */
+export const stripePaymentElementOptions = stripePaymentElementCreateOptions;
 
 export function CheckoutStripePaymentElement() {
   const { setPaymentReady, elementsLoading } = useCheckoutStripe();
