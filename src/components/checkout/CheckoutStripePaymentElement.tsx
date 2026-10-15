@@ -23,6 +23,8 @@ export const stripePaymentElementOptions = {
     link: "never" as const,
   },
   fields: {
+    // Collected on the delivery form instead. confirmPayment must still pass
+    // billing_details.address.postal_code — see buildConfirmPaymentBillingDetails.
     billingDetails: { address: "never" as const, email: "never" as const },
   },
   terms: { card: "never" as const },

@@ -230,8 +230,10 @@ export function CheckoutCardVanillaCheckout({
           name: trimmedName,
           email: email.trim() || undefined,
           phone: phoneCheck.normalized,
-          addressLine1: fullAddress,
+          addressLine1: trimmedAddress,
+          addressLine2: buildingPart || undefined,
           addressCity: emirate,
+          addressState: emirate,
           addressCountry: "AE",
         },
       });

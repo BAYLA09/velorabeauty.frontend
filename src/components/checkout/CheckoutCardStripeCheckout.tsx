@@ -286,8 +286,10 @@ function StripeCardPaymentAndSubmit({
           name: trimmedName,
           email: form.email.trim() || undefined,
           phone: phoneCheck.normalized,
-          addressLine1: fullAddress,
+          addressLine1: trimmedAddress,
+          addressLine2: buildingPart || undefined,
           addressCity: form.emirate,
+          addressState: form.emirate,
           addressCountry: "AE",
         },
       });
