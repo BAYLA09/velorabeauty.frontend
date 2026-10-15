@@ -238,6 +238,22 @@ export function listOrdersPendingCodSheetExport(limit = 50): OrderRecord[] {
   return rows.map(rowToRecord);
 }
 
+/** Paid card orders not yet exported to the card Google Sheet tab. */
+export function listOrdersPendingCardSheetExport(limit = 50): OrderRecord[] {
+  const capped = Math.min(Math.max(1, limit), 200);
+  const rows = getDb()
+    .prepare(
+      `SELECT * FROM orders
+       WHERE payment_method = 'card'
+         AND status = 'paid'
+         AND (sheet_card_exported_at IS NULL OR TRIM(sheet_card_exported_at) = '')
+       ORDER BY created_at DESC
+       LIMIT ?`,
+    )
+    .all(capped) as OrderRow[];
+  return rows.map(rowToRecord);
+}
+
 export function setOrderStripeSession(orderId: string, sessionId: string): void {
   getDb()
     .prepare(

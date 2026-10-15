@@ -8,6 +8,7 @@ export type GoogleSheetsDirectConfig = {
   enabled: boolean;
   spreadsheetId: string | null;
   sheetGid: number;
+  cardSheetGid: number | null;
   clientEmail: string | null;
   reason?: string;
 };
@@ -54,11 +55,19 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
     10,
   );
 
+  const cardGidRaw =
+    process.env.ORDERS_SHEETS_CARD_SHEET_GID?.trim() ||
+    process.env.CARD_SHEET_GID?.trim() ||
+    "";
+  const cardSheetGidParsed = cardGidRaw ? Number.parseInt(cardGidRaw, 10) : NaN;
+  const cardSheetGid = Number.isFinite(cardSheetGidParsed) ? cardSheetGidParsed : null;
+
   if (!rawJson) {
     return {
       enabled: false,
       spreadsheetId: null,
       sheetGid,
+      cardSheetGid,
       clientEmail: null,
       reason: "missing_service_account_json",
     };
@@ -70,6 +79,7 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
       enabled: false,
       spreadsheetId: null,
       sheetGid,
+      cardSheetGid,
       clientEmail: null,
       reason: "invalid_service_account_json",
     };
@@ -80,6 +90,7 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
       enabled: false,
       spreadsheetId: spreadsheetIdRaw,
       sheetGid,
+      cardSheetGid,
       clientEmail: sa.client_email ?? null,
       reason: "invalid_spreadsheet_id",
     };
@@ -89,6 +100,7 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
     enabled: true,
     spreadsheetId: spreadsheetIdRaw,
     sheetGid: Number.isFinite(sheetGid) ? sheetGid : VELORA_COD_SHEET_GID,
+    cardSheetGid,
     clientEmail: sa.client_email ?? null,
   };
 }
@@ -146,15 +158,23 @@ async function resolveSheetTitle(
   return title;
 }
 
-/** Append COD rows via Google Sheets API (no Apps Script). */
+/** Append COD/card rows via Google Sheets API (no Apps Script). */
 export async function appendCodRowsViaGoogleSheetsApi(
   config: GoogleSheetsDirectConfig,
   rows: (string | number)[][],
+  channel: "cod" | "card" = "cod",
 ): Promise<boolean> {
   if (!config.enabled || !config.spreadsheetId || rows.length === 0) return false;
 
+  const gid =
+    channel === "card" && config.cardSheetGid != null ? config.cardSheetGid : config.sheetGid;
+  if (channel === "card" && config.cardSheetGid == null) {
+    console.error("[orders-sheets] card export requires ORDERS_SHEETS_CARD_SHEET_GID");
+    return false;
+  }
+
   const token = await getAccessToken();
-  const title = await resolveSheetTitle(config.spreadsheetId, config.sheetGid, token);
+  const title = await resolveSheetTitle(config.spreadsheetId, gid, token);
   const range = `'${title.replace(/'/g, "''")}'!A:Q`;
 
   const res = await fetch(

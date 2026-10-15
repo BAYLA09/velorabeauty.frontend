@@ -1,16 +1,18 @@
 /**
- * Velora COD orders → Google Sheet (VeloraOrdersWebhook.gs)
+ * Velora orders → Google Sheet (COD + paid card)
  *
- * Bind this project to your spreadsheet OR set Script properties:
- *   WEBHOOK_SECRET     — same as Easypanel ORDERS_SHEETS_WEBHOOK_SECRET
- *   SPREADSHEET_ID     — optional (default: active spreadsheet)
- *   SHEET_GID          — optional tab gid from URL (#gid=469291840)
+ * Script properties:
+ *   WEBHOOK_SECRET   — same as Easypanel ORDERS_SHEETS_WEBHOOK_SECRET
+ *   SPREADSHEET_ID   — optional (default: bound spreadsheet)
+ *   SHEET_GID        — COD tab (#gid=…)
+ *   CARD_SHEET_GID   — paid card tab (#gid=…)
  *
  * Deploy → Web app → Execute as: Me → Who has access: Anyone
- * Easypanel → ORDERS_SHEETS_COD_WEBHOOK_URL = deployment URL (/exec)
+ * Easypanel:
+ *   ORDERS_SHEETS_COD_WEBHOOK_URL  = /exec URL
+ *   ORDERS_SHEETS_CARD_WEBHOOK_URL = same /exec URL (optional; routes by channel)
  */
 
-/** Default tab for Velora COD (override with Script property SHEET_GID). */
 var DEFAULT_SHEET_GID = 469291840;
 
 var COD_HEADER = [
@@ -33,7 +35,7 @@ var COD_HEADER = [
   "utm_term",
 ];
 
-var NOTES_COL = 12; // 1-based column index for "notes" (orderId=…)
+var NOTES_COL = 12;
 
 function jsonResponse_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
@@ -41,25 +43,36 @@ function jsonResponse_(obj) {
   );
 }
 
-function getTargetSheet_() {
+function openSpreadsheet_() {
   var props = PropertiesService.getScriptProperties();
   var spreadsheetId = props.getProperty("SPREADSHEET_ID");
-  var gidProp = props.getProperty("SHEET_GID");
   var ss = spreadsheetId
     ? SpreadsheetApp.openById(spreadsheetId)
     : SpreadsheetApp.getActiveSpreadsheet();
   if (!ss) throw new Error("Spreadsheet not found");
+  return ss;
+}
 
-  var gid = gidProp !== null && gidProp !== "" ? gidProp : String(DEFAULT_SHEET_GID);
-  if (gid) {
-    var targetGid = Number(gid);
-    var sheets = ss.getSheets();
-    for (var i = 0; i < sheets.length; i++) {
-      if (sheets[i].getSheetId() === targetGid) return sheets[i];
-    }
-    throw new Error("Sheet gid not found: " + gid);
+function getSheetByGid_(gidString) {
+  var ss = openSpreadsheet_();
+  var targetGid = Number(gidString);
+  var sheets = ss.getSheets();
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].getSheetId() === targetGid) return sheets[i];
   }
-  return ss.getSheets()[0];
+  throw new Error("Sheet gid not found: " + gidString);
+}
+
+function getTargetSheet_(channel) {
+  var props = PropertiesService.getScriptProperties();
+  if (channel === "card") {
+    var cardGid = props.getProperty("CARD_SHEET_GID");
+    if (cardGid) return getSheetByGid_(cardGid);
+    throw new Error("CARD_SHEET_GID not configured");
+  }
+  var gidProp = props.getProperty("SHEET_GID");
+  var gid = gidProp !== null && gidProp !== "" ? gidProp : String(DEFAULT_SHEET_GID);
+  return getSheetByGid_(gid);
 }
 
 function orderAlreadyExported_(sheet, orderId) {
@@ -91,7 +104,7 @@ function appendCodOrder_(sheet, orderId, rows) {
 }
 
 function doGet() {
-  return jsonResponse_({ ok: true, service: "velora-cod-orders-webhook" });
+  return jsonResponse_({ ok: true, service: "velora-orders-webhook" });
 }
 
 function doPost(e) {
@@ -107,16 +120,17 @@ function doPost(e) {
       return jsonResponse_({ ok: false, error: "unauthorized" });
     }
 
-    var sheet = getTargetSheet_();
+    var channel = body.channel === "card" ? "card" : "cod";
 
-    if (body.channel === "cod" && body.rows && body.orderId) {
+    if ((channel === "cod" || channel === "card") && body.rows && body.orderId) {
+      var sheet = getTargetSheet_(channel);
       return jsonResponse_(appendCodOrder_(sheet, String(body.orderId), body.rows));
     }
 
-    // Legacy single-row payload (e.g. card sheet)
     var values = body.values;
     if (values && Array.isArray(values)) {
-      sheet.appendRow(values);
+      var legacySheet = getTargetSheet_(channel);
+      legacySheet.appendRow(values);
       return jsonResponse_({ ok: true });
     }
 
