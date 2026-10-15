@@ -276,9 +276,51 @@ export function getOrderByStripeSessionId(sessionId: string): OrderRecord | null
 export function setOrderStripePaymentIntent(orderId: string, paymentIntentId: string): void {
   getDb()
     .prepare(
+      `UPDATE orders SET stripe_payment_intent_id = NULL
+       WHERE stripe_payment_intent_id = ? AND id != ?`,
+    )
+    .run(paymentIntentId, orderId);
+  getDb()
+    .prepare(
       `UPDATE orders SET stripe_payment_intent_id = ?, status = 'awaiting_payment' WHERE id = ?`,
     )
     .run(paymentIntentId, orderId);
+}
+
+export function updateOrderCardCustomerDetails(
+  orderId: string,
+  input: {
+    customerName: string;
+    phone: string;
+    emirate: string;
+    address: string;
+    customerEmail?: string;
+    marketingConsent?: boolean;
+  },
+): OrderRecord | null {
+  const existing = getOrderById(orderId);
+  if (!existing || existing.paymentMethod !== "card") return null;
+  getDb()
+    .prepare(
+      `UPDATE orders SET
+        customer_name = ?,
+        phone = ?,
+        emirate = ?,
+        address = ?,
+        customer_email = ?,
+        marketing_consent = ?
+       WHERE id = ?`,
+    )
+    .run(
+      input.customerName.trim(),
+      input.phone.trim(),
+      input.emirate.trim(),
+      input.address.trim(),
+      input.customerEmail?.trim() || null,
+      input.marketingConsent === true ? 1 : 0,
+      orderId,
+    );
+  return getOrderById(orderId);
 }
 
 export function getOrderByStripePaymentIntentId(paymentIntentId: string): OrderRecord | null {

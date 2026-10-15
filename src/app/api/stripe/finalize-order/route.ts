@@ -11,7 +11,10 @@ import { kickBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
 import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import {
   createOrder,
+  getOrderById,
+  getOrderByStripePaymentIntentId,
   setOrderStripePaymentIntent,
+  updateOrderCardCustomerDetails,
 } from "@/lib/ordersRepository";
 import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { getStripe, isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
@@ -86,26 +89,54 @@ export async function POST(request: Request) {
         ? emirate
         : (checkoutEmirates[0] ?? "دبي");
 
-    const order = createOrder({
-      productSlug,
-      productName,
-      quantity,
-      eligibleUnits,
-      cartLines: syncLines ?? undefined,
-      paymentMethod: "card",
-      customerName,
-      phone: resolvedPhone,
-      emirate: resolvedEmirate,
-      address,
-      customerEmail: email || undefined,
-      marketingConsent,
-      id: isStorefrontOrderId(externalCheckoutId) ? externalCheckoutId : undefined,
-      backendExternalCheckoutId: isStorefrontOrderId(externalCheckoutId)
-        ? externalCheckoutId
-        : undefined,
-    });
+    const stripe = getStripe();
+    let order =
+      getOrderByStripePaymentIntentId(paymentIntentId) ??
+      (isStorefrontOrderId(externalCheckoutId)
+        ? getOrderById(externalCheckoutId)
+        : null);
 
-    setOrderStripePaymentIntent(order.id, paymentIntentId);
+    if (order?.status === "paid") {
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      return NextResponse.json({
+        orderId: order.id,
+        order,
+        paymentIntentStatus: paymentIntent.status,
+      });
+    }
+
+    if (order && order.paymentMethod === "card") {
+      const updated = updateOrderCardCustomerDetails(order.id, {
+        customerName,
+        phone: resolvedPhone,
+        emirate: resolvedEmirate,
+        address,
+        customerEmail: email || undefined,
+        marketingConsent,
+      });
+      order = updated ?? order;
+      setOrderStripePaymentIntent(order.id, paymentIntentId);
+    } else {
+      order = createOrder({
+        productSlug,
+        productName,
+        quantity,
+        eligibleUnits,
+        cartLines: syncLines ?? undefined,
+        paymentMethod: "card",
+        customerName,
+        phone: resolvedPhone,
+        emirate: resolvedEmirate,
+        address,
+        customerEmail: email || undefined,
+        marketingConsent,
+        id: isStorefrontOrderId(externalCheckoutId) ? externalCheckoutId : undefined,
+        backendExternalCheckoutId: isStorefrontOrderId(externalCheckoutId)
+          ? externalCheckoutId
+          : undefined,
+      });
+      setOrderStripePaymentIntent(order.id, paymentIntentId);
+    }
 
     const metadata: Record<string, string> = {
       orderId: order.id,
@@ -116,7 +147,7 @@ export async function POST(request: Request) {
     };
     if (email) metadata.email = email;
 
-    await getStripe().paymentIntents.update(paymentIntentId, {
+    const paymentIntent = await stripe.paymentIntents.update(paymentIntentId, {
       metadata,
       ...(email ? { receipt_email: email } : {}),
     });
@@ -146,7 +177,11 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ orderId: order.id, order });
+    return NextResponse.json({
+      orderId: order.id,
+      order,
+      paymentIntentStatus: paymentIntent.status,
+    });
   } catch (err) {
     console.error("[api/stripe/finalize-order]", err);
     return NextResponse.json({ error: "تعذّر حفظ الطلب قبل الدفع." }, { status: 500 });

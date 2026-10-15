@@ -1,4 +1,5 @@
 import type { Stripe, StripeElements } from "@stripe/stripe-js";
+import { formatCheckoutPayError } from "@/lib/checkout/formatCheckoutPayError";
 
 export type StripeBillingDetails = {
   name: string;
@@ -11,43 +12,40 @@ export async function submitAndConfirmStripePayment(
   stripe: Stripe,
   elements: StripeElements,
   input: {
-    clientSecret?: string;
     returnUrl: string;
     billingDetails: StripeBillingDetails;
   },
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const submitResult = await elements.submit();
-  if (submitResult.error) {
-    return {
-      ok: false,
-      message: submitResult.error.message ?? "تعذّر التحقق من بيانات البطاقة.",
-    };
+  try {
+    const submitResult = await elements.submit();
+    if (submitResult.error) {
+      return {
+        ok: false,
+        message: submitResult.error.message ?? "تعذّر التحقق من بيانات البطاقة.",
+      };
+    }
+
+    const confirmResult = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: input.returnUrl,
+        payment_method_data: {
+          billing_details: input.billingDetails,
+        },
+      },
+      redirect: "if_required",
+    });
+
+    if (confirmResult.error) {
+      return {
+        ok: false,
+        message: confirmResult.error.message ?? "تعذّر إتمام الدفع.",
+      };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[submitAndConfirmStripePayment]", err);
+    return { ok: false, message: formatCheckoutPayError(err) };
   }
-
-  const confirmParams = {
-    return_url: input.returnUrl,
-    payment_method_data: {
-      billing_details: input.billingDetails,
-    },
-  };
-
-  const confirmResult = input.clientSecret
-    ? await stripe.confirmPayment({
-        elements,
-        clientSecret: input.clientSecret,
-        confirmParams,
-      })
-    : await stripe.confirmPayment({
-        elements,
-        confirmParams,
-      });
-
-  if (confirmResult.error) {
-    return {
-      ok: false,
-      message: confirmResult.error.message ?? "تعذّر إتمام الدفع.",
-    };
-  }
-
-  return { ok: true };
 }

@@ -19,6 +19,7 @@ import { IconCard, IconTruck } from "@/components/product/ProductFunnelIcons";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { readCheckoutApiJson } from "@/lib/checkout/readCheckoutApiJson";
+import { formatCheckoutPayError } from "@/lib/checkout/formatCheckoutPayError";
 import { submitAndConfirmStripePayment } from "@/lib/checkout/submitAndConfirmStripePayment";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
@@ -184,6 +185,7 @@ export function CheckoutCardVanillaCheckout({
       const parsed = await readCheckoutApiJson<{
         orderId?: string;
         order?: OrderRecord;
+        paymentIntentStatus?: string;
         error?: string;
       }>(finalizeRes);
       if (!parsed.ok) {
@@ -197,6 +199,12 @@ export function CheckoutCardVanillaCheckout({
       }
 
       const order = finalizeData.order;
+      if (finalizeData.paymentIntentStatus === "succeeded") {
+        clearStoredCheckoutExternalId();
+        router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
+        return;
+      }
+
       clearStoredCheckoutExternalId();
       saveOrderDraft({
         orderId: order.id,
@@ -217,7 +225,6 @@ export function CheckoutCardVanillaCheckout({
         typeof window !== "undefined" ? window.location.origin : "https://www.velorabeauty.world";
       const returnUrl = `${origin}/checkout/success?id=${encodeURIComponent(order.id)}`;
       const payment = await submitAndConfirmStripePayment(stripe, elements, {
-        clientSecret: stripeBootstrap.clientSecret,
         returnUrl,
         billingDetails: {
           name: trimmedName,
@@ -233,12 +240,7 @@ export function CheckoutCardVanillaCheckout({
       router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
     } catch (err) {
       console.error("[checkout-card-vanilla-pay]", err);
-      const detail = err instanceof Error ? err.message : "";
-      setError(
-        detail && detail.length > 0 && detail.length < 180
-          ? detail
-          : "تعذّر إتمام الدفع. تحققي من الاتصال أو أعيدي تحميل الصفحة وحاولي مجدداً.",
-      );
+      setError(formatCheckoutPayError(err));
     } finally {
       setSubmitting(false);
     }

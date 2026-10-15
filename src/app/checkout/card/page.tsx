@@ -1,11 +1,9 @@
-import Script from "next/script";
 import { CheckoutCardConfirmClient } from "@/components/checkout/CheckoutCardConfirmClient";
 import { CheckoutStripePaymentShell } from "@/components/checkout/CheckoutStripePaymentShell";
 import { StripeEarlyInit } from "@/components/checkout/StripeEarlyInit";
 import { getCheckoutProductImage } from "@/lib/checkoutProductMeta";
 import { resolveCheckoutContext } from "@/lib/resolveCheckoutContext";
 import { bootstrapStripeCardCheckout } from "@/lib/stripeCardBootstrap";
-import { buildStripeVanillaMountScript } from "@/lib/stripeVanillaMountScript";
 import { getStripePublishableKey, isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
 
 type PageProps = {
@@ -36,15 +34,6 @@ export default async function CardCheckoutPage({ searchParams }: PageProps) {
   return (
     <>
       <StripeEarlyInit publishableKey={publishableKey} bootstrap={stripeBootstrap} />
-      {stripeBootstrap ? (
-        <Script
-          id="velora-stripe-vanilla-mount"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: buildStripeVanillaMountScript(stripeBootstrap),
-          }}
-        />
-      ) : null}
       <CheckoutCardConfirmClient
         productSlug={ctx.productSlug}
         productName={ctx.productName}
