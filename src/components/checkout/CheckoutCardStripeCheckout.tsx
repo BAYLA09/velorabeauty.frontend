@@ -286,6 +286,9 @@ function StripeCardPaymentAndSubmit({
           name: trimmedName,
           email: form.email.trim() || undefined,
           phone: phoneCheck.normalized,
+          addressLine1: fullAddress,
+          addressCity: form.emirate,
+          addressCountry: "AE",
         },
       });
       if (!payment.ok) {
