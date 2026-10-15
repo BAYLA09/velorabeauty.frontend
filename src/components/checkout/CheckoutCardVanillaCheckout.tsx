@@ -94,7 +94,13 @@ export function CheckoutCardVanillaCheckout({
 }: Props) {
   const router = useRouter();
   const paymentReady = useVanillaStripeReady();
-  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
+  const total = resolveCheckoutTotalAed(
+    quantity,
+    "card",
+    eligibleUnits,
+    cartLines,
+    productSlug,
+  );
 
   useStripeCheckoutPrefetch({
     productSlug,
@@ -156,6 +162,7 @@ export function CheckoutCardVanillaCheckout({
 
     setSubmitting(true);
     try {
+      syncNow();
       const finalizeRes = await fetch("/api/stripe/finalize-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -225,11 +232,12 @@ export function CheckoutCardVanillaCheckout({
 
       router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
     } catch (err) {
+      console.error("[checkout-card-vanilla-pay]", err);
       const detail = err instanceof Error ? err.message : "";
       setError(
-        detail && detail.length < 180
+        detail && detail.length > 0 && detail.length < 180
           ? detail
-          : "تعذّر الاتصال. حاولي مجدداً.",
+          : "تعذّر إتمام الدفع. تحققي من الاتصال أو أعيدي تحميل الصفحة وحاولي مجدداً.",
       );
     } finally {
       setSubmitting(false);

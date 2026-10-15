@@ -5,8 +5,9 @@ import type { CartLine } from "@/lib/cart/cartTypes";
 import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import {
   checkoutLinesForSync,
-  enqueueStorefrontCheckoutAndFlush,
+  enqueueStorefrontCheckout,
 } from "@/lib/backendCheckout/capture";
+import { kickBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
 import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import {
   createOrder,
@@ -127,23 +128,28 @@ export async function POST(request: Request) {
     });
 
     if (email) {
-      await enqueueStorefrontCheckoutAndFlush({
-        email,
-        marketingConsent,
-        customerName,
-        phone,
-        emirate: resolvedEmirate,
-        paymentMethod: "card",
-        externalCheckoutId: order.backendExternalCheckoutId ?? order.id,
-        orderId: order.id,
-        stripePaymentIntentId: paymentIntentId,
-        lines: checkoutLinesForSync({
-          productSlug,
-          quantity,
-          cartLines: syncLines,
-        }),
-        phase: "order_open",
-      });
+      try {
+        enqueueStorefrontCheckout({
+          email,
+          marketingConsent,
+          customerName,
+          phone,
+          emirate: resolvedEmirate,
+          paymentMethod: "card",
+          externalCheckoutId: order.backendExternalCheckoutId ?? order.id,
+          orderId: order.id,
+          stripePaymentIntentId: paymentIntentId,
+          lines: checkoutLinesForSync({
+            productSlug,
+            quantity,
+            cartLines: syncLines,
+          }),
+          phase: "order_open",
+        });
+        kickBackendCheckoutWorker();
+      } catch (syncErr) {
+        console.error("[api/stripe/finalize-order] backend sync enqueue failed", syncErr);
+      }
     }
 
     return NextResponse.json({ orderId: order.id, order });

@@ -110,6 +110,7 @@ function CheckoutCardPaySection({
   form,
   cartLines,
   sendCartLines,
+  syncNow,
 }: {
   productSlug: string;
   productName: string;
@@ -118,9 +119,16 @@ function CheckoutCardPaySection({
   form: DeliveryFormState;
   cartLines: ReturnType<typeof parseCheckoutLines>;
   sendCartLines: boolean;
+  syncNow: () => void;
 }) {
   const { elementsLoading } = useCheckoutStripe();
-  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
+  const total = resolveCheckoutTotalAed(
+    quantity,
+    "card",
+    eligibleUnits,
+    cartLines,
+    productSlug,
+  );
 
   if (elementsLoading) {
     return (
@@ -139,6 +147,7 @@ function CheckoutCardPaySection({
       form={form}
       cartLines={cartLines}
       sendCartLines={sendCartLines}
+      syncNow={syncNow}
     />
   );
 }
@@ -151,6 +160,7 @@ function StripeCardPaymentAndSubmit({
   form,
   cartLines,
   sendCartLines,
+  syncNow,
 }: {
   productSlug: string;
   productName: string;
@@ -159,6 +169,7 @@ function StripeCardPaymentAndSubmit({
   form: DeliveryFormState;
   cartLines: ReturnType<typeof parseCheckoutLines>;
   sendCartLines: boolean;
+  syncNow: () => void;
 }) {
   const router = useRouter();
   const stripe = useStripe();
@@ -166,7 +177,13 @@ function StripeCardPaymentAndSubmit({
   const { paymentIntentId, paymentReady } = useCheckoutStripe();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
+  const total = resolveCheckoutTotalAed(
+    quantity,
+    "card",
+    eligibleUnits,
+    cartLines,
+    productSlug,
+  );
 
   async function handlePay() {
     setError(null);
@@ -196,6 +213,7 @@ function StripeCardPaymentAndSubmit({
 
     setSubmitting(true);
     try {
+      syncNow();
       const finalizeRes = await fetch("/api/stripe/finalize-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -264,11 +282,12 @@ function StripeCardPaymentAndSubmit({
 
       router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
     } catch (err) {
+      console.error("[checkout-card-pay]", err);
       const detail = err instanceof Error ? err.message : "";
       setError(
-        detail && detail.length < 180
+        detail && detail.length > 0 && detail.length < 180
           ? detail
-          : "تعذّر الاتصال. حاولي مجدداً.",
+          : "تعذّر إتمام الدفع. تحققي من الاتصال أو أعيدي تحميل الصفحة وحاولي مجدداً.",
       );
     } finally {
       setSubmitting(false);
@@ -406,6 +425,7 @@ export function CheckoutCardStripeCheckout({
                 form={formState}
                 cartLines={cartLines}
                 sendCartLines={sendCartLines}
+                syncNow={syncNow}
               />
             </CheckoutStripeElementsProvider>
           </div>
