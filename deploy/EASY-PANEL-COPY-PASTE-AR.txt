@@ -39,7 +39,7 @@
      STORE_API_KEY=...
      ORDERS_SHEETS_*=...
 
-     صفحة اختبار Stripe 20 د.إ (product 04):
+     اختبار Stripe ~1 USD (checkout فقط):
      STRIPE_TEST_CHECKOUT_ENABLED=true
      # STRIPE_TEST_CHECKOUT_TOKEN=secret-optional
 

@@ -3,10 +3,11 @@ import type { BundleQuantity } from "@/config/pricing";
 import { parseCartItemsParam } from "@/lib/cart/cartSerialization";
 import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import {
-  isStripeTestCheckoutEnabled,
-  isStripeTestCheckoutTokenValid,
-  isStripeTestProductSlug,
-} from "@/config/stripeTestCheckout";
+  isStripeLiveTestCheckoutEnabled,
+  isStripeLiveTestCheckoutTokenValid,
+  isStripeLiveTestProductSlug,
+  STRIPE_LIVE_TEST_PRODUCT_NAME,
+} from "@/config/stripeLiveTestCheckout";
 import { getProductBySlug } from "@/lib/productCatalog";
 import { parseCheckoutQuantity } from "@/lib/checkoutRoutes";
 
@@ -49,15 +50,21 @@ export function resolveCheckoutContext(
     redirect("/#products");
   }
 
-  if (isStripeTestProductSlug(productSlug)) {
-    if (!isStripeTestCheckoutEnabled()) {
-      redirect("/#products");
+  if (isStripeLiveTestProductSlug(productSlug)) {
+    if (!isStripeLiveTestCheckoutEnabled()) {
+      redirect("/");
     }
     const tokenParam = searchParams.token;
     const token = typeof tokenParam === "string" ? tokenParam : null;
-    if (!isStripeTestCheckoutTokenValid(token)) {
-      redirect("/#products");
+    if (!isStripeLiveTestCheckoutTokenValid(token)) {
+      redirect("/");
     }
+    return {
+      productSlug,
+      productName: STRIPE_LIVE_TEST_PRODUCT_NAME,
+      quantity: 1,
+      eligibleUnits: 1,
+    };
   }
 
   const catalog = getProductBySlug(productSlug);

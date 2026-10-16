@@ -1,13 +1,6 @@
 import { images } from "@/config/images";
 import { productPages } from "@/config/productPages";
 import { products, type Product, type ProductId } from "@/config/products";
-import {
-  isStripeTestCheckoutEnabled,
-  isStripeTestProductSlug,
-  STRIPE_TEST_PRICE_AED,
-  STRIPE_TEST_PRODUCT_NAME,
-  STRIPE_TEST_PRODUCT_SLUG,
-} from "@/config/stripeTestCheckout";
 
 export type ProductImageRef = {
   /** فارغ = مساحة محجوزة على PDP */
@@ -48,17 +41,6 @@ export function getAllProductsWithPages(): ProductWithPage[] {
 }
 
 export function getProductBySlug(slug: string): ProductWithPage | undefined {
-  if (isStripeTestCheckoutEnabled() && isStripeTestProductSlug(slug)) {
-    const hair = mapProduct(products.find((p) => p.id === "hair")!);
-    return {
-      ...hair,
-      slug: STRIPE_TEST_PRODUCT_SLUG,
-      name: STRIPE_TEST_PRODUCT_NAME,
-      price: STRIPE_TEST_PRICE_AED,
-      priceLabel: `${STRIPE_TEST_PRICE_AED} د.إ`,
-      description: "منتج 04 — الدفع الإلكتروني بالبطاقة (غير معروض في الرئيسية).",
-    };
-  }
   return getAllProductsWithPages().find((p) => p.slug === slug);
 }
 

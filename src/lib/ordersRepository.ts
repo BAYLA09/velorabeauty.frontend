@@ -11,9 +11,9 @@ import { parseStoredOrderAttribution } from "@/lib/attribution/orderAttribution"
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { getCheckoutTotalForCart, getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
 import {
-  isStripeTestCheckoutEnabled,
-  isStripeTestProductSlug,
-} from "@/config/stripeTestCheckout";
+  isStripeLiveTestCheckoutEnabled,
+  isStripeLiveTestProductSlug,
+} from "@/config/stripeLiveTestCheckout";
 import {
   resolveCheckoutMerchandiseAed,
   resolveCheckoutTotalAed,
@@ -159,8 +159,8 @@ function resolveCreateOrderAmounts(
   input: CreateOrderInput & { eligibleUnits?: number; cartLines?: CartLine[] },
 ): { subtotalAed: number; deliveryFeeAed: number; totalAed: number } {
   if (
-    isStripeTestCheckoutEnabled() &&
-    isStripeTestProductSlug(input.productSlug) &&
+    isStripeLiveTestCheckoutEnabled() &&
+    isStripeLiveTestProductSlug(input.productSlug) &&
     (!input.cartLines || input.cartLines.length === 0)
   ) {
     const totalAed = resolveCheckoutTotalAed(

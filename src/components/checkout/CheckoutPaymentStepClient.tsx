@@ -100,6 +100,7 @@ export function CheckoutPaymentStepClient({
     method,
     eligibleUnits,
     cartItemsParam ? cartLines : undefined,
+    productSlug,
   );
   useStripeCheckoutPrefetch({
     productSlug,

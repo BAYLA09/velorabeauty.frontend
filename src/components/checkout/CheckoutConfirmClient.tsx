@@ -86,6 +86,7 @@ export function CheckoutConfirmClient({
     paymentMethod,
     eligibleUnits,
     cartLines,
+    productSlug,
   );
   const isCod = paymentMethod === "cod";
 

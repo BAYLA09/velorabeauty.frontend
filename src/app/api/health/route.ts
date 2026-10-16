@@ -1,13 +1,12 @@
 import { readBackendCheckoutConfig } from "@/lib/backendCheckout/config";
 import { startBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
 import {
-  isStripeTestCheckoutEnabled,
-  STRIPE_TEST_PRICE_AED,
-  stripeTestCardCheckoutPath,
-  stripeTestCheckoutUrl,
-  stripeTestProductPagePath,
-  stripeTestProductPublicPath,
-} from "@/config/stripeTestCheckout";
+  isStripeLiveTestCheckoutEnabled,
+  STRIPE_LIVE_TEST_PRICE_AED,
+  STRIPE_LIVE_TEST_USD,
+  stripeLiveTestCheckoutUrl,
+  stripeLiveTestShortcutUrl,
+} from "@/config/stripeLiveTestCheckout";
 import { getSiteUrl } from "@/lib/siteUrl";
 import { readOrdersSheetsExportStatus } from "@/lib/ordersSheets/exportOrder";
 import {
@@ -92,14 +91,13 @@ export async function GET() {
       cardCheckoutEnabled: cardEnabled,
       embeddedPaymentElement: cardEnabled && Boolean(getStripePublishableKey()),
       webhookSecretConfigured: Boolean(process.env.STRIPE_WEBHOOK_SECRET?.trim()),
-      stripeTestCheckoutEnabled: isStripeTestCheckoutEnabled(),
-      stripeTestPriceAed: STRIPE_TEST_PRICE_AED,
-      stripeTestProductPagePublic: `${getSiteUrl()}${stripeTestProductPublicPath()}`,
-      stripeTestProductPageCanonical: `${getSiteUrl()}${stripeTestProductPagePath()}`,
-      ...(isStripeTestCheckoutEnabled()
+      stripeLiveTestCheckoutEnabled: isStripeLiveTestCheckoutEnabled(),
+      ...(isStripeLiveTestCheckoutEnabled()
         ? {
-            stripeTestCardCheckout: stripeTestCheckoutUrl(getSiteUrl()),
-            stripeTestCardCheckoutPath: stripeTestCardCheckoutPath(),
+            stripeLiveTestUsd: STRIPE_LIVE_TEST_USD,
+            stripeLiveTestPriceAed: STRIPE_LIVE_TEST_PRICE_AED,
+            stripeLiveTestShortcut: stripeLiveTestShortcutUrl(getSiteUrl()),
+            stripeLiveTestCardCheckout: stripeLiveTestCheckoutUrl(getSiteUrl()),
           }
         : {}),
     },
