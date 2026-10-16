@@ -1,6 +1,13 @@
 import { images } from "@/config/images";
 import { productPages } from "@/config/productPages";
 import { products, type Product, type ProductId } from "@/config/products";
+import {
+  isStripeTestCheckoutEnabled,
+  isStripeTestProductSlug,
+  STRIPE_TEST_PRICE_AED,
+  STRIPE_TEST_PRODUCT_NAME,
+  STRIPE_TEST_PRODUCT_SLUG,
+} from "@/config/stripeTestCheckout";
 
 export type ProductImageRef = {
   /** فارغ = مساحة محجوزة على PDP */
@@ -27,18 +34,32 @@ export type ProductWithPage = Product & {
   pageImage: ProductImageRef;
 };
 
-export function getAllProductsWithPages(): ProductWithPage[] {
-  return products.map((p) => ({
+function mapProduct(p: Product): ProductWithPage {
+  return {
     ...p,
     slug: productPages[p.id].slug,
     page: productPages[p.id],
     pageImage: images.productPage[p.id],
-  }));
+  };
+}
+
+export function getAllProductsWithPages(): ProductWithPage[] {
+  return products.map(mapProduct);
 }
 
 export function getProductBySlug(slug: string): ProductWithPage | undefined {
-  const entry = getAllProductsWithPages().find((p) => p.slug === slug);
-  return entry;
+  if (isStripeTestCheckoutEnabled() && isStripeTestProductSlug(slug)) {
+    const hair = mapProduct(products.find((p) => p.id === "hair")!);
+    return {
+      ...hair,
+      slug: STRIPE_TEST_PRODUCT_SLUG,
+      name: STRIPE_TEST_PRODUCT_NAME,
+      price: STRIPE_TEST_PRICE_AED,
+      priceLabel: `${STRIPE_TEST_PRICE_AED} د.إ`,
+      description: "منتج 04 — الدفع الإلكتروني بالبطاقة (غير معروض في الرئيسية).",
+    };
+  }
+  return getAllProductsWithPages().find((p) => p.slug === slug);
 }
 
 export function getProductPath(slug: string): string {
