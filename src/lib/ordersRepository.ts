@@ -10,6 +10,14 @@ import type { OrderAttribution } from "@/lib/attribution/orderAttribution";
 import { parseStoredOrderAttribution } from "@/lib/attribution/orderAttribution";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { getCheckoutTotalForCart, getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
+import {
+  isStripeLiveTestCheckoutEnabled,
+  isStripeLiveTestProductSlug,
+} from "@/config/stripeLiveTestCheckout";
+import {
+  resolveCheckoutMerchandiseAed,
+  resolveCheckoutTotalAed,
+} from "@/lib/checkoutTotals";
 import { getDb } from "@/lib/db";
 
 export type OrderRecord = {
@@ -147,13 +155,38 @@ export function computeOrderAmountsForCart(
   return { subtotalAed, deliveryFeeAed, totalAed };
 }
 
+function resolveCreateOrderAmounts(
+  input: CreateOrderInput & { eligibleUnits?: number; cartLines?: CartLine[] },
+): { subtotalAed: number; deliveryFeeAed: number; totalAed: number } {
+  if (
+    isStripeLiveTestCheckoutEnabled() &&
+    isStripeLiveTestProductSlug(input.productSlug) &&
+    (!input.cartLines || input.cartLines.length === 0)
+  ) {
+    const totalAed = resolveCheckoutTotalAed(
+      input.quantity,
+      input.paymentMethod,
+      input.eligibleUnits,
+      input.cartLines,
+      input.productSlug,
+    );
+    const subtotalAed = resolveCheckoutMerchandiseAed(
+      input.quantity,
+      input.eligibleUnits,
+      input.cartLines,
+      input.productSlug,
+    );
+    return { subtotalAed, deliveryFeeAed: totalAed - subtotalAed, totalAed };
+  }
+  return input.cartLines && input.cartLines.length > 0
+    ? computeOrderAmountsForCart(input.cartLines, input.paymentMethod)
+    : computeOrderAmountsForUnits(input.eligibleUnits ?? input.quantity, input.paymentMethod);
+}
+
 export function createOrder(
   input: CreateOrderInput & { eligibleUnits?: number; cartLines?: CartLine[] },
 ): OrderRecord {
-  const { subtotalAed, deliveryFeeAed, totalAed } =
-    input.cartLines && input.cartLines.length > 0
-      ? computeOrderAmountsForCart(input.cartLines, input.paymentMethod)
-      : computeOrderAmountsForUnits(input.eligibleUnits ?? input.quantity, input.paymentMethod);
+  const { subtotalAed, deliveryFeeAed, totalAed } = resolveCreateOrderAmounts(input);
 
   const requestedId = input.id?.trim() ?? "";
   const id =

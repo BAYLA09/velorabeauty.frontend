@@ -7,6 +7,17 @@ import {
 } from "@/config/pricing";
 import { getCheckoutTotalForCart, getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
+import {
+  isStripeLiveTestCheckoutEnabled,
+  isStripeLiveTestProductSlug,
+  STRIPE_LIVE_TEST_PRICE_AED,
+} from "@/config/stripeLiveTestCheckout";
+
+function liveTestLineSlug(cartLines?: CartLine[]): string | null {
+  if (!isStripeLiveTestCheckoutEnabled() || !cartLines?.length) return null;
+  const slug = cartLines[0]?.slug;
+  return slug && isStripeLiveTestProductSlug(slug) ? slug : null;
+}
 
 /** Order total: per-line bundles when `cartLines` set; else PDP single-SKU tiers. */
 export function resolveCheckoutTotalAed(
@@ -14,7 +25,19 @@ export function resolveCheckoutTotalAed(
   method: PaymentMethod,
   eligibleUnits?: number,
   cartLines?: CartLine[],
+  productSlug?: string,
 ): number {
+  if (
+    isStripeLiveTestCheckoutEnabled() &&
+    productSlug &&
+    isStripeLiveTestProductSlug(productSlug) &&
+    method === "card"
+  ) {
+    return STRIPE_LIVE_TEST_PRICE_AED;
+  }
+  if (liveTestLineSlug(cartLines) && method === "card") {
+    return STRIPE_LIVE_TEST_PRICE_AED;
+  }
   if (cartLines && cartLines.length > 0) {
     const fromCart = getCheckoutTotalForCart(cartLines, method);
     if (fromCart !== null) return fromCart;
@@ -26,7 +49,14 @@ export function resolveCheckoutMerchandiseAed(
   quantity: BundleQuantity,
   eligibleUnits?: number,
   cartLines?: CartLine[],
+  productSlug?: string,
 ): number {
+  if (isStripeLiveTestCheckoutEnabled() && productSlug && isStripeLiveTestProductSlug(productSlug)) {
+    return STRIPE_LIVE_TEST_PRICE_AED;
+  }
+  if (liveTestLineSlug(cartLines)) {
+    return STRIPE_LIVE_TEST_PRICE_AED;
+  }
   if (cartLines && cartLines.length > 0) {
     return getMerchandiseAedForCart(cartLines) ?? 0;
   }

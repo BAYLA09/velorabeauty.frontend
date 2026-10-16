@@ -1,5 +1,13 @@
 import { readBackendCheckoutConfig } from "@/lib/backendCheckout/config";
 import { startBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
+import {
+  isStripeLiveTestCheckoutEnabled,
+  STRIPE_LIVE_TEST_PRICE_AED,
+  STRIPE_LIVE_TEST_USD,
+  stripeLiveTestCheckoutUrl,
+  stripeLiveTestShortcutUrl,
+} from "@/config/stripeLiveTestCheckout";
+import { getSiteUrl } from "@/lib/siteUrl";
 import { readOrdersSheetsExportStatus } from "@/lib/ordersSheets/exportOrder";
 import {
   buildShaPrefix,
@@ -83,6 +91,15 @@ export async function GET() {
       cardCheckoutEnabled: cardEnabled,
       embeddedPaymentElement: cardEnabled && Boolean(getStripePublishableKey()),
       webhookSecretConfigured: Boolean(process.env.STRIPE_WEBHOOK_SECRET?.trim()),
+      stripeLiveTestCheckoutEnabled: isStripeLiveTestCheckoutEnabled(),
+      ...(isStripeLiveTestCheckoutEnabled()
+        ? {
+            stripeLiveTestUsd: STRIPE_LIVE_TEST_USD,
+            stripeLiveTestPriceAed: STRIPE_LIVE_TEST_PRICE_AED,
+            stripeLiveTestShortcut: stripeLiveTestShortcutUrl(getSiteUrl()),
+            stripeLiveTestCardCheckout: stripeLiveTestCheckoutUrl(getSiteUrl()),
+          }
+        : {}),
     },
     ordersSheets: {
       enabled: ordersSheets.enabled,

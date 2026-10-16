@@ -80,7 +80,13 @@ export function CheckoutCardLegacyCheckout({
     sendCartLines,
   });
   const [submitting, setSubmitting] = useState(false);
-  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
+  const total = resolveCheckoutTotalAed(
+    quantity,
+    "card",
+    eligibleUnits,
+    cartLines,
+    productSlug,
+  );
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
