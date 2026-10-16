@@ -1,4 +1,8 @@
-import { claimSnapPurchaseSend } from "@/lib/analytics/snapPurchaseDedupe";
+import {
+  hasSnapPurchaseBeenSent,
+  markSnapPurchaseSent,
+} from "@/lib/analytics/snapPurchaseDedupe";
+import { forwardStoreEventToSnap } from "@/lib/analytics/mapStoreEventToSnap";
 import { snapContentIdsFromOrder, snapItemCount } from "@/lib/analytics/snapContentIds";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
 import type { CartLine } from "@/lib/cart/cartTypes";
@@ -14,25 +18,34 @@ export function trackVerifiedPurchaseOnce(input: {
 }): void {
   const orderId = input.orderId.trim();
   if (!orderId || !Number.isFinite(input.valueAed) || input.valueAed <= 0) return;
-  if (!claimSnapPurchaseSend(orderId)) return;
+  if (hasSnapPurchaseBeenSent(orderId)) return;
 
   const content_ids = snapContentIdsFromOrder({
     productSlug: input.productSlug,
     cartLines: input.cartLines,
   });
+  if (content_ids.length === 0) return;
+
   const number_items = snapItemCount({
     quantity: input.quantity,
     cartLines: input.cartLines,
   });
 
-  trackStoreEvent({
-    event: "purchase",
+  const payload = {
+    event: "purchase" as const,
     order_id: orderId,
     order_ref: orderId.slice(0, 8).toUpperCase(),
     value_aed: input.valueAed,
-    currency: "AED",
+    currency: "AED" as const,
     payment_method: input.paymentMethod,
     content_ids,
     number_items,
-  });
+  };
+
+  trackStoreEvent(payload, { skipSnap: true });
+
+  const sentToSnap = forwardStoreEventToSnap(payload);
+  if (sentToSnap) {
+    markSnapPurchaseSent(orderId);
+  }
 }

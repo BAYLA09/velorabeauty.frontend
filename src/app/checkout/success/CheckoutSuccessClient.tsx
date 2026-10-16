@@ -19,6 +19,7 @@ export function CheckoutSuccessClient() {
   const sessionIdFromUrl = searchParams.get("session_id");
   const paymentIntentFromUrl = searchParams.get("payment_intent");
   const [order, setOrder] = useState<OrderDraft | null>(null);
+  const [purchaseVerified, setPurchaseVerified] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,13 +35,23 @@ export function CheckoutSuccessClient() {
       const draft = readOrderDraft();
 
       if (orderIdFromUrl) {
-        const { order: loaded, status } = await fetchOrderDraftById(orderIdFromUrl, draft);
-        if (!cancelled && loaded) {
+        const { order: loaded, status, verifiedFromApi } = await fetchOrderDraftById(
+          orderIdFromUrl,
+          draft,
+        );
+        if (!cancelled && loaded && verifiedFromApi) {
           if (loaded.method === "cod") {
             router.replace(`/order/thank-you?id=${encodeURIComponent(orderIdFromUrl)}`);
             return;
           }
+          setPurchaseVerified(true);
           setOrder({ ...loaded, status: status ?? loaded.status });
+          setLoading(false);
+          return;
+        }
+        if (!cancelled && orderIdFromUrl) {
+          setOrder(null);
+          setPurchaseVerified(false);
           setLoading(false);
           return;
         }
@@ -55,7 +66,10 @@ export function CheckoutSuccessClient() {
           );
           return;
         }
-        setOrder(draft);
+        if (draft) {
+          setOrder(draft);
+          setPurchaseVerified(false);
+        }
         setLoading(false);
       }
     }
@@ -81,7 +95,11 @@ export function CheckoutSuccessClient() {
             <p className="mt-8 text-center text-sm text-velora-burgundy/60">جاري تأكيد الدفع…</p>
           </div>
         ) : order ? (
-          <CardThankYouSuccess order={order} onNavigateAway={() => clearOrderDraft()} />
+          <CardThankYouSuccess
+            order={order}
+            purchaseVerified={purchaseVerified}
+            onNavigateAway={() => clearOrderDraft()}
+          />
         ) : (
           <div className="mx-auto max-w-md text-center">
             <p className="text-base text-velora-burgundy/75">

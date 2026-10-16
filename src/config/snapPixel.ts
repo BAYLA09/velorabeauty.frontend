@@ -1,7 +1,11 @@
-/** Public Snap Pixel ID (safe for browser). Override via Easypanel build env. */
-export const SNAP_PIXEL_ID =
-  process.env.NEXT_PUBLIC_SNAP_PIXEL_ID?.trim() ||
-  "fc3323cd-f493-4a59-899d-d533e282c701";
+/** Public Snap Pixel ID — set at build time via Easypanel: NEXT_PUBLIC_SNAP_PIXEL_ID */
+export function getSnapPixelId(): string | null {
+  const id = process.env.NEXT_PUBLIC_SNAP_PIXEL_ID?.trim();
+  return id || null;
+}
+
+/** @deprecated use getSnapPixelId() — empty string when unset (Snap disabled) */
+export const SNAP_PIXEL_ID = process.env.NEXT_PUBLIC_SNAP_PIXEL_ID?.trim() ?? "";
 
 export const SNAP_CURRENCY = "AED" as const;
 

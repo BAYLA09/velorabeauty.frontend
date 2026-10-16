@@ -25,10 +25,16 @@ export type CodThankYouOrder = OrderDraft & {
 
 type Props = {
   order: CodThankYouOrder;
+  /** True when order was loaded from /api/orders (not local draft only). */
+  purchaseVerified?: boolean;
   onNavigateAway?: () => void;
 };
 
-export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
+export function CodThankYouSuccess({
+  order,
+  purchaseVerified = false,
+  onNavigateAway,
+}: Props) {
   const orderRef = order.orderId?.slice(0, 8).toUpperCase() ?? "—";
   const createdAt = order.createdAt || new Date().toISOString();
   const deliveryFee = order.deliveryFeeAed ?? codFee;
@@ -51,7 +57,8 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!order.orderId?.trim()) return;
+    if (!purchaseVerified || !order.orderId?.trim()) return;
+    if (order.method && order.method !== "cod") return;
     trackVerifiedPurchaseOnce({
       orderId: order.orderId,
       valueAed: order.totalAed,
@@ -61,6 +68,8 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
       cartLines: order.cartLines,
     });
   }, [
+    purchaseVerified,
+    order.method,
     order.orderId,
     order.totalAed,
     order.productSlug,

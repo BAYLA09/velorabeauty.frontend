@@ -1,4 +1,4 @@
-import { SNAP_PIXEL_ID } from "@/config/snapPixel";
+import { getSnapPixelId } from "@/config/snapPixel";
 
 declare global {
   interface Window {
@@ -7,24 +7,25 @@ declare global {
 }
 
 export function isSnapPixelConfigured(): boolean {
-  return Boolean(SNAP_PIXEL_ID?.trim());
+  return Boolean(getSnapPixelId());
 }
 
-export function snapTrack(event: string, params?: Record<string, unknown>): void {
-  if (typeof window === "undefined" || !isSnapPixelConfigured()) return;
+/** Returns true if the call was passed to snaptr (or its queue). */
+export function snapTrack(event: string, params?: Record<string, unknown>): boolean {
+  if (typeof window === "undefined" || !isSnapPixelConfigured()) return false;
   try {
-    if (typeof window.snaptr === "function") {
-      if (params && Object.keys(params).length > 0) {
-        window.snaptr("track", event, params);
-      } else {
-        window.snaptr("track", event);
-      }
+    if (typeof window.snaptr !== "function") return false;
+    if (params && Object.keys(params).length > 0) {
+      window.snaptr("track", event, params);
+    } else {
+      window.snaptr("track", event);
     }
+    return true;
   } catch {
-    /* ignore */
+    return false;
   }
 }
 
-export function snapPageView(): void {
-  snapTrack("PAGE_VIEW");
+export function snapPageView(): boolean {
+  return snapTrack("PAGE_VIEW");
 }

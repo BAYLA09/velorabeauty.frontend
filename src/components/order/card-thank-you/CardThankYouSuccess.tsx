@@ -26,10 +26,16 @@ export type CardThankYouOrder = OrderDraft & {
 
 type Props = {
   order: CardThankYouOrder;
+  /** True when order was confirmed from /api/orders after payment. */
+  purchaseVerified?: boolean;
   onNavigateAway?: () => void;
 };
 
-export function CardThankYouSuccess({ order, onNavigateAway }: Props) {
+export function CardThankYouSuccess({
+  order,
+  purchaseVerified = false,
+  onNavigateAway,
+}: Props) {
   const orderRef = order.orderId?.slice(0, 8).toUpperCase() ?? "—";
   const createdAt = order.createdAt || new Date().toISOString();
   const deliveryFee = order.deliveryFeeAed ?? 0;
@@ -55,7 +61,8 @@ export function CardThankYouSuccess({ order, onNavigateAway }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!isPaid || !order.orderId?.trim()) return;
+    if (!purchaseVerified || !isPaid || !order.orderId?.trim()) return;
+    if (order.method && order.method !== "card") return;
     trackVerifiedPurchaseOnce({
       orderId: order.orderId,
       valueAed: order.totalAed,
@@ -65,7 +72,9 @@ export function CardThankYouSuccess({ order, onNavigateAway }: Props) {
       cartLines: order.cartLines,
     });
   }, [
+    purchaseVerified,
     isPaid,
+    order.method,
     order.orderId,
     order.totalAed,
     order.productSlug,

@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { SNAP_PIXEL_ID } from "@/config/snapPixel";
+import { getSnapPixelId } from "@/config/snapPixel";
 import { snapPageView } from "@/lib/analytics/snapTrack";
 
 function SnapPageViewOnNavigate() {
@@ -22,7 +22,7 @@ function SnapPageViewOnNavigate() {
 }
 
 export function SnapPixelRoot() {
-  const pixelId = SNAP_PIXEL_ID?.trim();
+  const pixelId = getSnapPixelId();
   if (!pixelId) return null;
 
   const safeId = JSON.stringify(pixelId);
@@ -38,7 +38,7 @@ snaptr('track','PAGE_VIEW');
 
   return (
     <>
-      <Script id="snap-pixel" strategy="afterInteractive">
+      <Script id="snap-pixel" strategy="beforeInteractive">
         {initSnippet}
       </Script>
       <SnapPageViewOnNavigate />

@@ -48,7 +48,15 @@ declare global {
   }
 }
 
-export function trackStoreEvent(payload: StoreAnalyticsEvent): void {
+export type TrackStoreEventOptions = {
+  /** When true, only dataLayer/gtag — caller sends Snap (e.g. PURCHASE dedupe). */
+  skipSnap?: boolean;
+};
+
+export function trackStoreEvent(
+  payload: StoreAnalyticsEvent,
+  options?: TrackStoreEventOptions,
+): void {
   if (typeof window === "undefined") return;
   const body = { ...payload, ts: Date.now() };
   try {
@@ -64,6 +72,7 @@ export function trackStoreEvent(payload: StoreAnalyticsEvent): void {
   } catch {
     /* ignore */
   }
+  if (options?.skipSnap) return;
   try {
     forwardStoreEventToSnap(payload);
   } catch {
