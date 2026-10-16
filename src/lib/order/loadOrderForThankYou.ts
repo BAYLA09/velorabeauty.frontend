@@ -63,7 +63,7 @@ export async function confirmStripePaymentIfNeeded(input: {
   sessionId: string | null;
   paymentIntentId: string | null;
 }): Promise<void> {
-  if (!input.orderId || (!input.sessionId && !input.paymentIntentId)) return;
+  if (!input.orderId) return;
   try {
     await fetch("/api/checkout/stripe/confirm", {
       method: "POST",

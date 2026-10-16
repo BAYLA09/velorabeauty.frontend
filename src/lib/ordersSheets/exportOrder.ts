@@ -6,7 +6,11 @@ import {
   buildCodSheetRows,
   type OrdersSheetChannel,
 } from "@/lib/ordersSheets/buildSheetRow";
-import { CARD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/cardSheetColumns";
+import {
+  CARD_ORDERS_SHEET_COLUMN_COUNT,
+  VELORA_CARD_SHEET_GID,
+  VELORA_CARD_SPREADSHEET_ID,
+} from "@/lib/ordersSheets/cardSheetColumns";
 import { COD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/codSheetColumns";
 import {
   appendCodRowsViaGoogleSheetsApi,
@@ -18,6 +22,7 @@ import {
   getOrderById,
   getOrderCartLines,
   markOrderSheetExported,
+  recordCardSheetExportAttempt,
   wasOrderSheetExported,
 } from "@/lib/ordersRepository";
 
@@ -94,6 +99,15 @@ type RowsWebhookPayload = {
   channel: OrdersSheetChannel;
   orderId: string;
   rows: (string | number)[][];
+  spreadsheetId?: string;
+  sheetGid?: string;
+};
+
+export type AppsScriptWebhookPostResult = {
+  ok: boolean;
+  status: number;
+  bodyPreview: string;
+  parsedError?: string;
 };
 
 type LegacyWebhookPayload = {
@@ -104,10 +118,19 @@ type LegacyWebhookPayload = {
 
 import { normalizeAppsScriptWebhookUrl } from "@/lib/ordersSheets/probeAppsScriptWebhook";
 
-async function postToAppsScriptWebhook(
+function parseWebhookError(text: string): string | undefined {
+  try {
+    const parsed = JSON.parse(text) as { error?: string };
+    return parsed.error?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function postToAppsScriptWebhook(
   url: string,
   payload: RowsWebhookPayload | LegacyWebhookPayload,
-): Promise<boolean> {
+): Promise<AppsScriptWebhookPostResult> {
   const target = normalizeAppsScriptWebhookUrl(url);
   const res = await fetch(target, {
     method: "POST",
@@ -131,14 +154,64 @@ async function postToAppsScriptWebhook(
     }
   }
   const ok = isAppsScriptWebhookSuccess(finalRes, text);
+  const parsedError = parseWebhookError(text);
   if (!ok) {
     console.error("[orders-sheets] webhook failed", {
       channel: payload.channel,
       status: finalRes.status,
-      preview: text.slice(0, 120),
+      error: parsedError,
+      preview: text.slice(0, 200),
     });
   }
-  return ok;
+  return {
+    ok,
+    status: finalRes.status,
+    bodyPreview: text.slice(0, 200),
+    parsedError,
+  };
+}
+
+export async function exportCardRowsViaAppsScriptWebhook(input: {
+  config: OrdersSheetsConfig;
+  orderId: string;
+  order: OrderRecord;
+  lines: CartLine[] | null;
+  attribution: ReturnType<typeof getOrderAttribution>;
+}): Promise<{ ok: boolean; lastError?: string; strategy?: string }> {
+  const url = webhookForChannel(input.config, "card");
+  if (!url || !input.config.webhookSecret) {
+    return { ok: false, lastError: "missing_card_webhook_url" };
+  }
+
+  const base = {
+    secret: input.config.webhookSecret,
+    channel: "card" as const,
+    orderId: input.orderId,
+    spreadsheetId: VELORA_CARD_SPREADSHEET_ID,
+    sheetGid: String(VELORA_CARD_SHEET_GID),
+  };
+
+  const attempts: { strategy: string; rows: (string | number)[][] }[] = [
+    {
+      strategy: "card-18-with-target",
+      rows: buildCardSheetRows(input.order, input.lines, input.attribution),
+    },
+    {
+      strategy: "cod-17-with-target",
+      rows: buildCodSheetRows(input.order, input.lines, input.attribution),
+    },
+  ];
+
+  let lastError = "no_rows";
+  for (const attempt of attempts) {
+    if (attempt.rows.length === 0) continue;
+    const result = await postToAppsScriptWebhook(url, { ...base, rows: attempt.rows });
+    if (result.ok) {
+      return { ok: true, strategy: attempt.strategy };
+    }
+    lastError = `${attempt.strategy}:${result.parsedError ?? result.bodyPreview}`;
+  }
+  return { ok: false, lastError };
 }
 
 /**
@@ -170,7 +243,13 @@ export async function exportOrderToGoogleSheets(input: {
 
   if (wasOrderSheetExported(input.order.id, input.channel)) return;
 
-  if (input.channel === "card" && input.order.status !== "paid") return;
+  if (input.channel === "card" && input.order.status !== "paid") {
+    console.warn("[orders-sheets] card export skipped (order not paid)", {
+      orderId: input.order.id,
+      status: input.order.status,
+    });
+    return;
+  }
   if (input.channel === "cod" && input.order.paymentMethod !== "cod") return;
 
   const lines = input.cartLines ?? getOrderCartLines(input.order.id);
@@ -195,16 +274,18 @@ export async function exportOrderToGoogleSheets(input: {
       } else if (webhookReady) {
         const url = webhookForChannel(config, "cod");
         if (!url) return;
-        ok = await postToAppsScriptWebhook(url, {
+        const codPost = await postToAppsScriptWebhook(url, {
           secret: config.webhookSecret!,
           channel: "cod",
           orderId: input.order.id,
           rows,
         });
+        ok = codPost.ok;
       } else {
         return;
       }
     } else {
+      recordCardSheetExportAttempt(input.order.id, null);
       const rows = buildCardSheetRows(input.order, lines, attribution);
       if (rows.length === 0) return;
       for (const row of rows) {
@@ -213,31 +294,40 @@ export async function exportOrderToGoogleSheets(input: {
             orderId: input.order.id,
             width: row.length,
           });
+          recordCardSheetExportAttempt(input.order.id, "invalid_card_row_width");
           return;
         }
       }
       if (direct.enabled) {
         ok = await appendCodRowsViaGoogleSheetsApi(direct, rows, "card");
+        if (!ok) recordCardSheetExportAttempt(input.order.id, "google_api_append_failed");
       } else if (webhookReady) {
-        const url = webhookForChannel(config, "card");
-        if (!url) return;
-        ok = await postToAppsScriptWebhook(url, {
-          secret: config.webhookSecret!,
-          channel: "card",
+        const cardResult = await exportCardRowsViaAppsScriptWebhook({
+          config,
           orderId: input.order.id,
-          rows,
+          order: input.order,
+          lines,
+          attribution,
         });
+        ok = cardResult.ok;
+        if (!ok) {
+          recordCardSheetExportAttempt(input.order.id, cardResult.lastError ?? "webhook_failed");
+        }
       } else {
         return;
       }
     }
     if (ok) markOrderSheetExported(input.order.id, input.channel);
   } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown";
     console.error("[orders-sheets] export error", {
       orderId: input.order.id,
       channel: input.channel,
-      error: err instanceof Error ? err.message : "unknown",
+      error: message,
     });
+    if (input.channel === "card") {
+      recordCardSheetExportAttempt(input.order.id, message);
+    }
   }
 }
 

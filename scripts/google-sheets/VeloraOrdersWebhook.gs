@@ -137,7 +137,27 @@ function appendCodOrder_(sheet, orderId, rows) {
 }
 
 function appendCardOrder_(sheet, orderId, rows) {
-  return appendOrderRows_(sheet, orderId, rows, CARD_HEADER.length);
+  if (!rows || !rows.length) {
+    return { ok: false, error: "empty rows" };
+  }
+  var width = rows[0].length;
+  if (width !== COD_HEADER.length && width !== CARD_HEADER.length) {
+    return {
+      ok: false,
+      error: "invalid row width",
+      expectedColumns: COD_HEADER.length + " or " + CARD_HEADER.length,
+    };
+  }
+  return appendOrderRows_(sheet, orderId, rows, width);
+}
+
+function resolveSheetForPost_(channel, body) {
+  if (body.spreadsheetId || body.sheetGid) {
+    var ss = openSpreadsheet_(body.spreadsheetId || null);
+    if (body.sheetGid) return findSheetByGid_(ss, String(body.sheetGid));
+    return ss.getSheets()[0];
+  }
+  return getTargetSheet_(channel);
 }
 
 function doGet() {
@@ -160,7 +180,7 @@ function doPost(e) {
     var channel = body.channel === "card" ? "card" : "cod";
 
     if ((channel === "cod" || channel === "card") && body.rows && body.orderId) {
-      var sheet = getTargetSheet_(channel);
+      var sheet = resolveSheetForPost_(channel, body);
       var result =
         channel === "card"
           ? appendCardOrder_(sheet, String(body.orderId), body.rows)
@@ -170,7 +190,7 @@ function doPost(e) {
 
     var values = body.values;
     if (values && Array.isArray(values)) {
-      var legacySheet = getTargetSheet_(channel);
+      var legacySheet = resolveSheetForPost_(channel, body);
       legacySheet.appendRow(values);
       return jsonResponse_({ ok: true });
     }

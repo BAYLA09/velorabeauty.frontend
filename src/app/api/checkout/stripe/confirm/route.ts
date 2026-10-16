@@ -17,8 +17,6 @@ export async function POST(request: Request) {
       paymentIntentId?: string;
     };
     const orderId = String(body.orderId ?? "").trim();
-    const sessionId = String(body.sessionId ?? "").trim();
-    const paymentIntentId = String(body.paymentIntentId ?? "").trim();
     if (!orderId) {
       return NextResponse.json({ error: "معرّف الطلب ناقص." }, { status: 400 });
     }
@@ -27,6 +25,11 @@ export async function POST(request: Request) {
     if (!order) {
       return NextResponse.json({ error: "الطلب غير موجود." }, { status: 404 });
     }
+
+    const sessionId =
+      String(body.sessionId ?? "").trim() || order.stripeCheckoutSessionId?.trim() || "";
+    const paymentIntentId =
+      String(body.paymentIntentId ?? "").trim() || order.stripePaymentIntentId?.trim() || "";
     if (order.status === "paid") {
       await exportPaidCardOrderToGoogleSheetsById(order.id);
       try {
@@ -69,7 +72,14 @@ export async function POST(request: Request) {
     }
 
     if (!sessionId) {
-      return NextResponse.json({ error: "معرّفات الدفع ناقصة." }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "معرّفات الدفع ناقصة.",
+          orderStatus: order.status,
+          hasStripePaymentIntentId: Boolean(order.stripePaymentIntentId),
+        },
+        { status: 400 },
+      );
     }
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);

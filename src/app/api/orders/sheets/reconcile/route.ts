@@ -8,6 +8,7 @@ import {
   readOrdersSheetsExportStatus,
 } from "@/lib/ordersSheets/exportOrder";
 import type { OrdersSheetChannel } from "@/lib/ordersSheets/buildSheetRow";
+import { repairAwaitingCardOrders } from "@/lib/checkout/repairAwaitingCardOrders";
 import {
   listOrdersPendingCardSheetExport,
   listOrdersPendingCodSheetExport,
@@ -90,6 +91,12 @@ export async function GET(request: Request) {
   } else {
     payload.webhookOk = false;
     payload.hint = status.webhook.reason ?? status.direct.reason ?? "orders_sheets_not_configured";
+  }
+
+  if (params.get("repair") === "1" && (channel === "card" || channel === "both")) {
+    payload.repairAwaiting = await repairAwaitingCardOrders(
+      Number.parseInt(params.get("limit") ?? "20", 10) || 20,
+    );
   }
 
   if (params.get("run") === "1") {
