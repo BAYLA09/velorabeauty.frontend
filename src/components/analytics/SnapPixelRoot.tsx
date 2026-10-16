@@ -38,7 +38,7 @@ snaptr('track','PAGE_VIEW');
 
   return (
     <>
-      <Script id="snap-pixel" strategy="beforeInteractive">
+      <Script id="snap-pixel" strategy="afterInteractive">
         {initSnippet}
       </Script>
       <SnapPageViewOnNavigate />
