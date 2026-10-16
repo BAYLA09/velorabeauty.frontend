@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { El_Messiri, Tajawal } from "next/font/google";
-import Script from "next/script";
+import { Suspense } from "react";
 import { SnapPixelRoot } from "@/components/analytics/SnapPixelRoot";
+import { SnapTestModePersist } from "@/components/analytics/SnapTestModePersist";
 import { snapPixelBootstrapScriptForApp } from "@/lib/analytics/snapBootstrap";
+import { buildSnapTestModeCaptureScript } from "@/lib/analytics/snapTestMode";
 import { CartRoot } from "@/components/cart/CartRoot";
 import { brand } from "@/config/brand";
 import "./globals.css";
@@ -49,6 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const snapBootstrap = snapPixelBootstrapScriptForApp();
+  const snapTestCapture = buildSnapTestModeCaptureScript();
   return (
     <html lang="ar" dir="rtl" className={`${display.variable} ${sansArabic.variable}`}>
       <head>
@@ -57,13 +60,17 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://js.stripe.com" />
         <link rel="preconnect" href="https://sc-static.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://tr.snapchat.com" crossOrigin="anonymous" />
+        {snapTestCapture ? (
+          <script dangerouslySetInnerHTML={{ __html: snapTestCapture }} />
+        ) : null}
         {snapBootstrap ? (
-          <Script id="snap-pixel-bootstrap" strategy="beforeInteractive">
-            {snapBootstrap}
-          </Script>
+          <script dangerouslySetInnerHTML={{ __html: snapBootstrap }} />
         ) : null}
       </head>
       <body className="antialiased">
+        <Suspense fallback={null}>
+          <SnapTestModePersist />
+        </Suspense>
         <SnapPixelRoot />
         <CartRoot>{children}</CartRoot>
       </body>

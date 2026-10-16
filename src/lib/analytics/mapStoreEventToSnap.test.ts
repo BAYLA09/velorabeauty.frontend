@@ -7,9 +7,15 @@ const store: unknown[][] = [];
 function installSnapMock() {
   (globalThis as typeof globalThis & { window?: typeof globalThis }).window =
     globalThis;
-  globalThis.snaptr = (...args: unknown[]) => {
-    store.push(args);
-  };
+  globalThis.document = {
+    querySelector: () => ({ src: "https://sc-static.net/scevent.min.js" }),
+  } as Document;
+  globalThis.snaptr = Object.assign(
+    (...args: unknown[]) => {
+      store.push(args);
+    },
+    { handleRequest: () => undefined, queue: [] },
+  );
 }
 
 describe("forwardStoreEventToSnap", () => {

@@ -10,26 +10,23 @@ declare global {
   }
 }
 
-/** Minimal queue stub until scevent.min.js loads (safe for early funnel events). */
-export function ensureSnaptrQueue(): boolean {
-  if (typeof window === "undefined") return false;
-  if (typeof window.snaptr === "function") return true;
-  const queue: unknown[][] = [];
-  const stub = ((...args: unknown[]) => {
-    queue.push(args);
-  }) as NonNullable<Window["snaptr"]>;
-  stub.queue = queue;
-  window.snaptr = stub;
-  return true;
-}
-
 export { isSnapPixelConfigured };
 
-/** Returns true if the call was passed to snaptr (or its queue). */
+function snapSdkReady(): boolean {
+  if (typeof window === "undefined") return false;
+  const snaptr = window.snaptr;
+  if (typeof snaptr !== "function") return false;
+  if (typeof snaptr.handleRequest === "function") return true;
+  return Boolean(
+    document.querySelector('script[src*="scevent.min.js"],script[data-velora-snap="1"]'),
+  );
+}
+
+/** Returns true if the call was passed to snaptr (SDK loaded or official queue). */
 export function snapTrack(event: string, params?: Record<string, unknown>): boolean {
   if (typeof window === "undefined" || !isSnapPixelConfigured()) return false;
+  if (!snapSdkReady()) return false;
   try {
-    ensureSnaptrQueue();
     const snaptr = window.snaptr;
     if (!snaptr) return false;
     if (params && Object.keys(params).length > 0) {

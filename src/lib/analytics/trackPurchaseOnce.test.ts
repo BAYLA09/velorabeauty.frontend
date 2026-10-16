@@ -30,9 +30,15 @@ function installBrowserMocks() {
   } as Storage;
   globalThis.dataLayer = [];
   snapCalls.length = 0;
-  globalThis.snaptr = (...args: unknown[]) => {
-    snapCalls.push(args);
-  };
+  globalThis.document = {
+    querySelector: () => ({ src: "https://sc-static.net/scevent.min.js" }),
+  } as Document;
+  globalThis.snaptr = Object.assign(
+    (...args: unknown[]) => {
+      snapCalls.push(args);
+    },
+    { handleRequest: () => undefined, queue: [] },
+  );
 }
 
 describe("trackVerifiedPurchaseOnce", () => {
