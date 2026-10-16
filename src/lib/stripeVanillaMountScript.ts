@@ -4,7 +4,8 @@ import type { StripeCardBootstrap } from "@/lib/stripeCardBootstrap";
 
 /**
  * Inline script: mount Stripe Payment Element before React hydrates (~ saves seconds).
- * Address stays hidden (`never`); confirmPayment supplies billing_details.address.postal_code.
+ * Billing fields stay hidden (`never`). confirmPayment must pass name, email, phone,
+ * and address (including postal_code) — see buildConfirmPaymentBillingDetails.
  */
 export function buildStripeVanillaMountScript(bootstrap: StripeCardBootstrap): string {
   const appearance = JSON.stringify(stripeElementsAppearance).replace(/</g, "\\u003c");
