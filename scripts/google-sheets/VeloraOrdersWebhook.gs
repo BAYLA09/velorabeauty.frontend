@@ -15,6 +15,8 @@
  */
 
 var DEFAULT_SHEET_GID = 469291840;
+var DEFAULT_CARD_SPREADSHEET_ID = "1paLygQEeE3V6kUVd4PP60v_xhpKp4e7Xu_UK3L5y32A";
+var DEFAULT_CARD_SHEET_GID = 1628433865;
 
 var COD_HEADER = [
   "OrderDate",
@@ -34,6 +36,27 @@ var COD_HEADER = [
   "utm_campaign",
   "utm_content",
   "utm_term",
+];
+
+var CARD_HEADER = [
+  "OrderDate",
+  "country",
+  "name",
+  "phone",
+  "address",
+  "url",
+  "sku",
+  "Product",
+  "quantity",
+  "price",
+  "currency",
+  "notes",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "national_address",
 ];
 
 var NOTES_COL = 12;
@@ -67,9 +90,10 @@ function findSheetByGid_(ss, gidString) {
 function getTargetSheet_(channel) {
   var props = PropertiesService.getScriptProperties();
   if (channel === "card") {
-    var cardWorkbookId = props.getProperty("CARD_SPREADSHEET_ID");
+    var cardWorkbookId =
+      props.getProperty("CARD_SPREADSHEET_ID") || DEFAULT_CARD_SPREADSHEET_ID;
     var ss = openSpreadsheet_(cardWorkbookId || null);
-    var cardGid = props.getProperty("CARD_SHEET_GID");
+    var cardGid = props.getProperty("CARD_SHEET_GID") || String(DEFAULT_CARD_SHEET_GID);
     if (cardGid) return findSheetByGid_(ss, cardGid);
     var sheetGid = props.getProperty("SHEET_GID");
     if (sheetGid) return findSheetByGid_(ss, sheetGid);
@@ -94,18 +118,26 @@ function orderAlreadyExported_(sheet, orderId) {
   return false;
 }
 
-function appendCodOrder_(sheet, orderId, rows) {
+function appendOrderRows_(sheet, orderId, rows, expectedColumns) {
   if (orderAlreadyExported_(sheet, orderId)) {
     return { ok: true, duplicate: true };
   }
   for (var i = 0; i < rows.length; i++) {
     var row = rows[i];
-    if (!row || row.length !== COD_HEADER.length) {
-      return { ok: false, error: "invalid row width", expectedColumns: COD_HEADER.length };
+    if (!row || row.length !== expectedColumns) {
+      return { ok: false, error: "invalid row width", expectedColumns: expectedColumns };
     }
     sheet.appendRow(row);
   }
   return { ok: true };
+}
+
+function appendCodOrder_(sheet, orderId, rows) {
+  return appendOrderRows_(sheet, orderId, rows, COD_HEADER.length);
+}
+
+function appendCardOrder_(sheet, orderId, rows) {
+  return appendOrderRows_(sheet, orderId, rows, CARD_HEADER.length);
 }
 
 function doGet() {
@@ -129,7 +161,11 @@ function doPost(e) {
 
     if ((channel === "cod" || channel === "card") && body.rows && body.orderId) {
       var sheet = getTargetSheet_(channel);
-      return jsonResponse_(appendCodOrder_(sheet, String(body.orderId), body.rows));
+      var result =
+        channel === "card"
+          ? appendCardOrder_(sheet, String(body.orderId), body.rows)
+          : appendCodOrder_(sheet, String(body.orderId), body.rows);
+      return jsonResponse_(result);
     }
 
     var values = body.values;

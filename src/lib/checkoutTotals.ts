@@ -5,13 +5,13 @@ import {
   type BundleQuantity,
   type PaymentMethod,
 } from "@/config/pricing";
-import { getCheckoutTotalForCart, getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
-import type { CartLine } from "@/lib/cart/cartTypes";
 import {
   isStripeLiveTestCheckoutEnabled,
   isStripeLiveTestProductSlug,
   STRIPE_LIVE_TEST_PRICE_AED,
 } from "@/config/stripeLiveTestCheckout";
+import { getCheckoutTotalForCart, getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
+import type { CartLine } from "@/lib/cart/cartTypes";
 
 function liveTestLineSlug(cartLines?: CartLine[]): string | null {
   if (!isStripeLiveTestCheckoutEnabled() || !cartLines?.length) return null;

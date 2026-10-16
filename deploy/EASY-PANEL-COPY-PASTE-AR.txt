@@ -1,5 +1,5 @@
 ═══════════════════════════════════════════════════════════
-  VELORA FRONTEND — Easypanel (Deploy auto)
+  VELORA FRONTEND — Easypanel (Deploy auto + test Stripe)
   Image: ghcr.io/bayla09/velorabeauty.frontend:latest
   Pin (main): ghcr.io/bayla09/velorabeauty.frontend:1ff1fd7
 ═══════════════════════════════════════════════════════════
@@ -39,12 +39,20 @@
      STORE_API_KEY=...
      ORDERS_SHEETS_*=...
 
+     اختبار Stripe ~1 USD (checkout فقط):
+     STRIPE_TEST_CHECKOUT_ENABLED=true
+     # STRIPE_TEST_CHECKOUT_TOKEN=secret-optional
+
 【5】 Deploy يدوي (حتى ما تزيديش webhook):
      Easypanel → Deploy → 1–3 دقائق (logs: Pulling / Pull complete)
 
 【6】 Test:
      curl -s https://www.velorabeauty.world/api/health
-     → version يطابق أحدث commit على main
+     → version يبدأ بـ 1ff1fd7 (أو أحدث main)
+     → stripeTestCheckoutEnabled: true (إلا زدتي السطر ف【4】)
+
+     PDP منتج 04 (دفع إلكتروني 20 د.إ — ما كاينش f home):
+     https://www.velorabeauty.world/products/04-e-pay
 
      Guide: docs/EASYPANEL-AUTO-DEPLOY-AR.md
 

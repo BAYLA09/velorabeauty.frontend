@@ -27,18 +27,21 @@ export type ProductWithPage = Product & {
   pageImage: ProductImageRef;
 };
 
-export function getAllProductsWithPages(): ProductWithPage[] {
-  return products.map((p) => ({
+function mapProduct(p: Product): ProductWithPage {
+  return {
     ...p,
     slug: productPages[p.id].slug,
     page: productPages[p.id],
     pageImage: images.productPage[p.id],
-  }));
+  };
+}
+
+export function getAllProductsWithPages(): ProductWithPage[] {
+  return products.map(mapProduct);
 }
 
 export function getProductBySlug(slug: string): ProductWithPage | undefined {
-  const entry = getAllProductsWithPages().find((p) => p.slug === slug);
-  return entry;
+  return getAllProductsWithPages().find((p) => p.slug === slug);
 }
 
 export function getProductPath(slug: string): string {
