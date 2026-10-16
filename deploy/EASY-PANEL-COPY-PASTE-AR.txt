@@ -1,51 +1,59 @@
 ═══════════════════════════════════════════════════════════
-  VELORA FRONTEND — Easypanel (Deploy 1s = GHALAT)
-  Image jahza: ghcr.io/bayla09/velorabeauty.frontend:latest
-  Pin (stable): ghcr.io/bayla09/velorabeauty.frontend:c6dc554
+  VELORA FRONTEND — Easypanel (Deploy auto + test Stripe)
+  Image: ghcr.io/bayla09/velorabeauty.frontend:latest
+  Pin (main): ghcr.io/bayla09/velorabeauty.frontend:1ff1fd7
 ═══════════════════════════════════════════════════════════
 
-【1】 GitHub → Settings → Secrets → Actions
-     → ADD "EASYPANEL_DEPLOY_WEBHOOK" = URL mn Easypanel (Docker Image service → Deployments → Webhook)
-     → DELETE webhook l9dim ila kan mربوط b Git service (Deploy 1s)
-     → Guide: docs/EASYPANEL-AUTO-DEPLOY-AR.md
+【0】 Deploy أوتوماتيكي (GitHub → Easypanel) — دابا ناقص!
+     GitHub Actions "Deploy Frontend (Easypanel)" كيفشل حيت:
+     EASYPANEL_DEPLOY_WEBHOOK = (ما مضافش)
 
-【2】 Easypanel → DELETE service frontend l9dim (Git/Compose)
-     → New Service → APP (mashi Compose)
+     Easypanel → خدمة Frontend (Docker Image) → Deployments → Webhook → Copy URL
+     GitHub → BAYLA09/velorabeauty.frontend → Settings → Secrets → Actions
+     → New secret: EASYPANEL_DEPLOY_WEBHOOK = (paste URL)
 
-【3】 Source = Docker Image ONLY
-     Image (copy):
-     ghcr.io/bayla09/velorabeauty.frontend:c6dc554
+     من بعد: كل merge f main → Publish container → Deploy auto (1–3 min)
+
+【1】 Source = Docker Image ONLY (ماشي Git — Deploy 1s = غلط)
+     Image:
+     ghcr.io/bayla09/velorabeauty.frontend:latest
 
      Registry Username: (KHAWI)
      Registry Password: (KHAWI)
 
-【4】 Port: 3000
-     Volume mount: /app/data  (persistent)
+【2】 Port: 3000
+     Volume: /app/data  (persistent)
 
-【5】 Domain: www.velorabeauty.world → port 3000
+【3】 Domain: www.velorabeauty.world → 3000
 
-【6】 Environment — paste keys (values mn panel l9dim):
+【4】 Environment (زيدي/حافظي على القيم اللي عندك):
      NODE_ENV=production
      HOSTNAME=0.0.0.0
      PORT=3000
      DATABASE_PATH=/app/data/velora.sqlite
      SITE_URL=https://www.velorabeauty.world
      CARD_PAYMENT_ENABLED=true
-     (+ STRIPE_* + STORE_API_KEY + ORDERS_SHEETS_*)
+     STRIPE_SECRET_KEY=...
+     STRIPE_PUBLISHABLE_KEY=...
+     STRIPE_WEBHOOK_SECRET=...
+     STORE_API_KEY=...
+     ORDERS_SHEETS_*=...
 
-【7】 Deploy → MUST take 1-3 MINUTES
-     Logs must show: Pulling / Pull complete
-     If still 1 second → Source still wrong (not Docker Image)
+     صفحة اختبار Stripe 20 د.إ (product 04):
+     STRIPE_TEST_CHECKOUT_ENABLED=true
+     # STRIPE_TEST_CHECKOUT_TOKEN=secret-optional
 
-【8】 Test:
+【5】 Deploy يدوي (حتى ما تزيديش webhook):
+     Easypanel → Deploy → 1–3 دقائق (logs: Pulling / Pull complete)
+
+【6】 Test:
      curl -s https://www.velorabeauty.world/api/health
+     → version يبدأ بـ 1ff1fd7 (أو أحدث main)
+     → stripeTestCheckoutEnabled: true (إلا زدتي السطر ف【4】)
 
-═══════════════════════════════════════════════════════════
-  SSH emergency (ila 3andek access l VPS):
-     docker pull ghcr.io/bayla09/velorabeauty.frontend:c6dc554
-     docker run -d --name velora-test -p 3000:3000 \
-       -v velora-data:/app/data \
-       -e DATABASE_PATH=/app/data/velora.sqlite \
-       -e SITE_URL=https://www.velorabeauty.world \
-       ghcr.io/bayla09/velorabeauty.frontend:c6dc554
+     PDP test:
+     https://www.velorabeauty.world/products/velora-stripe-test-20
+
+     Guide: docs/EASYPANEL-AUTO-DEPLOY-AR.md
+
 ═══════════════════════════════════════════════════════════
