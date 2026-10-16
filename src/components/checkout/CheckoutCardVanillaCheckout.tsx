@@ -96,13 +96,7 @@ export function CheckoutCardVanillaCheckout({
 }: Props) {
   const router = useRouter();
   const paymentReady = useVanillaStripeReady();
-  const total = resolveCheckoutTotalAed(
-    quantity,
-    "card",
-    eligibleUnits,
-    cartLines,
-    productSlug,
-  );
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
 
   useStripeCheckoutPrefetch({
     productSlug,

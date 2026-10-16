@@ -126,13 +126,7 @@ function CheckoutCardPaySection({
   stripeBootstrap?: StripeCardBootstrap | null;
 }) {
   const { elementsLoading } = useCheckoutStripe();
-  const total = resolveCheckoutTotalAed(
-    quantity,
-    "card",
-    eligibleUnits,
-    cartLines,
-    productSlug,
-  );
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
 
   if (elementsLoading) {
     return (
@@ -184,13 +178,7 @@ function StripeCardPaymentAndSubmit({
   const { paymentIntentId, paymentReady } = useCheckoutStripe();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const total = resolveCheckoutTotalAed(
-    quantity,
-    "card",
-    eligibleUnits,
-    cartLines,
-    productSlug,
-  );
+  const total = resolveCheckoutTotalAed(quantity, "card", eligibleUnits, cartLines);
 
   async function handlePay() {
     setError(null);
