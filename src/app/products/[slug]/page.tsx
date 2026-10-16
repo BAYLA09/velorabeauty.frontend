@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductPageClient } from "@/components/product/ProductPageClient";
+import { StripeTestProductPage } from "@/components/product/StripeTestProductPage";
 import { productSlugs } from "@/config/productPages";
-import { isStripeTestProductSlug } from "@/config/stripeTestCheckout";
+import {
+  isStripeTestCheckoutEnabled,
+  isStripeTestProductSlug,
+  STRIPE_TEST_PRODUCT_NAME,
+  stripeTestCardCheckoutPath,
+} from "@/config/stripeTestCheckout";
 import {
   getAllProductsWithPages,
   getProductBySlug,
@@ -16,6 +22,13 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  if (isStripeTestProductSlug(slug) && isStripeTestCheckoutEnabled()) {
+    return {
+      title: `${STRIPE_TEST_PRODUCT_NAME} | فيلورا`,
+      description: "صفحة اختبار دفع Stripe — 20 د.إ — غير معروضة في المتجر.",
+      robots: { index: false, follow: false },
+    };
+  }
   const product = getProductBySlug(slug);
   if (!product) return {};
   return {
@@ -26,7 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  if (isStripeTestProductSlug(slug)) notFound();
+  if (isStripeTestProductSlug(slug)) {
+    if (!isStripeTestCheckoutEnabled()) notFound();
+    return <StripeTestProductPage cardCheckoutHref={stripeTestCardCheckoutPath()} />;
+  }
   const product = getProductBySlug(slug);
   if (!product) notFound();
 
