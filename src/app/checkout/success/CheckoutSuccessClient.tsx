@@ -69,10 +69,16 @@ export function CheckoutSuccessClient() {
   return (
     <>
       <ProductStoreHeader />
-      <main className="min-h-[75vh] bg-velora-cream px-4 py-8 sm:py-12">
+      <main className="min-h-[75vh] bg-gradient-to-b from-velora-cream via-white to-velora-cream-dark/30 px-4 py-8 sm:py-12">
         {loading ? (
-          <div className="mx-auto max-w-xl text-center">
-            <p className="text-base text-velora-burgundy/70">جاري تأكيد الدفع…</p>
+          <div
+            className="mx-auto max-w-[440px] animate-pulse overflow-hidden rounded-[1.75rem] bg-white/80 p-8 shadow-lg ring-1 ring-velora-burgundy/8"
+            aria-busy
+          >
+            <div className="mx-auto h-16 w-16 rounded-full bg-velora-burgundy/10" />
+            <div className="mx-auto mt-6 h-6 w-48 rounded bg-velora-burgundy/10" />
+            <div className="mx-auto mt-3 h-4 w-full max-w-xs rounded bg-velora-burgundy/5" />
+            <p className="mt-8 text-center text-sm text-velora-burgundy/60">جاري تأكيد الدفع…</p>
           </div>
         ) : order ? (
           <CardThankYouSuccess order={order} onNavigateAway={() => clearOrderDraft()} />
