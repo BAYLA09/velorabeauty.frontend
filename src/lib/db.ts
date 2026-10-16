@@ -64,6 +64,12 @@ function ensureSchema(database: Database.Database): void {
   if (!names.has("sheet_card_exported_at")) {
     database.exec(`ALTER TABLE orders ADD COLUMN sheet_card_exported_at TEXT`);
   }
+  if (!names.has("sheet_card_export_last_error")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN sheet_card_export_last_error TEXT`);
+  }
+  if (!names.has("sheet_card_export_last_attempt_at")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN sheet_card_export_last_attempt_at TEXT`);
+  }
   if (!names.has("order_attribution_json")) {
     database.exec(`ALTER TABLE orders ADD COLUMN order_attribution_json TEXT`);
   }

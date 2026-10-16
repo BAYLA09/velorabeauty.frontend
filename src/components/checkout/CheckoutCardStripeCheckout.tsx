@@ -27,6 +27,7 @@ import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { readCheckoutApiJson } from "@/lib/checkout/readCheckoutApiJson";
 import { formatCheckoutPayError } from "@/lib/checkout/formatCheckoutPayError";
 import { STRIPE_CHECKOUT_BILLING_COUNTRY } from "@/lib/checkout/stripePaymentElementConfig";
+import { confirmCardPaymentOnServer } from "@/lib/checkout/confirmCardPaymentOnServer";
 import { submitAndConfirmStripePayment } from "@/lib/checkout/submitAndConfirmStripePayment";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
@@ -257,6 +258,7 @@ function StripeCardPaymentAndSubmit({
 
       const order = finalizeData.order;
       if (finalizeData.paymentIntentStatus === "succeeded") {
+        await confirmCardPaymentOnServer({ orderId: order.id, paymentIntentId });
         clearStoredCheckoutExternalId();
         router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
         return;
@@ -299,6 +301,7 @@ function StripeCardPaymentAndSubmit({
         return;
       }
 
+      await confirmCardPaymentOnServer({ orderId: order.id, paymentIntentId });
       router.push(`/checkout/success?id=${encodeURIComponent(order.id)}`);
     } catch (err) {
       console.error("[checkout-card-pay]", err);

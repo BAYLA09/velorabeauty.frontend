@@ -403,7 +403,90 @@ export function wasOrderSheetExported(
 export function markOrderSheetExported(orderId: string, channel: "cod" | "card"): void {
   const column = channel === "cod" ? "sheet_cod_exported_at" : "sheet_card_exported_at";
   const at = new Date().toISOString();
+  if (channel === "card") {
+    getDb()
+      .prepare(`UPDATE orders SET ${column} = ?, sheet_card_export_last_error = NULL WHERE id = ?`)
+      .run(at, orderId);
+  } else {
+    getDb()
+      .prepare(`UPDATE orders SET ${column} = ? WHERE id = ?`)
+      .run(at, orderId);
+  }
+}
+
+export function recordCardSheetExportAttempt(orderId: string, error: string | null): void {
+  const at = new Date().toISOString();
   getDb()
-    .prepare(`UPDATE orders SET ${column} = ? WHERE id = ?`)
-    .run(at, orderId);
+    .prepare(
+      `UPDATE orders SET sheet_card_export_last_attempt_at = ?, sheet_card_export_last_error = ? WHERE id = ?`,
+    )
+    .run(at, error, orderId);
+}
+
+export type CardSheetOrderDiagnostic = {
+  id: string;
+  status: string;
+  createdAt: string;
+  totalAed: number;
+  stripePaymentIntentId: string | null;
+  sheetCardExportedAt: string | null;
+  sheetCardExportLastError: string | null;
+  sheetCardExportLastAttemptAt: string | null;
+};
+
+export function listRecentCardOrdersForDiagnostics(limit = 15): CardSheetOrderDiagnostic[] {
+  const capped = Math.min(Math.max(1, limit), 50);
+  const rows = getDb()
+    .prepare(
+      `SELECT id, status, created_at, total_aed, stripe_payment_intent_id,
+              sheet_card_exported_at, sheet_card_export_last_error, sheet_card_export_last_attempt_at
+       FROM orders
+       WHERE payment_method = 'card'
+       ORDER BY created_at DESC
+       LIMIT ?`,
+    )
+    .all(capped) as {
+    id: string;
+    status: string;
+    created_at: string;
+    total_aed: number;
+    stripe_payment_intent_id?: string | null;
+    sheet_card_exported_at?: string | null;
+    sheet_card_export_last_error?: string | null;
+    sheet_card_export_last_attempt_at?: string | null;
+  }[];
+  return rows.map((r) => ({
+    id: r.id,
+    status: r.status,
+    createdAt: r.created_at,
+    totalAed: r.total_aed,
+    stripePaymentIntentId: r.stripe_payment_intent_id ?? null,
+    sheetCardExportedAt: r.sheet_card_exported_at ?? null,
+    sheetCardExportLastError: r.sheet_card_export_last_error ?? null,
+    sheetCardExportLastAttemptAt: r.sheet_card_export_last_attempt_at ?? null,
+  }));
+}
+
+export function countCardOrdersPaidNotExported(): number {
+  const row = getDb()
+    .prepare(
+      `SELECT COUNT(*) AS n FROM orders
+       WHERE payment_method = 'card' AND status = 'paid'
+         AND (sheet_card_exported_at IS NULL OR TRIM(sheet_card_exported_at) = '')`,
+    )
+    .get() as { n: number };
+  return row.n;
+}
+
+export function countCardOrdersAwaitingPaymentWithPi(): number {
+  const row = getDb()
+    .prepare(
+      `SELECT COUNT(*) AS n FROM orders
+       WHERE payment_method = 'card'
+         AND status IN ('awaiting_payment', 'pending')
+         AND stripe_payment_intent_id IS NOT NULL
+         AND TRIM(stripe_payment_intent_id) != ''`,
+    )
+    .get() as { n: number };
+  return row.n;
 }

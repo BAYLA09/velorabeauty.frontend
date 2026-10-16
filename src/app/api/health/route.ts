@@ -10,6 +10,10 @@ import {
 import { getSiteUrl } from "@/lib/siteUrl";
 import { readOrdersSheetsExportStatus } from "@/lib/ordersSheets/exportOrder";
 import {
+  countCardOrdersAwaitingPaymentWithPi,
+  countCardOrdersPaidNotExported,
+} from "@/lib/ordersRepository";
+import {
   buildShaPrefix,
   fetchGithubMainShaPrefix,
 } from "@/lib/deploy/githubMainHead";
@@ -116,6 +120,9 @@ export async function GET() {
         secretConfigured: Boolean(ordersSheets.webhook.webhookSecret),
       },
       cardSheetGidConfigured: Boolean(ordersSheets.direct.cardSheetGid),
+      cardPaidNotExported: countCardOrdersPaidNotExported(),
+      cardAwaitingPaymentWithPi: countCardOrdersAwaitingPaymentWithPi(),
+      diagnosticsPath: "/api/orders/sheets/diagnostics?secret=ORDERS_SHEETS_WEBHOOK_SECRET",
     },
   });
 }
