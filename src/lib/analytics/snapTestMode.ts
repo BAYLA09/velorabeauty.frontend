@@ -1,5 +1,3 @@
-import { VELORA_SNAP_PIXEL_ID } from "@/config/snapPixel";
-
 export const SNAP_TEST_MODE_ID_KEY = "velora_ScTestModeId";
 export const SNAP_TEST_CID_KEY = "velora_ScCid";
 
@@ -8,12 +6,10 @@ export const SNAP_TEST_CID_KEY = "velora_ScCid";
  * (including Next.js client navigations) so Snap Test Events can attribute the session.
  */
 export function buildSnapTestModeCaptureScript(): string {
-  const canonical = JSON.stringify(VELORA_SNAP_PIXEL_ID);
   const tidKey = SNAP_TEST_MODE_ID_KEY;
   const cidKey = SNAP_TEST_CID_KEY;
   return `
 (function(){
-  var CANONICAL = ${canonical};
   var TID_KEY = ${JSON.stringify(tidKey)};
   var CID_KEY = ${JSON.stringify(cidKey)};
   function readFromUrl(){
@@ -22,7 +18,7 @@ export function buildSnapTestModeCaptureScript(): string {
   }
   function persist(tid, cid){
     try {
-      if (tid && tid === CANONICAL) sessionStorage.setItem(TID_KEY, tid);
+      if (tid) sessionStorage.setItem(TID_KEY, tid);
       if (cid) sessionStorage.setItem(CID_KEY, cid);
     } catch (e) {}
   }
