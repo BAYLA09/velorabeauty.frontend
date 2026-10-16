@@ -2,11 +2,6 @@ import { redirect } from "next/navigation";
 import type { BundleQuantity } from "@/config/pricing";
 import { parseCartItemsParam } from "@/lib/cart/cartSerialization";
 import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
-import {
-  isStripeTestCheckoutEnabled,
-  isStripeTestCheckoutTokenValid,
-  isStripeTestProductSlug,
-} from "@/config/stripeTestCheckout";
 import { getProductBySlug } from "@/lib/productCatalog";
 import { parseCheckoutQuantity } from "@/lib/checkoutRoutes";
 
@@ -47,17 +42,6 @@ export function resolveCheckoutContext(
 
   if (!quantity) {
     redirect("/#products");
-  }
-
-  if (isStripeTestProductSlug(productSlug)) {
-    if (!isStripeTestCheckoutEnabled()) {
-      redirect("/#products");
-    }
-    const tokenParam = searchParams.token;
-    const token = typeof tokenParam === "string" ? tokenParam : null;
-    if (!isStripeTestCheckoutTokenValid(token)) {
-      redirect("/#products");
-    }
   }
 
   const catalog = getProductBySlug(productSlug);

@@ -25,7 +25,6 @@ export async function createOrUpdateCardPaymentIntent(input: {
     "card",
     eligibleUnits,
     cartLines,
-    productSlug,
   );
   const amountFils = totalAed * 100;
   const stripe = getStripe();
