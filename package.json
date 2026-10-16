@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "node --experimental-strip-types --import ./scripts/test-import-hook.mjs --test src/lib/backendCheckout/*.test.ts src/components/checkout/*.test.ts src/lib/checkout/*.test.ts src/lib/cart/*.test.ts src/lib/phone/*.test.ts src/lib/order/*.test.ts src/lib/ordersSheets/*.test.ts src/lib/analytics/*.test.ts",
     "optimize:images": "node scripts/optimize-pdp-images.mjs",
-    "reencode:skin-hq": "node scripts/reencode-skin-hq.mjs"
+    "reencode:skin-hq": "node scripts/reencode-skin-hq.mjs",
+    "probe:snap-funnel": "node scripts/snap-funnel-probe.mjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^7.0.0",
