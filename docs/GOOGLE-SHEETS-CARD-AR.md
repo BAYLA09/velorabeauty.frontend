@@ -12,7 +12,7 @@ Nfs colonnes b7al COD (17). Export ghir **`paid`**.
 2. Ligne 1:
 
 ```text
-OrderDate	country	name	phone	address	url	sku	Product	quantity	price	currency	notes	utm_source	utm_medium	utm_campaign	utm_content	utm_term
+OrderDate	country	name	phone	address	url	sku	Product	quantity	price	currency	notes	utm_source	utm_medium	utm_campaign	utm_term	utm_content	national_address
 ```
 
 3. Men URL `/d/XXXXXXXX/edit` — **`CARD_SPREADSHEET_ID`**

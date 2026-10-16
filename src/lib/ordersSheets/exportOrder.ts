@@ -2,9 +2,11 @@ import { after } from "next/server";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { isAppsScriptWebhookSuccess } from "@/lib/ordersSheets/webhookResponse";
 import {
+  buildCardSheetRows,
   buildCodSheetRows,
   type OrdersSheetChannel,
 } from "@/lib/ordersSheets/buildSheetRow";
+import { CARD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/cardSheetColumns";
 import { COD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/codSheetColumns";
 import {
   appendCodRowsViaGoogleSheetsApi,
@@ -203,10 +205,10 @@ export async function exportOrderToGoogleSheets(input: {
         return;
       }
     } else {
-      const rows = buildCodSheetRows(input.order, lines, attribution);
+      const rows = buildCardSheetRows(input.order, lines, attribution);
       if (rows.length === 0) return;
       for (const row of rows) {
-        if (row.length !== COD_ORDERS_SHEET_COLUMN_COUNT) {
+        if (row.length !== CARD_ORDERS_SHEET_COLUMN_COUNT) {
           console.error("[orders-sheets] invalid card row width", {
             orderId: input.order.id,
             width: row.length,
@@ -268,6 +270,11 @@ export function queueOrderSheetExportById(input: {
   cartLines?: CartLine[] | null;
 }): void {
   scheduleOrderSheetExport(() => exportOrderToGoogleSheetsById(input));
+}
+
+/** Run sheet export in-process (Stripe webhook / confirm — do not rely on `after()`). */
+export async function exportPaidCardOrderToGoogleSheetsById(orderId: string): Promise<void> {
+  await exportOrderToGoogleSheetsById({ orderId, channel: "card" });
 }
 
 function scheduleOrderSheetExport(task: () => Promise<void>): void {

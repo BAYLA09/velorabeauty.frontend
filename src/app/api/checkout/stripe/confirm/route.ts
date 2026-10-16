@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { recoverPaidOrderCheckout } from "@/lib/backendCheckout/capture";
 import { getOrderById, markOrderPaid } from "@/lib/ordersRepository";
-import { queueOrderSheetExportById } from "@/lib/ordersSheets/exportOrder";
+import { exportPaidCardOrderToGoogleSheetsById } from "@/lib/ordersSheets/exportOrder";
 import { getStripe, isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
 
 /** Fallback when webhook is delayed — verifies Checkout Session or PaymentIntent after redirect. */
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "الطلب غير موجود." }, { status: 404 });
     }
     if (order.status === "paid") {
-      queueOrderSheetExportById({ orderId: order.id, channel: "card" });
+      await exportPaidCardOrderToGoogleSheetsById(order.id);
       try {
         recoverPaidOrderCheckout(order);
       } catch (err) {
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         markOrderPaid(orderId);
         const updated = getOrderById(orderId);
         if (updated) {
-          queueOrderSheetExportById({ orderId: updated.id, channel: "card" });
+          await exportPaidCardOrderToGoogleSheetsById(updated.id);
           try {
             recoverPaidOrderCheckout(updated);
           } catch (err) {
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
       markOrderPaid(orderId);
       const updated = getOrderById(orderId);
       if (updated) {
-        queueOrderSheetExportById({ orderId: updated.id, channel: "card" });
+        await exportPaidCardOrderToGoogleSheetsById(updated.id);
         try {
           recoverPaidOrderCheckout(updated);
         } catch (err) {
