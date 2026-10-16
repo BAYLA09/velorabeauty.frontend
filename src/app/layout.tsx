@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { El_Messiri, Tajawal } from "next/font/google";
+import Script from "next/script";
 import { SnapPixelRoot } from "@/components/analytics/SnapPixelRoot";
+import { snapPixelBootstrapScriptForApp } from "@/lib/analytics/snapBootstrap";
 import { CartRoot } from "@/components/cart/CartRoot";
 import { brand } from "@/config/brand";
 import "./globals.css";
@@ -46,12 +48,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const snapBootstrap = snapPixelBootstrapScriptForApp();
   return (
     <html lang="ar" dir="rtl" className={`${display.variable} ${sansArabic.variable}`}>
       <head>
         <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://api.stripe.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://js.stripe.com" />
+        <link rel="preconnect" href="https://sc-static.net" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://tr.snapchat.com" crossOrigin="anonymous" />
+        {snapBootstrap ? (
+          <Script id="snap-pixel-bootstrap" strategy="beforeInteractive">
+            {snapBootstrap}
+          </Script>
+        ) : null}
       </head>
       <body className="antialiased">
         <SnapPixelRoot />

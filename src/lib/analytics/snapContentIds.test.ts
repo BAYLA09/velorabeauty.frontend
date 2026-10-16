@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { snapContentIdsFromOrder, snapItemCount } from "@/lib/analytics/snapContentIds";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { snapContentIdsFromOrder, snapItemCount } from "./snapContentIds.ts";
 
 describe("snapContentIdsFromOrder", () => {
   it("returns catalog slugs from cart lines", () => {
-    expect(
+    assert.deepEqual(
       snapContentIdsFromOrder({
         productSlug: "velora-offer",
         cartLines: [
@@ -11,22 +12,34 @@ describe("snapContentIdsFromOrder", () => {
           { slug: "eye-serum", quantity: 1 },
         ],
       }),
-    ).toEqual(["hair-gummies", "eye-serum"]);
+      ["hair-gummies", "eye-serum"],
+    );
   });
 
   it("includes primary slug when catalog", () => {
-    expect(
+    assert.deepEqual(
       snapContentIdsFromOrder({
         productSlug: "skin-gummies",
         cartLines: [],
       }),
-    ).toEqual(["skin-gummies"]);
+      ["skin-gummies"],
+    );
+  });
+
+  it("ignores non-catalog slugs", () => {
+    assert.deepEqual(
+      snapContentIdsFromOrder({
+        productSlug: "stripe-live-test",
+        cartLines: [{ slug: "unknown-sku", quantity: 1 }],
+      }),
+      [],
+    );
   });
 });
 
 describe("snapItemCount", () => {
   it("sums cart line quantities", () => {
-    expect(
+    assert.equal(
       snapItemCount({
         quantity: 1,
         cartLines: [
@@ -34,6 +47,7 @@ describe("snapItemCount", () => {
           { slug: "eye-serum", quantity: 1 },
         ],
       }),
-    ).toBe(3);
+      3,
+    );
   });
 });

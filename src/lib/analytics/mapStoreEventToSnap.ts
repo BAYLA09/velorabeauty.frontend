@@ -24,6 +24,13 @@ export function forwardStoreEventToSnap(payload: StoreAnalyticsEvent): boolean {
         item_ids: payload.content_ids,
         number_items: payload.number_items,
       });
+    case "add_billing":
+      return snapTrack("ADD_BILLING", {
+        price: payload.value_aed,
+        currency: payload.currency,
+        item_ids: payload.content_ids,
+        number_items: payload.number_items,
+      });
     case "purchase":
       return snapTrack("PURCHASE", {
         price: payload.value_aed,
@@ -31,6 +38,9 @@ export function forwardStoreEventToSnap(payload: StoreAnalyticsEvent): boolean {
         transaction_id: payload.order_id,
         item_ids: payload.content_ids,
         number_items: payload.number_items,
+        payment_type: payload.payment_method,
+        event_id: payload.order_id,
+        client_dedup_id: payload.order_id,
       });
     default:
       return false;

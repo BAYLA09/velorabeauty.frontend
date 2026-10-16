@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import { codFee } from "@/config/pricing";
 import type { BundleQuantity } from "@/config/pricing";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
+import { shouldFireCodSnapPurchase } from "@/lib/analytics/snapPurchaseGating";
 import { trackVerifiedPurchaseOnce } from "@/lib/analytics/trackPurchaseOnce";
 import { codTimelineSteps } from "@/lib/order/codThankYouTimeline";
 import { buildOrderDisplayLines } from "@/lib/order/buildOrderDisplayLines";
@@ -57,10 +58,17 @@ export function CodThankYouSuccess({
   }, []);
 
   useEffect(() => {
-    if (!purchaseVerified || !order.orderId?.trim()) return;
-    if (order.method && order.method !== "cod") return;
+    if (
+      !shouldFireCodSnapPurchase({
+        purchaseVerified,
+        orderId: order.orderId,
+        paymentMethod: order.method ?? "cod",
+      })
+    ) {
+      return;
+    }
     trackVerifiedPurchaseOnce({
-      orderId: order.orderId,
+      orderId: order.orderId!.trim(),
       valueAed: order.totalAed,
       paymentMethod: "cod",
       productSlug: order.productSlug,

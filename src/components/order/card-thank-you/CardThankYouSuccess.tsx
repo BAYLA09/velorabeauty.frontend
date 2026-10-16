@@ -12,6 +12,7 @@ import { CardThankYouQuickTrust } from "@/components/order/card-thank-you/CardTh
 import { CardThankYouReceiptStrip } from "@/components/order/card-thank-you/CardThankYouReceiptStrip";
 import { CardThankYouTimeline } from "@/components/order/card-thank-you/CardThankYouTimeline";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
+import { shouldFireCardSnapPurchase } from "@/lib/analytics/snapPurchaseGating";
 import { trackVerifiedPurchaseOnce } from "@/lib/analytics/trackPurchaseOnce";
 import { cardTimelineSteps } from "@/lib/order/cardThankYouTimeline";
 import { buildOrderDisplayLines } from "@/lib/order/buildOrderDisplayLines";
@@ -40,8 +41,6 @@ export function CardThankYouSuccess({
   const createdAt = order.createdAt || new Date().toISOString();
   const deliveryFee = order.deliveryFeeAed ?? 0;
   const subtotalAed = order.subtotalAed ?? Math.max(0, order.totalAed - deliveryFee);
-  const isPaid = order.status === "paid";
-
   const displayLines = useMemo(
     () =>
       buildOrderDisplayLines({
@@ -60,11 +59,21 @@ export function CardThankYouSuccess({
     trackStoreEvent({ event: "order_summary_view" });
   }, []);
 
+  const isPaid = order.status === "paid";
+
   useEffect(() => {
-    if (!purchaseVerified || !isPaid || !order.orderId?.trim()) return;
-    if (order.method && order.method !== "card") return;
+    if (
+      !shouldFireCardSnapPurchase({
+        purchaseVerified,
+        orderId: order.orderId,
+        status: order.status,
+        paymentMethod: order.method ?? "card",
+      })
+    ) {
+      return;
+    }
     trackVerifiedPurchaseOnce({
-      orderId: order.orderId,
+      orderId: order.orderId!.trim(),
       valueAed: order.totalAed,
       paymentMethod: "card",
       productSlug: order.productSlug,
@@ -73,9 +82,9 @@ export function CardThankYouSuccess({
     });
   }, [
     purchaseVerified,
-    isPaid,
     order.method,
     order.orderId,
+    order.status,
     order.totalAed,
     order.productSlug,
     order.quantity,

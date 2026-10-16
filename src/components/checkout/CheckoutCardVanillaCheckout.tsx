@@ -21,6 +21,7 @@ import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { readCheckoutApiJson } from "@/lib/checkout/readCheckoutApiJson";
 import { formatCheckoutPayError } from "@/lib/checkout/formatCheckoutPayError";
 import { STRIPE_CHECKOUT_BILLING_COUNTRY } from "@/lib/checkout/stripePaymentElementConfig";
+import { trackSnapAddBilling } from "@/lib/analytics/trackSnapCommerce";
 import { confirmCardPaymentOnServer } from "@/lib/checkout/confirmCardPaymentOnServer";
 import { submitAndConfirmStripePayment } from "@/lib/checkout/submitAndConfirmStripePayment";
 import { saveOrderDraft } from "@/lib/orderStorage";
@@ -201,6 +202,12 @@ export function CheckoutCardVanillaCheckout({
       }
 
       const order = finalizeData.order;
+      trackSnapAddBilling({
+        productSlug,
+        quantity,
+        valueAed: order.totalAed,
+        ...(sendCartLines ? { cartLines } : {}),
+      });
       if (finalizeData.paymentIntentStatus === "succeeded") {
         await confirmCardPaymentOnServer({
           orderId: order.id,

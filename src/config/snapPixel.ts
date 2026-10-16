@@ -1,11 +1,19 @@
-/** Public Snap Pixel ID — set at build time via Easypanel: NEXT_PUBLIC_SNAP_PIXEL_ID */
-export function getSnapPixelId(): string | null {
-  const id = process.env.NEXT_PUBLIC_SNAP_PIXEL_ID?.trim();
-  return id || null;
+/** Velora Beauty UAE — Snap Pixel (Ads Manager). */
+export const VELORA_SNAP_PIXEL_ID = "628f12d8-df4e-4272-889a-4806255011cd";
+
+/** Retired pixel — never load or accept from env. */
+export const LEGACY_SNAP_PIXEL_ID = "fc3323cd-f493-4a59-899d-d533e282c701";
+
+/** Public Snap Pixel ID — baked at build via NEXT_PUBLIC_SNAP_PIXEL_ID (optional override). */
+export function getSnapPixelId(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_SNAP_PIXEL_ID?.trim();
+  if (fromEnv && fromEnv !== LEGACY_SNAP_PIXEL_ID) return fromEnv;
+  return VELORA_SNAP_PIXEL_ID;
 }
 
-/** @deprecated use getSnapPixelId() — empty string when unset (Snap disabled) */
-export const SNAP_PIXEL_ID = process.env.NEXT_PUBLIC_SNAP_PIXEL_ID?.trim() ?? "";
+export function isSnapPixelConfigured(): boolean {
+  return Boolean(getSnapPixelId());
+}
 
 export const SNAP_CURRENCY = "AED" as const;
 

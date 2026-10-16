@@ -28,6 +28,13 @@ export type StoreAnalyticsEvent =
       number_items: number;
     }
   | {
+      event: "add_billing";
+      value_aed: number;
+      currency: "AED";
+      content_ids: string[];
+      number_items: number;
+    }
+  | {
       event: "purchase";
       value_aed: number;
       currency: "AED";

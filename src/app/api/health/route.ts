@@ -7,6 +7,7 @@ import {
   stripeLiveTestCheckoutUrl,
   stripeLiveTestShortcutUrl,
 } from "@/config/stripeLiveTestCheckout";
+import { getSnapPixelId, VELORA_SNAP_PIXEL_ID } from "@/config/snapPixel";
 import { getSiteUrl } from "@/lib/siteUrl";
 import { readOrdersSheetsExportStatus } from "@/lib/ordersSheets/exportOrder";
 import {
@@ -104,6 +105,14 @@ export async function GET() {
             stripeLiveTestCardCheckout: stripeLiveTestCheckoutUrl(getSiteUrl()),
           }
         : {}),
+    },
+    snapPixel: {
+      configured: Boolean(getSnapPixelId()),
+      pixelIdPrefix: getSnapPixelId().slice(0, 8),
+      canonicalId: VELORA_SNAP_PIXEL_ID,
+      bakedAtBuild: true,
+      note:
+        "NEXT_PUBLIC_SNAP_PIXEL_ID is inlined at Docker/GH Actions build — runtime Easypanel env alone does not change an existing image.",
     },
     ordersSheets: {
       enabled: ordersSheets.enabled,

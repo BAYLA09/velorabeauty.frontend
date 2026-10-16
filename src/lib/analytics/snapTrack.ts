@@ -1,24 +1,41 @@
-import { getSnapPixelId } from "@/config/snapPixel";
+import { isSnapPixelConfigured } from "@/config/snapPixel";
 
 declare global {
   interface Window {
-    snaptr?: (...args: unknown[]) => void;
+    snaptr?: {
+      (...args: unknown[]): void;
+      queue?: unknown[][];
+      handleRequest?: (...args: unknown[]) => void;
+    };
   }
 }
 
-export function isSnapPixelConfigured(): boolean {
-  return Boolean(getSnapPixelId());
+/** Minimal queue stub until scevent.min.js loads (safe for early funnel events). */
+export function ensureSnaptrQueue(): boolean {
+  if (typeof window === "undefined") return false;
+  if (typeof window.snaptr === "function") return true;
+  const queue: unknown[][] = [];
+  const stub = ((...args: unknown[]) => {
+    queue.push(args);
+  }) as NonNullable<Window["snaptr"]>;
+  stub.queue = queue;
+  window.snaptr = stub;
+  return true;
 }
+
+export { isSnapPixelConfigured };
 
 /** Returns true if the call was passed to snaptr (or its queue). */
 export function snapTrack(event: string, params?: Record<string, unknown>): boolean {
   if (typeof window === "undefined" || !isSnapPixelConfigured()) return false;
   try {
-    if (typeof window.snaptr !== "function") return false;
+    ensureSnaptrQueue();
+    const snaptr = window.snaptr;
+    if (!snaptr) return false;
     if (params && Object.keys(params).length > 0) {
-      window.snaptr("track", event, params);
+      snaptr("track", event, params);
     } else {
-      window.snaptr("track", event);
+      snaptr("track", event);
     }
     return true;
   } catch {
