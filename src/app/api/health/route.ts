@@ -36,6 +36,11 @@ export async function GET() {
     githubMainPrefix !== null &&
     shortSha !== "local" &&
     shortSha === githubMainPrefix;
+  const ghcrBase = "ghcr.io/bayla09/velorabeauty.frontend";
+  const pullImageLatest = `${ghcrBase}:latest`;
+  const pullImagePin =
+    githubMainPrefix !== null ? `${ghcrBase}:${githubMainPrefix}` : pullImageLatest;
+  const snapPixelId = process.env.NEXT_PUBLIC_SNAP_PIXEL_ID?.trim() || null;
   const backendCheckout = readBackendCheckoutConfig();
   const ordersSheets = readOrdersSheetsExportStatus();
 
@@ -63,7 +68,25 @@ export async function GET() {
           ? null
           : inSyncWithMain
             ? "الموقع محدّث مع GitHub main."
-            : `الموقع قديم (${shortSha}) — GitHub main هو ${githubMainPrefix}. Easypanel → Source: Docker Image → ghcr.io/bayla09/velorabeauty.frontend:latest → Deploy (1–3 دقائق، ماشي 1 ثانية).`,
+            : `الموقع قديم (${shortSha}) — GitHub main هو ${githubMainPrefix}. Easypanel → Docker Image (ماشي Git) → ${pullImageLatest} → Deploy (1–3 دقائق). إلا Deploy = 1 ثانية → Source غلط.`,
+      staleDeployFixAr: inSyncWithMain
+        ? null
+        : {
+            reason:
+              "الصورة الجديدة على GHCR ولكن السيرفر ما سحبش :latest (GitHub webhook/Easypanel ناقص).",
+            easypanelSource: "Docker Image فقط — ماشي GitHub/Git/Compose+build",
+            imageLatest: pullImageLatest,
+            imagePin: pullImagePin,
+            steps: [
+              "Easypanel → خدمة الموقع → Source = Docker Image",
+              `Image = ${pullImageLatest} (أو pin: ${pullImagePin})`,
+              "Port 3000 · Volume /app/data · Environment من deploy/easypanel.env.example",
+              "Deploy (استنى 1–3 دقائق — logs فيها Pulling)",
+              `تحقق: /api/health → version يبدأ بـ ${githubMainPrefix}`,
+            ],
+            githubAutoDeploy:
+              "Repo → Settings → Secrets → EASYPANEL_DEPLOY_WEBHOOK (URL من Easypanel → Deployments → Webhook)",
+          },
       autoDeployNoteAr:
         "Deploy أوتوماتيكي: GitHub → Secret EASYPANEL_DEPLOY_WEBHOOK (URL من Easypanel → Deployments → Webhook). بلا secret، Deploy يدوي فقط.",
       easypanel: {
@@ -104,6 +127,10 @@ export async function GET() {
             stripeLiveTestCardCheckout: stripeLiveTestCheckoutUrl(getSiteUrl()),
           }
         : {}),
+    },
+    analytics: {
+      snapPixelIdInImage: snapPixelId,
+      snapPixelReady: Boolean(snapPixelId),
     },
     ordersSheets: {
       enabled: ordersSheets.enabled,

@@ -40,7 +40,6 @@ jobs:
           context: .
           push: false
           tags: velorabeauty-frontend:ci
-          driver: docker
           build-args: |
             GIT_SHA=${{ github.sha }}
             NEXT_PUBLIC_SNAP_PIXEL_ID=${{ vars.NEXT_PUBLIC_SNAP_PIXEL_ID || '628f12d8-df4e-4272-889a-4806255011cd' }}
