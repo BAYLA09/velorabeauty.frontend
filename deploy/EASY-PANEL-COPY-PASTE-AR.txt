@@ -51,8 +51,8 @@
      → version يبدأ بـ 1ff1fd7 (أو أحدث main)
      → stripeTestCheckoutEnabled: true (إلا زدتي السطر ف【4】)
 
-     PDP test:
-     https://www.velorabeauty.world/products/velora-stripe-test-20
+     PDP منتج 04 (دفع إلكتروني 20 د.إ — ما كاينش f home):
+     https://www.velorabeauty.world/products/04-e-pay
 
      Guide: docs/EASYPANEL-AUTO-DEPLOY-AR.md
 

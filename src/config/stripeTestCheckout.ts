@@ -1,14 +1,27 @@
-/** Hidden Stripe live test — not listed on homepage. Enable via Easypanel only. */
+/** Hidden card checkout SKU — not listed on homepage. Enable via Easypanel only. */
 export const STRIPE_TEST_PRODUCT_SLUG = "velora-stripe-test-20";
 
-/** Hidden PDP «منتج 04» — live Stripe ~20 AED (~5 USD), not on homepage. */
+/** Short shareable PDP URL (same page as canonical slug). */
+export const STRIPE_TEST_PRODUCT_PUBLIC_SLUG = "04-e-pay";
+
+/** Hidden PDP «منتج 04» — الدفع الإلكتروني 20 د.إ، not on homepage. */
 export const STRIPE_TEST_PRODUCT_NUMBER = "04";
 
-export const STRIPE_TEST_PRODUCT_NAME = "اختبار Stripe — 20 د.إ";
+export const STRIPE_TEST_PRODUCT_NAME = "الدفع الإلكتروني — فيلورا";
+
+export const STRIPE_TEST_PRODUCT_HEADLINE =
+  "منتج 04 · ادفعي بالبطاقة بأمان — تجربة دفع إلكتروني داخل الإمارات";
+
+export const STRIPE_TEST_PRODUCT_SUBHOOK =
+  "طلب حقيقي بـ 20 د.إ عبر Stripe — تأكيد فوري على البطاقة، بدون دفع عند الاستلام.";
 
 export const STRIPE_TEST_PRICE_AED = 20;
 
 export const STRIPE_TEST_USD_HINT = "~5 USD";
+
+export function stripeTestProductPublicPath(): string {
+  return `/products/${STRIPE_TEST_PRODUCT_PUBLIC_SLUG}`;
+}
 
 export function isStripeTestCheckoutEnabled(): boolean {
   const v = process.env.STRIPE_TEST_CHECKOUT_ENABLED?.trim().toLowerCase();

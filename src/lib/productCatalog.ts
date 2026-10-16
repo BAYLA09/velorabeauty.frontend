@@ -56,7 +56,7 @@ export function getProductBySlug(slug: string): ProductWithPage | undefined {
       name: STRIPE_TEST_PRODUCT_NAME,
       price: STRIPE_TEST_PRICE_AED,
       priceLabel: `${STRIPE_TEST_PRICE_AED} د.إ`,
-      description: "اختبار دفع Stripe — غير معروض في المتجر.",
+      description: "منتج 04 — الدفع الإلكتروني بالبطاقة (غير معروض في الرئيسية).",
     };
   }
   return getAllProductsWithPages().find((p) => p.slug === slug);
