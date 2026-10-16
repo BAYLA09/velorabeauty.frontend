@@ -26,12 +26,14 @@ RUN npm run build
 
 FROM node:22-alpine AS runner
 ARG GIT_SHA=unknown
+ARG NEXT_PUBLIC_SNAP_PIXEL_ID=
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV BUILD_SHA=${GIT_SHA}
+ENV NEXT_PUBLIC_SNAP_PIXEL_ID=${NEXT_PUBLIC_SNAP_PIXEL_ID}
 ENV DATABASE_PATH=/app/data/velora.sqlite
 RUN apk add --no-cache sqlite-libs \
   && addgroup --system --gid 1001 nodejs \

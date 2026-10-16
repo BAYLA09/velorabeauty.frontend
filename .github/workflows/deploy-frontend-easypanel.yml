@@ -57,7 +57,11 @@ jobs:
         id: hook
         env:
           WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
+          WEBHOOK_VAR: ${{ vars.EASYPANEL_DEPLOY_WEBHOOK }}
         run: |
+          if [ -z "$WEBHOOK" ] && [ -n "$WEBHOOK_VAR" ]; then
+            WEBHOOK="$WEBHOOK_VAR"
+          fi
           if [ -z "$WEBHOOK" ]; then
             echo "configured=false" >> "$GITHUB_OUTPUT"
             echo "::warning::EASYPANEL_DEPLOY_WEBHOOK not set — image published on GHCR but Easypanel will NOT auto-pull."
@@ -72,7 +76,11 @@ jobs:
         if: steps.hook.outputs.configured == 'true'
         env:
           WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
+          WEBHOOK_VAR: ${{ vars.EASYPANEL_DEPLOY_WEBHOOK }}
         run: |
+          if [ -z "$WEBHOOK" ] && [ -n "$WEBHOOK_VAR" ]; then
+            WEBHOOK="$WEBHOOK_VAR"
+          fi
           set -euo pipefail
           for attempt in 1 2 3 4; do
             code=$(curl -sS -o /tmp/ep-deploy.txt -w "%{http_code}" -X POST "$WEBHOOK")
