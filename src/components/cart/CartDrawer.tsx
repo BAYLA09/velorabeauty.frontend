@@ -14,6 +14,8 @@ import { encodeCartItemsParam } from "@/lib/cart/cartSerialization";
 import { normalizeCartLines } from "@/lib/cart/cartPricing";
 import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
 import { CartUpsellSection } from "@/components/cart/CartUpsellSection";
+import { trackSnapStartCheckout } from "@/lib/analytics/trackSnapCommerce";
+import { getCheckoutTotalForCart } from "@/lib/cart/cartPricing";
 import { buildCartCheckoutPath } from "@/lib/checkoutRoutes";
 import { getProductBySlug } from "@/lib/productCatalog";
 import { cartDrawerCopy as t } from "@/components/cart/cartDrawerCopy";
@@ -246,7 +248,21 @@ export function CartDrawer() {
             {canCheckout ? (
               <Link
                 href={buildCartCheckoutPath(encodeCartItemsParam(lines))}
-                onClick={closeCart}
+                onClick={() => {
+                  if (pricing.ok) {
+                    const normalized = normalizeCartLines(lines);
+                    const meta = buildMixedCartSummary(normalized);
+                    const valueAed =
+                      getCheckoutTotalForCart(normalized, "card") ?? pricing.merchandiseAed;
+                    trackSnapStartCheckout({
+                      productSlug: meta.productSlug,
+                      quantity: pricing.bundleQuantity,
+                      valueAed,
+                      cartLines: normalized,
+                    });
+                  }
+                  closeCart();
+                }}
                 onMouseEnter={() => {
                   if (!pricing.ok) return;
                   const itemsParam = encodeCartItemsParam(lines);

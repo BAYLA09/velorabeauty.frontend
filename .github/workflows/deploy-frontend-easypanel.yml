@@ -60,11 +60,11 @@ jobs:
         run: |
           if [ -z "$WEBHOOK" ]; then
             echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::error::EASYPANEL_DEPLOY_WEBHOOK not set — production will NOT update after Publish container."
-            echo "Fix: Easypanel → Docker Image service → Deployments → Webhook → copy URL"
-            echo "Then GitHub repo → Settings → Secrets → EASYPANEL_DEPLOY_WEBHOOK"
-            echo "Guide: docs/EASYPANEL-AUTO-DEPLOY-AR.md · manual: docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
-            exit 1
+            echo "::warning::EASYPANEL_DEPLOY_WEBHOOK not set — image published on GHCR but Easypanel will NOT auto-pull."
+            echo "Manual deploy: Easypanel → Docker Image → ghcr.io/bayla09/velorabeauty.frontend:latest → Deploy (1–3 min)"
+            echo "Auto deploy: Easypanel → Deployments → Webhook → GitHub Secret EASYPANEL_DEPLOY_WEBHOOK"
+            echo "Guide: docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
+            exit 0
           fi
           echo "configured=true" >> "$GITHUB_OUTPUT"
 

@@ -12,6 +12,7 @@ import {
   readOrderDraft,
   type OrderDraft,
 } from "@/lib/orderStorage";
+
 export function ThankYouPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,6 +20,7 @@ export function ThankYouPageClient() {
   const sessionIdFromUrl = searchParams.get("session_id");
   const paymentIntentFromUrl = searchParams.get("payment_intent");
   const [order, setOrder] = useState<OrderDraft | null>(null);
+  const [purchaseVerified, setPurchaseVerified] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export function ThankYouPageClient() {
                 data.order.cartLines && data.order.cartLines.length > 0
                   ? data.order.cartLines
                   : draftCartLines;
+              setPurchaseVerified(true);
               setOrder({
                 orderId: data.order.id,
                 productSlug: data.order.productSlug,
@@ -100,15 +103,24 @@ export function ThankYouPageClient() {
             return;
           }
         } catch {
-          /* fall through to draft */
+          /* fall through */
         }
+        if (!cancelled) {
+          setOrder(null);
+          setPurchaseVerified(false);
+          setLoading(false);
+        }
+        return;
       }
       if (!cancelled) {
         if (draft?.method === "card" && orderIdFromUrl) {
           router.replace(`/checkout/success?id=${encodeURIComponent(orderIdFromUrl)}`);
           return;
         }
-        setOrder(draft);
+        if (draft) {
+          setOrder(draft);
+          setPurchaseVerified(false);
+        }
         setLoading(false);
       }
     }
@@ -140,7 +152,11 @@ export function ThankYouPageClient() {
             </Link>
           </div>
         ) : (
-          <CodThankYouSuccess order={order} onNavigateAway={() => clearOrderDraft()} />
+          <CodThankYouSuccess
+            order={order}
+            purchaseVerified={purchaseVerified}
+            onNavigateAway={() => clearOrderDraft()}
+          />
         )}
       </main>
       <FooterSection />

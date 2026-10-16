@@ -4,10 +4,10 @@ import type { OrderDraft } from "@/lib/orderStorage";
 export async function fetchOrderDraftById(
   orderId: string,
   draftFallback?: OrderDraft | null,
-): Promise<{ order: OrderDraft | null; status: string | null }> {
+): Promise<{ order: OrderDraft | null; status: string | null; verifiedFromApi: boolean }> {
   try {
     const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
-    if (!res.ok) return { order: draftFallback ?? null, status: null };
+    if (!res.ok) return { order: draftFallback ?? null, status: null, verifiedFromApi: false };
     const data = (await res.json()) as {
       order: {
         id: string;
@@ -34,6 +34,7 @@ export async function fetchOrderDraftById(
         ? data.order.cartLines
         : draftCartLines;
     return {
+      verifiedFromApi: true,
       status: data.order.status,
       order: {
         orderId: data.order.id,
@@ -54,7 +55,7 @@ export async function fetchOrderDraftById(
       },
     };
   } catch {
-    return { order: draftFallback ?? null, status: null };
+    return { order: draftFallback ?? null, status: null, verifiedFromApi: false };
   }
 }
 
