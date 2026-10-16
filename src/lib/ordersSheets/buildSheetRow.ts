@@ -5,6 +5,7 @@ import type { OrderAttribution } from "@/lib/attribution/orderAttribution";
 import type { OrderRecord } from "@/lib/ordersRepository";
 import { getProductBySlug } from "@/lib/productCatalog";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { CARD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/cardSheetColumns";
 import { COD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/codSheetColumns";
 
 export type OrdersSheetChannel = "cod" | "card";
@@ -92,6 +93,52 @@ export function buildCodSheetRows(
     ];
     if (row.length !== COD_ORDERS_SHEET_COLUMN_COUNT) {
       throw new Error(`COD sheet row length ${row.length} !== ${COD_ORDERS_SHEET_COLUMN_COUNT}`);
+    }
+    return row;
+  });
+}
+
+/** Paid card orders — 18 columns (includes national_address; utm_term before utm_content). */
+export function buildCardSheetRows(
+  order: OrderRecord,
+  lines: CartLine[] | null,
+  attribution: OrderAttribution | null,
+): (string | number)[][] {
+  const orderDate = formatOrderDateDubai(order.createdAt);
+  const country = "AE";
+  const currency = "AED";
+  const notes = buildNotes(order);
+  const utm = attribution ?? {};
+
+  return lineItemsForOrder(order, lines).map((line) => {
+    const product = getProductBySlug(line.slug);
+    const sku = line.slug;
+    const productName = product?.name ?? order.productName;
+    const price = getMerchandiseAedForLineQuantity(line.quantity) ?? order.subtotalAed;
+    const row: (string | number)[] = [
+      orderDate,
+      country,
+      order.customerName,
+      order.phone,
+      order.address,
+      productUrl(sku, utm),
+      sku,
+      productName,
+      line.quantity,
+      price,
+      currency,
+      notes,
+      utm.utm_source ?? "",
+      utm.utm_medium ?? "",
+      utm.utm_campaign ?? "",
+      utm.utm_term ?? "",
+      utm.utm_content ?? "",
+      "",
+    ];
+    if (row.length !== CARD_ORDERS_SHEET_COLUMN_COUNT) {
+      throw new Error(
+        `card sheet row length ${row.length} !== ${CARD_ORDERS_SHEET_COLUMN_COUNT}`,
+      );
     }
     return row;
   });

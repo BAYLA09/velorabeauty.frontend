@@ -1,5 +1,9 @@
 import { JWT } from "google-auth-library";
 import {
+  VELORA_CARD_SHEET_GID,
+  VELORA_CARD_SPREADSHEET_ID,
+} from "@/lib/ordersSheets/cardSheetColumns";
+import {
   VELORA_COD_SHEET_GID,
   VELORA_COD_SPREADSHEET_ID,
 } from "@/lib/ordersSheets/codSheetColumns";
@@ -59,14 +63,14 @@ export function readGoogleSheetsDirectConfig(): GoogleSheetsDirectConfig {
   const cardGidRaw =
     process.env.ORDERS_SHEETS_CARD_SHEET_GID?.trim() ||
     process.env.CARD_SHEET_GID?.trim() ||
-    "";
+    String(VELORA_CARD_SHEET_GID);
   const cardSheetGidParsed = cardGidRaw ? Number.parseInt(cardGidRaw, 10) : NaN;
   const cardSheetGid = Number.isFinite(cardSheetGidParsed) ? cardSheetGidParsed : null;
 
   const cardSpreadsheetIdRaw =
     process.env.ORDERS_SHEETS_CARD_SPREADSHEET_ID?.trim() ||
     process.env.CARD_SPREADSHEET_ID?.trim() ||
-    "";
+    VELORA_CARD_SPREADSHEET_ID;
   const cardSpreadsheetId = isLikelyGoogleSpreadsheetId(cardSpreadsheetIdRaw)
     ? cardSpreadsheetIdRaw
     : null;
@@ -180,8 +184,8 @@ export async function appendCodRowsViaGoogleSheetsApi(
   if (!config.enabled || !config.spreadsheetId || rows.length === 0) return false;
 
   const spreadsheetId =
-    channel === "card" && config.cardSpreadsheetId
-      ? config.cardSpreadsheetId
+    channel === "card"
+      ? (config.cardSpreadsheetId ?? config.spreadsheetId)
       : config.spreadsheetId;
   if (!spreadsheetId) return false;
 
@@ -196,7 +200,8 @@ export async function appendCodRowsViaGoogleSheetsApi(
 
   const token = await getAccessToken();
   const title = await resolveSheetTitle(spreadsheetId, gid, token);
-  const range = `'${title.replace(/'/g, "''")}'!A:Q`;
+  const lastColumn = channel === "card" ? "R" : "Q";
+  const range = `'${title.replace(/'/g, "''")}'!A:${lastColumn}`;
 
   const res = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
