@@ -10,6 +10,7 @@ import {
 } from "@/components/product/ProductPaymentMethodsInfo";
 import { useCart } from "@/context/CartProvider";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
+import { trackSnapStartCheckout } from "@/lib/analytics/trackSnapCommerce";
 import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
 import {
   codFee,
@@ -210,6 +211,11 @@ export function ProductPurchasePanel({
   }
 
   function goToCheckout() {
+    trackSnapStartCheckout({
+      productSlug,
+      quantity,
+      valueAed: displayTotal,
+    });
     warmStripeCheckout();
     router.push(buildCheckoutPaymentStepPath({ product: productSlug, quantity }));
   }

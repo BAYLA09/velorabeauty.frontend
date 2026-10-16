@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import { codFee } from "@/config/pricing";
 import type { BundleQuantity } from "@/config/pricing";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
+import { trackVerifiedPurchaseOnce } from "@/lib/analytics/trackPurchaseOnce";
 import { codTimelineSteps } from "@/lib/order/codThankYouTimeline";
 import { buildOrderDisplayLines } from "@/lib/order/buildOrderDisplayLines";
 import type { OrderDraft } from "@/lib/orderStorage";
@@ -48,6 +49,24 @@ export function CodThankYouSuccess({ order, onNavigateAway }: Props) {
     trackStoreEvent({ event: "cod_thank_you_page_view" });
     trackStoreEvent({ event: "order_summary_view" });
   }, []);
+
+  useEffect(() => {
+    if (!order.orderId?.trim()) return;
+    trackVerifiedPurchaseOnce({
+      orderId: order.orderId,
+      valueAed: order.totalAed,
+      paymentMethod: "cod",
+      productSlug: order.productSlug,
+      quantity: order.quantity as BundleQuantity,
+      cartLines: order.cartLines,
+    });
+  }, [
+    order.orderId,
+    order.totalAed,
+    order.productSlug,
+    order.quantity,
+    order.cartLines,
+  ]);
 
   return (
     <article className="relative mx-auto max-w-[440px] overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_48px_rgba(58,24,32,0.12)] ring-1 ring-velora-burgundy/8">

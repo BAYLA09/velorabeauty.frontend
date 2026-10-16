@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { El_Messiri, Tajawal } from "next/font/google";
+import { SnapPixelRoot } from "@/components/analytics/SnapPixelRoot";
 import { CartRoot } from "@/components/cart/CartRoot";
 import { brand } from "@/config/brand";
 import "./globals.css";
@@ -53,6 +54,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://js.stripe.com" />
       </head>
       <body className="antialiased">
+        <SnapPixelRoot />
         <CartRoot>{children}</CartRoot>
       </body>
     </html>

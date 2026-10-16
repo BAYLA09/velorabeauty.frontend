@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { cardThankYouCopy } from "@/config/cardThankYouCopy";
 import type { BundleQuantity } from "@/config/pricing";
 import { CodThankYouOrderMetaBar } from "@/components/order/cod-thank-you/CodThankYouOrderMetaBar";
@@ -12,6 +12,7 @@ import { CardThankYouQuickTrust } from "@/components/order/card-thank-you/CardTh
 import { CardThankYouReceiptStrip } from "@/components/order/card-thank-you/CardThankYouReceiptStrip";
 import { CardThankYouTimeline } from "@/components/order/card-thank-you/CardThankYouTimeline";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
+import { trackVerifiedPurchaseOnce } from "@/lib/analytics/trackPurchaseOnce";
 import { cardTimelineSteps } from "@/lib/order/cardThankYouTimeline";
 import { buildOrderDisplayLines } from "@/lib/order/buildOrderDisplayLines";
 import type { OrderDraft } from "@/lib/orderStorage";
@@ -34,7 +35,6 @@ export function CardThankYouSuccess({ order, onNavigateAway }: Props) {
   const deliveryFee = order.deliveryFeeAed ?? 0;
   const subtotalAed = order.subtotalAed ?? Math.max(0, order.totalAed - deliveryFee);
   const isPaid = order.status === "paid";
-  const purchaseTracked = useRef(false);
 
   const displayLines = useMemo(
     () =>
@@ -55,16 +55,23 @@ export function CardThankYouSuccess({ order, onNavigateAway }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!isPaid || purchaseTracked.current) return;
-    purchaseTracked.current = true;
-    trackStoreEvent({
-      event: "purchase",
-      value_aed: order.totalAed,
-      currency: "AED",
-      order_ref: orderRef,
-      payment_method: "card",
+    if (!isPaid || !order.orderId?.trim()) return;
+    trackVerifiedPurchaseOnce({
+      orderId: order.orderId,
+      valueAed: order.totalAed,
+      paymentMethod: "card",
+      productSlug: order.productSlug,
+      quantity: order.quantity as BundleQuantity,
+      cartLines: order.cartLines,
     });
-  }, [isPaid, order.totalAed, orderRef]);
+  }, [
+    isPaid,
+    order.orderId,
+    order.totalAed,
+    order.productSlug,
+    order.quantity,
+    order.cartLines,
+  ]);
 
   return (
     <article className="relative mx-auto max-w-[440px] overflow-hidden rounded-[1.75rem] bg-white shadow-[0_20px_56px_rgba(58,24,32,0.14)] ring-1 ring-velora-burgundy/8">

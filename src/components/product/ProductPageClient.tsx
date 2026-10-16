@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackSnapViewContent } from "@/lib/analytics/trackSnapCommerce";
 import type { BundleQuantity } from "@/config/pricing";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
@@ -30,6 +31,10 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
+
+  useEffect(() => {
+    trackSnapViewContent({ productSlug: product.slug, valueAed: product.price });
+  }, [product.slug, product.price]);
 
   return (
     <>

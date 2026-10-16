@@ -15,6 +15,7 @@ import {
 import { useStripeCheckoutPrefetch } from "@/components/checkout/useStripeCheckoutPrefetch";
 import { buildCheckoutPath } from "@/lib/checkoutRoutes";
 import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
+import { trackSnapStartCheckout } from "@/lib/analytics/trackSnapCommerce";
 import { parseCheckoutLines } from "@/lib/checkoutUpsell";
 
 type Props = {
@@ -115,6 +116,12 @@ export function CheckoutPaymentStepClient({
   }, [router, query]);
 
   function continueCheckout() {
+    trackSnapStartCheckout({
+      productSlug,
+      quantity,
+      valueAed: total,
+      cartLines: cartItemsParam ? cartLines : undefined,
+    });
     router.push(buildCheckoutPath(method, query));
   }
 
