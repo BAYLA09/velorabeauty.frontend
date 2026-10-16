@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { El_Messiri, Tajawal } from "next/font/google";
-import { Suspense } from "react";
 import { SnapPixelRoot } from "@/components/analytics/SnapPixelRoot";
-import { SnapTestModePersist } from "@/components/analytics/SnapTestModePersist";
 import { snapPixelBootstrapScriptForApp } from "@/lib/analytics/snapBootstrap";
 import { buildSnapTestModeCaptureScript } from "@/lib/analytics/snapTestMode";
 import { CartRoot } from "@/components/cart/CartRoot";
@@ -68,9 +66,6 @@ export default function RootLayout({
         ) : null}
       </head>
       <body className="antialiased">
-        <Suspense fallback={null}>
-          <SnapTestModePersist />
-        </Suspense>
         <SnapPixelRoot />
         <CartRoot>{children}</CartRoot>
       </body>
