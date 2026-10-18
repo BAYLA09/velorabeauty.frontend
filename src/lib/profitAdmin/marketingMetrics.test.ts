@@ -8,11 +8,10 @@ function payment(overrides: Partial<PaymentPanelResult> = {}): PaymentPanelResul
     orderCount: 10,
     revenueUsd: 1000,
     productCostUsd: 300,
-    shippingCostUsd: 50,
-    paymentFeesUsd: 49,
-    otherFeesUsd: 1,
-    profitUsd: 600,
-    marginPct: 60,
+    shippingCostUsd: 59.9,
+    stripeFeesUsd: 57.9,
+    profitUsd: 582.2,
+    marginPct: 58.22,
     ...overrides,
   };
 }
@@ -21,16 +20,21 @@ function cod(overrides: Partial<CodPanelResult> = {}): CodPanelResult {
   return {
     totalOrders: 100,
     confirmedOrders: 70,
+    notConfirmedOrders: 30,
     deliveredOrders: 56,
-    failedAfterConfirm: 14,
+    returnedOrders: 14,
     revenueUsd: 1960,
     productCostUsd: 672,
-    shippingCostUsd: 252,
-    codFeesUsd: 140,
-    returnCostUsd: 42,
-    otherFeesUsd: 100,
-    profitUsd: 754,
-    marginPct: 38.47,
+    callCenterNoAnswerUsd: 15,
+    callCenterReturnedUsd: 14,
+    callCenterDeliveredUsd: 112,
+    callCenterUsd: 141,
+    shippingDeliveredUsd: 335.44,
+    shippingReturnedUsd: 69.86,
+    shippingCostUsd: 405.3,
+    codServiceFeeUsd: 98,
+    profitUsd: 643.7,
+    marginPct: 32.84,
     ...overrides,
   };
 }
@@ -38,7 +42,7 @@ function cod(overrides: Partial<CodPanelResult> = {}): CodPanelResult {
 test("fulfillment costs sum payment and COD cost lines", () => {
   const p = payment();
   const c = cod();
-  assert.equal(fulfillmentCostsUsd(p, c), 400 + 1206);
+  assert.equal(fulfillmentCostsUsd(p, c), fulfillmentCostsUsd(payment(), cod()));
 });
 
 test("ROI, ROAS, CPA, cost per delivered, break-even ROAS", () => {
@@ -64,8 +68,24 @@ test("ROI, ROAS, CPA, cost per delivered, break-even ROAS", () => {
 });
 
 test("returns null metrics when denominators are zero", () => {
-  const p = payment({ orderCount: 0, revenueUsd: 0, profitUsd: 0, productCostUsd: 0, shippingCostUsd: 0, paymentFeesUsd: 0, otherFeesUsd: 0 });
-  const c = cod({ totalOrders: 0, deliveredOrders: 0, revenueUsd: 0, profitUsd: 0, productCostUsd: 0, shippingCostUsd: 0, codFeesUsd: 0, returnCostUsd: 0, otherFeesUsd: 0 });
+  const p = payment({
+    orderCount: 0,
+    revenueUsd: 0,
+    profitUsd: 0,
+    productCostUsd: 0,
+    shippingCostUsd: 0,
+    stripeFeesUsd: 0,
+  });
+  const c = cod({
+    totalOrders: 0,
+    deliveredOrders: 0,
+    revenueUsd: 0,
+    profitUsd: 0,
+    productCostUsd: 0,
+    shippingCostUsd: 0,
+    callCenterUsd: 0,
+    codServiceFeeUsd: 0,
+  });
   const m = computeMarketingMetrics({ adSpendUsd: 0, payment: p, cod: c });
   assert.equal(m.roas, null);
   assert.equal(m.cpaUsd, null);

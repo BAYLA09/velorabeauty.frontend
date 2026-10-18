@@ -15,7 +15,15 @@ import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository"
 type DashboardPayload = {
   range: { from: string; to: string };
   previousRange: { from: string; to: string };
-  payment: { input: PaymentPanelInput; result: PaymentPanelInput & { profitUsd: number; marginPct: number; paymentFeesUsd: number; revenueUsd: number } };
+  payment: {
+    input: PaymentPanelInput;
+    result: PaymentPanelInput & {
+      profitUsd: number;
+      marginPct: number;
+      stripeFeesUsd: number;
+      revenueUsd: number;
+    };
+  };
   cod: {
     input: CodPanelInput;
     result: CodPanelInput & {
@@ -23,12 +31,18 @@ type DashboardPayload = {
       marginPct: number;
       deliveredOrders: number;
       confirmedOrders: number;
+      notConfirmedOrders: number;
+      returnedOrders: number;
       revenueUsd: number;
       productCostUsd: number;
       shippingCostUsd: number;
-      codFeesUsd: number;
-      returnCostUsd: number;
-      otherFeesUsd: number;
+      callCenterUsd: number;
+      callCenterNoAnswerUsd: number;
+      callCenterReturnedUsd: number;
+      callCenterDeliveredUsd: number;
+      shippingDeliveredUsd: number;
+      shippingReturnedUsd: number;
+      codServiceFeeUsd: number;
     };
   };
   kpis: {
@@ -474,6 +488,35 @@ export function ProfitAdminDashboard() {
                 ))}
               </section>
 
+              {localState ? (
+                <article className="rounded-2xl border border-violet-500/25 bg-gradient-to-br from-violet-950/30 to-[#1a1d27] p-5">
+                  <h2 className="text-base font-semibold text-violet-200">Your inputs</h2>
+                  <p className="mt-1 text-xs text-slate-400">
+                    The only values you control — everything else uses live orders and server fee
+                    config.
+                  </p>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                    <NumInput
+                      label="Confirmation rate"
+                      suffix="%"
+                      value={localState.confirmationRatePct}
+                      onChange={(n) => patchState({ confirmationRatePct: n })}
+                    />
+                    <NumInput
+                      label="Delivery rate"
+                      suffix="%"
+                      value={localState.deliveryRatePct}
+                      onChange={(n) => patchState({ deliveryRatePct: n })}
+                    />
+                    <NumInput
+                      label="Ad spend (Snapchat)"
+                      value={localState.adSpendUsd}
+                      onChange={(n) => patchState({ adSpendUsd: n })}
+                    />
+                  </div>
+                </article>
+              ) : null}
+
               <section className="grid gap-6 xl:grid-cols-2">
                 <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
                   <h2 className="flex items-center gap-2 text-base font-semibold">
@@ -496,17 +539,14 @@ export function ProfitAdminDashboard() {
                           <dd>{money(paymentResult.shippingCostUsd)}</dd>
                         </div>
                         <div className="flex justify-between gap-2">
-                          <dt className="text-slate-400">Payment Fees</dt>
+                          <dt className="text-slate-400">Stripe fees (card only)</dt>
                           <dd className="text-right">
-                            {money(paymentResult.paymentFeesUsd)}
+                            {money(paymentResult.stripeFeesUsd)}
                             <span className="ml-1 text-xs text-slate-500">
-                              ({data.fees.payment.paymentFeePercent}%)
+                              ({data.fees.payment.stripePercent}% +{" "}
+                              {money(data.fees.payment.stripeFixedUsd)} / card order)
                             </span>
                           </dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt className="text-slate-400">Other Fees</dt>
-                          <dd>{money(paymentResult.otherFeesUsd)}</dd>
                         </div>
                       </dl>
                       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-slate-700/60 bg-[#12151f] p-4">
@@ -534,52 +574,69 @@ export function ProfitAdminDashboard() {
                   </h2>
                   {codInput && codResult && localState && data ? (
                     <div className="mt-4 grid gap-6 md:grid-cols-2">
-                      <div className="space-y-4">
-                        <dl className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <dt className="text-slate-400">Total COD Orders</dt>
-                            <dd>{codInput.totalOrders}</dd>
-                          </div>
-                          <div className="flex justify-between">
-                            <dt className="text-slate-400">Selling Price / Order</dt>
-                            <dd>{money(codInput.sellingPricePerOrderUsd)}</dd>
-                          </div>
-                          <div className="flex justify-between">
-                            <dt className="text-slate-400">Product Cost / Order</dt>
-                            <dd>{money(codInput.productCostPerOrderUsd)}</dd>
-                          </div>
-                          <div className="flex justify-between">
-                            <dt className="text-slate-400">Shipping Cost / Order</dt>
-                            <dd>{money(codInput.shippingCostPerOrderUsd)}</dd>
-                          </div>
-                          <div className="flex justify-between">
-                            <dt className="text-slate-400">COD Fees / Order</dt>
-                            <dd>{money(codInput.codFeesPerOrderUsd)}</dd>
-                          </div>
-                          <div className="flex justify-between">
-                            <dt className="text-slate-400">Return Cost / Order</dt>
-                            <dd>{money(codInput.returnCostPerOrderUsd)}</dd>
-                          </div>
-                          <div className="flex justify-between">
-                            <dt className="text-slate-400">Other Fees / Order</dt>
-                            <dd>{money(codInput.otherFeesPerOrderUsd)}</dd>
-                          </div>
-                        </dl>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <NumInput
-                            label="Confirmation Rate"
-                            suffix="%"
-                            value={localState.confirmationRatePct}
-                            onChange={(n) => patchState({ confirmationRatePct: n })}
-                          />
-                          <NumInput
-                            label="Delivery Rate"
-                            suffix="%"
-                            value={localState.deliveryRatePct}
-                            onChange={(n) => patchState({ deliveryRatePct: n })}
-                          />
+                      <dl className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Total COD orders (N)</dt>
+                          <dd>{codInput.totalOrders}</dd>
                         </div>
-                      </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Avg selling price (delivered)</dt>
+                          <dd>{money(codInput.sellingPricePerOrderUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Avg product cost (delivered)</dt>
+                          <dd>{money(codInput.productCostPerOrderUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Not confirmed (no answer)</dt>
+                          <dd>{Math.round(codResult.notConfirmedOrders)}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Returned (confirmed, not delivered)</dt>
+                          <dd>{Math.round(codResult.returnedOrders)}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Call center fees</dt>
+                          <dd>{money(codResult.callCenterUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between pl-3 text-xs text-slate-500">
+                          <dt>No answer</dt>
+                          <dd>{money(codResult.callCenterNoAnswerUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between pl-3 text-xs text-slate-500">
+                          <dt>Returned</dt>
+                          <dd>{money(codResult.callCenterReturnedUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between pl-3 text-xs text-slate-500">
+                          <dt>Delivered</dt>
+                          <dd>{money(codResult.callCenterDeliveredUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Shipping fees</dt>
+                          <dd>{money(codResult.shippingCostUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between pl-3 text-xs text-slate-500">
+                          <dt>Returned shipments</dt>
+                          <dd>{money(codResult.shippingReturnedUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between pl-3 text-xs text-slate-500">
+                          <dt>Delivered shipments</dt>
+                          <dd>{money(codResult.shippingDeliveredUsd)}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">COD service fee (COD only)</dt>
+                          <dd>
+                            {money(codResult.codServiceFeeUsd)}
+                            <span className="ml-1 text-xs text-slate-500">
+                              ({codInput.serviceFeePercent}% of delivered COD revenue)
+                            </span>
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Product cost (delivered)</dt>
+                          <dd>{money(codResult.productCostUsd)}</dd>
+                        </div>
+                      </dl>
                       <div className="space-y-3">
                         <div className="rounded-xl border border-slate-700/60 bg-[#12151f] p-4 text-sm">
                           <p className="text-slate-400">Delivered Orders</p>
@@ -665,18 +722,7 @@ export function ProfitAdminDashboard() {
                       </div>
                       <div className="flex justify-between border-t border-slate-700 pt-2 text-slate-400">
                         <dt>Ad spend (Snapchat)</dt>
-                        <dd>
-                          <input
-                            type="number"
-                            className="w-24 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm text-white"
-                            value={localState?.adSpendUsd ?? 0}
-                            onChange={(e) => {
-                              patchState({
-                                adSpendUsd: Number.parseFloat(e.target.value) || 0,
-                              });
-                            }}
-                          />
-                        </dd>
+                        <dd>{money(data.kpis.adSpendUsd)}</dd>
                       </div>
                       <div className="flex justify-between text-slate-300">
                         <dt>Total Profit Margin</dt>
@@ -837,36 +883,33 @@ export function ProfitAdminDashboard() {
                   <dd>{data.fees.aedPerUsd}</dd>
                 </div>
                 <div className="flex justify-between gap-2 sm:block">
-                  <dt className="text-slate-400">Payment fee %</dt>
-                  <dd>{data.fees.payment.paymentFeePercent}%</dd>
+                  <dt className="text-slate-400">Stripe fee (card only)</dt>
+                  <dd>
+                    {data.fees.payment.stripePercent}% + {money(data.fees.payment.stripeFixedUsd)}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-2 sm:block">
                   <dt className="text-slate-400">Card shipping / order</dt>
-                  <dd>{money(data.fees.payment.shippingDeliveredUsd)}</dd>
+                  <dd>{money(data.fees.payment.shippingPerOrderUsd)}</dd>
                 </div>
                 <div className="flex justify-between gap-2 sm:block">
-                  <dt className="text-slate-400">Payment other fees</dt>
-                  <dd>{money(data.fees.payment.otherFeesUsd)}</dd>
+                  <dt className="text-slate-400">COD call center</dt>
+                  <dd>
+                    {money(data.fees.cod.callCenterNoAnswerUsd)} /{" "}
+                    {money(data.fees.cod.callCenterReturnedUsd)} /{" "}
+                    {money(data.fees.cod.callCenterDeliveredUsd)}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-2 sm:block">
-                  <dt className="text-slate-400">COD platform fee %</dt>
-                  <dd>{data.fees.cod.platformFeePercent}%</dd>
+                  <dt className="text-slate-400">COD shipping</dt>
+                  <dd>
+                    {money(data.fees.cod.shippingReturnedUsd)} returned /{" "}
+                    {money(data.fees.cod.shippingDeliveredUsd)} delivered
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-2 sm:block">
-                  <dt className="text-slate-400">COD shipping (delivered)</dt>
-                  <dd>{money(data.fees.cod.shippingDeliveredUsd)}</dd>
-                </div>
-                <div className="flex justify-between gap-2 sm:block">
-                  <dt className="text-slate-400">COD return shipping</dt>
-                  <dd>{money(data.fees.cod.shippingReturnUsd)}</dd>
-                </div>
-                <div className="flex justify-between gap-2 sm:block">
-                  <dt className="text-slate-400">COD fee / delivered</dt>
-                  <dd>{money(data.fees.cod.codFeesPerOrderUsd)}</dd>
-                </div>
-                <div className="flex justify-between gap-2 sm:block">
-                  <dt className="text-slate-400">COD other / order</dt>
-                  <dd>{money(data.fees.cod.otherFeesPerOrderUsd)}</dd>
+                  <dt className="text-slate-400">COD service fee (COD only)</dt>
+                  <dd>{data.fees.cod.serviceFeePercent}% of delivered COD revenue</dd>
                 </div>
               </dl>
               <ConfigFootnote fees={data.fees} />

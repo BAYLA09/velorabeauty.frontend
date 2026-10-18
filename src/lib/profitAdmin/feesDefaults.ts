@@ -10,19 +10,17 @@ export const DEFAULT_FEE_CONFIG = {
     hairGummies: 6.1,
   },
   payment: {
-    paymentFeePercent: 4.9,
     stripePercent: 5.4,
     stripeFixedUsd: 0.3,
-    shippingDeliveredUsd: 5.99,
-    otherFeesUsd: 0,
+    shippingPerOrderUsd: 5.99,
   },
   cod: {
-    platformFeePercent: 5,
-    shippingDeliveredUsd: 4.5,
-    shippingReturnUsd: 3,
-    codFeesPerOrderUsd: 2.5,
-    otherFeesPerOrderUsd: 1,
-    /** Used when no COD orders in range to estimate unit economics */
+    serviceFeePercent: 5,
+    callCenterNoAnswerUsd: 0.5,
+    callCenterReturnedUsd: 1,
+    callCenterDeliveredUsd: 2,
+    shippingDeliveredUsd: 5.99,
+    shippingReturnedUsd: 4.99,
     defaultSellingPricePerOrderUsd: 35,
     defaultProductCostPerOrderUsd: 12,
   },
@@ -37,18 +35,17 @@ export type FeeConfig = {
     hairGummies: number;
   };
   payment: {
-    paymentFeePercent: number;
     stripePercent: number;
     stripeFixedUsd: number;
-    shippingDeliveredUsd: number;
-    otherFeesUsd: number;
+    shippingPerOrderUsd: number;
   };
   cod: {
-    platformFeePercent: number;
+    serviceFeePercent: number;
+    callCenterNoAnswerUsd: number;
+    callCenterReturnedUsd: number;
+    callCenterDeliveredUsd: number;
     shippingDeliveredUsd: number;
-    shippingReturnUsd: number;
-    codFeesPerOrderUsd: number;
-    otherFeesPerOrderUsd: number;
+    shippingReturnedUsd: number;
     defaultSellingPricePerOrderUsd: number;
     defaultProductCostPerOrderUsd: number;
   };
@@ -64,10 +61,6 @@ function parseEnvNumber(name: string, fallback: number): number {
 /** Load fee config from env (Easypanel). Called per request — not persisted in SQLite. */
 export function readFeeConfigFromEnv(): FeeConfig {
   const base = structuredClone(DEFAULT_FEE_CONFIG) as FeeConfig;
-  const sellingDefault = parseEnvNumber(
-    "BAYLA_COD_SELLING_PRICE_USD",
-    base.cod.defaultSellingPricePerOrderUsd,
-  );
   return {
     currency: "USD",
     aedPerUsd: parseEnvNumber("BAYLA_AED_PER_USD", base.aedPerUsd),
@@ -77,25 +70,36 @@ export function readFeeConfigFromEnv(): FeeConfig {
       hairGummies: parseEnvNumber("BAYLA_PRODUCT_COST_HAIR_USD", base.products.hairGummies),
     },
     payment: {
-      paymentFeePercent: parseEnvNumber("BAYLA_PAYMENT_FEE_PERCENT", base.payment.paymentFeePercent),
       stripePercent: parseEnvNumber("BAYLA_STRIPE_FEE_PERCENT", base.payment.stripePercent),
       stripeFixedUsd: parseEnvNumber("BAYLA_STRIPE_FEE_FIXED_USD", base.payment.stripeFixedUsd),
-      shippingDeliveredUsd: parseEnvNumber(
+      shippingPerOrderUsd: parseEnvNumber(
         "BAYLA_CARD_SHIPPING_USD",
-        base.payment.shippingDeliveredUsd,
+        base.payment.shippingPerOrderUsd,
       ),
-      otherFeesUsd: parseEnvNumber("BAYLA_PAYMENT_OTHER_FEES_USD", base.payment.otherFeesUsd),
     },
     cod: {
-      platformFeePercent: parseEnvNumber("BAYLA_COD_PLATFORM_FEE_PERCENT", base.cod.platformFeePercent),
-      shippingDeliveredUsd: parseEnvNumber("BAYLA_COD_SHIPPING_USD", base.cod.shippingDeliveredUsd),
-      shippingReturnUsd: parseEnvNumber("BAYLA_COD_RETURN_COST_USD", base.cod.shippingReturnUsd),
-      codFeesPerOrderUsd: parseEnvNumber("BAYLA_COD_FEE_PER_ORDER_USD", base.cod.codFeesPerOrderUsd),
-      otherFeesPerOrderUsd: parseEnvNumber(
-        "BAYLA_COD_OTHER_FEE_PER_ORDER_USD",
-        base.cod.otherFeesPerOrderUsd,
+      serviceFeePercent: parseEnvNumber(
+        "BAYLA_COD_SERVICE_FEE_PERCENT",
+        base.cod.serviceFeePercent,
       ),
-      defaultSellingPricePerOrderUsd: sellingDefault,
+      callCenterNoAnswerUsd: parseEnvNumber(
+        "BAYLA_COD_CALL_NO_ANSWER_USD",
+        base.cod.callCenterNoAnswerUsd,
+      ),
+      callCenterReturnedUsd: parseEnvNumber(
+        "BAYLA_COD_CALL_RETURNED_USD",
+        base.cod.callCenterReturnedUsd,
+      ),
+      callCenterDeliveredUsd: parseEnvNumber(
+        "BAYLA_COD_CALL_DELIVERED_USD",
+        base.cod.callCenterDeliveredUsd,
+      ),
+      shippingDeliveredUsd: parseEnvNumber("BAYLA_COD_SHIPPING_DELIVERED_USD", base.cod.shippingDeliveredUsd),
+      shippingReturnedUsd: parseEnvNumber("BAYLA_COD_SHIPPING_RETURNED_USD", base.cod.shippingReturnedUsd),
+      defaultSellingPricePerOrderUsd: parseEnvNumber(
+        "BAYLA_COD_SELLING_PRICE_USD",
+        base.cod.defaultSellingPricePerOrderUsd,
+      ),
       defaultProductCostPerOrderUsd: parseEnvNumber(
         "BAYLA_COD_PRODUCT_COST_USD",
         base.cod.defaultProductCostPerOrderUsd,
