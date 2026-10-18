@@ -15,8 +15,16 @@ Configure in Easypanel → Velora frontend → **Environment** → Save → **De
 
 ## Default fees (editable in UI)
 
-- Stripe: 5.4% + $0.30 / card order, shipping $5.99
-- COD: 5% platform fee; call center $0.50 / $1 / $2; ship $5.99 delivered, $4.99 return
-- Product COGS: eye serum $3, skin gummies $7.47, hair gummies $6.10
+- Payment panel fee line: **4.9% of card revenue** (editable); shipping defaults $5.99 / paid order
+- COD: per-order shipping, COD fee, return cost on failed deliveries; confirmation × delivery rates
+- Product COGS (USD): eye serum (SKU **vitaminamin**) $3, skin gummies (**WHITEAMIN**) $7.47
+- **Ad spend** (Snapchat, etc.): editable; subtracted from net total profit
+- AED → USD: peg **3.6725** (editable)
+
+### COD profit formula
+
+- `delivered = totalOrders × (confirmationRate/100) × (deliveryRate/100)`
+- `failedAfterConfirm = totalOrders × (confirmationRate/100) − delivered`
+- `profit = delivered×price − delivered×(product+shipping+COD fees) − failedAfterConfirm×returnCost − totalOrders×otherFeesPerOrder`
 
 Saved inputs persist in SQLite (`bayla_profit_admin_state`).

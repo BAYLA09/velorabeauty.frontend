@@ -253,6 +253,26 @@ export function getOrderById(id: string): OrderRecord | null {
   return row ? rowToRecord(row) : null;
 }
 
+/** Orders with created_at in [fromIso, toIso] inclusive (ISO strings). */
+export function listOrdersBetween(fromIso: string, toIso: string): OrderRecord[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT * FROM orders
+       WHERE created_at >= ? AND created_at <= ?
+       ORDER BY created_at ASC`,
+    )
+    .all(fromIso, toIso) as OrderRow[];
+  return rows.map(rowToRecord);
+}
+
+export function listRecentOrders(limit = 10): OrderRecord[] {
+  const capped = Math.min(Math.max(1, limit), 50);
+  const rows = getDb()
+    .prepare(`SELECT * FROM orders ORDER BY created_at DESC LIMIT ?`)
+    .all(capped) as OrderRow[];
+  return rows.map(rowToRecord);
+}
+
 /** COD orders not yet marked exported to Google Sheets (for manual reconcile). */
 export function listOrdersPendingCodSheetExport(limit = 50): OrderRecord[] {
   const capped = Math.min(Math.max(1, limit), 200);
