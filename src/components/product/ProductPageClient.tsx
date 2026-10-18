@@ -19,6 +19,7 @@ import { ProductTrustBar } from "@/components/product/ProductTrustBar";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
+import { AttributionCaptureEffect } from "@/components/attribution/AttributionCaptureEffect";
 import type { ProductWithPage } from "@/lib/productCatalog";
 
 type Props = {
@@ -38,6 +39,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
 
   return (
     <>
+      <AttributionCaptureEffect />
       <ProductAnnouncementBar />
       <ProductStoreHeader />
 
