@@ -31,12 +31,28 @@ export async function PUT(request: NextRequest) {
   const incoming = body.state ?? {};
   const next: ProfitDashboardState = {
     fees: mergeFeeConfig({ ...current.fees, ...incoming.fees }),
-    payment: { ...current.payment, ...incoming.payment },
+    codUseLiveOrderCount:
+      typeof incoming.codUseLiveOrderCount === "boolean"
+        ? incoming.codUseLiveOrderCount
+        : current.codUseLiveOrderCount,
     cod: { ...current.cod, ...incoming.cod },
-    scenarioDeliveryRatePct:
-      typeof incoming.scenarioDeliveryRatePct === "number"
-        ? incoming.scenarioDeliveryRatePct
-        : current.scenarioDeliveryRatePct,
+    paymentOverrides: { ...current.paymentOverrides, ...incoming.paymentOverrides },
+    paymentOtherFeesUsd:
+      typeof incoming.paymentOtherFeesUsd === "number"
+        ? incoming.paymentOtherFeesUsd
+        : current.paymentOtherFeesUsd,
+    chartDays:
+      incoming.chartDays === 7 || incoming.chartDays === 30 || incoming.chartDays === 90
+        ? incoming.chartDays
+        : current.chartDays,
+    dateRangeFrom:
+      incoming.dateRangeFrom === null || typeof incoming.dateRangeFrom === "string"
+        ? incoming.dateRangeFrom ?? current.dateRangeFrom
+        : current.dateRangeFrom,
+    dateRangeTo:
+      incoming.dateRangeTo === null || typeof incoming.dateRangeTo === "string"
+        ? incoming.dateRangeTo ?? current.dateRangeTo
+        : current.dateRangeTo,
   };
   saveProfitDashboardState(next);
   return NextResponse.json({ ok: true, state: next });

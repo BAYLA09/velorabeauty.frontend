@@ -1,37 +1,36 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { computeCodProfit, computePaymentProfit } from "@/lib/profitAdmin/calculations";
-import { DEFAULT_FEE_CONFIG } from "@/lib/profitAdmin/feesDefaults";
+import { computeCodPanel, computePaymentPanel } from "@/lib/profitAdmin/calculations";
 
 test("COD delivered orders = total × confirmation × delivery", () => {
-  const r = computeCodProfit(
-    {
-      totalOrders: 100,
-      confirmationRatePct: 70,
-      deliveryRatePct: 80,
-      sellingPriceUsd: 35,
-      avgProductCostUsd: 6.1,
-      noAnswerRatePct: 20,
-      declinedRatePct: 10,
-      otherCostsUsd: 0,
-    },
-    DEFAULT_FEE_CONFIG as import("@/lib/profitAdmin/feesDefaults").FeeConfig,
-  );
+  const r = computeCodPanel({
+    totalOrders: 100,
+    confirmationRatePct: 70,
+    deliveryRatePct: 80,
+    sellingPricePerOrderUsd: 35,
+    productCostPerOrderUsd: 12,
+    shippingCostPerOrderUsd: 4.5,
+    codFeesPerOrderUsd: 2.5,
+    returnCostPerOrderUsd: 3,
+    otherFeesPerOrderUsd: 1,
+  });
   assert.equal(r.deliveredOrders, 56);
   assert.equal(r.revenueUsd, 56 * 35);
+  assert.equal(r.failedAfterConfirm, 100 * 0.7 - 56);
+  assert.equal(r.returnCostUsd, r.failedAfterConfirm * 3);
 });
 
-test("Payment Stripe fee uses percent + fixed per order", () => {
-  const r = computePaymentProfit(
-    {
-      orderCount: 10,
-      totalRevenueUsd: 350,
-      avgProductCostUsd: 6.1,
-      otherCostsUsd: 0,
-    },
-    DEFAULT_FEE_CONFIG as import("@/lib/profitAdmin/feesDefaults").FeeConfig,
-  );
-  assert.equal(r.avgOrderUsd, 35);
-  const perOrderFee = 35 * 0.054 + 0.3;
-  assert.ok(Math.abs(r.stripeFeesUsd - perOrderFee * 10) < 0.01);
+test("Payment panel fees are percent of revenue", () => {
+  const r = computePaymentPanel({
+    orderCount: 10,
+    totalRevenueUsd: 25430,
+    productCostUsd: 9450,
+    shippingCostUsd: 2150,
+    paymentFeePercent: 4.9,
+    otherFeesUsd: 1343,
+  });
+  assert.ok(Math.abs(r.paymentFeesUsd - 25430 * 0.049) < 0.01);
+  const expectedProfit =
+    25430 - 9450 - 2150 - 25430 * 0.049 - 1343;
+  assert.ok(Math.abs(r.profitUsd - expectedProfit) < 0.01);
 });

@@ -1,23 +1,77 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  computeCodProfit,
-  computePaymentProfit,
-  computeScenarioDelta,
-  type CodCalcInput,
-  type PaymentCalcInput,
-} from "@/lib/profitAdmin/calculations";
-import { DEFAULT_FEE_CONFIG, mergeFeeConfig, type FeeConfig } from "@/lib/profitAdmin/feesDefaults";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DonutChart } from "@/components/profitAdmin/DonutChart";
+import { ProfitLineChart } from "@/components/profitAdmin/ProfitLineChart";
+import type { CodPanelInput, PaymentPanelInput } from "@/lib/profitAdmin/calculations";
 import { BAYLA_ADMIN_CSRF_HEADER } from "@/lib/profitAdmin/constants";
+import type { DailyProfitPoint } from "@/lib/profitAdmin/orderMetrics";
 import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository";
+
+type DashboardPayload = {
+  range: { from: string; to: string };
+  previousRange: { from: string; to: string };
+  payment: { input: PaymentPanelInput; result: PaymentPanelInput & { profitUsd: number; marginPct: number; paymentFeesUsd: number; revenueUsd: number } };
+  cod: {
+    input: CodPanelInput;
+    result: CodPanelInput & {
+      profitUsd: number;
+      marginPct: number;
+      deliveredOrders: number;
+      confirmedOrders: number;
+      revenueUsd: number;
+      productCostUsd: number;
+      shippingCostUsd: number;
+      codFeesUsd: number;
+      returnCostUsd: number;
+      otherFeesUsd: number;
+    };
+  };
+  kpis: {
+    totalProfitUsd: number;
+    paymentProfitUsd: number;
+    codProfitUsd: number;
+    adSpendUsd: number;
+    totalOrders: number;
+    changes: {
+      totalProfitPct: number | null;
+      paymentProfitPct: number | null;
+      codProfitPct: number | null;
+      totalOrdersPct: number | null;
+    };
+  };
+  profitSummary: {
+    paymentProfitUsd: number;
+    codProfitUsd: number;
+    totalProfitUsd: number;
+    totalMarginPct: number;
+  };
+  chart: DailyProfitPoint[];
+  recentOrders: {
+    id: string;
+    type: string;
+    customerName: string;
+    amountUsd: number;
+    status: string;
+    statusTone: string;
+    date: string;
+  }[];
+  state: ProfitDashboardState;
+};
+
+const NAV = [
+  { id: "dashboard", label: "Dashboard", icon: "◉" },
+  { id: "payment", label: "Payment Orders", icon: "◎" },
+  { id: "cod", label: "COD Orders", icon: "◈" },
+  { id: "products", label: "Products", icon: "▣" },
+  { id: "costs", label: "Costs & Fees", icon: "◇" },
+  { id: "analytics", label: "Analytics", icon: "◐" },
+  { id: "reports", label: "Reports", icon: "▤" },
+  { id: "settings", label: "Settings", icon: "⚙" },
+] as const;
 
 function money(n: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
-}
-
-function pct(n: number): string {
-  return `${n.toFixed(1)}%`;
 }
 
 function readCsrf(): string {
@@ -35,27 +89,70 @@ function apiHeaders(): HeadersInit {
     : { "Content-Type": "application/json" };
 }
 
+function formatRangeLabel(from: string, to: string): string {
+  const f = new Date(from);
+  const t = new Date(to);
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+  return `${f.toLocaleDateString("en-US", opts)} – ${t.toLocaleDateString("en-US", opts)}`;
+}
+
+function formatPrevLabel(from: string, to: string): string {
+  const f = new Date(from);
+  const t = new Date(to);
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+  return `${f.toLocaleDateString("en-US", opts)} – ${t.toLocaleDateString("en-US", opts)}`;
+}
+
+function TrendBadge({ pct, prevLabel }: { pct: number | null; prevLabel: string }) {
+  if (pct === null) {
+    return <span className="text-xs text-slate-500">No prior period data</span>;
+  }
+  const up = pct >= 0;
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+        up ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"
+      }`}
+    >
+      {up ? "+" : ""}
+      {pct.toFixed(1)}% vs {prevLabel}
+    </span>
+  );
+}
+
 function NumInput({
   label,
   value,
   onChange,
   step = "any",
+  disabled,
+  suffix,
 }: {
   label: string;
   value: number;
   onChange: (n: number) => void;
   step?: string;
+  disabled?: boolean;
+  suffix?: string;
 }) {
   return (
     <label className="block text-xs text-slate-400">
       {label}
-      <input
-        type="number"
-        step={step}
-        value={Number.isFinite(value) ? value : 0}
-        onChange={(e) => onChange(Number.parseFloat(e.target.value) || 0)}
-        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
-      />
+      <div className="relative mt-1">
+        <input
+          type="number"
+          step={step}
+          disabled={disabled}
+          value={Number.isFinite(value) ? value : 0}
+          onChange={(e) => onChange(Number.parseFloat(e.target.value) || 0)}
+          className="w-full rounded-lg border border-slate-700/80 bg-[#0c1018] px-3 py-2 text-sm text-white disabled:opacity-60"
+        />
+        {suffix ? (
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+            {suffix}
+          </span>
+        ) : null}
+      </div>
     </label>
   );
 }
@@ -65,40 +162,17 @@ export function ProfitAdminDashboard() {
   const [configError, setConfigError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [activeNav, setActiveNav] = useState<string>("dashboard");
+  const [data, setData] = useState<DashboardPayload | null>(null);
+  const [loadingDash, setLoadingDash] = useState(false);
+  const [paymentEdit, setPaymentEdit] = useState(false);
+  const [codEdit, setCodEdit] = useState(false);
+  const [costsEdit, setCostsEdit] = useState(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [fees, setFees] = useState<FeeConfig>(mergeFeeConfig(null));
-  const [payment, setPayment] = useState<PaymentCalcInput>({
-    orderCount: 0,
-    totalRevenueUsd: 0,
-    avgProductCostUsd: DEFAULT_FEE_CONFIG.products.hairGummies,
-    otherCostsUsd: 0,
-  });
-  const [cod, setCod] = useState<CodCalcInput>({
-    totalOrders: 100,
-    confirmationRatePct: 70,
-    deliveryRatePct: 80,
-    sellingPriceUsd: 35,
-    avgProductCostUsd: DEFAULT_FEE_CONFIG.products.hairGummies,
-    noAnswerRatePct: 15,
-    declinedRatePct: 15,
-    otherCostsUsd: 0,
-  });
-  const [scenarioDeliveryRatePct, setScenarioDeliveryRatePct] = useState(80);
-
-  const paymentResult = useMemo(() => computePaymentProfit(payment, fees), [payment, fees]);
-  const codResult = useMemo(() => computeCodProfit(cod, fees), [cod, fees]);
-  const scenarioCod = useMemo(
-    () => computeCodProfit({ ...cod, deliveryRatePct: scenarioDeliveryRatePct }, fees),
-    [cod, fees, scenarioDeliveryRatePct],
-  );
-  const scenarioDelta = useMemo(
-    () => computeScenarioDelta(codResult, scenarioCod),
-    [codResult, scenarioCod],
-  );
-
-  const totalProfit = paymentResult.profitUsd + codResult.profitUsd;
-  const totalOrders = paymentResult.orderCount + cod.totalOrders;
+  const [localState, setLocalState] = useState<ProfitDashboardState | null>(null);
+  const [rangeFrom, setRangeFrom] = useState("");
+  const [rangeTo, setRangeTo] = useState("");
 
   const loadSession = useCallback(async () => {
     const res = await fetch("/api/bayla-admin/auth/session", { credentials: "include" });
@@ -107,28 +181,54 @@ export function ProfitAdminDashboard() {
       setAuthenticated(false);
       return;
     }
-    const data = (await res.json()) as { authenticated?: boolean };
-    setAuthenticated(Boolean(data.authenticated));
+    const json = (await res.json()) as { authenticated?: boolean };
+    setAuthenticated(Boolean(json.authenticated));
   }, []);
 
-  const loadState = useCallback(async () => {
-    const res = await fetch("/api/bayla-admin/state", { credentials: "include" });
-    if (!res.ok) return;
-    const data = (await res.json()) as { state?: ProfitDashboardState };
-    if (!data.state) return;
-    setFees(data.state.fees);
-    setPayment(data.state.payment);
-    setCod(data.state.cod);
-    setScenarioDeliveryRatePct(data.state.scenarioDeliveryRatePct);
+  const persistState = useCallback(async (state: ProfitDashboardState) => {
+    await fetch("/api/bayla-admin/state", {
+      method: "PUT",
+      credentials: "include",
+      headers: apiHeaders(),
+      body: JSON.stringify({ state }),
+    });
   }, []);
+
+  const loadDashboard = useCallback(async (from?: string, to?: string) => {
+    setLoadingDash(true);
+    const params = new URLSearchParams();
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    const res = await fetch(`/api/bayla-admin/dashboard?${params}`, { credentials: "include" });
+    if (res.ok) {
+      const json = (await res.json()) as DashboardPayload;
+      setData(json);
+      setLocalState(json.state);
+      setRangeFrom(json.range.from.slice(0, 10));
+      setRangeTo(json.range.to.slice(0, 10));
+    }
+    setLoadingDash(false);
+  }, []);
+
+  const scheduleSave = useCallback(
+    (state: ProfitDashboardState) => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => {
+        void persistState(state).then(() =>
+          loadDashboard(state.dateRangeFrom ?? undefined, state.dateRangeTo ?? undefined),
+        );
+      }, 400);
+    },
+    [persistState, loadDashboard],
+  );
 
   useEffect(() => {
     void loadSession();
   }, [loadSession]);
 
   useEffect(() => {
-    if (authenticated) void loadState();
-  }, [authenticated, loadState]);
+    if (authenticated) void loadDashboard();
+  }, [authenticated, loadDashboard]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -145,25 +245,36 @@ export function ProfitAdminDashboard() {
     }
     setPassword("");
     setAuthenticated(true);
-    await loadState();
+    await loadDashboard();
   }
 
-  async function saveState() {
-    setSaveMsg(null);
-    const res = await fetch("/api/bayla-admin/state", {
-      method: "PUT",
-      credentials: "include",
-      headers: apiHeaders(),
-      body: JSON.stringify({
-        state: { fees, payment, cod, scenarioDeliveryRatePct },
-      }),
-    });
-    setSaveMsg(res.ok ? "Saved to database." : "Could not save.");
+  function patchState(patch: Partial<ProfitDashboardState>) {
+    if (!localState) return;
+    const next = { ...localState, ...patch };
+    setLocalState(next);
+    scheduleSave(next);
   }
+
+  function applyRange() {
+    const from = new Date(`${rangeFrom}T00:00:00.000Z`).toISOString();
+    const to = new Date(`${rangeTo}T23:59:59.999Z`).toISOString();
+    if (localState) {
+      const next = { ...localState, dateRangeFrom: from, dateRangeTo: to };
+      setLocalState(next);
+      void persistState(next).then(() => loadDashboard(from, to));
+    } else {
+      void loadDashboard(from, to);
+    }
+  }
+
+  const prevLabel = useMemo(() => {
+    if (!data) return "";
+    return formatPrevLabel(data.previousRange.from, data.previousRange.to);
+  }, [data]);
 
   if (authenticated === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0f1419] text-slate-200">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f111a] text-slate-200">
         Loading…
       </div>
     );
@@ -171,8 +282,8 @@ export function ProfitAdminDashboard() {
 
   if (configError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0f1419] px-4 text-center text-white">
-        <div className="max-w-md rounded-xl border border-violet-500/40 bg-slate-900 p-6">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f111a] px-4 text-center text-white">
+        <div className="max-w-md rounded-xl border border-violet-500/40 bg-[#1a1d27] p-6">
           <p>{configError}</p>
           <p className="mt-3 text-xs text-slate-400">
             Add BAYLA_ADMIN_PASSWORD and BAYLA_ADMIN_SESSION_SECRET in Easypanel.
@@ -184,20 +295,26 @@ export function ProfitAdminDashboard() {
 
   if (!authenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0f1419] px-4">
-        <form onSubmit={handleLogin} className="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-6">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f111a] px-4">
+        <form
+          onSubmit={handleLogin}
+          className="w-full max-w-sm rounded-2xl border border-slate-700/80 bg-[#1a1d27] p-6 shadow-xl"
+        >
           <h1 className="text-xl font-semibold text-white">Bayla Ecom</h1>
-          <p className="text-sm text-slate-400">Private profit dashboard</p>
+          <p className="text-sm text-slate-400">Velora Beauty profit dashboard</p>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-6 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-6 w-full rounded-lg border border-slate-600 bg-[#0c1018] px-3 py-2 text-sm text-white"
             placeholder="Password"
             required
           />
           {loginError ? <p className="mt-2 text-sm text-red-400">{loginError}</p> : null}
-          <button type="submit" className="mt-4 w-full rounded-lg bg-violet-600 py-2 text-sm font-semibold text-white">
+          <button
+            type="submit"
+            className="mt-4 w-full rounded-lg bg-violet-600 py-2 text-sm font-semibold text-white hover:bg-violet-500"
+          >
             Sign in
           </button>
         </form>
@@ -205,150 +322,667 @@ export function ProfitAdminDashboard() {
     );
   }
 
+  const paymentInput = data?.payment.input;
+  const paymentResult = data?.payment.result;
+  const codInput = data?.cod.input;
+  const codResult = data?.cod.result;
+
   return (
-    <div className="min-h-screen bg-[#0f1419] text-slate-100">
-      <header className="border-b border-slate-800 bg-[#121820] px-4 py-4 md:px-8">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-semibold">Bayla Ecom Dashboard</h1>
-            <p className="text-xs text-slate-400">COD + card profit calculator (USD)</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => void saveState()}
-              className="rounded-lg bg-violet-600 px-3 py-1.5 text-sm font-medium"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                void fetch("/api/bayla-admin/auth/logout", {
-                  method: "POST",
-                  credentials: "include",
-                  headers: apiHeaders(),
-                }).then(() => setAuthenticated(false))
-              }
-              className="rounded-lg border border-slate-600 px-3 py-1.5 text-sm"
-            >
-              Log out
-            </button>
-          </div>
+    <div className="flex min-h-screen bg-[#0f111a] text-slate-100">
+      <aside className="hidden w-56 shrink-0 flex-col border-r border-slate-800/80 bg-[#12151f] lg:flex">
+        <div className="border-b border-slate-800/80 px-5 py-5">
+          <p className="text-lg font-bold tracking-tight text-white">Bayla Ecom</p>
+          <p className="text-xs text-slate-500">Dashboard</p>
         </div>
-        {saveMsg ? <p className="mx-auto mt-2 max-w-7xl text-xs text-emerald-400">{saveMsg}</p> : null}
-      </header>
-
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-8">
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { label: "Total profit", value: money(totalProfit), tone: "text-violet-300" },
-            { label: "Payment profit", value: money(paymentResult.profitUsd), tone: "text-emerald-300" },
-            { label: "COD profit", value: money(codResult.profitUsd), tone: "text-orange-300" },
-            { label: "Orders (pay + COD)", value: String(totalOrders), tone: "text-sky-300" },
-          ].map((card) => (
-            <div key={card.label} className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">{card.label}</p>
-              <p className={`mt-2 text-2xl font-semibold ${card.tone}`}>{card.value}</p>
-            </div>
+        <nav className="flex-1 space-y-0.5 p-3">
+          {NAV.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setActiveNav(item.id)}
+              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition ${
+                activeNav === item.id
+                  ? "bg-violet-600/90 text-white"
+                  : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
+              }`}
+            >
+              <span className="text-base opacity-80">{item.icon}</span>
+              {item.label}
+            </button>
           ))}
-        </section>
+        </nav>
+        <div className="space-y-1 border-t border-slate-800/80 p-3 text-sm text-slate-400">
+          <a href="mailto:support@velorabeauty.world" className="block rounded-lg px-3 py-2 hover:bg-slate-800/60">
+            Support
+          </a>
+          <button
+            type="button"
+            onClick={() =>
+              void fetch("/api/bayla-admin/auth/logout", {
+                method: "POST",
+                credentials: "include",
+                headers: apiHeaders(),
+              }).then(() => setAuthenticated(false))
+            }
+            className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-800/60"
+          >
+            Logout
+          </button>
+        </div>
+      </aside>
 
-        <section className="grid gap-6 lg:grid-cols-2">
-          <article className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
-            <h2 className="text-base font-semibold text-emerald-300">Payment (Stripe card)</h2>
-            <p className="mt-1 text-xs text-slate-500">
-              Fee per order: {fees.payment.stripePercent}% + {money(fees.payment.stripeFixedUsd)} · Shipping{" "}
-              {money(fees.payment.shippingDeliveredUsd)}/order
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <NumInput label="Order count" value={payment.orderCount} onChange={(n) => setPayment({ ...payment, orderCount: n })} step="1" />
-              <NumInput label="Total revenue ($)" value={payment.totalRevenueUsd} onChange={(n) => setPayment({ ...payment, totalRevenueUsd: n })} />
-              <NumInput label="Avg product cost / order ($)" value={payment.avgProductCostUsd} onChange={(n) => setPayment({ ...payment, avgProductCostUsd: n })} />
-              <NumInput label="Other costs ($)" value={payment.otherCostsUsd} onChange={(n) => setPayment({ ...payment, otherCostsUsd: n })} />
-            </div>
-            <dl className="mt-4 space-y-1 text-sm">
-              <div className="flex justify-between"><dt>Stripe fees</dt><dd>{money(paymentResult.stripeFeesUsd)}</dd></div>
-              <div className="flex justify-between"><dt>Product cost</dt><dd>{money(paymentResult.productCostUsd)}</dd></div>
-              <div className="flex justify-between"><dt>Shipping</dt><dd>{money(paymentResult.shippingUsd)}</dd></div>
-              <div className="flex justify-between border-t border-slate-700 pt-2 font-semibold text-emerald-300">
-                <dt>Profit</dt><dd>{money(paymentResult.profitUsd)} ({pct(paymentResult.marginPct)})</dd>
-              </div>
-            </dl>
-          </article>
-
-          <article className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
-            <h2 className="text-base font-semibold text-orange-300">COD</h2>
-            <p className="mt-1 text-xs text-slate-500">
-              Delivered = total × confirmation × delivery · COD fee {fees.cod.platformFeePercent}%
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <NumInput label="Total COD orders" value={cod.totalOrders} onChange={(n) => setCod({ ...cod, totalOrders: n })} step="1" />
-              <NumInput label="Confirmation rate (%)" value={cod.confirmationRatePct} onChange={(n) => setCod({ ...cod, confirmationRatePct: n })} />
-              <NumInput label="Delivery rate (% of confirmed)" value={cod.deliveryRatePct} onChange={(n) => setCod({ ...cod, deliveryRatePct: n })} />
-              <NumInput label="Selling price ($)" value={cod.sellingPriceUsd} onChange={(n) => setCod({ ...cod, sellingPriceUsd: n })} />
-              <NumInput label="Avg product cost ($)" value={cod.avgProductCostUsd} onChange={(n) => setCod({ ...cod, avgProductCostUsd: n })} />
-              <NumInput label="No-answer rate (% of total)" value={cod.noAnswerRatePct} onChange={(n) => setCod({ ...cod, noAnswerRatePct: n })} />
-              <NumInput label="Declined rate (% of total)" value={cod.declinedRatePct} onChange={(n) => setCod({ ...cod, declinedRatePct: n })} />
-              <NumInput label="Other costs ($)" value={cod.otherCostsUsd} onChange={(n) => setCod({ ...cod, otherCostsUsd: n })} />
-            </div>
-            <p className="mt-3 text-xs text-slate-400">
-              Delivered orders: <strong className="text-white">{codResult.deliveredOrders.toFixed(1)}</strong> (
-              {cod.totalOrders} × {cod.confirmationRatePct}% × {cod.deliveryRatePct}%)
-            </p>
-            <dl className="mt-3 space-y-1 text-sm">
-              <div className="flex justify-between"><dt>Revenue</dt><dd>{money(codResult.revenueUsd)}</dd></div>
-              <div className="flex justify-between"><dt>Call center</dt><dd>{money(codResult.callCenterUsd)}</dd></div>
-              <div className="flex justify-between"><dt>Shipping + returns</dt><dd>{money(codResult.shippingUsd)}</dd></div>
-              <div className="flex justify-between"><dt>COD platform fee</dt><dd>{money(codResult.codPlatformFeeUsd)}</dd></div>
-              <div className="flex justify-between border-t border-slate-700 pt-2 font-semibold text-orange-300">
-                <dt>Profit</dt><dd>{money(codResult.profitUsd)} ({pct(codResult.marginPct)})</dd>
-              </div>
-            </dl>
-          </article>
-        </section>
-
-        <section className="rounded-2xl border border-violet-500/30 bg-violet-950/20 p-5">
-          <h2 className="text-base font-semibold text-violet-200">Scenario calculator (COD delivery rate)</h2>
-          <div className="mt-3 flex flex-wrap items-end gap-4">
-            <NumInput
-              label="Scenario delivery rate (%)"
-              value={scenarioDeliveryRatePct}
-              onChange={setScenarioDeliveryRatePct}
-            />
-            <div className="text-sm">
-              <p>
-                Scenario profit: <strong>{money(scenarioCod.profitUsd)}</strong>
-              </p>
-              <p className={scenarioDelta.profitDeltaUsd >= 0 ? "text-emerald-400" : "text-red-400"}>
-                vs current: {scenarioDelta.profitDeltaUsd >= 0 ? "+" : ""}
-                {money(scenarioDelta.profitDeltaUsd)} estimated profit
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="border-b border-slate-800/80 bg-[#12151f]/80 px-4 py-4 backdrop-blur md:px-8">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
+              <p className="text-sm text-slate-400">
+                Overview of your store performance and profits.
               </p>
             </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 rounded-xl border border-slate-700/80 bg-[#1a1d27] px-3 py-2 text-xs">
+                <input
+                  type="date"
+                  value={rangeFrom}
+                  onChange={(e) => setRangeFrom(e.target.value)}
+                  className="bg-transparent text-slate-200 outline-none"
+                />
+                <span className="text-slate-500">–</span>
+                <input
+                  type="date"
+                  value={rangeTo}
+                  onChange={(e) => setRangeTo(e.target.value)}
+                  className="bg-transparent text-slate-200 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={applyRange}
+                  className="rounded-lg bg-slate-700 px-2 py-1 text-white hover:bg-slate-600"
+                >
+                  Apply
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-sm font-semibold">
+                  AB
+                </div>
+                <div className="text-sm">
+                  <p className="font-medium text-white">Amine Bayla</p>
+                  <p className="text-xs text-slate-500">Admin</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
+          {data ? (
+            <p className="mt-2 text-xs text-slate-500">
+              {formatRangeLabel(data.range.from, data.range.to)}
+              {loadingDash ? " · Refreshing…" : null}
+            </p>
+          ) : null}
+        </header>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
-          <h2 className="text-base font-semibold">Fee & product cost settings</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            <NumInput label="Eye serum cost ($)" value={fees.products.eyeSerum} onChange={(n) => setFees({ ...fees, products: { ...fees.products, eyeSerum: n } })} />
-            <NumInput label="Skin gummies cost ($)" value={fees.products.skinGummies} onChange={(n) => setFees({ ...fees, products: { ...fees.products, skinGummies: n } })} />
-            <NumInput label="Hair gummies cost ($)" value={fees.products.hairGummies} onChange={(n) => setFees({ ...fees, products: { ...fees.products, hairGummies: n } })} />
-            <NumInput label="Stripe %" value={fees.payment.stripePercent} onChange={(n) => setFees({ ...fees, payment: { ...fees.payment, stripePercent: n } })} />
-            <NumInput label="Stripe fixed ($)" value={fees.payment.stripeFixedUsd} onChange={(n) => setFees({ ...fees, payment: { ...fees.payment, stripeFixedUsd: n } })} />
-            <NumInput label="COD fee %" value={fees.cod.platformFeePercent} onChange={(n) => setFees({ ...fees, cod: { ...fees.cod, platformFeePercent: n } })} />
-            <NumInput label="Call center no answer ($)" value={fees.cod.callCenterNoAnswerUsd} onChange={(n) => setFees({ ...fees, cod: { ...fees.cod, callCenterNoAnswerUsd: n } })} />
-            <NumInput label="Call center declined ($)" value={fees.cod.callCenterDeclinedUsd} onChange={(n) => setFees({ ...fees, cod: { ...fees.cod, callCenterDeclinedUsd: n } })} />
-            <NumInput label="Call center delivered ($)" value={fees.cod.callCenterDeliveredUsd} onChange={(n) => setFees({ ...fees, cod: { ...fees.cod, callCenterDeliveredUsd: n } })} />
-            <NumInput label="COD ship delivered ($)" value={fees.cod.shippingDeliveredUsd} onChange={(n) => setFees({ ...fees, cod: { ...fees.cod, shippingDeliveredUsd: n } })} />
-            <NumInput label="COD return ship ($)" value={fees.cod.shippingReturnUsd} onChange={(n) => setFees({ ...fees, cod: { ...fees.cod, shippingReturnUsd: n } })} />
-          </div>
-          <p className="mt-3 text-xs text-slate-500">
-            Call center: {money(fees.cod.callCenterNoAnswerUsd)} no answer · {money(fees.cod.callCenterDeclinedUsd)}{" "}
-            declined · {money(fees.cod.callCenterDeliveredUsd)} delivered/accepted
-          </p>
-        </section>
-      </main>
+        <main className="flex-1 space-y-6 overflow-auto p-4 md:p-8">
+          {(activeNav === "dashboard" || activeNav === "payment" || activeNav === "cod") && data ? (
+            <>
+              <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                  {
+                    label: "Total Profit",
+                    value: money(data.kpis.totalProfitUsd),
+                    change: data.kpis.changes.totalProfitPct,
+                    tone: "from-violet-600/20 to-violet-900/10 border-violet-500/30",
+                    accent: "text-violet-300",
+                  },
+                  {
+                    label: "Payment Profit",
+                    value: money(data.kpis.paymentProfitUsd),
+                    change: data.kpis.changes.paymentProfitPct,
+                    tone: "from-emerald-600/15 to-emerald-900/5 border-emerald-500/25",
+                    accent: "text-emerald-300",
+                  },
+                  {
+                    label: "COD Profit",
+                    value: money(data.kpis.codProfitUsd),
+                    change: data.kpis.changes.codProfitPct,
+                    tone: "from-orange-600/15 to-orange-900/5 border-orange-500/25",
+                    accent: "text-orange-300",
+                  },
+                  {
+                    label: "Total Orders",
+                    value: String(data.kpis.totalOrders),
+                    change: data.kpis.changes.totalOrdersPct,
+                    tone: "from-sky-600/15 to-sky-900/5 border-sky-500/25",
+                    accent: "text-sky-300",
+                  },
+                ].map((card) => (
+                  <div
+                    key={card.label}
+                    className={`rounded-2xl border bg-gradient-to-br p-4 ${card.tone}`}
+                  >
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                      {card.label}
+                    </p>
+                    <p className={`mt-2 text-2xl font-bold ${card.accent}`}>{card.value}</p>
+                    <div className="mt-3">
+                      <TrendBadge pct={card.change} prevLabel={prevLabel} />
+                    </div>
+                  </div>
+                ))}
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-2">
+                <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="flex items-center gap-2 text-base font-semibold">
+                      <span className="h-2 w-2 rounded-full bg-violet-400" />
+                      Payment Orders (Card / Online)
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentEdit((v) => !v)}
+                      className="rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-300 hover:bg-slate-800"
+                    >
+                      {paymentEdit ? "Done" : "Edit Values"}
+                    </button>
+                  </div>
+                  {paymentInput && paymentResult ? (
+                    <div className="mt-4 grid gap-6 md:grid-cols-2">
+                      <dl className="space-y-2 text-sm">
+                        <div className="flex justify-between gap-2">
+                          <dt className="text-slate-400">Total Revenue</dt>
+                          <dd>
+                            {paymentEdit ? (
+                              <input
+                                type="number"
+                                className="w-28 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm"
+                                value={paymentInput.totalRevenueUsd}
+                                onChange={(e) => {
+                                  const v = Number.parseFloat(e.target.value) || 0;
+                                  patchState({
+                                    paymentOverrides: {
+                                      ...localState?.paymentOverrides,
+                                      totalRevenueUsd: v,
+                                    },
+                                  });
+                                  void loadDashboard(
+                                    localState?.dateRangeFrom ?? undefined,
+                                    localState?.dateRangeTo ?? undefined,
+                                  );
+                                }}
+                              />
+                            ) : (
+                              money(paymentResult.revenueUsd)
+                            )}
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Product Cost</dt>
+                          <dd>
+                            {paymentEdit ? (
+                              <input
+                                type="number"
+                                className="w-28 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm"
+                                value={paymentInput.productCostUsd}
+                                onChange={(e) => {
+                                  patchState({
+                                    paymentOverrides: {
+                                      ...localState?.paymentOverrides,
+                                      productCostUsd: Number.parseFloat(e.target.value) || 0,
+                                    },
+                                  });
+                                }}
+                              />
+                            ) : (
+                              money(paymentResult.productCostUsd)
+                            )}
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Shipping Cost</dt>
+                          <dd>
+                            {paymentEdit ? (
+                              <input
+                                type="number"
+                                className="w-28 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm"
+                                value={paymentInput.shippingCostUsd}
+                                onChange={(e) => {
+                                  patchState({
+                                    paymentOverrides: {
+                                      ...localState?.paymentOverrides,
+                                      shippingCostUsd: Number.parseFloat(e.target.value) || 0,
+                                    },
+                                  });
+                                }}
+                              />
+                            ) : (
+                              money(paymentResult.shippingCostUsd)
+                            )}
+                          </dd>
+                        </div>
+                        <div className="flex justify-between items-center gap-2">
+                          <dt className="text-slate-400">Payment Fees</dt>
+                          <dd className="flex items-center gap-2">
+                            <span>{money(paymentResult.paymentFeesUsd)}</span>
+                            <input
+                              type="number"
+                              step="0.1"
+                              disabled={!paymentEdit}
+                              className="w-14 rounded border border-slate-600 bg-[#0c1018] px-1 py-0.5 text-right text-xs disabled:opacity-50"
+                              value={paymentInput.paymentFeePercent}
+                              onChange={(e) => {
+                                patchState({
+                                  paymentOverrides: {
+                                    ...localState?.paymentOverrides,
+                                    paymentFeePercent: Number.parseFloat(e.target.value) || 0,
+                                  },
+                                });
+                              }}
+                            />
+                            <span className="text-xs text-slate-500">%</span>
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-slate-400">Other Fees</dt>
+                          <dd>
+                            {paymentEdit ? (
+                              <input
+                                type="number"
+                                className="w-28 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm"
+                                value={localState?.paymentOtherFeesUsd ?? 0}
+                                onChange={(e) => {
+                                  patchState({
+                                    paymentOtherFeesUsd: Number.parseFloat(e.target.value) || 0,
+                                  });
+                                }}
+                              />
+                            ) : (
+                              money(paymentResult.otherFeesUsd)
+                            )}
+                          </dd>
+                        </div>
+                      </dl>
+                      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-slate-700/60 bg-[#12151f] p-4">
+                        <p className="text-sm text-slate-400">Payment Profit</p>
+                        <p className="text-2xl font-bold text-emerald-400">
+                          {money(paymentResult.profitUsd)}
+                        </p>
+                        <DonutChart
+                          percent={paymentResult.marginPct}
+                          color="#34d399"
+                          label="Profit Margin"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                </article>
+
+                <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="flex items-center gap-2 text-base font-semibold">
+                      <span className="h-2 w-2 rounded-full bg-orange-400" />
+                      COD Orders
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => setCodEdit((v) => !v)}
+                      className="rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-300 hover:bg-slate-800"
+                    >
+                      {codEdit ? "Done" : "Edit Values"}
+                    </button>
+                  </div>
+                  {codInput && codResult && localState ? (
+                    <div className="mt-4 grid gap-6 md:grid-cols-2">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <NumInput
+                          label="Total COD Orders"
+                          value={codInput.totalOrders}
+                          step="1"
+                          disabled={!codEdit && localState.codUseLiveOrderCount}
+                          onChange={(n) => {
+                            patchState({ cod: { ...localState.cod, totalOrders: n }, codUseLiveOrderCount: false });
+                          }}
+                        />
+                        <NumInput
+                          label="Confirmation Rate"
+                          suffix="%"
+                          value={codInput.confirmationRatePct}
+                          disabled={!codEdit}
+                          onChange={(n) => patchState({ cod: { ...localState.cod, confirmationRatePct: n } })}
+                        />
+                        <NumInput
+                          label="Delivery Rate"
+                          suffix="%"
+                          value={codInput.deliveryRatePct}
+                          disabled={!codEdit}
+                          onChange={(n) => patchState({ cod: { ...localState.cod, deliveryRatePct: n } })}
+                        />
+                        <NumInput
+                          label="Selling Price / Order"
+                          value={codInput.sellingPricePerOrderUsd}
+                          disabled={!codEdit}
+                          onChange={(n) =>
+                            patchState({ cod: { ...localState.cod, sellingPricePerOrderUsd: n } })
+                          }
+                        />
+                        <NumInput
+                          label="Product Cost / Order"
+                          value={codInput.productCostPerOrderUsd}
+                          disabled={!codEdit}
+                          onChange={(n) =>
+                            patchState({ cod: { ...localState.cod, productCostPerOrderUsd: n } })
+                          }
+                        />
+                        <NumInput
+                          label="Shipping Cost / Order"
+                          value={codInput.shippingCostPerOrderUsd}
+                          disabled={!codEdit}
+                          onChange={(n) =>
+                            patchState({ cod: { ...localState.cod, shippingCostPerOrderUsd: n } })
+                          }
+                        />
+                        <NumInput
+                          label="COD Fees / Order"
+                          value={codInput.codFeesPerOrderUsd}
+                          disabled={!codEdit}
+                          onChange={(n) => patchState({ cod: { ...localState.cod, codFeesPerOrderUsd: n } })}
+                        />
+                        <NumInput
+                          label="Return Cost / Order"
+                          value={codInput.returnCostPerOrderUsd}
+                          disabled={!codEdit}
+                          onChange={(n) =>
+                            patchState({ cod: { ...localState.cod, returnCostPerOrderUsd: n } })
+                          }
+                        />
+                        <NumInput
+                          label="Other Fees / Order"
+                          value={codInput.otherFeesPerOrderUsd}
+                          disabled={!codEdit}
+                          onChange={(n) =>
+                            patchState({ cod: { ...localState.cod, otherFeesPerOrderUsd: n } })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="rounded-xl border border-slate-700/60 bg-[#12151f] p-4 text-sm">
+                          <p className="text-slate-400">Delivered Orders</p>
+                          <p className="text-xl font-semibold text-white">
+                            {Math.round(codResult.deliveredOrders)}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            ({codInput.totalOrders} × {codInput.confirmationRatePct}% ×{" "}
+                            {codInput.deliveryRatePct}%)
+                          </p>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-400">COD Revenue</span>
+                          <span>{money(codResult.revenueUsd)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm font-semibold text-orange-300">
+                          <span>COD Profit</span>
+                          <span>{money(codResult.profitUsd)}</span>
+                        </div>
+                        <div className="flex justify-center pt-2">
+                          <DonutChart
+                            percent={codResult.marginPct}
+                            color="#fb923c"
+                            label="Profit Margin"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </article>
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-3">
+                <article className="xl:col-span-2 rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-base font-semibold">Profit Overview</h2>
+                    <div className="flex items-center gap-3 text-xs">
+                      <span className="flex items-center gap-1 text-violet-300">
+                        <span className="h-2 w-2 rounded-full bg-violet-400" /> Payment
+                      </span>
+                      <span className="flex items-center gap-1 text-orange-300">
+                        <span className="h-2 w-2 rounded-full bg-orange-400" /> COD
+                      </span>
+                      <span className="flex items-center gap-1 text-emerald-300">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400" /> Total
+                      </span>
+                      <select
+                        className="rounded-lg border border-slate-600 bg-[#0c1018] px-2 py-1 text-slate-200"
+                        value={localState?.chartDays ?? 7}
+                        onChange={(e) => {
+                          const v = Number.parseInt(e.target.value, 10) as 7 | 30 | 90;
+                          patchState({ chartDays: v });
+                          void loadDashboard();
+                        }}
+                      >
+                        <option value={7}>Last 7 Days</option>
+                        <option value={30}>Last 30 Days</option>
+                        <option value={90}>Last 90 Days</option>
+                      </select>
+                    </div>
+                  </div>
+                  <ProfitLineChart points={data.chart} />
+                </article>
+
+                <div className="space-y-4">
+                  <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
+                    <h2 className="text-base font-semibold">Profit Summary</h2>
+                    <dl className="mt-4 space-y-2 text-sm">
+                      <div className="flex justify-between text-violet-300">
+                        <dt>Payment Profit</dt>
+                        <dd>{money(data.profitSummary.paymentProfitUsd)}</dd>
+                      </div>
+                      <div className="flex justify-between text-orange-300">
+                        <dt>COD Profit</dt>
+                        <dd>{money(data.profitSummary.codProfitUsd)}</dd>
+                      </div>
+                      <div className="flex justify-between font-semibold text-emerald-300">
+                        <dt>Total Profit</dt>
+                        <dd>{money(data.profitSummary.totalProfitUsd)}</dd>
+                      </div>
+                      <div className="flex justify-between border-t border-slate-700 pt-2 text-slate-400">
+                        <dt>Ad spend (Snapchat)</dt>
+                        <dd>
+                          <input
+                            type="number"
+                            className="w-24 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm text-white"
+                            value={localState?.fees.adSpendUsd ?? 0}
+                            onChange={(e) => {
+                              const v = Number.parseFloat(e.target.value) || 0;
+                              patchState({
+                                fees: { ...localState!.fees, adSpendUsd: v },
+                              });
+                              void loadDashboard();
+                            }}
+                          />
+                        </dd>
+                      </div>
+                      <div className="flex justify-between text-slate-300">
+                        <dt>Total Profit Margin</dt>
+                        <dd>{data.profitSummary.totalMarginPct.toFixed(1)}%</dd>
+                      </div>
+                    </dl>
+                  </article>
+
+                  <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
+                    <h2 className="text-base font-semibold">Quick Actions</h2>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      {[
+                        { label: "Add Payment Order", href: "/checkout/card" },
+                        { label: "Add COD Order", href: "/checkout/cod" },
+                        { label: "Update Costs", action: () => setCostsEdit(true) },
+                        {
+                          label: "Download Report",
+                          action: () => {
+                            const q = new URLSearchParams();
+                            if (localState?.dateRangeFrom) q.set("from", localState.dateRangeFrom);
+                            if (localState?.dateRangeTo) q.set("to", localState.dateRangeTo);
+                            window.open(`/api/bayla-admin/report?${q}`, "_blank");
+                          },
+                        },
+                      ].map((btn) =>
+                        btn.href ? (
+                          <a
+                            key={btn.label}
+                            href={btn.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-xl border border-slate-700 bg-[#12151f] px-2 py-3 text-center text-xs font-medium text-slate-200 hover:border-violet-500/50"
+                          >
+                            {btn.label}
+                          </a>
+                        ) : (
+                          <button
+                            key={btn.label}
+                            type="button"
+                            onClick={btn.action}
+                            className="rounded-xl border border-slate-700 bg-[#12151f] px-2 py-3 text-xs font-medium text-slate-200 hover:border-violet-500/50"
+                          >
+                            {btn.label}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-semibold">Recent Orders</h2>
+                  <span className="text-xs text-violet-400">View All Orders</span>
+                </div>
+                {data.recentOrders.length === 0 ? (
+                  <p className="mt-6 text-center text-sm text-slate-500">
+                    No orders yet — empty state until ads drive traffic.
+                  </p>
+                ) : (
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="w-full min-w-[640px] text-left text-sm">
+                      <thead className="text-xs uppercase text-slate-500">
+                        <tr>
+                          <th className="pb-2 pr-4">Order ID</th>
+                          <th className="pb-2 pr-4">Type</th>
+                          <th className="pb-2 pr-4">Customer</th>
+                          <th className="pb-2 pr-4">Amount</th>
+                          <th className="pb-2 pr-4">Status</th>
+                          <th className="pb-2">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.recentOrders.map((row) => (
+                          <tr key={row.id} className="border-t border-slate-800/80">
+                            <td className="py-2.5 pr-4 font-mono text-xs text-slate-400">
+                              #{row.id.slice(0, 8)}
+                            </td>
+                            <td className="py-2.5 pr-4">{row.type}</td>
+                            <td className="py-2.5 pr-4">{row.customerName}</td>
+                            <td className="py-2.5 pr-4">{money(row.amountUsd)}</td>
+                            <td className="py-2.5 pr-4">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-xs ${
+                                  row.statusTone === "success"
+                                    ? "bg-emerald-500/15 text-emerald-400"
+                                    : row.statusTone === "warning"
+                                      ? "bg-orange-500/15 text-orange-300"
+                                      : "bg-slate-700 text-slate-300"
+                                }`}
+                              >
+                                {row.status}
+                              </span>
+                            </td>
+                            <td className="py-2.5 text-slate-400">{row.date}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </article>
+            </>
+          ) : null}
+
+          {(activeNav === "products" || activeNav === "costs" || costsEdit) && localState ? (
+            <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
+              <h2 className="text-base font-semibold">Costs &amp; Fees (USD)</h2>
+              <p className="mt-1 text-xs text-slate-500">
+                In stock: Eye serum (SKU vitaminamin), Skin Whitening Gummies (SKU WHITEAMIN).
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <NumInput
+                  label="Eye serum COGS (vitaminamin)"
+                  value={localState.fees.products.eyeSerum}
+                  onChange={(n) =>
+                    patchState({
+                      fees: { ...localState.fees, products: { ...localState.fees.products, eyeSerum: n } },
+                    })
+                  }
+                />
+                <NumInput
+                  label="Skin gummies COGS (WHITEAMIN)"
+                  value={localState.fees.products.skinGummies}
+                  onChange={(n) =>
+                    patchState({
+                      fees: {
+                        ...localState.fees,
+                        products: { ...localState.fees.products, skinGummies: n },
+                      },
+                    })
+                  }
+                />
+                <NumInput
+                  label="AED per USD (FX)"
+                  value={localState.fees.aedPerUsd}
+                  onChange={(n) => patchState({ fees: { ...localState.fees, aedPerUsd: n } })}
+                />
+                <NumInput
+                  label="Card shipping / order"
+                  value={localState.fees.payment.shippingDeliveredUsd}
+                  onChange={(n) =>
+                    patchState({
+                      fees: {
+                        ...localState.fees,
+                        payment: { ...localState.fees.payment, shippingDeliveredUsd: n },
+                      },
+                    })
+                  }
+                />
+                <NumInput
+                  label="Snapchat ad spend (period)"
+                  value={localState.fees.adSpendUsd}
+                  onChange={(n) => {
+                    patchState({ fees: { ...localState.fees, adSpendUsd: n } });
+                    void loadDashboard();
+                  }}
+                />
+              </div>
+              <p className="mt-4 text-xs text-slate-500">
+                COD formula: delivered = orders × confirmation% × delivery%; return cost applies to
+                confirmed-but-not-delivered orders. Net profit subtracts ad spend from payment + COD
+                profit.
+              </p>
+            </article>
+          ) : null}
+
+          {["analytics", "reports", "settings"].includes(activeNav) ? (
+            <article className="rounded-2xl border border-dashed border-slate-700 bg-[#1a1d27]/50 p-8 text-center text-sm text-slate-400">
+              <p className="font-medium text-slate-300">{NAV.find((n) => n.id === activeNav)?.label}</p>
+              <p className="mt-2">Use the main dashboard for profit analytics. More views coming soon.</p>
+              <button
+                type="button"
+                onClick={() => setActiveNav("dashboard")}
+                className="mt-4 rounded-lg bg-violet-600 px-4 py-2 text-sm text-white"
+              >
+                Back to Dashboard
+              </button>
+            </article>
+          ) : null}
+        </main>
+      </div>
     </div>
   );
 }
