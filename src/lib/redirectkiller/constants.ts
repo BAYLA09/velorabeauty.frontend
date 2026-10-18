@@ -12,9 +12,12 @@ export type RedirectDestinationOption = { label: string; path: string };
 export const REDIRECT_PRESET_DESTINATIONS: RedirectDestinationOption[] = [
   { label: "Brand landing (EN)", path: "/lp" },
   { label: "Homepage", path: "/" },
-  { label: "Hair Gummies", path: "/products/hair-gummies" },
-  { label: "Skin Gummies", path: "/products/skin-gummies" },
-  { label: "Eye Serum", path: "/products/eye-serum" },
+  { label: "Hair Gummies (PDP)", path: "/products/hair-gummies" },
+  { label: "Hair Gummies (short)", path: "/hair-gummies" },
+  { label: "Skin Gummies (PDP)", path: "/products/skin-gummies" },
+  { label: "Skin Gummies (short)", path: "/skin-gummies" },
+  { label: "Eye Serum (PDP)", path: "/products/eye-serum" },
+  { label: "Eye Serum (short)", path: "/eye-serum" },
 ];
 
 /** Presets plus any other allowlisted internal paths (for admin dropdown). */
@@ -40,6 +43,10 @@ export function listAllowedInternalPaths(): string[] {
     "/checkout",
     "/checkout/cod",
     "/checkout/card",
+    "/hair-gummies",
+    "/skin-gummies",
+    "/eye-serum",
+    "/eye-gummies",
     ...CORE_PRODUCT_SLUGS.map((slug) => `/products/${slug}`),
   ];
   const merged = new Set([...base, ...extra]);

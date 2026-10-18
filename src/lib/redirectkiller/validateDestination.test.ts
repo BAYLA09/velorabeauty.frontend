@@ -21,6 +21,10 @@ test("validateInternalDestination allows brand landing /lp", () => {
   if (r.ok) assert.equal(r.path, "/lp");
 });
 
+test("validateInternalDestination allows short product paths", () => {
+  assert.equal(validateInternalDestination("/hair-gummies").ok, true);
+});
+
 test("validateInternalDestination rejects ads paths", () => {
   assert.equal(validateInternalDestination("/ads/foo").ok, false);
 });
