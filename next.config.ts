@@ -1,4 +1,11 @@
 import type { NextConfig } from "next";
+import { PRODUCT_SHORT_PATH_REDIRECTS } from "./src/config/productShortPaths";
+
+const productShortRedirects = PRODUCT_SHORT_PATH_REDIRECTS.map(({ short, canonical }) => ({
+  source: short,
+  destination: canonical,
+  permanent: true,
+}));
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -47,6 +54,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      ...productShortRedirects,
       {
         source: "/magnific_animate-into-a-5second-photorealistic-lifestyle-cl_kling_720p_9-16_24fps_31067.mp4",
         destination:
