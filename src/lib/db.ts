@@ -91,6 +91,18 @@ function ensureSchema(database: Database.Database): void {
       attempted_at TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_rk_login_ip_time ON redirectkiller_login_attempts (ip, attempted_at DESC);
+    CREATE TABLE IF NOT EXISTS bayla_admin_login_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ip TEXT NOT NULL,
+      success INTEGER NOT NULL DEFAULT 0,
+      attempted_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_bayla_login_ip_time ON bayla_admin_login_attempts (ip, attempted_at DESC);
+    CREATE TABLE IF NOT EXISTS bayla_profit_admin_state (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      state_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
 }
 
