@@ -58,11 +58,19 @@ function formatDisplayDate(iso: string): string {
 
 function mapOrderStatus(order: OrderRecord): { label: string; tone: "success" | "warning" | "neutral" } {
   if (order.paymentMethod === "card") {
-    if (order.status === "paid") return { label: "Paid", tone: "success" };
+    if (order.status === "paid" || order.status === "delivered")
+      return { label: "Delivered", tone: "success" };
+    if (order.status === "returned") return { label: "Returned", tone: "neutral" };
+    if (order.status === "refunded") return { label: "Refunded", tone: "warning" };
+    if (order.status === "cancelled") return { label: "Cancelled", tone: "neutral" };
     if (order.status === "awaiting_payment") return { label: "Pending", tone: "warning" };
     return { label: order.status, tone: "neutral" };
   }
   if (order.status === "delivered") return { label: "Delivered", tone: "success" };
+  if (order.status === "returned") return { label: "Returned", tone: "neutral" };
+  if (order.status === "no_answer") return { label: "No answer", tone: "warning" };
+  if (order.status === "cancelled") return { label: "Cancelled", tone: "neutral" };
+  if (order.status === "confirmed") return { label: "Confirmed", tone: "success" };
   if (order.status === "paid") return { label: "Delivered", tone: "success" };
   return { label: "Pending", tone: "warning" };
 }
@@ -83,7 +91,7 @@ export function aggregateOrdersForPeriod(
 
   for (const order of orders) {
     if (order.paymentMethod === "card") {
-      if (order.status !== "paid") continue;
+      if (order.status !== "paid" && order.status !== "delivered") continue;
       paymentCount += 1;
       const rev = aedToUsd(order.totalAed, rate);
       paymentRevenueUsd += rev;
@@ -195,7 +203,10 @@ export function computeDailyProfitSeries(
     const day = startOfDayUtc(order.createdAt);
     const bucket = dayMap.get(day) ?? { paymentProfit: 0, codProfit: 0, paymentRevenue: 0 };
 
-    if (order.paymentMethod === "card" && order.status === "paid") {
+    if (
+      order.paymentMethod === "card" &&
+      (order.status === "paid" || order.status === "delivered")
+    ) {
       const rev = aedToUsd(order.totalAed, rate);
       const product = orderProductCostUsd(order, fees);
       const ship = fees.payment.shippingPerOrderUsd;

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAdminSession } from "@/lib/profitAdmin/apiHelpers";
 import { readFeeConfigFromEnv } from "@/lib/profitAdmin/feesDefaults";
+import { buildCodPanelForPeriodWithLiveStatuses } from "@/lib/profitAdmin/codLiveMetrics";
 import {
-  buildCodPanelForPeriod,
   buildPaymentPanelFromLive,
   computeDailyProfitSeries,
   percentChange,
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   const { paymentResult, codResult, live, marketing, totalProfitUsd, totalOrders, adSpendUsd } =
     period;
 
-  const codInput = buildCodPanelForPeriod(
+  const { input: codInput, live: codLive } = buildCodPanelForPeriodWithLiveStatuses(
     from,
     to,
     fees,
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     fees,
     live,
     payment: { input: buildPaymentPanelFromLive(live.payment, fees), result: paymentResult },
-    cod: { input: codInput, result: codResult },
+    cod: { input: codInput, result: codResult, live: codLive },
     kpis: {
       totalProfitUsd,
       paymentProfitUsd: paymentResult.profitUsd,

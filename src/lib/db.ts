@@ -73,6 +73,16 @@ function ensureSchema(database: Database.Database): void {
   if (!names.has("order_attribution_json")) {
     database.exec(`ALTER TABLE orders ADD COLUMN order_attribution_json TEXT`);
   }
+  if (!names.has("order_source")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN order_source TEXT NOT NULL DEFAULT 'storefront'`);
+  }
+
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS app_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+  `);
 
   database.exec(`
     CREATE TABLE IF NOT EXISTS ad_redirects (

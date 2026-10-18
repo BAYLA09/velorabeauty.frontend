@@ -141,6 +141,18 @@ async function getAccessToken(): Promise<string> {
   return token.token;
 }
 
+export async function resolveSheetTabTitle(
+  spreadsheetId: string,
+  sheetGid: number,
+): Promise<string | null> {
+  try {
+    const token = await getAccessToken();
+    return await resolveSheetTitle(spreadsheetId, sheetGid, token);
+  } catch {
+    return null;
+  }
+}
+
 async function resolveSheetTitle(
   spreadsheetId: string,
   sheetGid: number,
@@ -224,4 +236,62 @@ export async function appendCodRowsViaGoogleSheetsApi(
     return false;
   }
   return true;
+}
+
+export type OrderSheetGrid = { headers: string[]; rows: string[][] };
+
+async function readSheetGridViaGoogleSheetsApi(
+  config: GoogleSheetsDirectConfig,
+  channel: "cod" | "card",
+): Promise<OrderSheetGrid | null> {
+  if (!config.enabled || !config.spreadsheetId) return null;
+
+  const spreadsheetId =
+    channel === "card"
+      ? (config.cardSpreadsheetId ?? config.spreadsheetId)
+      : config.spreadsheetId;
+  const gid =
+    channel === "card" && config.cardSheetGid != null ? config.cardSheetGid : config.sheetGid;
+  if (!spreadsheetId) return null;
+
+  const token = await getAccessToken();
+  const title = await resolveSheetTitle(spreadsheetId, gid, token);
+  const range = `'${title.replace(/'/g, "''")}'!A:Z`;
+
+  const res = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(25_000),
+    },
+  );
+  const text = await res.text();
+  if (!res.ok) {
+    console.error("[orders-sheets] google api read failed", {
+      status: res.status,
+      body: text.slice(0, 300),
+    });
+    return null;
+  }
+
+  const data = JSON.parse(text) as { values?: string[][] };
+  const values = data.values ?? [];
+  if (values.length === 0) return { headers: [], rows: [] };
+  const headers = values[0].map((c) => String(c ?? "").trim());
+  const rows = values.slice(1).map((row) => row.map((c) => String(c ?? "")));
+  return { headers, rows };
+}
+
+/** Read the COD workbook tab (gid from ORDERS_SHEETS_SHEET_GID / default 469291840). */
+export async function readCodSheetGridViaGoogleSheetsApi(
+  config: GoogleSheetsDirectConfig,
+): Promise<OrderSheetGrid | null> {
+  return readSheetGridViaGoogleSheetsApi(config, "cod");
+}
+
+/** Read the card workbook tab (gid from ORDERS_SHEETS_CARD_SHEET_GID / default 1628433865). */
+export async function readCardSheetGridViaGoogleSheetsApi(
+  config: GoogleSheetsDirectConfig,
+): Promise<OrderSheetGrid | null> {
+  return readSheetGridViaGoogleSheetsApi(config, "card");
 }
