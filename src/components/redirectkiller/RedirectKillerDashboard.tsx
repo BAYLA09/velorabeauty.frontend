@@ -324,7 +324,10 @@ export function RedirectKillerDashboard() {
               Destination
               <select
                 value={newDest}
-                onChange={(e) => setNewDest(e.target.value)}
+                onChange={(e) => {
+                  setNewDest(e.target.value);
+                  setCustomDest("");
+                }}
                 className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
               >
                 {presets.map((p) => (
@@ -346,7 +349,7 @@ export function RedirectKillerDashboard() {
               <input
                 value={customDest}
                 onChange={(e) => setCustomDest(e.target.value)}
-                placeholder="/products/hair-gummies"
+                placeholder="/lp or /products/hair-gummies"
                 className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
               />
             </label>
@@ -412,11 +415,31 @@ export function RedirectKillerDashboard() {
                       <td className="py-3 pr-3 font-mono text-emerald-300">{row.slug}</td>
                       <td className="py-3 pr-3">
                         {editId === row.id ? (
-                          <input
+                          <select
                             value={editDest}
                             onChange={(e) => setEditDest(e.target.value)}
-                            className="w-full rounded border border-slate-600 bg-slate-950 px-2 py-1 text-xs"
-                          />
+                            className="w-full max-w-xs rounded border border-slate-600 bg-slate-950 px-2 py-1 text-xs"
+                          >
+                            {presets.map((p) => (
+                              <option key={p.path} value={p.path}>
+                                {p.label} — {p.path}
+                              </option>
+                            ))}
+                            {destOptions
+                              .filter(
+                                (p) =>
+                                  !presets.some((pr) => pr.path === p) && p !== editDest,
+                              )
+                              .map((p) => (
+                                <option key={p} value={p}>
+                                  {p}
+                                </option>
+                              ))}
+                            {!presets.some((p) => p.path === editDest) &&
+                            !destOptions.includes(editDest) ? (
+                              <option value={editDest}>{editDest}</option>
+                            ) : null}
+                          </select>
                         ) : (
                           <span className="font-mono text-xs text-slate-300">{row.destinationPath}</span>
                         )}

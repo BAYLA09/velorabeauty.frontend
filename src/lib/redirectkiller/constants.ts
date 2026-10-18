@@ -7,11 +7,24 @@ export const REDIRECTKILLER_CSRF_HEADER = "x-rk-csrf";
 
 export const REDIRECT_PUBLIC_PREFIX = "/ads";
 
-export const REDIRECT_PRESET_DESTINATIONS = [
+export type RedirectDestinationOption = { label: string; path: string };
+
+export const REDIRECT_PRESET_DESTINATIONS: RedirectDestinationOption[] = [
+  { label: "Brand landing (EN)", path: "/lp" },
+  { label: "Homepage", path: "/" },
   { label: "Hair Gummies", path: "/products/hair-gummies" },
   { label: "Skin Gummies", path: "/products/skin-gummies" },
   { label: "Eye Serum", path: "/products/eye-serum" },
-] as const;
+];
+
+/** Presets plus any other allowlisted internal paths (for admin dropdown). */
+export function getRedirectDestinationOptions(): RedirectDestinationOption[] {
+  const presetPaths = new Set(REDIRECT_PRESET_DESTINATIONS.map((p) => p.path));
+  const extras = listAllowedInternalPaths()
+    .filter((path) => !presetPaths.has(path))
+    .map((path) => ({ label: path, path }));
+  return [...REDIRECT_PRESET_DESTINATIONS, ...extras];
+}
 
 const productPathSet = new Set(CORE_PRODUCT_SLUGS.map((slug) => `/products/${slug}`));
 

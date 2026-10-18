@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAdminMutation, requireAdminSession } from "@/lib/redirectkiller/apiHelpers";
-import { REDIRECT_PRESET_DESTINATIONS } from "@/lib/redirectkiller/constants";
+import { getRedirectDestinationOptions } from "@/lib/redirectkiller/constants";
 import {
   createAdRedirect,
   getAdRedirectBySlug,
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     ok: true,
     redirects: rows.map(serialize),
-    presets: REDIRECT_PRESET_DESTINATIONS,
+    presets: getRedirectDestinationOptions(),
   });
 }
 
