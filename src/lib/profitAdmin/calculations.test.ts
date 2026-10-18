@@ -9,6 +9,37 @@ import { DEFAULT_FEE_CONFIG } from "@/lib/profitAdmin/feesDefaults";
 
 const defaultCodRates = DEFAULT_FEE_CONFIG.cod;
 
+test("COD funnel from explicit Sheet counts matches rate-based panel", () => {
+  const explicit = computeCodPanelFromFunnelCounts({
+    totalOrders: 100,
+    notConfirmedOrders: 30,
+    deliveredOrders: 56,
+    returnedOrders: 14,
+    sellingPricePerOrderUsd: 35,
+    productCostPerOrderUsd: 12,
+    callCenterNoAnswerUsd: defaultCodRates.callCenterNoAnswerUsd,
+    callCenterReturnedUsd: defaultCodRates.callCenterReturnedUsd,
+    callCenterDeliveredUsd: defaultCodRates.callCenterDeliveredUsd,
+    shippingDeliveredUsd: defaultCodRates.shippingDeliveredUsd,
+    shippingReturnedUsd: defaultCodRates.shippingReturnedUsd,
+    serviceFeePercent: defaultCodRates.serviceFeePercent,
+  });
+  const rates = computeCodPanel({
+    totalOrders: 100,
+    confirmationRatePct: 70,
+    deliveryRatePct: 80,
+    sellingPricePerOrderUsd: 35,
+    productCostPerOrderUsd: 12,
+    callCenterNoAnswerUsd: defaultCodRates.callCenterNoAnswerUsd,
+    callCenterReturnedUsd: defaultCodRates.callCenterReturnedUsd,
+    callCenterDeliveredUsd: defaultCodRates.callCenterDeliveredUsd,
+    shippingDeliveredUsd: defaultCodRates.shippingDeliveredUsd,
+    shippingReturnedUsd: defaultCodRates.shippingReturnedUsd,
+    serviceFeePercent: defaultCodRates.serviceFeePercent,
+  });
+  assert.ok(Math.abs(explicit.profitUsd - rates.profitUsd) < 0.05);
+});
+
 test("COD funnel counts: N=100, 70% conf, 80% deliv", () => {
   const r = computeCodPanel({
     totalOrders: 100,
