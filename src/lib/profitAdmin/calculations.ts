@@ -1,16 +1,16 @@
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 
 /**
- * Payment (card / Stripe) panel economics — USD.
- * Payment fees = revenue × paymentFeePercent / 100 (editable % in UI).
+ * Card / Stripe orders only — never mixed with COD service fee.
+ * Stripe fee per order = order amount × stripePercent + stripeFixedUsd.
  */
 export type PaymentPanelInput = {
   orderCount: number;
   totalRevenueUsd: number;
   productCostUsd: number;
   shippingCostUsd: number;
-  paymentFeePercent: number;
-  otherFeesUsd: number;
+  stripePercent: number;
+  stripeFixedUsd: number;
 };
 
 export type PaymentPanelResult = {
@@ -18,26 +18,16 @@ export type PaymentPanelResult = {
   revenueUsd: number;
   productCostUsd: number;
   shippingCostUsd: number;
-  paymentFeesUsd: number;
-  otherFeesUsd: number;
+  /** Stripe processing fees only (card channel). */
+  stripeFeesUsd: number;
   profitUsd: number;
   marginPct: number;
 };
 
 /**
- * COD panel — per-order unit costs (USD).
- *
- * Delivered orders = totalOrders × (confirmationRate/100) × (deliveryRate/100)
- * Confirmed orders = totalOrders × (confirmationRate/100)
- * Failed after confirm = confirmed − delivered (returns / RTO)
- *
- * COD revenue = delivered × sellingPricePerOrder
- * COD profit = revenue
- *   − delivered × productCostPerOrder
- *   − delivered × shippingCostPerOrder
- *   − delivered × codFeesPerOrder
- *   − failedAfterConfirm × returnCostPerOrder
- *   − totalOrders × otherFeesPerOrder
+ * COD orders only — never mixed with Stripe card fees.
+ * COD funnel (N = total orders, conf & deliv = rates in %).
+ * confirmed = N×conf; notConfirmed = N−confirmed; delivered = confirmed×deliv; returned = confirmed−delivered.
  */
 export type CodPanelInput = {
   totalOrders: number;
@@ -45,28 +35,36 @@ export type CodPanelInput = {
   deliveryRatePct: number;
   sellingPricePerOrderUsd: number;
   productCostPerOrderUsd: number;
-  shippingCostPerOrderUsd: number;
-  codFeesPerOrderUsd: number;
-  returnCostPerOrderUsd: number;
-  otherFeesPerOrderUsd: number;
+  callCenterNoAnswerUsd: number;
+  callCenterReturnedUsd: number;
+  callCenterDeliveredUsd: number;
+  shippingDeliveredUsd: number;
+  shippingReturnedUsd: number;
+  serviceFeePercent: number;
 };
 
 export type CodPanelResult = {
   totalOrders: number;
   confirmedOrders: number;
+  notConfirmedOrders: number;
   deliveredOrders: number;
-  failedAfterConfirm: number;
+  returnedOrders: number;
   revenueUsd: number;
   productCostUsd: number;
+  callCenterNoAnswerUsd: number;
+  callCenterReturnedUsd: number;
+  callCenterDeliveredUsd: number;
+  callCenterUsd: number;
+  shippingDeliveredUsd: number;
+  shippingReturnedUsd: number;
   shippingCostUsd: number;
-  codFeesUsd: number;
-  returnCostUsd: number;
-  otherFeesUsd: number;
+  /** COD Network / cash-collection fee — % of delivered COD revenue only. */
+  codServiceFeeUsd: number;
   profitUsd: number;
   marginPct: number;
 };
 
-/** @deprecated Legacy alias — use PaymentPanelInput */
+/** @deprecated */
 export type PaymentCalcInput = {
   orderCount: number;
   totalRevenueUsd: number;
@@ -74,7 +72,7 @@ export type PaymentCalcInput = {
   otherCostsUsd: number;
 };
 
-/** @deprecated Legacy alias — use CodPanelInput */
+/** @deprecated */
 export type CodCalcInput = {
   totalOrders: number;
   confirmationRatePct: number;
@@ -86,8 +84,8 @@ export type CodCalcInput = {
   otherCostsUsd: number;
 };
 
-export type PaymentCalcResult = PaymentPanelResult & { stripeFeesUsd: number; avgOrderUsd: number };
-export type CodCalcResult = CodPanelResult & { callCenterUsd: number; codPlatformFeeUsd: number };
+export type PaymentCalcResult = PaymentPanelResult & { avgOrderUsd: number };
+export type CodCalcResult = CodPanelResult & { codPlatformFeeUsd: number };
 
 function clampNum(n: number, fallback = 0): number {
   return Number.isFinite(n) ? n : fallback;
@@ -98,11 +96,11 @@ export function computePaymentPanel(input: PaymentPanelInput): PaymentPanelResul
   const revenueUsd = Math.max(0, clampNum(input.totalRevenueUsd));
   const productCostUsd = Math.max(0, clampNum(input.productCostUsd));
   const shippingCostUsd = Math.max(0, clampNum(input.shippingCostUsd));
-  const paymentFeePercent = Math.min(100, Math.max(0, clampNum(input.paymentFeePercent)));
-  const otherFeesUsd = Math.max(0, clampNum(input.otherFeesUsd));
+  const stripePercent = Math.min(100, Math.max(0, clampNum(input.stripePercent)));
+  const stripeFixedUsd = Math.max(0, clampNum(input.stripeFixedUsd));
 
-  const paymentFeesUsd = revenueUsd * (paymentFeePercent / 100);
-  const profitUsd = revenueUsd - productCostUsd - shippingCostUsd - paymentFeesUsd - otherFeesUsd;
+  const stripeFeesUsd = (revenueUsd * stripePercent) / 100 + orderCount * stripeFixedUsd;
+  const profitUsd = revenueUsd - productCostUsd - shippingCostUsd - stripeFeesUsd;
   const marginPct = revenueUsd > 0 ? (profitUsd / revenueUsd) * 100 : 0;
 
   return {
@@ -110,10 +108,32 @@ export function computePaymentPanel(input: PaymentPanelInput): PaymentPanelResul
     revenueUsd,
     productCostUsd,
     shippingCostUsd,
-    paymentFeesUsd,
-    otherFeesUsd,
+    stripeFeesUsd,
     profitUsd,
     marginPct,
+  };
+}
+
+export function codPanelInputFromFees(
+  partial: Omit<
+    CodPanelInput,
+    | "callCenterNoAnswerUsd"
+    | "callCenterReturnedUsd"
+    | "callCenterDeliveredUsd"
+    | "shippingDeliveredUsd"
+    | "shippingReturnedUsd"
+    | "serviceFeePercent"
+  >,
+  fees: FeeConfig,
+): CodPanelInput {
+  return {
+    ...partial,
+    callCenterNoAnswerUsd: fees.cod.callCenterNoAnswerUsd,
+    callCenterReturnedUsd: fees.cod.callCenterReturnedUsd,
+    callCenterDeliveredUsd: fees.cod.callCenterDeliveredUsd,
+    shippingDeliveredUsd: fees.cod.shippingDeliveredUsd,
+    shippingReturnedUsd: fees.cod.shippingReturnedUsd,
+    serviceFeePercent: fees.cod.serviceFeePercent,
   };
 }
 
@@ -123,51 +143,55 @@ export function computeCodPanel(input: CodPanelInput): CodPanelResult {
   const deliveryRatePct = Math.min(100, Math.max(0, clampNum(input.deliveryRatePct)));
   const sellingPricePerOrderUsd = Math.max(0, clampNum(input.sellingPricePerOrderUsd));
   const productCostPerOrderUsd = Math.max(0, clampNum(input.productCostPerOrderUsd));
-  const shippingCostPerOrderUsd = Math.max(0, clampNum(input.shippingCostPerOrderUsd));
-  const codFeesPerOrderUsd = Math.max(0, clampNum(input.codFeesPerOrderUsd));
-  const returnCostPerOrderUsd = Math.max(0, clampNum(input.returnCostPerOrderUsd));
-  const otherFeesPerOrderUsd = Math.max(0, clampNum(input.otherFeesPerOrderUsd));
 
   const confirmedOrders = totalOrders * (confirmationRatePct / 100);
+  const notConfirmedOrders = Math.max(0, totalOrders - confirmedOrders);
   const deliveredOrders = confirmedOrders * (deliveryRatePct / 100);
-  const failedAfterConfirm = Math.max(0, confirmedOrders - deliveredOrders);
+  const returnedOrders = Math.max(0, confirmedOrders - deliveredOrders);
 
   const revenueUsd = deliveredOrders * sellingPricePerOrderUsd;
   const productCostUsd = deliveredOrders * productCostPerOrderUsd;
-  const shippingCostUsd = deliveredOrders * shippingCostPerOrderUsd;
-  const codFeesUsd = deliveredOrders * codFeesPerOrderUsd;
-  const returnCostUsd = failedAfterConfirm * returnCostPerOrderUsd;
-  const otherFeesUsd = totalOrders * otherFeesPerOrderUsd;
+
+  const callCenterNoAnswerUsd = notConfirmedOrders * input.callCenterNoAnswerUsd;
+  const callCenterReturnedUsd = returnedOrders * input.callCenterReturnedUsd;
+  const callCenterDeliveredUsd = deliveredOrders * input.callCenterDeliveredUsd;
+  const callCenterUsd = callCenterNoAnswerUsd + callCenterReturnedUsd + callCenterDeliveredUsd;
+
+  const shippingDeliveredUsd = deliveredOrders * input.shippingDeliveredUsd;
+  const shippingReturnedUsd = returnedOrders * input.shippingReturnedUsd;
+  const shippingCostUsd = shippingDeliveredUsd + shippingReturnedUsd;
+
+  const servicePct = Math.min(100, Math.max(0, clampNum(input.serviceFeePercent)));
+  const codServiceFeeUsd = revenueUsd * (servicePct / 100);
 
   const profitUsd =
-    revenueUsd -
-    productCostUsd -
-    shippingCostUsd -
-    codFeesUsd -
-    returnCostUsd -
-    otherFeesUsd;
+    revenueUsd - productCostUsd - callCenterUsd - shippingCostUsd - codServiceFeeUsd;
   const marginPct = revenueUsd > 0 ? (profitUsd / revenueUsd) * 100 : 0;
 
   return {
     totalOrders,
     confirmedOrders,
+    notConfirmedOrders,
     deliveredOrders,
-    failedAfterConfirm,
+    returnedOrders,
     revenueUsd,
     productCostUsd,
+    callCenterNoAnswerUsd,
+    callCenterReturnedUsd,
+    callCenterDeliveredUsd,
+    callCenterUsd,
+    shippingDeliveredUsd,
+    shippingReturnedUsd,
     shippingCostUsd,
-    codFeesUsd,
-    returnCostUsd,
-    otherFeesUsd,
+    codServiceFeeUsd,
     profitUsd,
     marginPct,
   };
 }
 
-/** Estimate Stripe fees for a single card order (used when aggregating live orders). */
-export function estimateStripeFeesUsd(revenueUsd: number, fees: FeeConfig): number {
-  if (revenueUsd <= 0) return 0;
-  return (revenueUsd * fees.payment.stripePercent) / 100 + fees.payment.stripeFixedUsd;
+export function estimateStripeFeesUsd(revenueUsd: number, orderCount: number, fees: FeeConfig): number {
+  if (revenueUsd <= 0 && orderCount <= 0) return 0;
+  return (revenueUsd * fees.payment.stripePercent) / 100 + orderCount * fees.payment.stripeFixedUsd;
 }
 
 /** Legacy wrapper */
@@ -177,52 +201,35 @@ export function computePaymentProfit(
 ): PaymentCalcResult {
   const orderCount = Math.max(0, clampNum(input.orderCount));
   const revenueUsd = Math.max(0, clampNum(input.totalRevenueUsd));
-  const avgProductCostUsd = Math.max(0, clampNum(input.avgProductCostUsd));
-  const productCostUsd = orderCount * avgProductCostUsd;
-  const shippingCostUsd = orderCount * fees.payment.shippingDeliveredUsd;
+  const productCostUsd = orderCount * Math.max(0, clampNum(input.avgProductCostUsd));
+  const shippingCostUsd = orderCount * fees.payment.shippingPerOrderUsd;
   const panel = computePaymentPanel({
     orderCount,
     totalRevenueUsd: revenueUsd,
     productCostUsd,
     shippingCostUsd,
-    paymentFeePercent: fees.payment.paymentFeePercent,
-    otherFeesUsd: Math.max(0, clampNum(input.otherCostsUsd)),
+    stripePercent: fees.payment.stripePercent,
+    stripeFixedUsd: fees.payment.stripeFixedUsd,
   });
   const avgOrderUsd = orderCount > 0 ? revenueUsd / orderCount : 0;
-  const stripeFeesUsd =
-    orderCount > 0
-      ? orderCount *
-        ((avgOrderUsd * fees.payment.stripePercent) / 100 + fees.payment.stripeFixedUsd)
-      : 0;
-  return { ...panel, stripeFeesUsd, avgOrderUsd, paymentFeesUsd: panel.paymentFeesUsd };
+  return { ...panel, avgOrderUsd };
 }
 
-/** Legacy wrapper — maps old COD input to per-order panel defaults */
+/** Legacy wrapper */
 export function computeCodProfit(input: CodCalcInput, fees: FeeConfig): CodCalcResult {
-  const panel = computeCodPanel({
-    totalOrders: input.totalOrders,
-    confirmationRatePct: input.confirmationRatePct,
-    deliveryRatePct: input.deliveryRatePct,
-    sellingPricePerOrderUsd: input.sellingPriceUsd,
-    productCostPerOrderUsd: input.avgProductCostUsd,
-    shippingCostPerOrderUsd: fees.cod.shippingDeliveredUsd,
-    codFeesPerOrderUsd:
-      fees.cod.codFeesPerOrderUsd > 0
-        ? fees.cod.codFeesPerOrderUsd
-        : (input.sellingPriceUsd * fees.cod.platformFeePercent) / 100,
-    returnCostPerOrderUsd: fees.cod.shippingReturnUsd,
-    otherFeesPerOrderUsd:
-      fees.cod.otherFeesPerOrderUsd > 0
-        ? fees.cod.otherFeesPerOrderUsd
-        : input.totalOrders > 0
-          ? input.otherCostsUsd / input.totalOrders
-          : 0,
-  });
-  return {
-    ...panel,
-    callCenterUsd: 0,
-    codPlatformFeeUsd: panel.codFeesUsd,
-  };
+  const panel = computeCodPanel(
+    codPanelInputFromFees(
+      {
+        totalOrders: input.totalOrders,
+        confirmationRatePct: input.confirmationRatePct,
+        deliveryRatePct: input.deliveryRatePct,
+        sellingPricePerOrderUsd: input.sellingPriceUsd,
+        productCostPerOrderUsd: input.avgProductCostUsd,
+      },
+      fees,
+    ),
+  );
+  return { ...panel, codPlatformFeeUsd: panel.codServiceFeeUsd };
 }
 
 export function computeScenarioDelta(

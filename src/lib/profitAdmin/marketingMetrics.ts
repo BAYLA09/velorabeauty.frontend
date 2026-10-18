@@ -23,13 +23,11 @@ export function fulfillmentCostsUsd(
   return (
     payment.productCostUsd +
     payment.shippingCostUsd +
-    payment.paymentFeesUsd +
-    payment.otherFeesUsd +
+    payment.stripeFeesUsd +
     cod.productCostUsd +
     cod.shippingCostUsd +
-    cod.codFeesUsd +
-    cod.returnCostUsd +
-    cod.otherFeesUsd
+    cod.callCenterUsd +
+    cod.codServiceFeeUsd
   );
 }
 

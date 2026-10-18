@@ -1,8 +1,8 @@
 import { aedToUsd } from "@/lib/profitAdmin/currency";
 import {
+  codPanelInputFromFees,
   computeCodPanel,
   computePaymentPanel,
-  type CodPanelInput,
   type PaymentPanelInput,
 } from "@/lib/profitAdmin/calculations";
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
@@ -88,7 +88,7 @@ export function aggregateOrdersForPeriod(
       const rev = aedToUsd(order.totalAed, rate);
       paymentRevenueUsd += rev;
       paymentProductCostUsd += orderProductCostUsd(order, fees);
-      paymentShippingUsd += fees.payment.shippingDeliveredUsd;
+      paymentShippingUsd += fees.payment.shippingPerOrderUsd;
     } else if (order.paymentMethod === "cod") {
       codCount += 1;
     }
@@ -132,8 +132,8 @@ export function buildPaymentPanelFromLive(
     totalRevenueUsd: live.totalRevenueUsd,
     productCostUsd: live.productCostUsd,
     shippingCostUsd: live.shippingCostUsd,
-    paymentFeePercent: fees.payment.paymentFeePercent,
-    otherFeesUsd: fees.payment.otherFeesUsd,
+    stripePercent: fees.payment.stripePercent,
+    stripeFixedUsd: fees.payment.stripeFixedUsd,
   };
 }
 
@@ -143,7 +143,7 @@ export function buildCodPanelForPeriod(
   fees: FeeConfig,
   confirmationRatePct: number,
   deliveryRatePct: number,
-): CodPanelInput {
+) {
   const orders = listOrdersBetween(fromIso, toIso).filter(
     (o) => !isExcludedTestOrder(o) && o.paymentMethod === "cod",
   );
@@ -159,29 +159,24 @@ export function buildCodPanelForPeriod(
     count > 0 ? sellingSum / count : fees.cod.defaultSellingPricePerOrderUsd;
   const productCostPerOrderUsd =
     count > 0 ? productCostSum / count : fees.cod.defaultProductCostPerOrderUsd;
-  const codFeesPerOrderUsd =
-    fees.cod.codFeesPerOrderUsd > 0
-      ? fees.cod.codFeesPerOrderUsd
-      : (sellingPricePerOrderUsd * fees.cod.platformFeePercent) / 100;
 
-  return {
-    totalOrders: count,
-    confirmationRatePct,
-    deliveryRatePct,
-    sellingPricePerOrderUsd,
-    productCostPerOrderUsd,
-    shippingCostPerOrderUsd: fees.cod.shippingDeliveredUsd,
-    codFeesPerOrderUsd,
-    returnCostPerOrderUsd: fees.cod.shippingReturnUsd,
-    otherFeesPerOrderUsd: fees.cod.otherFeesPerOrderUsd,
-  };
+  return codPanelInputFromFees(
+    {
+      totalOrders: count,
+      confirmationRatePct,
+      deliveryRatePct,
+      sellingPricePerOrderUsd,
+      productCostPerOrderUsd,
+    },
+    fees,
+  );
 }
 
 export function computeDailyProfitSeries(
   fromIso: string,
   toIso: string,
   fees: FeeConfig,
-  codPanel: CodPanelInput,
+  codPanel: import("@/lib/profitAdmin/calculations").CodPanelInput,
   chartDays: number,
 ): DailyProfitPoint[] {
   const orders = listOrdersBetween(fromIso, toIso).filter((o) => !isExcludedTestOrder(o));
@@ -203,14 +198,14 @@ export function computeDailyProfitSeries(
     if (order.paymentMethod === "card" && order.status === "paid") {
       const rev = aedToUsd(order.totalAed, rate);
       const product = orderProductCostUsd(order, fees);
-      const ship = fees.payment.shippingDeliveredUsd;
+      const ship = fees.payment.shippingPerOrderUsd;
       const panel = computePaymentPanel({
         orderCount: 1,
         totalRevenueUsd: rev,
         productCostUsd: product,
         shippingCostUsd: ship,
-        paymentFeePercent: fees.payment.paymentFeePercent,
-        otherFeesUsd: 0,
+        stripePercent: fees.payment.stripePercent,
+        stripeFixedUsd: fees.payment.stripeFixedUsd,
       });
       bucket.paymentProfit += panel.profitUsd;
       bucket.paymentRevenue += rev;
@@ -242,12 +237,7 @@ export function computeDailyProfitSeries(
     });
   }
 
-  const otherPerDay = fees.payment.otherFeesUsd / Math.max(1, points.length);
-  return points.map((p) => ({
-    ...p,
-    paymentProfitUsd: p.paymentProfitUsd - otherPerDay,
-    totalProfitUsd: p.paymentProfitUsd + p.codProfitUsd - otherPerDay,
-  }));
+  return points;
 }
 
 export function percentChange(current: number, previous: number): number | null {

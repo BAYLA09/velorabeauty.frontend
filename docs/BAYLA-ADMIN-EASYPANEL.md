@@ -15,7 +15,7 @@ Configure in Easypanel → Velora frontend → **Environment** → Save → **De
 
 ## Dashboard inputs (persisted in SQLite)
 
-Only these are editable in the UI:
+Only these are editable in the UI (single **Your inputs** panel):
 
 | Field | Purpose |
 |-------|---------|
@@ -27,35 +27,47 @@ Saved in `bayla_profit_admin_state`.
 
 ## Unit economics (server env — not on the page)
 
-Defaults match the profit mockup; override in Easypanel without redeploying dashboard code:
+### Card (Stripe) only — never on COD orders
 
-| Variable | Default | Meaning |
-|----------|---------|---------|
-| `BAYLA_AED_PER_USD` | `3.6725` | AED peg for order totals → USD |
-| `BAYLA_PAYMENT_FEE_PERCENT` | `4.9` | Card payment fees as % of revenue |
-| `BAYLA_CARD_SHIPPING_USD` | `5.99` | Shipping cost per paid card order |
-| `BAYLA_PAYMENT_OTHER_FEES_USD` | `0` | Fixed other fees on payment panel |
-| `BAYLA_PRODUCT_COST_EYE_USD` | `3` | COGS — SKU **vitaminamin** (eye serum) |
-| `BAYLA_PRODUCT_COST_SKIN_USD` | `7.47` | COGS — SKU **WHITEAMIN** (skin gummies) |
-| `BAYLA_PRODUCT_COST_HAIR_USD` | `6.1` | COGS — hair gummies (legacy orders) |
-| `BAYLA_COD_SHIPPING_USD` | `4.5` | COD shipping per delivered order |
-| `BAYLA_COD_RETURN_COST_USD` | `3` | Return cost per confirmed-not-delivered order |
-| `BAYLA_COD_FEE_PER_ORDER_USD` | `2.5` | COD Network fee per delivered order |
-| `BAYLA_COD_OTHER_FEE_PER_ORDER_USD` | `1` | Other COD cost per placed order |
-| `BAYLA_COD_SELLING_PRICE_USD` | `35` | Fallback avg selling price when no COD orders in range |
-| `BAYLA_COD_PRODUCT_COST_USD` | `12` | Fallback avg product cost when no COD orders in range |
-| `BAYLA_COD_PLATFORM_FEE_PERCENT` | `5` | Used only if `BAYLA_COD_FEE_PER_ORDER_USD` is `0` |
-| `BAYLA_STRIPE_FEE_PERCENT` | `5.4` | Internal estimate (per-order chart) |
-| `BAYLA_STRIPE_FEE_FIXED_USD` | `0.3` | Stripe fixed fee per card order |
+- Stripe fee: **5.4%** of card order amount + **$0.30** (per paid card order)
+- Shipping: **$5.99**
+- Product COGS: per SKU (see below)
 
-Card revenue and COGS use **real paid orders** in the selected date range. COD order count and average selling price/COGS use **real COD orders** when present.
+| Variable | Default |
+|----------|---------|
+| `BAYLA_STRIPE_FEE_PERCENT` | `5.4` |
+| `BAYLA_STRIPE_FEE_FIXED_USD` | `0.30` |
+| `BAYLA_CARD_SHIPPING_USD` | `5.99` |
+| `BAYLA_PRODUCT_COST_EYE_USD` | `3` (SKU **vitaminamin**) |
+| `BAYLA_PRODUCT_COST_SKIN_USD` | `7.47` (SKU **WHITEAMIN**) |
+| `BAYLA_PRODUCT_COST_HAIR_USD` | `6.1` |
+| `BAYLA_AED_PER_USD` | `3.6725` |
 
-### COD profit formula
+### COD only — never on card orders
 
-- `delivered = totalOrders × (confirmationRate/100) × (deliveryRate/100)`
-- `failedAfterConfirm = totalOrders × (confirmationRate/100) − delivered`
-- `profit = delivered×price − delivered×(product+shipping+COD fees) − failedAfterConfirm×returnCost − totalOrders×otherFeesPerOrder`
-- `netTotalProfit = paymentProfit + codProfit − adSpendUsd`
+(N = total COD orders, conf / deliv = rates)
+
+- `confirmed = N × conf`; `notConfirmed = N − confirmed`
+- `delivered = confirmed × deliv`; `returned = confirmed − delivered`
+- **Call center:** $0.50 / not confirmed · $1.00 / returned · $2.00 / delivered
+- **Shipping:** $4.99 / returned · $5.99 / delivered
+- **COD service fee:** 5% of delivered COD revenue (cash collected) — not Stripe
+- **Product cost:** COGS × delivered count only (returns come back to stock)
+
+| Variable | Default |
+|----------|---------|
+| `BAYLA_COD_CALL_NO_ANSWER_USD` | `0.50` |
+| `BAYLA_COD_CALL_RETURNED_USD` | `1.00` |
+| `BAYLA_COD_CALL_DELIVERED_USD` | `2.00` |
+| `BAYLA_COD_SHIPPING_RETURNED_USD` | `4.99` |
+| `BAYLA_COD_SHIPPING_DELIVERED_USD` | `5.99` |
+| `BAYLA_COD_SERVICE_FEE_PERCENT` | `5` |
+| `BAYLA_COD_SELLING_PRICE_USD` | `35` (fallback if no COD orders in range) |
+| `BAYLA_COD_PRODUCT_COST_USD` | `12` (fallback avg COGS) |
+
+Card revenue and COGS use **real paid orders** in the date range. COD **N** and average selling price/COGS use **real COD orders** when present.
+
+`netTotalProfit = paymentProfit + codProfit − adSpendUsd`
 
 ### Ad performance metrics (computed)
 
@@ -67,4 +79,4 @@ Card revenue and COGS use **real paid orders** in the selected date range. COD o
 | Cost / delivered order | `adSpend / (paid orders + delivered COD orders)` |
 | Break-even ROAS | `total revenue / gross profit before ad spend` |
 
-Shown as `—` when the divisor is zero. Included in the dashboard API, Profit Summary UI, and CSV report header.
+Shown as `—` when the divisor is zero.
