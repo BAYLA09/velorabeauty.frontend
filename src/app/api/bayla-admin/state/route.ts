@@ -6,9 +6,12 @@ import {
   saveProfitDashboardState,
   type ProfitDashboardState,
 } from "@/lib/profitAdmin/settingsRepository";
-import { mergeFeeConfig } from "@/lib/profitAdmin/feesDefaults";
 
 export const runtime = "nodejs";
+
+function clampPct(n: number): number {
+  return Math.min(100, Math.max(0, n));
+}
 
 export async function GET(request: NextRequest) {
   const denied = requireAdminSession(request);
@@ -30,17 +33,18 @@ export async function PUT(request: NextRequest) {
   const current = loadProfitDashboardState();
   const incoming = body.state ?? {};
   const next: ProfitDashboardState = {
-    fees: mergeFeeConfig({ ...current.fees, ...incoming.fees }),
-    codUseLiveOrderCount:
-      typeof incoming.codUseLiveOrderCount === "boolean"
-        ? incoming.codUseLiveOrderCount
-        : current.codUseLiveOrderCount,
-    cod: { ...current.cod, ...incoming.cod },
-    paymentOverrides: { ...current.paymentOverrides, ...incoming.paymentOverrides },
-    paymentOtherFeesUsd:
-      typeof incoming.paymentOtherFeesUsd === "number"
-        ? incoming.paymentOtherFeesUsd
-        : current.paymentOtherFeesUsd,
+    confirmationRatePct:
+      typeof incoming.confirmationRatePct === "number"
+        ? clampPct(incoming.confirmationRatePct)
+        : current.confirmationRatePct,
+    deliveryRatePct:
+      typeof incoming.deliveryRatePct === "number"
+        ? clampPct(incoming.deliveryRatePct)
+        : current.deliveryRatePct,
+    adSpendUsd:
+      typeof incoming.adSpendUsd === "number"
+        ? Math.max(0, incoming.adSpendUsd)
+        : current.adSpendUsd,
     chartDays:
       incoming.chartDays === 7 || incoming.chartDays === 30 || incoming.chartDays === 90
         ? incoming.chartDays

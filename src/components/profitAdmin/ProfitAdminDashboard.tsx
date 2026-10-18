@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ConfigFootnote } from "@/components/profitAdmin/ConfigFootnote";
 import { DonutChart } from "@/components/profitAdmin/DonutChart";
 import { ProfitLineChart } from "@/components/profitAdmin/ProfitLineChart";
 import type { CodPanelInput, PaymentPanelInput } from "@/lib/profitAdmin/calculations";
 import { BAYLA_ADMIN_CSRF_HEADER } from "@/lib/profitAdmin/constants";
+import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 import type { DailyProfitPoint } from "@/lib/profitAdmin/orderMetrics";
 import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository";
 
@@ -57,6 +59,7 @@ type DashboardPayload = {
     date: string;
   }[];
   state: ProfitDashboardState;
+  fees: FeeConfig;
 };
 
 const NAV = [
@@ -165,9 +168,6 @@ export function ProfitAdminDashboard() {
   const [activeNav, setActiveNav] = useState<string>("dashboard");
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loadingDash, setLoadingDash] = useState(false);
-  const [paymentEdit, setPaymentEdit] = useState(false);
-  const [codEdit, setCodEdit] = useState(false);
-  const [costsEdit, setCostsEdit] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [localState, setLocalState] = useState<ProfitDashboardState | null>(null);
@@ -473,133 +473,37 @@ export function ProfitAdminDashboard() {
 
               <section className="grid gap-6 xl:grid-cols-2">
                 <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="flex items-center gap-2 text-base font-semibold">
-                      <span className="h-2 w-2 rounded-full bg-violet-400" />
-                      Payment Orders (Card / Online)
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentEdit((v) => !v)}
-                      className="rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-300 hover:bg-slate-800"
-                    >
-                      {paymentEdit ? "Done" : "Edit Values"}
-                    </button>
-                  </div>
-                  {paymentInput && paymentResult ? (
+                  <h2 className="flex items-center gap-2 text-base font-semibold">
+                    <span className="h-2 w-2 rounded-full bg-violet-400" />
+                    Payment Orders (Card / Online)
+                  </h2>
+                  {paymentInput && paymentResult && data ? (
                     <div className="mt-4 grid gap-6 md:grid-cols-2">
                       <dl className="space-y-2 text-sm">
                         <div className="flex justify-between gap-2">
                           <dt className="text-slate-400">Total Revenue</dt>
-                          <dd>
-                            {paymentEdit ? (
-                              <input
-                                type="number"
-                                className="w-28 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm"
-                                value={paymentInput.totalRevenueUsd}
-                                onChange={(e) => {
-                                  const v = Number.parseFloat(e.target.value) || 0;
-                                  patchState({
-                                    paymentOverrides: {
-                                      ...localState?.paymentOverrides,
-                                      totalRevenueUsd: v,
-                                    },
-                                  });
-                                  void loadDashboard(
-                                    localState?.dateRangeFrom ?? undefined,
-                                    localState?.dateRangeTo ?? undefined,
-                                  );
-                                }}
-                              />
-                            ) : (
-                              money(paymentResult.revenueUsd)
-                            )}
-                          </dd>
+                          <dd>{money(paymentResult.revenueUsd)}</dd>
                         </div>
                         <div className="flex justify-between">
                           <dt className="text-slate-400">Product Cost</dt>
-                          <dd>
-                            {paymentEdit ? (
-                              <input
-                                type="number"
-                                className="w-28 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm"
-                                value={paymentInput.productCostUsd}
-                                onChange={(e) => {
-                                  patchState({
-                                    paymentOverrides: {
-                                      ...localState?.paymentOverrides,
-                                      productCostUsd: Number.parseFloat(e.target.value) || 0,
-                                    },
-                                  });
-                                }}
-                              />
-                            ) : (
-                              money(paymentResult.productCostUsd)
-                            )}
-                          </dd>
+                          <dd>{money(paymentResult.productCostUsd)}</dd>
                         </div>
                         <div className="flex justify-between">
                           <dt className="text-slate-400">Shipping Cost</dt>
-                          <dd>
-                            {paymentEdit ? (
-                              <input
-                                type="number"
-                                className="w-28 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm"
-                                value={paymentInput.shippingCostUsd}
-                                onChange={(e) => {
-                                  patchState({
-                                    paymentOverrides: {
-                                      ...localState?.paymentOverrides,
-                                      shippingCostUsd: Number.parseFloat(e.target.value) || 0,
-                                    },
-                                  });
-                                }}
-                              />
-                            ) : (
-                              money(paymentResult.shippingCostUsd)
-                            )}
-                          </dd>
+                          <dd>{money(paymentResult.shippingCostUsd)}</dd>
                         </div>
-                        <div className="flex justify-between items-center gap-2">
+                        <div className="flex justify-between gap-2">
                           <dt className="text-slate-400">Payment Fees</dt>
-                          <dd className="flex items-center gap-2">
-                            <span>{money(paymentResult.paymentFeesUsd)}</span>
-                            <input
-                              type="number"
-                              step="0.1"
-                              disabled={!paymentEdit}
-                              className="w-14 rounded border border-slate-600 bg-[#0c1018] px-1 py-0.5 text-right text-xs disabled:opacity-50"
-                              value={paymentInput.paymentFeePercent}
-                              onChange={(e) => {
-                                patchState({
-                                  paymentOverrides: {
-                                    ...localState?.paymentOverrides,
-                                    paymentFeePercent: Number.parseFloat(e.target.value) || 0,
-                                  },
-                                });
-                              }}
-                            />
-                            <span className="text-xs text-slate-500">%</span>
+                          <dd className="text-right">
+                            {money(paymentResult.paymentFeesUsd)}
+                            <span className="ml-1 text-xs text-slate-500">
+                              ({data.fees.payment.paymentFeePercent}%)
+                            </span>
                           </dd>
                         </div>
                         <div className="flex justify-between">
                           <dt className="text-slate-400">Other Fees</dt>
-                          <dd>
-                            {paymentEdit ? (
-                              <input
-                                type="number"
-                                className="w-28 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm"
-                                value={localState?.paymentOtherFeesUsd ?? 0}
-                                onChange={(e) => {
-                                  patchState({
-                                    paymentOtherFeesUsd: Number.parseFloat(e.target.value) || 0,
-                                  });
-                                }}
-                              />
-                            ) : (
-                              money(paymentResult.otherFeesUsd)
-                            )}
-                          </dd>
+                          <dd>{money(paymentResult.otherFeesUsd)}</dd>
                         </div>
                       </dl>
                       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-slate-700/60 bg-[#12151f] p-4">
@@ -613,96 +517,65 @@ export function ProfitAdminDashboard() {
                           label="Profit Margin"
                         />
                       </div>
+                      <div className="md:col-span-2">
+                        <ConfigFootnote fees={data.fees} />
+                      </div>
                     </div>
                   ) : null}
                 </article>
 
                 <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="flex items-center gap-2 text-base font-semibold">
-                      <span className="h-2 w-2 rounded-full bg-orange-400" />
-                      COD Orders
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={() => setCodEdit((v) => !v)}
-                      className="rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-300 hover:bg-slate-800"
-                    >
-                      {codEdit ? "Done" : "Edit Values"}
-                    </button>
-                  </div>
-                  {codInput && codResult && localState ? (
+                  <h2 className="flex items-center gap-2 text-base font-semibold">
+                    <span className="h-2 w-2 rounded-full bg-orange-400" />
+                    COD Orders
+                  </h2>
+                  {codInput && codResult && localState && data ? (
                     <div className="mt-4 grid gap-6 md:grid-cols-2">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <NumInput
-                          label="Total COD Orders"
-                          value={codInput.totalOrders}
-                          step="1"
-                          disabled={!codEdit && localState.codUseLiveOrderCount}
-                          onChange={(n) => {
-                            patchState({ cod: { ...localState.cod, totalOrders: n }, codUseLiveOrderCount: false });
-                          }}
-                        />
-                        <NumInput
-                          label="Confirmation Rate"
-                          suffix="%"
-                          value={codInput.confirmationRatePct}
-                          disabled={!codEdit}
-                          onChange={(n) => patchState({ cod: { ...localState.cod, confirmationRatePct: n } })}
-                        />
-                        <NumInput
-                          label="Delivery Rate"
-                          suffix="%"
-                          value={codInput.deliveryRatePct}
-                          disabled={!codEdit}
-                          onChange={(n) => patchState({ cod: { ...localState.cod, deliveryRatePct: n } })}
-                        />
-                        <NumInput
-                          label="Selling Price / Order"
-                          value={codInput.sellingPricePerOrderUsd}
-                          disabled={!codEdit}
-                          onChange={(n) =>
-                            patchState({ cod: { ...localState.cod, sellingPricePerOrderUsd: n } })
-                          }
-                        />
-                        <NumInput
-                          label="Product Cost / Order"
-                          value={codInput.productCostPerOrderUsd}
-                          disabled={!codEdit}
-                          onChange={(n) =>
-                            patchState({ cod: { ...localState.cod, productCostPerOrderUsd: n } })
-                          }
-                        />
-                        <NumInput
-                          label="Shipping Cost / Order"
-                          value={codInput.shippingCostPerOrderUsd}
-                          disabled={!codEdit}
-                          onChange={(n) =>
-                            patchState({ cod: { ...localState.cod, shippingCostPerOrderUsd: n } })
-                          }
-                        />
-                        <NumInput
-                          label="COD Fees / Order"
-                          value={codInput.codFeesPerOrderUsd}
-                          disabled={!codEdit}
-                          onChange={(n) => patchState({ cod: { ...localState.cod, codFeesPerOrderUsd: n } })}
-                        />
-                        <NumInput
-                          label="Return Cost / Order"
-                          value={codInput.returnCostPerOrderUsd}
-                          disabled={!codEdit}
-                          onChange={(n) =>
-                            patchState({ cod: { ...localState.cod, returnCostPerOrderUsd: n } })
-                          }
-                        />
-                        <NumInput
-                          label="Other Fees / Order"
-                          value={codInput.otherFeesPerOrderUsd}
-                          disabled={!codEdit}
-                          onChange={(n) =>
-                            patchState({ cod: { ...localState.cod, otherFeesPerOrderUsd: n } })
-                          }
-                        />
+                      <div className="space-y-4">
+                        <dl className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <dt className="text-slate-400">Total COD Orders</dt>
+                            <dd>{codInput.totalOrders}</dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-slate-400">Selling Price / Order</dt>
+                            <dd>{money(codInput.sellingPricePerOrderUsd)}</dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-slate-400">Product Cost / Order</dt>
+                            <dd>{money(codInput.productCostPerOrderUsd)}</dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-slate-400">Shipping Cost / Order</dt>
+                            <dd>{money(codInput.shippingCostPerOrderUsd)}</dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-slate-400">COD Fees / Order</dt>
+                            <dd>{money(codInput.codFeesPerOrderUsd)}</dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-slate-400">Return Cost / Order</dt>
+                            <dd>{money(codInput.returnCostPerOrderUsd)}</dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-slate-400">Other Fees / Order</dt>
+                            <dd>{money(codInput.otherFeesPerOrderUsd)}</dd>
+                          </div>
+                        </dl>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <NumInput
+                            label="Confirmation Rate"
+                            suffix="%"
+                            value={localState.confirmationRatePct}
+                            onChange={(n) => patchState({ confirmationRatePct: n })}
+                          />
+                          <NumInput
+                            label="Delivery Rate"
+                            suffix="%"
+                            value={localState.deliveryRatePct}
+                            onChange={(n) => patchState({ deliveryRatePct: n })}
+                          />
+                        </div>
                       </div>
                       <div className="space-y-3">
                         <div className="rounded-xl border border-slate-700/60 bg-[#12151f] p-4 text-sm">
@@ -711,8 +584,8 @@ export function ProfitAdminDashboard() {
                             {Math.round(codResult.deliveredOrders)}
                           </p>
                           <p className="mt-1 text-xs text-slate-500">
-                            ({codInput.totalOrders} × {codInput.confirmationRatePct}% ×{" "}
-                            {codInput.deliveryRatePct}%)
+                            ({codInput.totalOrders} × {localState.confirmationRatePct}% ×{" "}
+                            {localState.deliveryRatePct}%)
                           </p>
                         </div>
                         <div className="flex justify-between text-sm">
@@ -730,6 +603,9 @@ export function ProfitAdminDashboard() {
                             label="Profit Margin"
                           />
                         </div>
+                      </div>
+                      <div className="md:col-span-2">
+                        <ConfigFootnote fees={data.fees} />
                       </div>
                     </div>
                   ) : null}
@@ -790,13 +666,11 @@ export function ProfitAdminDashboard() {
                           <input
                             type="number"
                             className="w-24 rounded border border-slate-600 bg-[#0c1018] px-2 py-1 text-right text-sm text-white"
-                            value={localState?.fees.adSpendUsd ?? 0}
+                            value={localState?.adSpendUsd ?? 0}
                             onChange={(e) => {
-                              const v = Number.parseFloat(e.target.value) || 0;
                               patchState({
-                                fees: { ...localState!.fees, adSpendUsd: v },
+                                adSpendUsd: Number.parseFloat(e.target.value) || 0,
                               });
-                              void loadDashboard();
                             }}
                           />
                         </dd>
@@ -814,7 +688,7 @@ export function ProfitAdminDashboard() {
                       {[
                         { label: "Add Payment Order", href: "/checkout/card" },
                         { label: "Add COD Order", href: "/checkout/cod" },
-                        { label: "Update Costs", action: () => setCostsEdit(true) },
+                        { label: "View Costs", action: () => setActiveNav("costs") },
                         {
                           label: "Download Report",
                           action: () => {
@@ -906,60 +780,68 @@ export function ProfitAdminDashboard() {
             </>
           ) : null}
 
-          {(activeNav === "products" || activeNav === "costs" || costsEdit) && localState ? (
+          {(activeNav === "products" || activeNav === "costs") && data ? (
             <article className="rounded-2xl border border-slate-800/80 bg-[#1a1d27] p-5">
-              <h2 className="text-base font-semibold">Costs &amp; Fees (USD)</h2>
+              <h2 className="text-base font-semibold">
+                {activeNav === "products" ? "Products" : "Costs & Fees"} (read-only)
+              </h2>
               <p className="mt-1 text-xs text-slate-500">
+                Fee config is set in Easypanel environment variables — not editable in the dashboard.
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
                 In stock: Eye serum (SKU vitaminamin), Skin Whitening Gummies (SKU WHITEAMIN).
               </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <NumInput
-                  label="Eye serum COGS (vitaminamin)"
-                  value={localState.fees.products.eyeSerum}
-                  onChange={(n) =>
-                    patchState({
-                      fees: { ...localState.fees, products: { ...localState.fees.products, eyeSerum: n } },
-                    })
-                  }
-                />
-                <NumInput
-                  label="Skin gummies COGS (WHITEAMIN)"
-                  value={localState.fees.products.skinGummies}
-                  onChange={(n) =>
-                    patchState({
-                      fees: {
-                        ...localState.fees,
-                        products: { ...localState.fees.products, skinGummies: n },
-                      },
-                    })
-                  }
-                />
-                <NumInput
-                  label="AED per USD (FX)"
-                  value={localState.fees.aedPerUsd}
-                  onChange={(n) => patchState({ fees: { ...localState.fees, aedPerUsd: n } })}
-                />
-                <NumInput
-                  label="Card shipping / order"
-                  value={localState.fees.payment.shippingDeliveredUsd}
-                  onChange={(n) =>
-                    patchState({
-                      fees: {
-                        ...localState.fees,
-                        payment: { ...localState.fees.payment, shippingDeliveredUsd: n },
-                      },
-                    })
-                  }
-                />
-                <NumInput
-                  label="Snapchat ad spend (period)"
-                  value={localState.fees.adSpendUsd}
-                  onChange={(n) => {
-                    patchState({ fees: { ...localState.fees, adSpendUsd: n } });
-                    void loadDashboard();
-                  }}
-                />
-              </div>
+              <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">Eye serum COGS</dt>
+                  <dd>{money(data.fees.products.eyeSerum)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">Skin gummies COGS</dt>
+                  <dd>{money(data.fees.products.skinGummies)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">Hair gummies COGS</dt>
+                  <dd>{money(data.fees.products.hairGummies)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">AED per USD (FX)</dt>
+                  <dd>{data.fees.aedPerUsd}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">Payment fee %</dt>
+                  <dd>{data.fees.payment.paymentFeePercent}%</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">Card shipping / order</dt>
+                  <dd>{money(data.fees.payment.shippingDeliveredUsd)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">Payment other fees</dt>
+                  <dd>{money(data.fees.payment.otherFeesUsd)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">COD platform fee %</dt>
+                  <dd>{data.fees.cod.platformFeePercent}%</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">COD shipping (delivered)</dt>
+                  <dd>{money(data.fees.cod.shippingDeliveredUsd)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">COD return shipping</dt>
+                  <dd>{money(data.fees.cod.shippingReturnUsd)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">COD fee / delivered</dt>
+                  <dd>{money(data.fees.cod.codFeesPerOrderUsd)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 sm:block">
+                  <dt className="text-slate-400">COD other / order</dt>
+                  <dd>{money(data.fees.cod.otherFeesPerOrderUsd)}</dd>
+                </div>
+              </dl>
+              <ConfigFootnote fees={data.fees} />
               <p className="mt-4 text-xs text-slate-500">
                 COD formula: delivered = orders × confirmation% × delivery%; return cost applies to
                 confirmed-but-not-delivered orders. Net profit subtracts ad spend from payment + COD

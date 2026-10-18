@@ -7,13 +7,14 @@ import {
 } from "@/lib/profitAdmin/calculations";
 import {
   aggregateOrdersForPeriod,
-  buildCodPanelFromState,
+  buildCodPanelForPeriod,
   buildPaymentPanelFromLive,
   computeDailyProfitSeries,
   percentChange,
   previousPeriodRange,
 } from "@/lib/profitAdmin/orderMetrics";
 import { requireAdminSession } from "@/lib/profitAdmin/apiHelpers";
+import { readFeeConfigFromEnv } from "@/lib/profitAdmin/feesDefaults";
 import {
   defaultDateRange,
   loadProfitDashboardState,
@@ -38,60 +39,52 @@ export async function GET(request: NextRequest) {
 
   const { from, to } = parseRange(request);
   const state = loadProfitDashboardState();
-  const fees = state.fees;
+  const fees = readFeeConfigFromEnv();
 
   const live = aggregateOrdersForPeriod(from, to, fees);
-  const paymentInput = buildPaymentPanelFromLive(live.payment, fees, {
-    ...state.paymentOverrides,
-    otherFeesUsd: state.paymentOtherFeesUsd,
-  });
+  const paymentInput = buildPaymentPanelFromLive(live.payment, fees);
   const paymentResult = computePaymentPanel(paymentInput);
 
-  const codInput = buildCodPanelFromState(
-    live.codOrderCount,
-    state.cod,
-    state.codUseLiveOrderCount,
+  const codInput = buildCodPanelForPeriod(
+    from,
+    to,
+    fees,
+    state.confirmationRatePct,
+    state.deliveryRatePct,
   );
   const codResult = computeCodPanel(codInput);
 
-  const adSpend = fees.adSpendUsd;
+  const adSpend = state.adSpendUsd;
   const totalProfit = netProfitAfterAdSpend(paymentResult.profitUsd, codResult.profitUsd, adSpend);
   const totalOrders = paymentResult.orderCount + codInput.totalOrders;
 
   const prev = previousPeriodRange(from, to);
   const prevLive = aggregateOrdersForPeriod(prev.from, prev.to, fees);
-  const prevPayment = computePaymentPanel(
-    buildPaymentPanelFromLive(prevLive.payment, fees, {
-      ...state.paymentOverrides,
-      otherFeesUsd: state.paymentOtherFeesUsd,
-    }),
-  );
+  const prevPayment = computePaymentPanel(buildPaymentPanelFromLive(prevLive.payment, fees));
   const prevCod = computeCodPanel(
-    buildCodPanelFromState(prevLive.codOrderCount, state.cod, state.codUseLiveOrderCount),
+    buildCodPanelForPeriod(
+      prev.from,
+      prev.to,
+      fees,
+      state.confirmationRatePct,
+      state.deliveryRatePct,
+    ),
   );
   const prevTotalProfit = netProfitAfterAdSpend(
     prevPayment.profitUsd,
     prevCod.profitUsd,
     adSpend,
   );
-  const prevTotalOrders =
-    prevPayment.orderCount +
-    buildCodPanelFromState(prevLive.codOrderCount, state.cod, state.codUseLiveOrderCount).totalOrders;
+  const prevTotalOrders = prevPayment.orderCount + prevCod.totalOrders;
 
-  const chart = computeDailyProfitSeries(
-    from,
-    to,
-    fees,
-    codInput,
-    state.paymentOtherFeesUsd,
-    state.chartDays,
-  );
+  const chart = computeDailyProfitSeries(from, to, fees, codInput, state.chartDays);
 
   return NextResponse.json({
     ok: true,
     range: { from, to },
     previousRange: prev,
     state,
+    fees,
     live,
     payment: { input: paymentInput, result: paymentResult },
     cod: { input: codInput, result: codResult },

@@ -206,9 +206,17 @@ export function computeCodProfit(input: CodCalcInput, fees: FeeConfig): CodCalcR
     sellingPricePerOrderUsd: input.sellingPriceUsd,
     productCostPerOrderUsd: input.avgProductCostUsd,
     shippingCostPerOrderUsd: fees.cod.shippingDeliveredUsd,
-    codFeesPerOrderUsd: (input.sellingPriceUsd * fees.cod.platformFeePercent) / 100,
+    codFeesPerOrderUsd:
+      fees.cod.codFeesPerOrderUsd > 0
+        ? fees.cod.codFeesPerOrderUsd
+        : (input.sellingPriceUsd * fees.cod.platformFeePercent) / 100,
     returnCostPerOrderUsd: fees.cod.shippingReturnUsd,
-    otherFeesPerOrderUsd: input.totalOrders > 0 ? input.otherCostsUsd / input.totalOrders : 0,
+    otherFeesPerOrderUsd:
+      fees.cod.otherFeesPerOrderUsd > 0
+        ? fees.cod.otherFeesPerOrderUsd
+        : input.totalOrders > 0
+          ? input.otherCostsUsd / input.totalOrders
+          : 0,
   });
   return {
     ...panel,
