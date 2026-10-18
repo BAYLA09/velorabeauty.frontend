@@ -37,6 +37,28 @@ export async function GET() {
     githubMainPrefix !== null &&
     shortSha !== "local" &&
     shortSha === githubMainPrefix;
+
+  const deployChecklistDarija = [
+    "GitHub → Actions → Publish container (khass ykoun ✅ ba3d merge)",
+    "Easypanel → Source = Docker Image (mashi Git / mashi Dockerfile build)",
+    "Image: ghcr.io/bayla09/velorabeauty.frontend:latest",
+    "Port 3000 · Volume /app/data · Env men deploy/easypanel.env.example",
+    "Deploy: 1–3 d9ayeq — f logs khass Pulling / Pull complete",
+    "Ila Deploy 1–2 seconds → Source glt — chof docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md",
+    "Auto-deploy: Easypanel Webhook → GitHub Secret EASYPANEL_DEPLOY_WEBHOOK (daba ma kaynch f repo)",
+  ];
+
+  const statusMessageDarija =
+    githubMainPrefix === null
+      ? shortSha === "local"
+        ? null
+        : `الموقع على ${shortSha}. ما قدرنا نقراو GitHub main من السيرفر — دير Deploy يدوي: Docker Image → latest (1–3 دقائق).`
+      : inSyncWithMain
+        ? "الموقع محدّث مع GitHub main."
+        : `الموقع قديم (${shortSha}) — main هو ${githubMainPrefix}. Easypanel → Docker Image → latest → Deploy (1–3 دقائق، ماشي 1 ثانية).`;
+  const pinImageTag =
+    shortSha !== "local" ? `ghcr.io/bayla09/velorabeauty.frontend:${shortSha}` : null;
+
   const backendCheckout = readBackendCheckoutConfig();
   const ordersSheets = readOrdersSheetsExportStatus();
 
@@ -53,18 +75,13 @@ export async function GET() {
         process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
         null,
       recommendedImage: "ghcr.io/bayla09/velorabeauty.frontend:latest",
-      pinImageTag:
-        shortSha !== "local"
-          ? `ghcr.io/bayla09/velorabeauty.frontend:${shortSha}`
-          : null,
+      pinImageTag,
       githubMainPrefix,
       inSyncWithMain,
-      statusMessageAr:
-        githubMainPrefix === null
-          ? null
-          : inSyncWithMain
-            ? "الموقع محدّث مع GitHub main."
-            : `الموقع قديم (${shortSha}) — GitHub main هو ${githubMainPrefix}. Easypanel → Source: Docker Image → ghcr.io/bayla09/velorabeauty.frontend:latest → Deploy (1–3 دقائق، ماشي 1 ثانية).`,
+      statusMessageAr: statusMessageDarija,
+      statusMessageDarija,
+      deployChecklistDarija,
+      liveImagePullCommand: pinImageTag ? `docker pull ${pinImageTag}` : null,
       autoDeployNoteAr:
         "Deploy أوتوماتيكي: GitHub → Secret EASYPANEL_DEPLOY_WEBHOOK (URL من Easypanel → Deployments → Webhook). بلا secret، Deploy يدوي فقط.",
       easypanel: {
@@ -74,7 +91,8 @@ export async function GET() {
         composeFile: "docker-compose.yml",
         envTemplate: "deploy/easypanel.env.example",
         quickGuide: "docs/EASYPANEL-AUTO-DEPLOY-AR.md",
-        deployDarija: "docs/EASYPANEL-DEPLOY-DARIJA.md",
+        deployDarija: "docs/DEPLOY-FRONTEND-DARIJA.md",
+        deployDarijaFull: "docs/EASYPANEL-DEPLOY-DARIJA.md",
         deployOneSecondFix: "docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md",
         port: 3000,
         volume: "/app/data",

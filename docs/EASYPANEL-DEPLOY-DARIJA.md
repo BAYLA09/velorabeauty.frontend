@@ -1,5 +1,11 @@
 # Easypanel — Deploy ma kaydozch (Darija)
 
+> **Bda hna:** [DEPLOY-FRONTEND-DARIJA.md](./DEPLOY-FRONTEND-DARIJA.md) — checklist msawer.
+
+## ⚠️ Daba f GitHub
+
+**`EASYPANEL_DEPLOY_WEBHOOK` ma kaynch** → image katbni f Actions walakin Easypanel **ma kaydeployich bo7do**. Khass **Deploy yddawi** f panel, wla tzid webhook (t7t).
+
 ## 3lach kayw9e3
 
 | Symptom | Sabab |
