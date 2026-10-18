@@ -33,7 +33,15 @@ npm run dev
 
 ## Docker / Easypanel (production)
 
-**Easypanel: استعمل Docker Image فقط** — ماشي GitHub + Dockerfile (Deploy 1s = ما كيسحبش image جديد).
+**Easypanel: استعمل Docker Image فقط** — ماشي GitHub + `Dockerfile` (Deploy 1s = ما كيسحبش image جديد).
+
+| Source | Setting |
+|--------|---------|
+| **Best** | App → **Docker Image** → `ghcr.io/bayla09/velorabeauty.frontend:latest` |
+| Git + Dockerfile | Use **`Dockerfile.easypanel`** (pull prebuilt image — no VPS build) |
+| Compose | `docker-compose.yml` or `deploy/easypanel-docker-image.compose.yaml` |
+
+Deploy ma kaydozch? → [docs/EASYPANEL-DEPLOY-DARIJA.md](docs/EASYPANEL-DEPLOY-DARIJA.md)
 
 ```text
 ghcr.io/bayla09/velorabeauty.frontend:latest
