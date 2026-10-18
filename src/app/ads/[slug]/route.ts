@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getRedirectOrigin } from "@/lib/requestOrigin";
 import { buildRedirectLocation } from "@/lib/redirectkiller/mergeQueryStrings";
 import { getAdRedirectBySlug } from "@/lib/redirectkiller/redirectRepository";
 import { normalizeRedirectSlug } from "@/lib/redirectkiller/validateSlug";
@@ -25,5 +26,6 @@ export async function GET(request: NextRequest, context: Ctx) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  return NextResponse.redirect(new URL(location, request.url), 302);
+  const origin = getRedirectOrigin(request);
+  return NextResponse.redirect(new URL(location, origin), 302);
 }
