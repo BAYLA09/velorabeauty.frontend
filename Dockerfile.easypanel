@@ -1,0 +1,6 @@
+# Easypanel ONLY — do not build Next.js on the VPS (OOM / better-sqlite3 failures).
+# Use this file when Source = GitHub + Dockerfile:
+#   Dockerfile path: Dockerfile.easypanel
+#
+# CI builds the real image via Dockerfile → GHCR. This file reuses that image.
+FROM ghcr.io/bayla09/velorabeauty.frontend:latest

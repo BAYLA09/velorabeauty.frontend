@@ -70,9 +70,11 @@ export async function GET() {
       easypanel: {
         /** Use App → Docker Image OR Compose with docker-compose.yml — never Git Dockerfile build */
         source: "docker-image",
+        gitDockerfilePullThrough: "Dockerfile.easypanel",
         composeFile: "docker-compose.yml",
         envTemplate: "deploy/easypanel.env.example",
         quickGuide: "docs/EASYPANEL-AUTO-DEPLOY-AR.md",
+        deployDarija: "docs/EASYPANEL-DEPLOY-DARIJA.md",
         deployOneSecondFix: "docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md",
         port: 3000,
         volume: "/app/data",
