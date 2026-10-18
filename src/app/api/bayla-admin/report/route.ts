@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { requireAdminSession } from "@/lib/profitAdmin/apiHelpers";
 import { aedToUsd } from "@/lib/profitAdmin/currency";
 import { isExcludedTestOrder } from "@/lib/profitAdmin/productCosts";
+import { readFeeConfigFromEnv } from "@/lib/profitAdmin/feesDefaults";
 import {
   defaultDateRange,
   loadProfitDashboardState,
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
         ? { from: saved.dateRangeFrom, to: saved.dateRangeTo }
         : defaultDateRange();
 
-  const fees = saved.fees;
+  const fees = readFeeConfigFromEnv();
   const orders = listOrdersBetween(range.from, range.to).filter((o) => !isExcludedTestOrder(o));
 
   const header = [

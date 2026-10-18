@@ -1,70 +1,23 @@
 import { getDb } from "@/lib/db";
-import type { CodPanelInput, PaymentPanelInput } from "@/lib/profitAdmin/calculations";
-import { mergeFeeConfig, type FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 
+/** Only owner-controlled values persisted in SQLite. */
 export type ProfitDashboardState = {
-  fees: FeeConfig;
-  /** When true, COD total orders follows live DB count for the selected range. */
-  codUseLiveOrderCount: boolean;
-  cod: CodPanelInput;
-  paymentOverrides: Partial<PaymentPanelInput>;
-  paymentOtherFeesUsd: number;
+  confirmationRatePct: number;
+  deliveryRatePct: number;
+  adSpendUsd: number;
   chartDays: 7 | 30 | 90;
   dateRangeFrom: string | null;
   dateRangeTo: string | null;
 };
 
-const DEFAULT_COD: CodPanelInput = {
-  totalOrders: 0,
+const DEFAULT_STATE: ProfitDashboardState = {
   confirmationRatePct: 70,
   deliveryRatePct: 80,
-  sellingPricePerOrderUsd: 35,
-  productCostPerOrderUsd: 12,
-  shippingCostPerOrderUsd: 4.5,
-  codFeesPerOrderUsd: 2.5,
-  returnCostPerOrderUsd: 3,
-  otherFeesPerOrderUsd: 1,
-};
-
-const DEFAULT_STATE: ProfitDashboardState = {
-  fees: mergeFeeConfig(null),
-  codUseLiveOrderCount: true,
-  cod: DEFAULT_COD,
-  paymentOverrides: {},
-  paymentOtherFeesUsd: 0,
+  adSpendUsd: 0,
   chartDays: 7,
   dateRangeFrom: null,
   dateRangeTo: null,
 };
-
-function migrateLegacyCod(raw: Record<string, unknown>, fees: FeeConfig): CodPanelInput {
-  if ("sellingPricePerOrderUsd" in raw) {
-    return { ...DEFAULT_COD, ...(raw as CodPanelInput) };
-  }
-  const legacy = raw as {
-    totalOrders?: number;
-    confirmationRatePct?: number;
-    deliveryRatePct?: number;
-    sellingPriceUsd?: number;
-    avgProductCostUsd?: number;
-    otherCostsUsd?: number;
-  };
-  const total = legacy.totalOrders ?? 0;
-  return {
-    totalOrders: total,
-    confirmationRatePct: legacy.confirmationRatePct ?? DEFAULT_COD.confirmationRatePct,
-    deliveryRatePct: legacy.deliveryRatePct ?? DEFAULT_COD.deliveryRatePct,
-    sellingPricePerOrderUsd: legacy.sellingPriceUsd ?? DEFAULT_COD.sellingPricePerOrderUsd,
-    productCostPerOrderUsd: legacy.avgProductCostUsd ?? DEFAULT_COD.productCostPerOrderUsd,
-    shippingCostPerOrderUsd: fees.cod.shippingDeliveredUsd,
-    codFeesPerOrderUsd:
-      ((legacy.sellingPriceUsd ?? DEFAULT_COD.sellingPricePerOrderUsd) *
-        fees.cod.platformFeePercent) /
-      100,
-    returnCostPerOrderUsd: fees.cod.shippingReturnUsd,
-    otherFeesPerOrderUsd: total > 0 ? (legacy.otherCostsUsd ?? 0) / total : DEFAULT_COD.otherFeesPerOrderUsd,
-  };
-}
 
 function ensureTable(): void {
   getDb().exec(`
@@ -76,6 +29,51 @@ function ensureTable(): void {
   `);
 }
 
+function migrateParsed(raw: Record<string, unknown>): ProfitDashboardState {
+  if (
+    typeof raw.confirmationRatePct === "number" &&
+    typeof raw.deliveryRatePct === "number" &&
+    typeof raw.adSpendUsd === "number"
+  ) {
+    return {
+      confirmationRatePct: raw.confirmationRatePct,
+      deliveryRatePct: raw.deliveryRatePct,
+      adSpendUsd: raw.adSpendUsd,
+      chartDays:
+        raw.chartDays === 30 || raw.chartDays === 90 ? raw.chartDays : DEFAULT_STATE.chartDays,
+      dateRangeFrom:
+        typeof raw.dateRangeFrom === "string" ? raw.dateRangeFrom : DEFAULT_STATE.dateRangeFrom,
+      dateRangeTo:
+        typeof raw.dateRangeTo === "string" ? raw.dateRangeTo : DEFAULT_STATE.dateRangeTo,
+    };
+  }
+
+  const cod = (raw.cod as Record<string, unknown> | undefined) ?? {};
+  const fees = (raw.fees as Record<string, unknown> | undefined) ?? {};
+  return {
+    confirmationRatePct:
+      typeof cod.confirmationRatePct === "number"
+        ? cod.confirmationRatePct
+        : DEFAULT_STATE.confirmationRatePct,
+    deliveryRatePct:
+      typeof cod.deliveryRatePct === "number"
+        ? cod.deliveryRatePct
+        : DEFAULT_STATE.deliveryRatePct,
+    adSpendUsd:
+      typeof fees.adSpendUsd === "number"
+        ? fees.adSpendUsd
+        : typeof raw.adSpendUsd === "number"
+          ? raw.adSpendUsd
+          : DEFAULT_STATE.adSpendUsd,
+    chartDays:
+      raw.chartDays === 30 || raw.chartDays === 90 ? raw.chartDays : DEFAULT_STATE.chartDays,
+    dateRangeFrom:
+      typeof raw.dateRangeFrom === "string" ? raw.dateRangeFrom : DEFAULT_STATE.dateRangeFrom,
+    dateRangeTo:
+      typeof raw.dateRangeTo === "string" ? raw.dateRangeTo : DEFAULT_STATE.dateRangeTo,
+  };
+}
+
 export function loadProfitDashboardState(): ProfitDashboardState {
   ensureTable();
   const row = getDb()
@@ -84,29 +82,7 @@ export function loadProfitDashboardState(): ProfitDashboardState {
   if (!row?.state_json) return structuredClone(DEFAULT_STATE);
   try {
     const parsed = JSON.parse(row.state_json) as Record<string, unknown>;
-    const fees = mergeFeeConfig(parsed.fees as Partial<FeeConfig>);
-    const cod = migrateLegacyCod((parsed.cod as Record<string, unknown>) ?? {}, fees);
-    return {
-      fees,
-      codUseLiveOrderCount:
-        typeof parsed.codUseLiveOrderCount === "boolean"
-          ? parsed.codUseLiveOrderCount
-          : DEFAULT_STATE.codUseLiveOrderCount,
-      cod,
-      paymentOverrides: (parsed.paymentOverrides as Partial<PaymentPanelInput>) ?? {},
-      paymentOtherFeesUsd:
-        typeof parsed.paymentOtherFeesUsd === "number"
-          ? parsed.paymentOtherFeesUsd
-          : DEFAULT_STATE.paymentOtherFeesUsd,
-      chartDays:
-        parsed.chartDays === 30 || parsed.chartDays === 90
-          ? parsed.chartDays
-          : DEFAULT_STATE.chartDays,
-      dateRangeFrom:
-        typeof parsed.dateRangeFrom === "string" ? parsed.dateRangeFrom : DEFAULT_STATE.dateRangeFrom,
-      dateRangeTo:
-        typeof parsed.dateRangeTo === "string" ? parsed.dateRangeTo : DEFAULT_STATE.dateRangeTo,
-    };
+    return migrateParsed(parsed);
   } catch {
     return structuredClone(DEFAULT_STATE);
   }
