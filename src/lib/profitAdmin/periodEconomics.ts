@@ -1,13 +1,9 @@
-import {
-  computeCodPanel,
-  computePaymentPanel,
-  netProfitAfterAdSpend,
-} from "@/lib/profitAdmin/calculations";
+import { computePaymentPanel, netProfitAfterAdSpend } from "@/lib/profitAdmin/calculations";
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 import { computeMarketingMetrics, type MarketingMetrics } from "@/lib/profitAdmin/marketingMetrics";
+import { buildCodPanelForPeriodWithLiveStatuses } from "@/lib/profitAdmin/codLiveMetrics";
 import {
   aggregateOrdersForPeriod,
-  buildCodPanelForPeriod,
   buildPaymentPanelFromLive,
   type PeriodMetrics,
 } from "@/lib/profitAdmin/orderMetrics";
@@ -16,7 +12,7 @@ import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository"
 export type PeriodEconomics = {
   live: PeriodMetrics;
   paymentResult: ReturnType<typeof computePaymentPanel>;
-  codResult: ReturnType<typeof computeCodPanel>;
+  codResult: ReturnType<typeof buildCodPanelForPeriodWithLiveStatuses>["result"];
   adSpendUsd: number;
   totalProfitUsd: number;
   totalOrders: number;
@@ -31,14 +27,13 @@ export function computePeriodEconomics(
 ): PeriodEconomics {
   const live = aggregateOrdersForPeriod(fromIso, toIso, fees);
   const paymentResult = computePaymentPanel(buildPaymentPanelFromLive(live.payment, fees));
-  const codInput = buildCodPanelForPeriod(
+  const { input: codInput, result: codResult } = buildCodPanelForPeriodWithLiveStatuses(
     fromIso,
     toIso,
     fees,
     state.confirmationRatePct,
     state.deliveryRatePct,
   );
-  const codResult = computeCodPanel(codInput);
   const adSpendUsd = state.adSpendUsd;
   const marketing = computeMarketingMetrics({ adSpendUsd, payment: paymentResult, cod: codResult });
   const totalProfitUsd = netProfitAfterAdSpend(

@@ -189,6 +189,71 @@ export function computeCodPanel(input: CodPanelInput): CodPanelResult {
   };
 }
 
+export type CodFunnelCounts = {
+  totalOrders: number;
+  notConfirmedOrders: number;
+  deliveredOrders: number;
+  returnedOrders: number;
+  sellingPricePerOrderUsd: number;
+  productCostPerOrderUsd: number;
+  callCenterNoAnswerUsd: number;
+  callCenterReturnedUsd: number;
+  callCenterDeliveredUsd: number;
+  shippingDeliveredUsd: number;
+  shippingReturnedUsd: number;
+  serviceFeePercent: number;
+};
+
+/** COD profit from Sheet-synced funnel counts + projected pending (new fee model). */
+export function computeCodPanelFromFunnelCounts(input: CodFunnelCounts): CodPanelResult {
+  const totalOrders = Math.max(0, clampNum(input.totalOrders));
+  const notConfirmedOrders = Math.max(0, clampNum(input.notConfirmedOrders));
+  const deliveredOrders = Math.max(0, clampNum(input.deliveredOrders));
+  const returnedOrders = Math.max(0, clampNum(input.returnedOrders));
+  const sellingPricePerOrderUsd = Math.max(0, clampNum(input.sellingPricePerOrderUsd));
+  const productCostPerOrderUsd = Math.max(0, clampNum(input.productCostPerOrderUsd));
+
+  const confirmedOrders = Math.max(0, totalOrders - notConfirmedOrders);
+  const revenueUsd = deliveredOrders * sellingPricePerOrderUsd;
+  const productCostUsd = deliveredOrders * productCostPerOrderUsd;
+
+  const callCenterNoAnswerUsd = notConfirmedOrders * input.callCenterNoAnswerUsd;
+  const callCenterReturnedUsd = returnedOrders * input.callCenterReturnedUsd;
+  const callCenterDeliveredUsd = deliveredOrders * input.callCenterDeliveredUsd;
+  const callCenterUsd = callCenterNoAnswerUsd + callCenterReturnedUsd + callCenterDeliveredUsd;
+
+  const shippingDeliveredUsd = deliveredOrders * input.shippingDeliveredUsd;
+  const shippingReturnedUsd = returnedOrders * input.shippingReturnedUsd;
+  const shippingCostUsd = shippingDeliveredUsd + shippingReturnedUsd;
+
+  const servicePct = Math.min(100, Math.max(0, clampNum(input.serviceFeePercent)));
+  const codServiceFeeUsd = revenueUsd * (servicePct / 100);
+
+  const profitUsd =
+    revenueUsd - productCostUsd - callCenterUsd - shippingCostUsd - codServiceFeeUsd;
+  const marginPct = revenueUsd > 0 ? (profitUsd / revenueUsd) * 100 : 0;
+
+  return {
+    totalOrders,
+    confirmedOrders,
+    notConfirmedOrders,
+    deliveredOrders,
+    returnedOrders,
+    revenueUsd,
+    productCostUsd,
+    callCenterNoAnswerUsd,
+    callCenterReturnedUsd,
+    callCenterDeliveredUsd,
+    callCenterUsd,
+    shippingDeliveredUsd,
+    shippingReturnedUsd,
+    shippingCostUsd,
+    codServiceFeeUsd,
+    profitUsd,
+    marginPct,
+  };
+}
+
 export function estimateStripeFeesUsd(revenueUsd: number, orderCount: number, fees: FeeConfig): number {
   if (revenueUsd <= 0 && orderCount <= 0) return 0;
   return (revenueUsd * fees.payment.stripePercent) / 100 + orderCount * fees.payment.stripeFixedUsd;

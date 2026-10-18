@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { computeCodPanel, computePaymentPanel } from "@/lib/profitAdmin/calculations";
+import {
+  computeCodPanel,
+  computeCodPanelFromFunnelCounts,
+  computePaymentPanel,
+} from "@/lib/profitAdmin/calculations";
 import { DEFAULT_FEE_CONFIG } from "@/lib/profitAdmin/feesDefaults";
 
 const defaultCodRates = DEFAULT_FEE_CONFIG.cod;
