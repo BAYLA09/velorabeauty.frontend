@@ -171,6 +171,8 @@ export function ProfitAdminDashboard() {
   const [activeNav, setActiveNav] = useState<string>("dashboard");
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loadingDash, setLoadingDash] = useState(false);
+  const [sheetSyncing, setSheetSyncing] = useState(false);
+  const [sheetSyncNote, setSheetSyncNote] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [localState, setLocalState] = useState<ProfitDashboardState | null>(null);
@@ -213,6 +215,42 @@ export function ProfitAdminDashboard() {
     setLoadingDash(false);
   }, []);
 
+  const runSheetSync = useCallback(async () => {
+    setSheetSyncing(true);
+    setSheetSyncNote(null);
+    try {
+      const res = await fetch("/api/bayla-admin/sheets/sync", {
+        method: "POST",
+        credentials: "include",
+        headers: apiHeaders(),
+      });
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        stats?: {
+          cutoffIso: string;
+          cod?: { statusUpdated: number; imported: number; skippedBeforeCutoff: number };
+          card?: { statusUpdated: number; imported: number; skippedBeforeCutoff: number };
+        };
+      };
+      if (!res.ok || !json.ok) {
+        setSheetSyncNote(json.error ?? "Sheet sync failed");
+        return;
+      }
+      const s = json.stats;
+      if (s?.cod && s?.card) {
+        setSheetSyncNote(
+          `Sheet sync (cutoff ${s.cutoffIso.slice(0, 19)}Z) — COD: ${s.cod.statusUpdated} updated / ${s.cod.imported} imported / ${s.cod.skippedBeforeCutoff} skipped; Card: ${s.card.statusUpdated} updated / ${s.card.imported} imported / ${s.card.skippedBeforeCutoff} skipped.`,
+        );
+      } else {
+        setSheetSyncNote("Sheet sync complete.");
+      }
+      await loadDashboard();
+    } finally {
+      setSheetSyncing(false);
+    }
+  }, [loadDashboard]);
+
   const scheduleSave = useCallback(
     (state: ProfitDashboardState) => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -232,6 +270,13 @@ export function ProfitAdminDashboard() {
   useEffect(() => {
     if (authenticated) void loadDashboard();
   }, [authenticated, loadDashboard]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    void runSheetSync();
+    const interval = window.setInterval(() => void runSheetSync(), 12 * 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [authenticated, runSheetSync]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -406,6 +451,14 @@ export function ProfitAdminDashboard() {
                   Apply
                 </button>
               </div>
+              <button
+                type="button"
+                disabled={sheetSyncing}
+                onClick={() => void runSheetSync()}
+                className="rounded-xl border border-violet-500/40 bg-violet-600/20 px-3 py-2 text-xs font-medium text-violet-100 hover:bg-violet-600/35 disabled:opacity-50"
+              >
+                {sheetSyncing ? "Syncing Sheet…" : "Sync from Sheet"}
+              </button>
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-sm font-semibold">
                   AB
@@ -421,6 +474,7 @@ export function ProfitAdminDashboard() {
             <p className="mt-2 text-xs text-slate-500">
               {formatRangeLabel(data.range.from, data.range.to)}
               {loadingDash ? " · Refreshing…" : null}
+              {sheetSyncNote ? ` · ${sheetSyncNote}` : null}
             </p>
           ) : null}
         </header>

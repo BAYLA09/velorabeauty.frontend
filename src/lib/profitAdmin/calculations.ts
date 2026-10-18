@@ -164,6 +164,70 @@ export function computeCodPanel(input: CodPanelInput): CodPanelResult {
   };
 }
 
+export type CodFunnelCounts = {
+  totalOrders: number;
+  notConfirmedOrders: number;
+  deliveredOrders: number;
+  /** Confirmed but not yet delivered (incl. returned). */
+  failedAfterConfirmOrders: number;
+  sellingPricePerOrderUsd: number;
+  productCostPerOrderUsd: number;
+  shippingCostPerOrderUsd: number;
+  codFeesPerOrderUsd: number;
+  returnCostPerOrderUsd: number;
+  otherFeesPerOrderUsd: number;
+};
+
+/** COD profit from explicit funnel counts (Sheet-synced statuses + projected pending). */
+export function computeCodPanelFromCounts(input: CodFunnelCounts): CodPanelResult {
+  const totalOrders = Math.max(0, clampNum(input.totalOrders));
+  const notConfirmedOrders = Math.max(0, clampNum(input.notConfirmedOrders));
+  const deliveredOrders = Math.max(0, clampNum(input.deliveredOrders));
+  const failedAfterConfirm = Math.max(0, clampNum(input.failedAfterConfirmOrders));
+  const sellingPricePerOrderUsd = Math.max(0, clampNum(input.sellingPricePerOrderUsd));
+  const productCostPerOrderUsd = Math.max(0, clampNum(input.productCostPerOrderUsd));
+  const shippingCostPerOrderUsd = Math.max(0, clampNum(input.shippingCostPerOrderUsd));
+  const codFeesPerOrderUsd = Math.max(0, clampNum(input.codFeesPerOrderUsd));
+  const returnCostPerOrderUsd = Math.max(0, clampNum(input.returnCostPerOrderUsd));
+  const otherFeesPerOrderUsd = Math.max(0, clampNum(input.otherFeesPerOrderUsd));
+
+  const confirmedOrders = Math.max(
+    0,
+    totalOrders - notConfirmedOrders,
+  );
+
+  const revenueUsd = deliveredOrders * sellingPricePerOrderUsd;
+  const productCostUsd = deliveredOrders * productCostPerOrderUsd;
+  const shippingCostUsd = deliveredOrders * shippingCostPerOrderUsd;
+  const codFeesUsd = deliveredOrders * codFeesPerOrderUsd;
+  const returnCostUsd = failedAfterConfirm * returnCostPerOrderUsd;
+  const otherFeesUsd = totalOrders * otherFeesPerOrderUsd;
+
+  const profitUsd =
+    revenueUsd -
+    productCostUsd -
+    shippingCostUsd -
+    codFeesUsd -
+    returnCostUsd -
+    otherFeesUsd;
+  const marginPct = revenueUsd > 0 ? (profitUsd / revenueUsd) * 100 : 0;
+
+  return {
+    totalOrders,
+    confirmedOrders,
+    deliveredOrders,
+    failedAfterConfirm,
+    revenueUsd,
+    productCostUsd,
+    shippingCostUsd,
+    codFeesUsd,
+    returnCostUsd,
+    otherFeesUsd,
+    profitUsd,
+    marginPct,
+  };
+}
+
 /** Estimate Stripe fees for a single card order (used when aggregating live orders). */
 export function estimateStripeFeesUsd(revenueUsd: number, fees: FeeConfig): number {
   if (revenueUsd <= 0) return 0;

@@ -41,6 +41,7 @@ export type OrderRecord = {
   backendExternalCheckoutId: string | null;
   createdAt: string;
   cartLines: CartLine[];
+  orderSource: "storefront" | "sheet";
 };
 
 export type CreateOrderInput = {
@@ -81,6 +82,7 @@ type OrderRow = {
   backend_external_checkout_id?: string | null;
   created_at: string;
   order_lines_json?: string | null;
+  order_source?: string | null;
 };
 
 function parseOrderLinesJson(raw: string | null | undefined): CartLine[] {
@@ -125,6 +127,7 @@ function rowToRecord(row: OrderRow): OrderRecord {
     backendExternalCheckoutId: row.backend_external_checkout_id ?? null,
     createdAt: row.created_at,
     cartLines: parseOrderLinesJson(row.order_lines_json),
+    orderSource: row.order_source === "sheet" ? "sheet" : "storefront",
   };
 }
 
@@ -496,6 +499,134 @@ export function countCardOrdersPaidNotExported(): number {
     )
     .get() as { n: number };
   return row.n;
+}
+
+const COD_SHEET_SYNC_STATUSES = new Set([
+  "no_answer",
+  "confirmed",
+  "delivered",
+  "returned",
+  "cancelled",
+  "preparing",
+  "packed",
+  "processing",
+  "shipped",
+  "out_for_delivery",
+]);
+
+export function updateCodOrderStatusFromSheet(
+  orderId: string,
+  status: string,
+): { updated: boolean; reason?: string } {
+  const order = getOrderById(orderId);
+  if (!order) return { updated: false, reason: "not_found" };
+  if (order.paymentMethod !== "cod") return { updated: false, reason: "not_cod" };
+  const normalized = status.trim().toLowerCase();
+  if (!COD_SHEET_SYNC_STATUSES.has(normalized) && normalized !== "pending") {
+    return { updated: false, reason: "invalid_status" };
+  }
+  if (order.status === normalized) return { updated: false, reason: "unchanged" };
+  getDb().prepare(`UPDATE orders SET status = ? WHERE id = ?`).run(normalized, orderId);
+  return { updated: true };
+}
+
+export type CreateOrderFromSheetInput = {
+  id: string;
+  productSlug: string;
+  productName: string;
+  quantity: BundleQuantity;
+  customerName: string;
+  phone: string;
+  address: string;
+  emirate: string;
+  totalAed: number;
+  subtotalAed: number;
+  status: string;
+  createdAt: string;
+};
+
+const CARD_SHEET_SYNC_STATUSES = new Set(["delivered", "returned", "refunded", "cancelled"]);
+
+export function updateCardOrderStatusFromSheet(
+  orderId: string,
+  status: string,
+): { updated: boolean; reason?: string } {
+  const order = getOrderById(orderId);
+  if (!order) return { updated: false, reason: "not_found" };
+  if (order.paymentMethod !== "card") return { updated: false, reason: "not_card" };
+  const normalized = status.trim().toLowerCase();
+  const dbStatus = normalized === "paid" ? "delivered" : normalized;
+  if (!CARD_SHEET_SYNC_STATUSES.has(dbStatus)) {
+    return { updated: false, reason: "invalid_status" };
+  }
+  if (order.status === dbStatus) return { updated: false, reason: "unchanged" };
+  getDb().prepare(`UPDATE orders SET status = ? WHERE id = ?`).run(dbStatus, orderId);
+  return { updated: true };
+}
+
+export function createCardOrderFromSheet(
+  input: CreateOrderFromSheetInput & { status: string },
+): OrderRecord {
+  const deliveryFeeAed = Math.max(0, input.totalAed - input.subtotalAed);
+  const dbStatus = input.status === "paid" ? "delivered" : input.status;
+  getDb()
+    .prepare(
+      `INSERT INTO orders (
+        id, product_slug, product_name, quantity, payment_method,
+        subtotal_aed, delivery_fee_aed, total_aed,
+        customer_name, phone, emirate, address, status, created_at,
+        order_source, sheet_card_exported_at
+      ) VALUES (?, ?, ?, ?, 'card', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'sheet', ?)`,
+    )
+    .run(
+      input.id,
+      input.productSlug,
+      input.productName,
+      input.quantity,
+      input.subtotalAed,
+      deliveryFeeAed,
+      input.totalAed,
+      input.customerName.trim(),
+      input.phone.trim(),
+      input.emirate.trim(),
+      input.address.trim(),
+      dbStatus,
+      input.createdAt,
+      input.createdAt,
+    );
+
+  return getOrderById(input.id)!;
+}
+
+export function createCodOrderFromSheet(input: CreateOrderFromSheetInput): OrderRecord {
+  const deliveryFeeAed = Math.max(0, input.totalAed - input.subtotalAed);
+  getDb()
+    .prepare(
+      `INSERT INTO orders (
+        id, product_slug, product_name, quantity, payment_method,
+        subtotal_aed, delivery_fee_aed, total_aed,
+        customer_name, phone, emirate, address, status, created_at,
+        order_source, sheet_cod_exported_at
+      ) VALUES (?, ?, ?, ?, 'cod', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'sheet', ?)`,
+    )
+    .run(
+      input.id,
+      input.productSlug,
+      input.productName,
+      input.quantity,
+      input.subtotalAed,
+      deliveryFeeAed,
+      input.totalAed,
+      input.customerName.trim(),
+      input.phone.trim(),
+      input.emirate.trim(),
+      input.address.trim(),
+      input.status,
+      input.createdAt,
+      input.createdAt,
+    );
+
+  return getOrderById(input.id)!;
 }
 
 export function countCardOrdersAwaitingPaymentWithPi(): number {
