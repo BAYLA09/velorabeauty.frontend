@@ -10,6 +10,9 @@ Independent admin dashboard at **`/redirectkiller`** and public ad links at **`/
 | `REDIRECTKILLER_SESSION_SECRET` | **Yes** | HMAC secret for signed session cookies (min 16 chars) | `openssl rand -hex 32` |
 | `REDIRECTKILLER_SESSION_MAX_AGE_SECONDS` | No | Cookie lifetime (900–1,209,600; default 86400) | `86400` |
 | `REDIRECTKILLER_EXTRA_DESTINATIONS` | No | Extra allowed internal paths (comma-separated) | `/checkout/cod` |
+| `REDIRECTKILLER_BUILTIN_REDIRECTS_JSON` | No | Default `/ads/{slug}` targets when no DB row (JSON object) | `{"hair-ads":"/products/hair-gummies"}` |
+
+Built-in defaults (no env required) include `hair-ads` → `/products/hair-gummies`. Root URLs like **`/hair-ads`** redirect to **`/ads/hair-ads`** via `next.config.ts` (use **`https://www.velorabeauty.world`** in ads — see `docs/APEX-SSL-EASYPANEL.md`).
 
 Also ensure existing **`DATABASE_PATH`** (default `/app/data/velora.sqlite`) points at your persisted volume so redirects survive restarts.
 
