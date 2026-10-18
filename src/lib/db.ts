@@ -73,6 +73,25 @@ function ensureSchema(database: Database.Database): void {
   if (!names.has("order_attribution_json")) {
     database.exec(`ALTER TABLE orders ADD COLUMN order_attribution_json TEXT`);
   }
+
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS ad_redirects (
+      id TEXT PRIMARY KEY,
+      slug TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      destination_path TEXT NOT NULL,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_ad_redirects_enabled ON ad_redirects (enabled);
+    CREATE TABLE IF NOT EXISTS redirectkiller_login_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ip TEXT NOT NULL,
+      success INTEGER NOT NULL DEFAULT 0,
+      attempted_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_rk_login_ip_time ON redirectkiller_login_attempts (ip, attempted_at DESC);
+  `);
 }
 
 export function getDb(): Database.Database {
