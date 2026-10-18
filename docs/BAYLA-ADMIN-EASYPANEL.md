@@ -56,3 +56,15 @@ Card revenue and COGS use **real paid orders** in the selected date range. COD o
 - `failedAfterConfirm = totalOrders × (confirmationRate/100) − delivered`
 - `profit = delivered×price − delivered×(product+shipping+COD fees) − failedAfterConfirm×returnCost − totalOrders×otherFeesPerOrder`
 - `netTotalProfit = paymentProfit + codProfit − adSpendUsd`
+
+### Ad performance metrics (computed)
+
+| Metric | Formula |
+|--------|---------|
+| ROI % | `netProfit / (adSpend + fulfillment costs) × 100` |
+| ROAS | `(card revenue + delivered COD revenue) / adSpend` |
+| CPA | `adSpend / total orders` |
+| Cost / delivered order | `adSpend / (paid orders + delivered COD orders)` |
+| Break-even ROAS | `total revenue / gross profit before ad spend` |
+
+Shown as `—` when the divisor is zero. Included in the dashboard API, Profit Summary UI, and CSV report header.

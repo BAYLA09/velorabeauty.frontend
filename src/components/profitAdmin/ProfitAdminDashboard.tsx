@@ -8,6 +8,8 @@ import type { CodPanelInput, PaymentPanelInput } from "@/lib/profitAdmin/calcula
 import { BAYLA_ADMIN_CSRF_HEADER } from "@/lib/profitAdmin/constants";
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 import type { DailyProfitPoint } from "@/lib/profitAdmin/orderMetrics";
+import type { MarketingMetrics } from "@/lib/profitAdmin/marketingMetrics";
+import { formatMoneyMetric, formatRoiPct, formatRoas } from "@/lib/profitAdmin/marketingMetrics";
 import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository";
 
 type DashboardPayload = {
@@ -47,6 +49,7 @@ type DashboardPayload = {
     codProfitUsd: number;
     totalProfitUsd: number;
     totalMarginPct: number;
+    marketing: MarketingMetrics;
   };
   chart: DailyProfitPoint[];
   recentOrders: {
@@ -678,6 +681,31 @@ export function ProfitAdminDashboard() {
                       <div className="flex justify-between text-slate-300">
                         <dt>Total Profit Margin</dt>
                         <dd>{data.profitSummary.totalMarginPct.toFixed(1)}%</dd>
+                      </div>
+                      <div className="mt-3 space-y-2 border-t border-slate-700 pt-3">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Ad performance
+                        </p>
+                        {[
+                          { label: "ROI", value: formatRoiPct(data.profitSummary.marketing.roiPct) },
+                          { label: "ROAS", value: formatRoas(data.profitSummary.marketing.roas) },
+                          { label: "CPA", value: formatMoneyMetric(data.profitSummary.marketing.cpaUsd) },
+                          {
+                            label: "Cost / delivered order",
+                            value: formatMoneyMetric(
+                              data.profitSummary.marketing.costPerDeliveredOrderUsd,
+                            ),
+                          },
+                          {
+                            label: "Break-even ROAS",
+                            value: formatRoas(data.profitSummary.marketing.breakEvenRoas),
+                          },
+                        ].map((row) => (
+                          <div key={row.label} className="flex justify-between text-slate-300">
+                            <dt className="text-slate-400">{row.label}</dt>
+                            <dd className="font-medium text-white">{row.value}</dd>
+                          </div>
+                        ))}
                       </div>
                     </dl>
                   </article>

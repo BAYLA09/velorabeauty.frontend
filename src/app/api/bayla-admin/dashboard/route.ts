@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { requireAdminSession } from "@/lib/profitAdmin/apiHelpers";
+import { readFeeConfigFromEnv } from "@/lib/profitAdmin/feesDefaults";
 import {
-  computeCodPanel,
-  computePaymentPanel,
-  netProfitAfterAdSpend,
-} from "@/lib/profitAdmin/calculations";
-import {
-  aggregateOrdersForPeriod,
   buildCodPanelForPeriod,
   buildPaymentPanelFromLive,
   computeDailyProfitSeries,
   percentChange,
   previousPeriodRange,
 } from "@/lib/profitAdmin/orderMetrics";
-import { requireAdminSession } from "@/lib/profitAdmin/apiHelpers";
-import { readFeeConfigFromEnv } from "@/lib/profitAdmin/feesDefaults";
+import { computePeriodEconomics } from "@/lib/profitAdmin/periodEconomics";
 import {
   defaultDateRange,
   loadProfitDashboardState,
@@ -41,9 +36,9 @@ export async function GET(request: NextRequest) {
   const state = loadProfitDashboardState();
   const fees = readFeeConfigFromEnv();
 
-  const live = aggregateOrdersForPeriod(from, to, fees);
-  const paymentInput = buildPaymentPanelFromLive(live.payment, fees);
-  const paymentResult = computePaymentPanel(paymentInput);
+  const period = computePeriodEconomics(from, to, fees, state);
+  const { paymentResult, codResult, live, marketing, totalProfitUsd, totalOrders, adSpendUsd } =
+    period;
 
   const codInput = buildCodPanelForPeriod(
     from,
@@ -52,30 +47,9 @@ export async function GET(request: NextRequest) {
     state.confirmationRatePct,
     state.deliveryRatePct,
   );
-  const codResult = computeCodPanel(codInput);
-
-  const adSpend = state.adSpendUsd;
-  const totalProfit = netProfitAfterAdSpend(paymentResult.profitUsd, codResult.profitUsd, adSpend);
-  const totalOrders = paymentResult.orderCount + codInput.totalOrders;
 
   const prev = previousPeriodRange(from, to);
-  const prevLive = aggregateOrdersForPeriod(prev.from, prev.to, fees);
-  const prevPayment = computePaymentPanel(buildPaymentPanelFromLive(prevLive.payment, fees));
-  const prevCod = computeCodPanel(
-    buildCodPanelForPeriod(
-      prev.from,
-      prev.to,
-      fees,
-      state.confirmationRatePct,
-      state.deliveryRatePct,
-    ),
-  );
-  const prevTotalProfit = netProfitAfterAdSpend(
-    prevPayment.profitUsd,
-    prevCod.profitUsd,
-    adSpend,
-  );
-  const prevTotalOrders = prevPayment.orderCount + prevCod.totalOrders;
+  const prevPeriod = computePeriodEconomics(prev.from, prev.to, fees, state);
 
   const chart = computeDailyProfitSeries(from, to, fees, codInput, state.chartDays);
 
@@ -86,30 +60,34 @@ export async function GET(request: NextRequest) {
     state,
     fees,
     live,
-    payment: { input: paymentInput, result: paymentResult },
+    payment: { input: buildPaymentPanelFromLive(live.payment, fees), result: paymentResult },
     cod: { input: codInput, result: codResult },
     kpis: {
-      totalProfitUsd: totalProfit,
+      totalProfitUsd,
       paymentProfitUsd: paymentResult.profitUsd,
       codProfitUsd: codResult.profitUsd,
-      adSpendUsd: adSpend,
+      adSpendUsd,
       totalOrders,
       changes: {
-        totalProfitPct: percentChange(totalProfit, prevTotalProfit),
-        paymentProfitPct: percentChange(paymentResult.profitUsd, prevPayment.profitUsd),
-        codProfitPct: percentChange(codResult.profitUsd, prevCod.profitUsd),
-        totalOrdersPct: percentChange(totalOrders, prevTotalOrders),
+        totalProfitPct: percentChange(totalProfitUsd, prevPeriod.totalProfitUsd),
+        paymentProfitPct: percentChange(
+          paymentResult.profitUsd,
+          prevPeriod.paymentResult.profitUsd,
+        ),
+        codProfitPct: percentChange(codResult.profitUsd, prevPeriod.codResult.profitUsd),
+        totalOrdersPct: percentChange(totalOrders, prevPeriod.totalOrders),
       },
     },
     chart,
     profitSummary: {
       paymentProfitUsd: paymentResult.profitUsd,
       codProfitUsd: codResult.profitUsd,
-      totalProfitUsd: totalProfit,
+      totalProfitUsd,
       totalMarginPct:
-        paymentResult.revenueUsd + codResult.revenueUsd > 0
-          ? (totalProfit / (paymentResult.revenueUsd + codResult.revenueUsd)) * 100
+        marketing.totalRevenueUsd > 0
+          ? (totalProfitUsd / marketing.totalRevenueUsd) * 100
           : 0,
+      marketing,
     },
     recentOrders: live.recentOrders,
   });
