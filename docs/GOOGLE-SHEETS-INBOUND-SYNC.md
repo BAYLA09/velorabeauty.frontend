@@ -1,6 +1,11 @@
-# Google Sheets → Bayla admin (inbound sync)
+# Google Sheets → Bayla admin (inbound sync) — **REMOVED**
 
-One-way sync: **Sheet → SQLite**. Status changes in the Sheet are never written back.
+**Status updates now come from COD Network webhooks** — see `docs/COD-NETWORK-WEBHOOKS.md`.  
+Do not modify Google Sheets (COD Network imports leads from them). Outbound export to Sheets is unchanged.
+
+---
+
+Legacy notes (no longer active):
 
 ## What you must do
 

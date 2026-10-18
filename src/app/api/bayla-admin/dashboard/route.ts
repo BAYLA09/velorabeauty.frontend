@@ -10,6 +10,10 @@ import {
   previousPeriodRange,
 } from "@/lib/profitAdmin/orderMetrics";
 import { computePeriodEconomics } from "@/lib/profitAdmin/periodEconomics";
+import { readCodNetworkWebhookSecret } from "@/lib/codNetwork/auth";
+import { isCodNetworkApiConfigured } from "@/lib/codNetwork/sellerApi";
+import { readLastCodNetworkWebhookAt } from "@/lib/codNetwork/webhookStore";
+import { readInboundStatusCutoffIso } from "@/lib/inboundStatusCutoff";
 import {
   defaultDateRange,
   loadProfitDashboardState,
@@ -90,5 +94,11 @@ export async function GET(request: NextRequest) {
       marketing,
     },
     recentOrders: live.recentOrders,
+    codNetwork: {
+      webhookSecretConfigured: Boolean(readCodNetworkWebhookSecret()),
+      apiTokenConfigured: isCodNetworkApiConfigured(),
+      lastWebhookAt: readLastCodNetworkWebhookAt(),
+      statusCutoffIso: readInboundStatusCutoffIso(),
+    },
   });
 }

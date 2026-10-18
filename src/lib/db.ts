@@ -76,6 +76,21 @@ function ensureSchema(database: Database.Database): void {
   if (!names.has("order_source")) {
     database.exec(`ALTER TABLE orders ADD COLUMN order_source TEXT NOT NULL DEFAULT 'storefront'`);
   }
+  if (!names.has("cod_network_lead_id")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN cod_network_lead_id TEXT`);
+  }
+  if (!names.has("cod_network_order_ref")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN cod_network_order_ref TEXT`);
+  }
+  if (!names.has("cod_network_status_detail")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN cod_network_status_detail TEXT`);
+  }
+  database.exec(
+    `CREATE INDEX IF NOT EXISTS idx_orders_codnet_lead ON orders (cod_network_lead_id)`,
+  );
+  database.exec(
+    `CREATE INDEX IF NOT EXISTS idx_orders_codnet_ref ON orders (cod_network_order_ref)`,
+  );
 
   database.exec(`
     CREATE TABLE IF NOT EXISTS app_meta (

@@ -1,28 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAdminSession } from "@/lib/profitAdmin/apiHelpers";
-import { listOrderSheetTargetsWithTabTitles } from "@/lib/ordersSheets/sheetTargets";
-import { syncOrdersFromGoogleSheets } from "@/lib/ordersSheets/syncFromSheet";
 
 export const runtime = "nodejs";
 
+/** Sheet inbound sync removed — statuses come from COD Network webhooks. Outbound export unchanged. */
 export async function POST(request: NextRequest) {
   const denied = requireAdminSession(request);
   if (denied) return denied;
 
-  const result = await syncOrdersFromGoogleSheets();
-  const sheetTargets = await listOrderSheetTargetsWithTabTitles();
-  if (!result.ok) {
-    return NextResponse.json(
-      { ok: false, error: result.error, stats: result.stats ?? null, sheetTargets },
-      { status: 502 },
-    );
-  }
-
-  return NextResponse.json({
-    ok: true,
-    source: result.source,
-    stats: result.stats,
-    sheetTargets,
-  });
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "sheet_inbound_sync_disabled",
+      message:
+        "Inbound Google Sheet status sync is disabled. Configure COD Network webhooks (see docs/COD-NETWORK-WEBHOOKS.md).",
+    },
+    { status: 410 },
+  );
 }
