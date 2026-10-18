@@ -106,6 +106,7 @@ type RowsWebhookPayload = {
 export type AppsScriptWebhookPostResult = {
   ok: boolean;
   status: number;
+  body: string;
   bodyPreview: string;
   parsedError?: string;
 };
@@ -115,6 +116,17 @@ type LegacyWebhookPayload = {
   channel: OrdersSheetChannel;
   values: (string | number)[];
 };
+
+type ReadOrderSheetWebhookPayload = {
+  secret: string;
+  channel: OrdersSheetChannel;
+  action: "readCodOrders" | "readCardOrders";
+};
+
+export type AppsScriptWebhookPayload =
+  | RowsWebhookPayload
+  | LegacyWebhookPayload
+  | ReadOrderSheetWebhookPayload;
 
 import { normalizeAppsScriptWebhookUrl } from "@/lib/ordersSheets/probeAppsScriptWebhook";
 
@@ -129,7 +141,7 @@ function parseWebhookError(text: string): string | undefined {
 
 export async function postToAppsScriptWebhook(
   url: string,
-  payload: RowsWebhookPayload | LegacyWebhookPayload,
+  payload: AppsScriptWebhookPayload,
 ): Promise<AppsScriptWebhookPostResult> {
   const target = normalizeAppsScriptWebhookUrl(url);
   const res = await fetch(target, {
@@ -166,6 +178,7 @@ export async function postToAppsScriptWebhook(
   return {
     ok,
     status: finalRes.status,
+    body: text,
     bodyPreview: text.slice(0, 200),
     parsedError,
   };

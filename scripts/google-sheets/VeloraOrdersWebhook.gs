@@ -179,6 +179,30 @@ function doPost(e) {
 
     var channel = body.channel === "card" ? "card" : "cod";
 
+    if (
+      (body.action === "readCodOrders" && channel === "cod") ||
+      (body.action === "readCardOrders" && channel === "card")
+    ) {
+      var readChannel = body.action === "readCardOrders" ? "card" : "cod";
+      var readSheet = getTargetSheet_(readChannel);
+      var sheetValues = readSheet.getDataRange().getValues();
+      if (!sheetValues || !sheetValues.length) {
+        return jsonResponse_({ ok: true, headers: [], rows: [] });
+      }
+      var headers = sheetValues[0].map(function (c) {
+        return String(c || "");
+      });
+      var rows = [];
+      for (var ri = 1; ri < sheetValues.length; ri++) {
+        rows.push(
+          sheetValues[ri].map(function (c) {
+            return String(c === null || c === undefined ? "" : c);
+          }),
+        );
+      }
+      return jsonResponse_({ ok: true, headers: headers, rows: rows });
+    }
+
     if ((channel === "cod" || channel === "card") && body.rows && body.orderId) {
       var sheet = resolveSheetForPost_(channel, body);
       var result =

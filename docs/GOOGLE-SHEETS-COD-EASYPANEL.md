@@ -106,6 +106,13 @@ curl -sS -X POST 'https://www.velorabeauty.world/api/orders/sheets/reconcile' \
 
 Re-deploy Apps Script after updating `VeloraOrdersWebhook.gs` (default tab gid `469291840`).
 
+**Inbound sync (Bayla admin, Sheet → SQLite, never writes back to Sheet):**
+
+- COD tab: spreadsheet `1nasdcXYD5ihxj5QnGMWQ05ug3VqoVfgP8R9ojBnsjXQ`, gid `469291840` (`SHEET_GID` / `ORDERS_SHEETS_SHEET_GID`).
+- Card tab: spreadsheet `1paLygQEeE3V6kUVd4PP60v_xhpKp4e7Xu_UK3L5y32A`, gid `1628433865` (`CARD_SPREADSHEET_ID` / `ORDERS_SHEETS_CARD_*`).
+- Apps Script must support `action: "readCodOrders"` and `action: "readCardOrders"` (see `VeloraOrdersWebhook.gs`).
+- Optional `ORDERS_SHEETS_SYNC_CUTOFF_ISO` — only rows/orders at or after this time are imported or status-updated (default: deploy time stored in SQLite `app_meta`).
+
 ---
 
 ## 5) Code entry points (for review)
