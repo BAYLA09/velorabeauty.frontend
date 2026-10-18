@@ -86,6 +86,12 @@ type DashboardPayload = {
   }[];
   state: ProfitDashboardState;
   fees: FeeConfig;
+  codNetwork?: {
+    webhookSecretConfigured: boolean;
+    apiTokenConfigured: boolean;
+    lastWebhookAt: string | null;
+    statusCutoffIso: string;
+  };
 };
 
 const NAV = [
@@ -194,8 +200,8 @@ export function ProfitAdminDashboard() {
   const [activeNav, setActiveNav] = useState<string>("dashboard");
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loadingDash, setLoadingDash] = useState(false);
-  const [sheetSyncing, setSheetSyncing] = useState(false);
-  const [sheetSyncNote, setSheetSyncNote] = useState<string | null>(null);
+  const [codNetRefreshing, setCodNetRefreshing] = useState(false);
+  const [codNetNote, setCodNetNote] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [localState, setLocalState] = useState<ProfitDashboardState | null>(null);
@@ -238,11 +244,11 @@ export function ProfitAdminDashboard() {
     setLoadingDash(false);
   }, []);
 
-  const runSheetSync = useCallback(async () => {
-    setSheetSyncing(true);
-    setSheetSyncNote(null);
+  const refreshCodNetwork = useCallback(async () => {
+    setCodNetRefreshing(true);
+    setCodNetNote(null);
     try {
-      const res = await fetch("/api/bayla-admin/sheets/sync", {
+      const res = await fetch("/api/bayla-admin/cod-network/refresh", {
         method: "POST",
         credentials: "include",
         headers: apiHeaders(),
@@ -250,29 +256,32 @@ export function ProfitAdminDashboard() {
       const json = (await res.json()) as {
         ok?: boolean;
         error?: string;
-        stats?: {
-          cutoffIso: string;
-          cod?: { statusUpdated: number; imported: number; skippedBeforeCutoff: number };
-          card?: { statusUpdated: number; imported: number; skippedBeforeCutoff: number };
-        };
+        leadsProcessed?: number;
+        ordersProcessed?: number;
+        errors?: string[];
       };
       if (!res.ok || !json.ok) {
-        setSheetSyncNote(json.error ?? "Sheet sync failed");
+        setCodNetNote(json.error ?? "COD Network refresh failed");
         return;
       }
-      const s = json.stats;
-      if (s?.cod && s?.card) {
-        setSheetSyncNote(
-          `Sheet sync (cutoff ${s.cutoffIso.slice(0, 19)}Z) — COD: ${s.cod.statusUpdated} updated / ${s.cod.imported} imported / ${s.cod.skippedBeforeCutoff} skipped; Card: ${s.card.statusUpdated} updated / ${s.card.imported} imported / ${s.card.skippedBeforeCutoff} skipped.`,
-        );
-      } else {
-        setSheetSyncNote("Sheet sync complete.");
-      }
+      setCodNetNote(
+        `Polled COD Network — leads ${json.leadsProcessed ?? 0}, orders ${json.ordersProcessed ?? 0}.`,
+      );
       await loadDashboard();
     } finally {
-      setSheetSyncing(false);
+      setCodNetRefreshing(false);
     }
   }, [loadDashboard]);
+
+  const codNetworkStatusLine = useMemo(() => {
+    const cn = data?.codNetwork;
+    if (!cn) return null;
+    const last = cn.lastWebhookAt
+      ? new Date(cn.lastWebhookAt).toLocaleString("en-GB", { timeZone: "Asia/Dubai" })
+      : "never";
+    const secret = cn.webhookSecretConfigured ? "webhook OK" : "webhook secret missing";
+    return `COD Network status · last webhook: ${last} (${secret})`;
+  }, [data?.codNetwork]);
 
   const scheduleSave = useCallback(
     (state: ProfitDashboardState) => {
@@ -294,12 +303,6 @@ export function ProfitAdminDashboard() {
     if (authenticated) void loadDashboard();
   }, [authenticated, loadDashboard]);
 
-  useEffect(() => {
-    if (!authenticated) return;
-    void runSheetSync();
-    const interval = window.setInterval(() => void runSheetSync(), 12 * 60 * 1000);
-    return () => window.clearInterval(interval);
-  }, [authenticated, runSheetSync]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -474,14 +477,25 @@ export function ProfitAdminDashboard() {
                   Apply
                 </button>
               </div>
-              <button
-                type="button"
-                disabled={sheetSyncing}
-                onClick={() => void runSheetSync()}
-                className="rounded-xl border border-violet-500/40 bg-violet-600/20 px-3 py-2 text-xs font-medium text-violet-100 hover:bg-violet-600/35 disabled:opacity-50"
+              {data?.codNetwork?.apiTokenConfigured ? (
+                <button
+                  type="button"
+                  disabled={codNetRefreshing}
+                  onClick={() => void refreshCodNetwork()}
+                  className="rounded-xl border border-slate-600 bg-slate-800/80 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-50"
+                >
+                  {codNetRefreshing ? "Refreshing…" : "Refresh from COD Network"}
+                </button>
+              ) : null}
+              <div
+                className="max-w-xs rounded-xl border border-emerald-500/30 bg-emerald-950/30 px-3 py-2 text-xs text-emerald-100/90"
+                title="Statuses update via COD Network webhooks (not Google Sheets)"
               >
-                {sheetSyncing ? "Syncing Sheet…" : "Sync from Sheet"}
-              </button>
+                COD Network status
+                <p className="mt-0.5 text-[11px] text-emerald-200/70">
+                  {codNetworkStatusLine ?? "Loading…"}
+                </p>
+              </div>
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-sm font-semibold">
                   AB
@@ -497,7 +511,7 @@ export function ProfitAdminDashboard() {
             <p className="mt-2 text-xs text-slate-500">
               {formatRangeLabel(data.range.from, data.range.to)}
               {loadingDash ? " · Refreshing…" : null}
-              {sheetSyncNote ? ` · ${sheetSyncNote}` : null}
+              {codNetNote ? ` · ${codNetNote}` : null}
             </p>
           ) : null}
         </header>
@@ -652,7 +666,7 @@ export function ProfitAdminDashboard() {
                         </div>
                         {data.cod.live ? (
                           <div className="rounded-lg border border-slate-700/50 bg-[#12151f]/80 p-3 text-xs text-slate-400">
-                            <p className="font-medium text-slate-300">From Sheet sync (actual)</p>
+                            <p className="font-medium text-slate-300">From COD Network (actual)</p>
                             <p className="mt-1">
                               No answer {data.cod.live.noAnswerOrders} · Confirmed{" "}
                               {data.cod.live.confirmedPipelineOrders} · Delivered{" "}
@@ -728,7 +742,7 @@ export function ProfitAdminDashboard() {
                           <p className="mt-1 text-xs text-slate-500">
                             {data.cod.live && data.cod.live.pendingOrders > 0
                               ? `Includes ${Math.round(data.cod.live.projectedFromPending.delivered)} projected from ${data.cod.live.pendingOrders} pending`
-                              : "All orders have Sheet-synced statuses"}
+                              : "All orders have COD Network-synced statuses"}
                           </p>
                         </div>
                         <div className="flex justify-between text-sm">

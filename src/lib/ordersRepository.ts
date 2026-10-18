@@ -18,6 +18,7 @@ import {
   resolveCheckoutMerchandiseAed,
   resolveCheckoutTotalAed,
 } from "@/lib/checkoutTotals";
+import { uaePhoneMatchKey } from "@/lib/codNetwork/phoneMatch";
 import { getDb } from "@/lib/db";
 
 export type OrderRecord = {
@@ -501,7 +502,8 @@ export function countCardOrdersPaidNotExported(): number {
   return row.n;
 }
 
-const COD_SHEET_SYNC_STATUSES = new Set([
+const COD_INBOUND_STATUSES = new Set([
+  "pending",
   "no_answer",
   "confirmed",
   "delivered",
@@ -514,20 +516,115 @@ const COD_SHEET_SYNC_STATUSES = new Set([
   "out_for_delivery",
 ]);
 
-export function updateCodOrderStatusFromSheet(
+export function updateCodOrderStatusFromInbound(
   orderId: string,
   status: string,
+  statusDetail?: string | null,
 ): { updated: boolean; reason?: string } {
   const order = getOrderById(orderId);
   if (!order) return { updated: false, reason: "not_found" };
   if (order.paymentMethod !== "cod") return { updated: false, reason: "not_cod" };
   const normalized = status.trim().toLowerCase();
-  if (!COD_SHEET_SYNC_STATUSES.has(normalized) && normalized !== "pending") {
+  if (!COD_INBOUND_STATUSES.has(normalized)) {
     return { updated: false, reason: "invalid_status" };
   }
-  if (order.status === normalized) return { updated: false, reason: "unchanged" };
-  getDb().prepare(`UPDATE orders SET status = ? WHERE id = ?`).run(normalized, orderId);
+  if (order.status === normalized && !statusDetail) return { updated: false, reason: "unchanged" };
+  getDb()
+    .prepare(
+      `UPDATE orders SET status = ?, cod_network_status_detail = COALESCE(?, cod_network_status_detail) WHERE id = ?`,
+    )
+    .run(normalized, statusDetail ?? null, orderId);
   return { updated: true };
+}
+
+/** @deprecated Sheet inbound sync disabled — use COD Network webhooks */
+export function updateCodOrderStatusFromSheet(
+  orderId: string,
+  status: string,
+): { updated: boolean; reason?: string } {
+  return updateCodOrderStatusFromInbound(orderId, status, null);
+}
+
+export function linkCodNetworkIds(
+  orderId: string,
+  leadId: string | null,
+  orderRef: string | null,
+): void {
+  if (!leadId && !orderRef) return;
+  getDb()
+    .prepare(
+      `UPDATE orders SET
+        cod_network_lead_id = COALESCE(?, cod_network_lead_id),
+        cod_network_order_ref = COALESCE(?, cod_network_order_ref)
+       WHERE id = ?`,
+    )
+    .run(leadId, orderRef, orderId);
+}
+
+export type CodNetworkMatchInput = {
+  leadId: string | null;
+  orderReference: string | null;
+  storefrontOrderId: string | null;
+  phone: string | null;
+  eventTimeIso: string | null;
+  windowMs: number;
+};
+
+export function findCodOrderForCodNetworkMatch(
+  input: CodNetworkMatchInput,
+): OrderRecord | null {
+  if (input.storefrontOrderId) {
+    const byId = getOrderById(input.storefrontOrderId);
+    if (byId?.paymentMethod === "cod") return byId;
+  }
+  if (input.leadId) {
+    const row = getDb()
+      .prepare(
+        `SELECT * FROM orders WHERE payment_method = 'cod' AND cod_network_lead_id = ? LIMIT 1`,
+      )
+      .get(input.leadId) as OrderRow | undefined;
+    if (row) return rowToRecord(row);
+  }
+  if (input.orderReference) {
+    const row = getDb()
+      .prepare(
+        `SELECT * FROM orders WHERE payment_method = 'cod' AND cod_network_order_ref = ? LIMIT 1`,
+      )
+      .get(input.orderReference) as OrderRow | undefined;
+    if (row) return rowToRecord(row);
+  }
+  if (!input.phone) return null;
+
+  const key = uaePhoneMatchKey(input.phone);
+  if (!key) return null;
+
+  const eventMs = input.eventTimeIso ? Date.parse(input.eventTimeIso) : Date.now();
+  const fromIso = new Date(eventMs - input.windowMs).toISOString();
+  const toIso = new Date(eventMs + input.windowMs).toISOString();
+
+  const rows = getDb()
+    .prepare(
+      `SELECT * FROM orders
+       WHERE payment_method = 'cod'
+         AND created_at >= ? AND created_at <= ?
+       ORDER BY created_at DESC
+       LIMIT 50`,
+    )
+    .all(fromIso, toIso) as OrderRow[];
+
+  let best: OrderRecord | null = null;
+  let bestDelta = Infinity;
+  for (const row of rows) {
+    const rowKey = uaePhoneMatchKey(row.phone);
+    if (rowKey !== key) continue;
+    const created = Date.parse(row.created_at);
+    const delta = Math.abs(created - eventMs);
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      best = rowToRecord(row);
+    }
+  }
+  return best;
 }
 
 export type CreateOrderFromSheetInput = {
