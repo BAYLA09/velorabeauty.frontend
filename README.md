@@ -31,6 +31,10 @@ npm install
 npm run dev
 ```
 
+Open **http://localhost:3000** (not `https://0.0.0.0:3000` — browsers reject that host).  
+Landing page: **http://localhost:3000/lp** · Redirect admin: **http://localhost:3000/redirectkiller**  
+Details: [docs/LOCAL-DEV-REDIRECT-LP.md](docs/LOCAL-DEV-REDIRECT-LP.md)
+
 ## Docker / Easypanel (production)
 
 **Easypanel: استعمل Docker Image فقط** — ماشي GitHub + Dockerfile (Deploy 1s = ما كيسحبش image جديد).
