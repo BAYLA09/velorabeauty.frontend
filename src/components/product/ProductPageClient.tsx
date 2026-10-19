@@ -9,18 +9,20 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductFeaturePills } from "@/components/product/ProductFeaturePills";
 import { ProductMobileStickyBar } from "@/components/product/ProductMobileStickyBar";
 import { ProductPageLongSections } from "@/components/product/ProductPageLongSections";
+import { ProductFinalCtaSection } from "@/components/product/ProductFinalCtaSection";
 import {
   ProductPurchasePanel,
   type PurchaseState,
 } from "@/components/product/ProductPurchasePanel";
-import { ProductRitualSection } from "@/components/product/ProductRitualSection";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
 import { ProductTrustBar } from "@/components/product/ProductTrustBar";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
+import { uaeDeliveryWindowLabel } from "@/lib/delivery/uaeDeliveryWindow";
 import { AttributionCaptureEffect } from "@/components/attribution/AttributionCaptureEffect";
 import type { ProductWithPage } from "@/lib/productCatalog";
+import { IconCheckCircle } from "@/components/product/ProductFunnelIcons";
 
 type Props = {
   product: ProductWithPage;
@@ -32,10 +34,15 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
+  const deliveryWindow = uaeDeliveryWindowLabel();
 
   useEffect(() => {
     trackSnapViewContent({ productSlug: product.slug, valueAed: product.price });
   }, [product.slug, product.price]);
+
+  const displayTotal = purchase?.total ?? cardBundlePrices[quantity];
+  const stickyCtaLabel =
+    purchase?.ctaLabel ?? "اطلبي الآن — الدفع عند الاستلام";
 
   return (
     <>
@@ -43,9 +50,15 @@ export function ProductPageClient({ product, allProducts }: Props) {
       <ProductAnnouncementBar />
       <ProductStoreHeader />
 
-      <main className="product-typography bg-velora-cream pb-24 lg:pb-0">
-        <div className="mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:max-w-7xl lg:py-8">
-          <section id="purchase" className="scroll-mt-24">
+      <main
+        className="product-typography bg-velora-cream pb-24 lg:pb-20"
+        style={{ ["--header-h" as string]: "3.5rem" }}
+      >
+        <div className="mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:max-w-[1200px] lg:py-8">
+          <section
+            id="buy-box"
+            className="scroll-mt-[var(--header-h)] sm:scroll-mt-[var(--header-h)]"
+          >
             <header className="mb-4 text-right sm:mb-5 lg:mb-6">
               <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
                 {page.headlineQuestion}
@@ -53,11 +66,26 @@ export function ProductPageClient({ product, allProducts }: Props) {
               <p className="mt-2.5 text-[15px] font-medium leading-[1.85] text-velora-burgundy/85 sm:mt-3 sm:text-base">
                 {page.subhook}
               </p>
+              <ul className="mt-3 space-y-2 sm:mt-4">
+                {page.heroBullets.map((line) => (
+                  <li
+                    key={line}
+                    className="flex items-start justify-end gap-2 text-right text-[13px] font-semibold leading-relaxed text-velora-burgundy/90 sm:text-sm"
+                  >
+                    <span>{line}</span>
+                    <IconCheckCircle
+                      className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700"
+                      aria-hidden
+                    />
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs font-bold text-velora-burgundy/60">{deliveryWindow}</p>
             </header>
 
-            <div className="flex flex-col items-start gap-6 lg:flex-row lg:gap-8">
-              <aside className="hidden w-[min(100%,340px)] shrink-0 lg:block xl:w-[360px]">
-                <div className="sticky top-20 z-20">
+            <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
+              <aside className="min-w-0 lg:sticky lg:top-[calc(var(--header-h)+1rem)] lg:self-start">
+                <div className="hidden lg:block">
                   <ProductGallery
                     mainSrc={product.pageImage.src}
                     productName={product.name}
@@ -69,47 +97,44 @@ export function ProductPageClient({ product, allProducts }: Props) {
               </aside>
 
               <div className="min-w-0 flex-1">
-                <div id="pdp-hero-gallery" className="grid items-start gap-6 lg:block">
-                  <div className="min-w-0 w-full lg:hidden">
-                    <ProductGallery
-                      mainSrc={product.pageImage.src}
-                      productName={product.name}
-                      placeholder={product.pageImage.placeholder}
-                      laraFrame
-                      fullWidthMobile
-                    />
-                    <ProductFeaturePills form={page.form} />
-                  </div>
+                <div className="lg:hidden">
+                  <ProductGallery
+                    mainSrc={product.pageImage.src}
+                    productName={product.name}
+                    placeholder={product.pageImage.placeholder}
+                    laraFrame
+                    fullWidthMobile
+                  />
+                  <ProductFeaturePills form={page.form} />
+                </div>
 
-                  <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
-                    <p className="text-sm font-semibold tabular-nums text-velora-burgundy/75">
-                      من {formatPrice(singleProductPrice)} / {unitLabel}
-                    </p>
+                <div className="mt-4 flex min-w-0 flex-col gap-3.5 sm:mt-0 sm:gap-4">
+                  <p className="text-sm font-semibold tabular-nums text-velora-burgundy/75">
+                    من {formatPrice(singleProductPrice)} / {unitLabel}
+                  </p>
 
-                    <ProductPurchasePanel
-                      funnelOffers
-                      form={page.form}
-                      productSlug={product.slug}
-                      upsellSlotSrc={product.pageImage.upsellSlotSrc}
-                      productName={product.name}
-                      quantity={quantity}
-                      onQuantityChange={setQuantity}
-                      onChange={setPurchase}
-                    />
-
-                    <ProductTrustBar prominent />
-
-                    <ProductVideoStoriesStrip compact productSlug={product.slug} />
-                  </div>
+                  <ProductPurchasePanel
+                    funnelOffers
+                    form={page.form}
+                    productSlug={product.slug}
+                    upsellSlotSrc={product.pageImage.upsellSlotSrc}
+                    productName={product.name}
+                    quantity={quantity}
+                    onQuantityChange={setQuantity}
+                    onChange={setPurchase}
+                    showTrustRow
+                  />
                 </div>
               </div>
             </div>
           </section>
 
-          <ProductRitualSection
-            productId={product.id}
-            imageSrc={product.pageImage.storySrc ?? product.pageImage.src}
-          />
+          <div className="mt-8 border-t border-velora-burgundy/8 pt-6">
+            <ProductVideoStoriesStrip productSlug={product.slug} />
+            <div className="mt-6 sm:mt-8">
+              <ProductTrustBar prominent />
+            </div>
+          </div>
 
           <ProductPageLongSections
             page={page}
@@ -117,22 +142,34 @@ export function ProductPageClient({ product, allProducts }: Props) {
             productName={product.name}
             marketingSpotlight={product.pageImage.marketingSpotlight}
             formulaSectionImageSrc={product.pageImage.formulaSectionImageSrc}
-            timelineSectionImageSrc={product.pageImage.timelineSectionImageSrc}
+            problemSectionImageSrc={
+              product.pageImage.storySrc ?? product.pageImage.src
+            }
+          />
+
+          <ProductFinalCtaSection
+            form={page.form}
+            productSlug={product.slug}
+            productName={product.name}
+            upsellSlotSrc={product.pageImage.upsellSlotSrc}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            onPurchaseChange={setPurchase}
+            headline="جاهزة تكملين طلبك؟"
           />
 
           <RelatedProducts currentSlug={product.slug} products={allProducts} />
         </div>
-
       </main>
       <FooterSection />
 
       <ProductMobileStickyBar
-        ctaLabel={
-          purchase?.ctaLabel ??
-          `اطلبي الآن — ${formatPrice(cardBundlePrices[quantity])}`
-        }
+        ctaLabel={stickyCtaLabel}
         productSlug={product.slug}
         quantity={purchase?.quantity ?? quantity}
+        productName={product.name}
+        thumbnailSrc={product.pageImage.src ?? "/images/products/eye-serum.webp"}
+        priceAed={displayTotal}
       />
     </>
   );

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FooterSection } from "@/components/FooterSection";
 import { CardThankYouSuccess } from "@/components/order/card-thank-you/CardThankYouSuccess";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
+import { CheckoutSupportBlock } from "@/components/support/CheckoutSupportBlock";
 import {
   confirmStripePaymentIfNeeded,
   fetchOrderDraftById,
@@ -95,11 +96,14 @@ export function CheckoutSuccessClient() {
             <p className="mt-8 text-center text-sm text-velora-burgundy/60">جاري تأكيد الدفع…</p>
           </div>
         ) : order ? (
-          <CardThankYouSuccess
-            order={order}
-            purchaseVerified={purchaseVerified}
-            onNavigateAway={() => clearOrderDraft()}
-          />
+          <div className="mx-auto max-w-[440px] space-y-6">
+            <CardThankYouSuccess
+              order={order}
+              purchaseVerified={purchaseVerified}
+              onNavigateAway={() => clearOrderDraft()}
+            />
+            <CheckoutSupportBlock />
+          </div>
         ) : (
           <div className="mx-auto max-w-md text-center">
             <p className="text-base text-velora-burgundy/75">

@@ -1,6 +1,7 @@
 "use client";
 
 import { ProductPageImage } from "@/components/product/ProductPageImage";
+import { productPageFlags } from "@/config/productPageFlags";
 import { productProblemOverlayById } from "@/config/productRitualSection";
 import type { ProductId } from "@/config/products";
 
@@ -11,6 +12,7 @@ export function ProductRitualSection({
   productId: ProductId;
   imageSrc?: string;
 }) {
+  if (!productPageFlags.showUnverifiedStatBlocks) return null;
   const data = productProblemOverlayById[productId];
   if (!data) return null;
 

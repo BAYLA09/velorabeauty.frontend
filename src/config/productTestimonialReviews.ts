@@ -1,3 +1,4 @@
+import { productPageFlags } from "./productPageFlags";
 import type { ProductId } from "./products";
 import type { TestimonialReview } from "./testimonials";
 
@@ -107,5 +108,6 @@ export const productTestimonialReviews: Record<ProductId, TestimonialReview[]> =
 };
 
 export function publishedProductTestimonials(productId: ProductId): TestimonialReview[] {
+  if (!productPageFlags.showSocialProof) return [];
   return productTestimonialReviews[productId].filter((r) => r.published);
 }

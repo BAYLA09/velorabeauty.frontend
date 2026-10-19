@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FooterSection } from "@/components/FooterSection";
 import { CodThankYouSuccess } from "@/components/order/CodThankYouSuccess";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
+import { CheckoutSupportBlock } from "@/components/support/CheckoutSupportBlock";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import {
   clearOrderDraft,
@@ -152,11 +153,14 @@ export function ThankYouPageClient() {
             </Link>
           </div>
         ) : (
-          <CodThankYouSuccess
-            order={order}
-            purchaseVerified={purchaseVerified}
-            onNavigateAway={() => clearOrderDraft()}
-          />
+          <div className="mx-auto max-w-[440px] space-y-6">
+            <CodThankYouSuccess
+              order={order}
+              purchaseVerified={purchaseVerified}
+              onNavigateAway={() => clearOrderDraft()}
+            />
+            <CheckoutSupportBlock />
+          </div>
         )}
       </main>
       <FooterSection />

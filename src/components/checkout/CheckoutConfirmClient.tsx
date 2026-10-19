@@ -14,6 +14,7 @@ import {
   useCaptureBackendCheckout,
 } from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutFunnelShell } from "@/components/checkout/CheckoutFunnelShell";
+import { CheckoutSupportBlock } from "@/components/support/CheckoutSupportBlock";
 import { CheckoutSummarySidebar } from "@/components/checkout/CheckoutSummarySidebar";
 import {
   checkoutInputClass,
@@ -253,6 +254,12 @@ export function CheckoutConfirmClient({
               </p>
             )}
 
+            {isCod && (
+              <p className="rounded-xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-center text-sm font-semibold leading-relaxed text-amber-950">
+                📞 سيتصل بك فريقنا خلال 24 ساعة لتأكيد طلبك — الرجاء الرد على الرقم
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={submitting}
@@ -270,6 +277,8 @@ export function CheckoutConfirmClient({
               </p>
             )}
           </form>
+
+          <CheckoutSupportBlock className="mt-8" />
         </section>
 
         <CheckoutSummarySidebar

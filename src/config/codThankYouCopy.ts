@@ -1,11 +1,11 @@
-import { codFee, currencyLabel, formatPrice } from "@/config/pricing";
+import { codFee, currencyLabel } from "@/config/pricing";
 import { brand } from "@/config/brand";
 
 /** COD thank-you — Khaleeji; layout matches premium COD mockup (Velora colors). */
 export const codThankYouCopy = {
   hero: {
-    title: "أبشر! تم تسجيل طلبك بنجاح",
-    lead: "يعطيك العافية على ثقتك فينا — مندوبنا بيتواصل معك قريب لتأكيد التفاصيل.",
+    title: "تم استلام طلبك ✅ — انتظري اتصالنا",
+    lead: "فريق فيلورا بيتصل فيك خلال 24 ساعة لتأكيد الطلب — الرجاء الرد على الرقم.",
   },
   meta: {
     orderNumber: "رقم الطلب",
@@ -17,18 +17,18 @@ export const codThankYouCopy = {
       placed: { label: "تسجيل الطلب", sub: "تم التسجيل" },
       confirm: { label: "مكالمة التأكيد", sub: "فريقنا يتصل فيك" },
       prepare: { label: "تجهيز الطلب", sub: "بعد التأكيد" },
-      deliver: { label: "التوصيل للمنزل", sub: "خلال يومين · كل الإمارات" },
+      deliver: { label: "التوصيل للمنزل", sub: "2–4 أيام · الدفع عند الاستلام" },
     },
   },
   quickTrust: [
-    { id: "time", label: "التوصيل المتوقع", value: "يومين عمل", badge: "كل الإمارات" },
+    { id: "time", label: "التوصيل المتوقع", value: "2–4 أيام عمل", badge: "كل الإمارات" },
     { id: "cod", label: "الدفع", value: "عند الاستلام" },
     { id: "check", label: "استلام آمن", value: "راجعي الطرد قبل الدفع" },
     { id: "quality", label: "ثقة فيلورا", value: "منتجات مختارة بعناية" },
   ],
   reachable: {
     title: "خلّي جوالك قريب!",
-    body: "بنتصل فيك خلال الساعات الجاية (15–45 دقيقة في أوقات الدوام) لتأكيد العنوان والكمية.",
+    body: "بنتصل فيك خلال 24 ساعة لتأكيد العنوان والكمية — أضيفي رقمنا لجهات الاتصال وخلّي الجوال قريب.",
     phoneLabel: "رقم التواصل",
     whatsappCta: "أكّد عبر واتساب",
     whatsappHint: "رسالة جاهزة — التأكيد النهائي من فريقنا بعد الرد.",
@@ -46,7 +46,8 @@ export const codThankYouCopy = {
   summary: {
     title: "تفاصيل طلبك",
     promise:
-      "بنتصل فيك قريب لتأكيد الطلب — وبعد التأكيد نوصّل لباب بيتك خلال يومين في كل إمارات الدولة.",
+      "بعد مكالمة التأكيد، يوصلك الطلب خلال 2–4 أيام داخل الإمارات — جهّزي المبلغ أدناه للمندوب.",
+    prepareCash: "احتفظي بالمبلغ جاهز عند الاستلام:",
     deliveryNote: "التوصيل لباب المنزل · الدفع عند الاستلام",
     subtotal: "المجموع الفرعي",
     shipping: "رسوم التوصيل",

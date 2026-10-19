@@ -7,6 +7,7 @@ import {
   getCheckoutAttributionForOrder,
 } from "@/lib/attribution/checkoutAttributionClient";
 import { CheckoutSummary } from "@/components/CheckoutSummary";
+import { CheckoutSupportBlock } from "@/components/support/CheckoutSupportBlock";
 import { checkoutExperience } from "@/config/checkoutExperience";
 import { checkoutEmirates } from "@/config/productCheckout";
 import type { BundleQuantity, PaymentMethod } from "@/config/pricing";
@@ -194,6 +195,12 @@ export function CheckoutOrderForm({
         )}
       </div>
 
+      {paymentMethod === "cod" ? (
+        <p className="rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-center text-sm font-semibold leading-relaxed text-amber-950">
+          📞 سيتصل بك فريقنا خلال 24 ساعة لتأكيد طلبك — الرجاء الرد على الرقم
+        </p>
+      ) : null}
+
       <CheckoutSummary
         quantity={quantity}
         method={paymentMethod}
@@ -209,6 +216,8 @@ export function CheckoutOrderForm({
           الموقع.
         </p>
       )}
+
+      <CheckoutSupportBlock className="mt-4" />
     </form>
   );
 }
