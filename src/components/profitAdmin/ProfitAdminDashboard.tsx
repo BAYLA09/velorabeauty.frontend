@@ -960,7 +960,7 @@ export function ProfitAdminDashboard() {
                 Fee config is set in Easypanel environment variables — not editable in the dashboard.
               </p>
               <p className="mt-2 text-xs text-slate-500">
-                In stock: Eye serum (SKU vitaminamin), Skin Whitening Gummies (SKU WHITEAMIN).
+                In stock: Eye serum (SKU vitaminamin), Skin gummies (SKU WHITEAMIN).
               </p>
               <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
                 <div className="flex justify-between gap-2 sm:block">
