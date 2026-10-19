@@ -11,6 +11,7 @@ import {
   useCaptureBackendCheckout,
 } from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
+import { CheckoutSupportBlock } from "@/components/support/CheckoutSupportBlock";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
 import { useStripeCheckoutPrefetch } from "@/components/checkout/useStripeCheckoutPrefetch";
 import type { BundleQuantity } from "@/config/pricing";
@@ -346,6 +347,8 @@ export function CheckoutCardVanillaCheckout({
           }
         />
       </div>
+
+      <CheckoutSupportBlock className="mx-auto mt-8 max-w-2xl" />
     </CheckoutLaraShell>
   );
 }

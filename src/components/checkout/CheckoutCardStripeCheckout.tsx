@@ -12,6 +12,7 @@ import {
   useCaptureBackendCheckout,
 } from "@/components/checkout/useCaptureBackendCheckout";
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
+import { CheckoutSupportBlock } from "@/components/support/CheckoutSupportBlock";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
 import {
   CheckoutStripeElementsProvider,
@@ -469,6 +470,8 @@ export function CheckoutCardStripeCheckout({
           quantity={quantity}
         />
       </div>
+
+      <CheckoutSupportBlock className="mx-auto mt-8 max-w-2xl" />
     </CheckoutLaraShell>
   );
 }

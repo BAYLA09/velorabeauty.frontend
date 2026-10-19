@@ -6,6 +6,7 @@ import { SnapTestModePersist } from "@/components/analytics/SnapTestModePersist"
 import { snapPixelBootstrapScriptForApp } from "@/lib/analytics/snapBootstrap";
 import { buildSnapTestModeCaptureScript } from "@/lib/analytics/snapTestMode";
 import { CartRoot } from "@/components/cart/CartRoot";
+import { FloatingWhatsAppButton } from "@/components/support/FloatingWhatsAppButton";
 import { brand } from "@/config/brand";
 import "./globals.css";
 
@@ -72,7 +73,10 @@ export default function RootLayout({
           <SnapTestModePersist />
         </Suspense>
         <SnapPixelRoot />
-        <CartRoot>{children}</CartRoot>
+        <CartRoot>
+          {children}
+          <FloatingWhatsAppButton />
+        </CartRoot>
       </body>
     </html>
   );

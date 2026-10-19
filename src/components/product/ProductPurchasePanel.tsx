@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductForm } from "@/config/productPages";
 import { IconCrown } from "@/components/product/ProductFunnelIcons";
+import { ProductBuyBoxTrustRow } from "@/components/product/ProductBuyBoxTrustRow";
 import {
   cardOfferPrice,
   ProductPaymentMethodsInfo,
@@ -12,13 +13,7 @@ import { useCart } from "@/context/CartProvider";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { trackSnapStartCheckout } from "@/lib/analytics/trackSnapCommerce";
 import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
-import {
-  codFee,
-  currencyLabel,
-  formatPrice,
-  singleProductPrice,
-  type BundleQuantity,
-} from "@/config/pricing";
+import { formatPrice, singleProductPrice, type BundleQuantity } from "@/config/pricing";
 
 const quantities: BundleQuantity[] = [1, 2, 3];
 
@@ -165,6 +160,7 @@ type Props = {
   onChange?: (state: PurchaseState) => void;
   /** Lara-style bundle labels + payment info (non-interactive) */
   funnelOffers?: boolean;
+  showTrustRow?: boolean;
 };
 
 export function ProductPurchasePanel({
@@ -176,6 +172,7 @@ export function ProductPurchasePanel({
   onQuantityChange,
   onChange,
   funnelOffers = false,
+  showTrustRow = false,
 }: Props) {
   const router = useRouter();
   const { addItem, openCart } = useCart();
@@ -192,7 +189,7 @@ export function ProductPurchasePanel({
   const ctaLabel = useMemo(
     () =>
       funnelOffers
-        ? `اطلبي الآن — ${formatPrice(displayTotal)}`
+        ? "اطلبي الآن — الدفع عند الاستلام"
         : `ابدئي روتينك الآن — ${formatPrice(displayTotal)}`,
     [displayTotal, funnelOffers],
   );
@@ -332,10 +329,10 @@ export function ProductPurchasePanel({
           أضيفي للسلة — أكملي روتينك ({quantity}{" "}
           {form === "serum" ? "عبوة" : "علبة"})
         </button>
-        {funnelOffers && (
+        {funnelOffers && showTrustRow ? <ProductBuyBoxTrustRow /> : null}
+        {funnelOffers && !showTrustRow && (
           <p className="mt-2.5 text-center text-[11px] font-semibold leading-relaxed text-velora-burgundy/60">
-            الدفع بالبطاقة (شحن مجاني) · الدفع عند الاستلام (+{codFee} {currencyLabel} عند
-            التوصيل)
+            اختاري طريقة الدفع في الخطوة التالية — رسوم COD تظهر مرة واحدة هناك.
           </p>
         )}
         {!funnelOffers && (

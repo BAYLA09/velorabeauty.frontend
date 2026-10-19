@@ -88,6 +88,10 @@ export function CodThankYouOrderSummary(props: Props) {
           </div>
         </dl>
 
+        <p className="mt-3 rounded-xl bg-velora-champagne/25 px-3 py-2.5 text-center text-sm font-extrabold text-velora-burgundy-dark">
+          {summary.prepareCash} {formatPrice(props.totalAed)}
+        </p>
+
         <div className="mt-3 flex items-start justify-end gap-2 border-t border-velora-burgundy/8 pt-3 text-[11px] text-velora-burgundy/65">
           <p className="text-right leading-relaxed">{summary.deliveryNote}</p>
           <CodThankYouIconFrame variant="muted" size="sm" className="mt-0.5 shrink-0">

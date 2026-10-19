@@ -19,7 +19,19 @@ function cityAgeLine(review: TestimonialReview) {
 export function TestimonialReviewCard({ review, featured, layout = "default" }: Props) {
   if (layout === "pdp") {
     return (
-      <article className="flex h-full flex-col rounded-[1.25rem] border border-velora-burgundy/10 bg-white p-5 shadow-sm sm:p-6">
+      <article className="flex h-full flex-col overflow-hidden rounded-[1.25rem] border border-velora-burgundy/10 bg-white shadow-sm">
+        {review.imageSrc ? (
+          <div className="relative aspect-[4/5] w-full bg-velora-cream-dark">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={review.imageSrc}
+              alt=""
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        ) : null}
+        <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="mb-4 flex items-start justify-between gap-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-velora-cream-dark px-2.5 py-1 text-[10px] font-bold text-velora-burgundy-dark">
             <IconCheckCircle className="h-3 w-3 shrink-0 opacity-80" aria-hidden />
@@ -39,6 +51,7 @@ export function TestimonialReviewCard({ review, featured, layout = "default" }: 
           </div>
           <TestimonialAvatar name={review.name} imageSrc={review.imageSrc} size="sm" />
         </footer>
+        </div>
       </article>
     );
   }

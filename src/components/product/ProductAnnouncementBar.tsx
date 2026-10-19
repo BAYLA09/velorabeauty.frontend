@@ -5,7 +5,7 @@ export function ProductAnnouncementBar() {
     <div className="bg-velora-burgundy text-velora-cream">
       <div className="mx-auto flex min-h-9 max-w-6xl items-center justify-center gap-2 px-4 py-2 text-center text-xs font-extrabold sm:text-sm">
         <IconTruck className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-        <span>توصيل داخل الإمارات — بطاقة أو دفع عند الاستلام</span>
+        <span>توصيل 2–4 أيام داخل الإمارات · الدفع عند الاستلام</span>
       </div>
     </div>
   );

@@ -94,7 +94,7 @@ export function ProductTrustBar({
           {items.map((item) => (
             <div
               key={item.title}
-              className={`flex items-center gap-3 sm:gap-3.5 ${item.subEmphasis && isLarge ? "sm:col-span-1" : ""}`}
+              className="flex items-center gap-3 sm:gap-3.5"
             >
               <div
                 className={
@@ -125,8 +125,8 @@ export function ProductTrustBar({
                 </p>
                 <p
                   className={
-                    item.subEmphasis && isLarge
-                      ? "mt-0.5 text-[13px] font-black leading-snug text-velora-champagne sm:text-base"
+                    item.subEmphasis
+                      ? "mt-0.5 text-[12px] font-black leading-snug text-velora-champagne sm:text-[15px]"
                       : isLarge
                         ? "mt-0.5 text-[11px] font-semibold text-velora-cream/65 sm:text-xs"
                         : "text-[9px] text-velora-cream/60 sm:text-[10px]"

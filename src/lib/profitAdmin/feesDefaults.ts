@@ -5,7 +5,7 @@ export const DEFAULT_FEE_CONFIG = {
   products: {
     /** SKU vitaminamin — Eye serum with vitamin E */
     eyeSerum: 3,
-    /** SKU WHITEAMIN — Skin Whitening Gummies */
+    /** SKU WHITEAMIN — skin gummies */
     skinGummies: 7.47,
     hairGummies: 6.1,
   },
