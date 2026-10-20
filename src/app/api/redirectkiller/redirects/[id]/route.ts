@@ -4,12 +4,14 @@ import { requireAdminMutation } from "@/lib/redirectkiller/apiHelpers";
 import {
   deleteAdRedirect,
   getAdRedirectById,
+  getAdRedirectBySlug,
   updateAdRedirect,
 } from "@/lib/redirectkiller/redirectRepository";
 import {
   validateInternalDestination,
   wouldRedirectLoop,
 } from "@/lib/redirectkiller/validateDestination";
+import { normalizeRedirectSlug } from "@/lib/redirectkiller/validateSlug";
 import { getSiteUrl } from "@/lib/siteUrl";
 
 export const runtime = "nodejs";
@@ -39,11 +41,24 @@ export async function PATCH(request: NextRequest, context: Ctx) {
     return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
   }
 
-  let body: { destinationPath?: string; enabled?: boolean };
+  let body: { slug?: string; destinationPath?: string; enabled?: boolean };
   try {
     body = (await request.json()) as typeof body;
   } catch {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  }
+
+  let slug = existing.slug;
+  if (body.slug !== undefined) {
+    const normalized = normalizeRedirectSlug(String(body.slug));
+    if (!normalized) {
+      return NextResponse.json({ ok: false, error: "invalid_slug" }, { status: 400 });
+    }
+    const taken = getAdRedirectBySlug(normalized);
+    if (taken && taken.id !== existing.id) {
+      return NextResponse.json({ ok: false, error: "slug_exists" }, { status: 409 });
+    }
+    slug = normalized;
   }
 
   let destinationPath = existing.destinationPath;
@@ -52,14 +67,14 @@ export async function PATCH(request: NextRequest, context: Ctx) {
     if (!destCheck.ok) {
       return NextResponse.json({ ok: false, error: destCheck.reason }, { status: 400 });
     }
-    if (wouldRedirectLoop(destCheck.path, existing.slug)) {
+    if (wouldRedirectLoop(destCheck.path, slug)) {
       return NextResponse.json({ ok: false, error: "redirect_loop" }, { status: 400 });
     }
     destinationPath = destCheck.path;
   }
 
   const enabled = body.enabled !== undefined ? Boolean(body.enabled) : existing.enabled;
-  const updated = updateAdRedirect(id, { destinationPath, enabled });
+  const updated = updateAdRedirect(id, { slug, destinationPath, enabled });
   return NextResponse.json({ ok: true, redirect: serialize(updated!) });
 }
 

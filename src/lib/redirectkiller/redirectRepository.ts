@@ -94,19 +94,20 @@ export function createAdRedirect(input: {
 
 export function updateAdRedirect(
   id: string,
-  patch: { destinationPath?: string; enabled?: boolean },
+  patch: { slug?: string; destinationPath?: string; enabled?: boolean },
 ): AdRedirectRecord | null {
   ensureRedirectsTable();
   const existing = getAdRedirectById(id);
   if (!existing) return null;
+  const slug = patch.slug ?? existing.slug;
   const destinationPath = patch.destinationPath ?? existing.destinationPath;
   const enabled = patch.enabled ?? existing.enabled;
   const now = new Date().toISOString();
   getDb()
     .prepare(
-      `UPDATE ad_redirects SET destination_path = ?, enabled = ?, updated_at = ? WHERE id = ?`,
+      `UPDATE ad_redirects SET slug = ?, destination_path = ?, enabled = ?, updated_at = ? WHERE id = ?`,
     )
-    .run(destinationPath, enabled ? 1 : 0, now, id);
+    .run(slug, destinationPath, enabled ? 1 : 0, now, id);
   return getAdRedirectById(id);
 }
 
