@@ -122,6 +122,8 @@ export function ProductPageClient({ product, allProducts }: Props) {
             <ProductVideoStoriesStrip productSlug={product.slug} />
           </div>
 
+          <ProductPagePainNarrative page={page} />
+
           {scrollImages.problem ? (
             <div className="py-4 sm:py-5">
               <ProductPdpStackedImage
@@ -131,7 +133,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
             </div>
           ) : null}
 
-          <ProductPagePainNarrative page={page} />
           <ProductPageFormulaMarketing page={page} />
 
           {scrollImages.timeline ? (
