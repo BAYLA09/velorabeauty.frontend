@@ -10,7 +10,7 @@ export const WARM_TEE_SLUG = "warm";
 export const WARM_TEE_SKU = "WARMTEE";
 export const WARM_TEE_PRICE_AED = 79;
 
-export const WARM_TEE_IMAGE_SRC = "/images/products/warm-tee.svg";
+export const WARM_TEE_IMAGE_SRC = "/images/products/warm-tee.webp?v=20261020";
 
 export const WARM_TEE_NAME_AR = "تيشيرت أسود سادة";
 export const WARM_TEE_NAME_EN = "Plain Black T-Shirt";
