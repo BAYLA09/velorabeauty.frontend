@@ -1,32 +1,9 @@
 import { processLeadWebhook, processOrderWebhook } from "@/lib/codNetwork/applyWebhook";
 import { parseLeadWebhookBody, parseOrderWebhookBody } from "@/lib/codNetwork/parseWebhook";
+import { fetchSellerJson } from "@/lib/codNetwork/sellerApiClient";
 
-const DEFAULT_API_BASE = "https://api.cod.network";
-
-function apiBase(): string {
-  return process.env.COD_NETWORK_API_BASE?.trim().replace(/\/$/, "") || DEFAULT_API_BASE;
-}
-
-function apiToken(): string | null {
-  return process.env.COD_NETWORK_API_TOKEN?.trim() || null;
-}
-
-async function fetchSellerJson(path: string): Promise<unknown> {
-  const token = apiToken();
-  if (!token) throw new Error("missing_api_token");
-  const res = await fetch(`${apiBase()}${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-    },
-    signal: AbortSignal.timeout(25_000),
-  });
-  const text = await res.text();
-  if (!res.ok) {
-    throw new Error(`cod_network_api_${res.status}:${text.slice(0, 200)}`);
-  }
-  return JSON.parse(text) as unknown;
-}
+export { createSellerLead, isCodNetworkApiConfigured } from "@/lib/codNetwork/sellerApiClient";
+export type { SellerLeadCreatePayload } from "@/lib/codNetwork/sellerApiClient";
 
 /** Best-effort poll — paths may vary; see COD Network Seller API docs. */
 export async function refreshStatusesFromCodNetworkApi(): Promise<{
@@ -75,8 +52,4 @@ export async function refreshStatusesFromCodNetworkApi(): Promise<{
   }
 
   return { leadsProcessed, ordersProcessed, errors };
-}
-
-export function isCodNetworkApiConfigured(): boolean {
-  return Boolean(apiToken());
 }

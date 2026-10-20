@@ -565,6 +565,60 @@ export function updateCodOrderStatusFromSheet(
   return updateCodOrderStatusFromInbound(orderId, status, null);
 }
 
+export type CodNetworkPushStatus = "sent" | "failed" | "skipped";
+
+export type OrderCodNetworkPushState = {
+  leadId: string | null;
+  pushStatus: CodNetworkPushStatus | null;
+  pushError: string | null;
+  pushAttemptedAt: string | null;
+};
+
+export function getOrderCodNetworkPushState(orderId: string): OrderCodNetworkPushState {
+  const row = getDb()
+    .prepare(
+      `SELECT cod_network_lead_id, cod_network_push_status, cod_network_push_error, cod_network_push_attempted_at
+       FROM orders WHERE id = ?`,
+    )
+    .get(orderId) as
+    | {
+        cod_network_lead_id?: string | null;
+        cod_network_push_status?: string | null;
+        cod_network_push_error?: string | null;
+        cod_network_push_attempted_at?: string | null;
+      }
+    | undefined;
+  if (!row) {
+    return { leadId: null, pushStatus: null, pushError: null, pushAttemptedAt: null };
+  }
+  const status = row.cod_network_push_status?.trim() as CodNetworkPushStatus | undefined;
+  const pushStatus =
+    status === "sent" || status === "failed" || status === "skipped" ? status : null;
+  return {
+    leadId: row.cod_network_lead_id?.trim() || null,
+    pushStatus,
+    pushError: row.cod_network_push_error?.trim() || null,
+    pushAttemptedAt: row.cod_network_push_attempted_at?.trim() || null,
+  };
+}
+
+export function recordCodNetworkPushAttempt(
+  orderId: string,
+  input: { status: CodNetworkPushStatus; error: string | null; leadId?: string | null },
+): void {
+  const at = new Date().toISOString();
+  getDb()
+    .prepare(
+      `UPDATE orders SET
+        cod_network_push_status = ?,
+        cod_network_push_error = ?,
+        cod_network_push_attempted_at = ?,
+        cod_network_lead_id = COALESCE(?, cod_network_lead_id)
+       WHERE id = ?`,
+    )
+    .run(input.status, input.error, at, input.leadId ?? null, orderId);
+}
+
 export function linkCodNetworkIds(
   orderId: string,
   leadId: string | null,
