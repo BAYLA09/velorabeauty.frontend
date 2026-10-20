@@ -1,4 +1,3 @@
-import { BundleSection } from "@/components/BundleSection";
 import { images } from "@/config/images";
 import { FaqSection } from "@/components/FaqSection";
 import { FinalCtaSection } from "@/components/FinalCtaSection";
@@ -23,7 +22,6 @@ export default function Home() {
       <main>
         <ProductIntroSection />
         <ProductShowcaseSection />
-        <BundleSection />
         <WhyVeloraSection />
         <TestimonialsSection />
         <HowToOrderSection />

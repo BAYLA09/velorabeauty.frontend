@@ -1,3 +1,4 @@
+import { isRetiredBundleImageSrc } from "@/config/retiredBundleImage";
 import type { BundleQuantity } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { getMerchandiseAedForLineQuantity } from "@/config/pricing";
@@ -18,8 +19,10 @@ export function getCheckoutProductImage(slug: string): string | undefined {
   const product = getStoreProductBySlug(slug);
   if (!product) return undefined;
   const homeSrc = product.image.src?.trim();
-  if (homeSrc) return homeSrc;
-  return product.pageImage.src?.trim() || undefined;
+  if (homeSrc && !isRetiredBundleImageSrc(homeSrc)) return homeSrc;
+  const pdpSrc = product.pageImage.src?.trim();
+  if (pdpSrc && !isRetiredBundleImageSrc(pdpSrc)) return pdpSrc;
+  return undefined;
 }
 
 export function bundleOfferLabel(quantity: BundleQuantity): string {

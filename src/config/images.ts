@@ -18,10 +18,6 @@ export const images = {
       src: "/images/products/eye-serum.webp?v=20261007",
       placeholder: "[ضع صورة السيروم هنا]",
     },
-    bundle: {
-      src: "/images/products/bundle.webp?v=20261007",
-      placeholder: "[ضع صورة المجموعة هنا]",
-    },
   },
   /** صفحات المنتج (PDP) — placeholders حتى تزيدي صور مخصّصة
    * formulaSectionImageSrc: صورة تحت قسم التركيبة

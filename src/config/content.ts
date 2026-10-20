@@ -3,7 +3,6 @@ import { codFee, currencyLabel, formatPrice } from "./pricing";
 export const navigation = [
   { label: "الرئيسية", href: "/" },
   { label: "المنتجات", href: "/#products" },
-  { label: "المجموعة", href: "/#bundle" },
   { label: "الأسئلة الشائعة", href: "/#faq" },
 ] as const;
 
@@ -11,10 +10,10 @@ export const hero = {
   headline: "جمالك، بطابعٍ مختلف.",
   subheadline:
     "ثلاث عنايات صُممت لترافق روتينك اليومي، من الشعر إلى البشرة ومحيط العين.",
-  primaryCta: "اكتشفي المجموعة",
+  primaryCta: "اكتشفي المنتجات",
   secondaryCta: "تصفحي المنتجات",
-  primaryHref: "#bundle",
-  secondaryHref: "#products",
+  primaryHref: "#products",
+  secondaryHref: "#faq",
   trustBadges: [
     { label: "مكونات طبيعية", icon: "leaf" as const },
     { label: "جودة عالية", icon: "diamond" as const },
@@ -81,7 +80,7 @@ export const faq = {
     {
       question: "كيف أختار المنتج المناسب لي؟",
       answer:
-        "اختاري العناية التي تناسب احتياجك: الشعر، البشرة، أو محيط العين — أو المجموعة الكاملة لروتين متكامل.",
+        "اختاري العناية التي تناسب احتياجك: الشعر، البشرة، أو محيط العين — كل منتج له صفحته وعروض الكمية الخاصة به.",
     },
     {
       question: "هل يمكنني طلب أكثر من منتج؟",

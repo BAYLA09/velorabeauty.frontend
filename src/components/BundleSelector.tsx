@@ -17,7 +17,7 @@ type Props = {
 const bundleLabels: Record<BundleQuantity, string> = {
   1: "منتج واحد",
   2: "منتجان",
-  3: "المجموعة الكاملة",
+  3: "3 منتجات · أفضل قيمة",
 };
 
 export function BundleSelector({ selected, onChange }: Props) {

@@ -23,6 +23,16 @@ describe("getProductGalleryImageSrcs", () => {
     ]);
   });
 
+  it("skips retired bundle composite image", () => {
+    const srcs = getProductGalleryImageSrcs({
+      placeholder: "x",
+      src: "/images/products/bundle.webp?v=1",
+      storySrc: "/images/products/pdp/hair-story.webp",
+    });
+    assert.equal(srcs.includes("/images/products/bundle.webp?v=1"), false);
+    assert.ok(srcs.length > 0);
+  });
+
   it("pads to four by reusing available assets", () => {
     const srcs = getProductGalleryImageSrcs({
       placeholder: "x",

@@ -1,4 +1,5 @@
 import { images } from "@/config/images";
+import { isRetiredBundleImageSrc } from "@/config/retiredBundleImage";
 import type { BundleQuantity } from "@/config/pricing";
 import { getProductBySlug } from "@/lib/productCatalog";
 
@@ -13,21 +14,22 @@ export function resolveOrderProductImage(
   productSlug: string,
   lineQuantity = 1,
 ): { src: string; alt: string } | null {
-  if (productSlug === "velora-offer") {
-    const src = images.products.bundle.src;
-    return src ? { src, alt: "مجموعة فيلورا" } : null;
+  if (productSlug === "velora-offer" || productSlug === "velora-mixed-cart") {
+    const src = images.products.hair.src?.trim();
+    return src ? { src, alt: "فيلورا" } : null;
   }
   const product = getProductBySlug(productSlug);
   if (!product) return null;
 
   const qty = lineBundleQuantity(lineQuantity);
   const slot = product.pageImage.upsellSlotSrc;
-  const src =
-    slot?.[qty] ??
-    slot?.[1] ??
-    product.pageImage.upsellSrc ??
-    product.image.src?.trim() ??
-    "";
+  const candidates = [
+    slot?.[qty],
+    slot?.[1],
+    product.pageImage.upsellSrc,
+    product.image.src?.trim(),
+  ];
+  const src = candidates.find((c) => c?.trim() && !isRetiredBundleImageSrc(c))?.trim() ?? "";
 
   if (!src) return null;
   return { src, alt: product.name ?? product.image.placeholder ?? "منتج فيلورا" };

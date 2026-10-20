@@ -1,3 +1,4 @@
+import { isRetiredBundleImageSrc } from "@/config/retiredBundleImage";
 import type { ProductImageRef } from "@/lib/productCatalog";
 
 const GALLERY_SLOT_COUNT = 4;
@@ -22,7 +23,7 @@ export function getProductGalleryImageSrcs(
   const unique: string[] = [];
   for (const raw of pool) {
     const s = raw?.trim();
-    if (!s) continue;
+    if (!s || isRetiredBundleImageSrc(s)) continue;
     if (!unique.includes(s)) unique.push(s);
   }
 
