@@ -121,9 +121,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
 
           <div className="mt-8 border-t border-velora-burgundy/8 pt-6">
             <ProductVideoStoriesStrip productSlug={product.slug} />
-            <div className="mt-6 sm:mt-8">
-              <ProductTrustBar prominent />
-            </div>
           </div>
 
           <ProductPageLongSections
