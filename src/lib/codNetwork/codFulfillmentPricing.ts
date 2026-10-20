@@ -82,7 +82,7 @@ export function allocateCodApiLineTotals(
 
   const rawShares = merch.map((m) => (fee * m) / sumMerch);
   const feeParts = rawShares.map((s) => Math.floor(s));
-  let remainder = fee - feeParts.reduce((a, b) => a + b, 0);
+  const remainder = fee - feeParts.reduce((a, b) => a + b, 0);
   const fractional = rawShares
     .map((s, i) => ({ i, frac: s - Math.floor(s) }))
     .sort((a, b) => b.frac - a.frac);
