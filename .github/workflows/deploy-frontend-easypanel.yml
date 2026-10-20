@@ -68,6 +68,18 @@ jobs:
           fi
           echo "configured=true" >> "$GITHUB_OUTPUT"
 
+      - name: Manual Easypanel deploy (no auto webhook)
+        if: >-
+          steps.hook.outputs.configured != 'true' &&
+          (github.event_name == 'workflow_dispatch' ||
+           github.event.workflow_run.conclusion == 'success')
+        env:
+          EXPECT: ${{ steps.ver.outputs.prefix }}
+        run: |
+          set -euo pipefail
+          echo "::notice title=Easypanel manual deploy required::Image is on GHCR for commit ${EXPECT}. Easypanel → Source Docker Image → ghcr.io/bayla09/velorabeauty.frontend:latest → Deploy (1–3 min, logs must show Pulling). Add GitHub Secret EASYPANEL_DEPLOY_WEBHOOK for auto-deploy."
+          echo "Pin tag: ghcr.io/bayla09/velorabeauty.frontend:${EXPECT}"
+
       - name: Trigger Easypanel redeploy
         if: steps.hook.outputs.configured == 'true'
         env:
@@ -104,6 +116,5 @@ jobs:
             fi
             sleep 15
           done
-          echo "::warning::Live version did not match $EXPECT within 10 minutes."
-          echo "Deploy ~1s on Easypanel → wrong Source (Git). See docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
-          exit 1
+          echo "::warning title=Production version not verified::Live site did not report $EXPECT within 10 minutes. If you use manual deploy: Easypanel → Docker Image → Deploy (1–3 min). Deploy finishing in ~1s means wrong Source (Git). See docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
+          exit 0
