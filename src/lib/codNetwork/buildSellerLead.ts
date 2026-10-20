@@ -1,6 +1,6 @@
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { buildCodApiLineItems, lineItemsForCodFulfillment } from "@/lib/codNetwork/codFulfillmentPricing";
-import { mapEmirateToCodNetworkCity } from "@/lib/codNetwork/emirateCity";
+import { resolveCodNetworkLeadAddress } from "@/lib/codNetwork/leadAddress";
 import {
   orderLinesPushableToCodNetwork,
   resolveCodNetworkSkuForSlug,
@@ -43,13 +43,15 @@ export function buildSellerLeadBodyFromOrder(
     };
   });
 
+  const { address, city } = resolveCodNetworkLeadAddress(order);
+
   return {
     body: {
       phone: order.phone,
       name: order.customerName,
       country: "AE",
-      address: order.address,
-      city: mapEmirateToCodNetworkCity(order.emirate),
+      address,
+      city,
       items,
     },
   };

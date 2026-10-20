@@ -65,9 +65,11 @@ export function CodThankYouOrderSummary(props: Props) {
       </div>
 
       <div className="mt-4 rounded-2xl border border-velora-burgundy/10 bg-white p-4 text-right text-sm shadow-sm">
-        <p className="text-xs leading-relaxed text-velora-burgundy/65">
-          {props.emirate} · {props.address}
-        </p>
+        {(props.emirate.trim() || props.address.trim()) && (
+          <p className="text-xs leading-relaxed text-velora-burgundy/65">
+            {[props.emirate.trim(), props.address.trim()].filter(Boolean).join(" · ")}
+          </p>
+        )}
 
         <dl className="mt-4 space-y-2 border-t border-velora-burgundy/10 pt-3 text-xs">
           <div className="flex justify-between gap-2">

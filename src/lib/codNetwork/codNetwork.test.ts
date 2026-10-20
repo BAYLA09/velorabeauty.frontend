@@ -5,6 +5,11 @@ import { extractStorefrontOrderIdFromInputs, parseLeadWebhookBody, parseOrderWeb
 import { phonesMatch, uaePhoneMatchKey } from "@/lib/codNetwork/phoneMatch";
 import { buildSellerLeadBodyFromOrder } from "@/lib/codNetwork/buildSellerLead";
 import { mapEmirateToCodNetworkCity } from "@/lib/codNetwork/emirateCity";
+import {
+  COD_NETWORK_ADDRESS_CONFIRM_BY_PHONE,
+  COD_NETWORK_CITY_FALLBACK,
+  resolveCodNetworkLeadAddress,
+} from "@/lib/codNetwork/leadAddress";
 import { createSellerLead } from "@/lib/codNetwork/sellerApiClient";
 import { mapCodNetworkLeadStatus, mapCodNetworkOrderStatus } from "@/lib/codNetwork/statusMapping";
 describe("COD Network webhook secret", () => {
@@ -107,9 +112,22 @@ describe("COD Network seller lead", () => {
     assert.ok(built && "body" in built);
     assert.equal(built.body.country, "AE");
     assert.equal(built.body.city, "Sharjah");
+    assert.equal(built.body.address, "Al Majaz");
     assert.equal(built.body.items[0].sku, "vitaminamin");
     assert.equal(built.body.items[0].quantity, 1);
     assert.equal(built.body.items[0].price, 219);
+  });
+
+  it("uses phone-confirm fallbacks when address and emirate are empty", () => {
+    const order = { ...baseOrder, emirate: "", address: "" };
+    const loc = resolveCodNetworkLeadAddress(order);
+    assert.equal(loc.city, COD_NETWORK_CITY_FALLBACK);
+    assert.equal(loc.address, COD_NETWORK_ADDRESS_CONFIRM_BY_PHONE);
+
+    const built = buildSellerLeadBodyFromOrder(order, null);
+    assert.ok(built && "body" in built);
+    assert.equal(built.body.city, COD_NETWORK_CITY_FALLBACK);
+    assert.equal(built.body.address, COD_NETWORK_ADDRESS_CONFIRM_BY_PHONE);
   });
 
   it("createSellerLead uses mocked fetch only", async () => {

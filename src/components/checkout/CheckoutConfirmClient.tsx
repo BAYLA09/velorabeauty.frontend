@@ -7,7 +7,6 @@ import {
   getCheckoutAttributionForOrder,
 } from "@/lib/attribution/checkoutAttributionClient";
 import { CheckoutBackActions } from "@/components/checkout/CheckoutBackActions";
-import { CheckoutEmailMarketingFields } from "@/components/checkout/CheckoutEmailMarketingFields";
 import {
   clearStoredCheckoutExternalId,
   resolveCheckoutExternalId,
@@ -63,9 +62,8 @@ export function CheckoutConfirmClient({
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
-  const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const { externalCheckoutId, syncNow } = useCaptureBackendCheckout({
+  const { externalCheckoutId } = useCaptureBackendCheckout({
     email,
     marketingConsent,
     customerName: name,
@@ -96,7 +94,6 @@ export function CheckoutConfirmClient({
     setError(null);
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
-    const trimmedAddress = address.trim();
     if (!trimmedName || !trimmedPhone) {
       setError("أكملي الاسم ورقم الهاتف.");
       return;
@@ -104,10 +101,6 @@ export function CheckoutConfirmClient({
     const phoneCheck = validateUaeMobilePhone(trimmedPhone);
     if (!phoneCheck.ok) {
       setError(phoneCheck.error);
-      return;
-    }
-    if (isCod && !trimmedAddress) {
-      setError("أدخلي عنوان التوصيل.");
       return;
     }
 
@@ -126,8 +119,12 @@ export function CheckoutConfirmClient({
           email: email.trim() || undefined,
           marketingConsent,
           externalCheckoutId: resolveCheckoutExternalId(externalCheckoutId),
-          emirate: "دبي",
-          address: isCod ? trimmedAddress : "يُؤكَّد بعد التواصل",
+          ...(isCod
+            ? {}
+            : {
+                emirate: "دبي",
+                address: "يُؤكَّد بعد التواصل",
+              }),
           ...(cartItemsParam ? { cartLines } : {}),
           attribution: getCheckoutAttributionForOrder(),
         }),
@@ -187,7 +184,7 @@ export function CheckoutConfirmClient({
             </h1>
             <p className="mt-2 text-sm text-neutral-500">
               {isCod
-                ? "الاسم، الهاتف، والعنوان — الدفع عند الاستلام."
+                ? "الاسم ورقم الهاتف — الدفع عند الاستلام."
                 : "أدخلي بياناتك — نرسل لك رابط الدفع الآمن بعد التأكيد."}
             </p>
           </header>
@@ -223,31 +220,6 @@ export function CheckoutConfirmClient({
                 {uaePhoneHint}
               </p>
             </label>
-            {isCod && (
-              <label className="block">
-                <span className={checkoutLabelClass}>العنوان</span>
-                <textarea
-                  required
-                  rows={3}
-                  value={address}
-                  onChange={(ev) => setAddress(ev.target.value)}
-                  placeholder="الإمارة، المنطقة، الشارع، رقم المبنى / الشقة…"
-                  className={`${checkoutInputClass} resize-none`}
-                  autoComplete="street-address"
-                />
-              </label>
-            )}
-
-            {isCod && (
-              <CheckoutEmailMarketingFields
-                email={email}
-                setEmail={setEmail}
-                marketingConsent={marketingConsent}
-                setMarketingConsent={setMarketingConsent}
-                onEmailBlur={syncNow}
-              />
-            )}
-
             {error && (
               <p className="text-sm font-medium text-rose-700" role="alert">
                 {error}
