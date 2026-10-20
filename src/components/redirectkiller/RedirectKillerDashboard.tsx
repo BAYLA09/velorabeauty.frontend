@@ -30,6 +30,94 @@ function apiHeaders(): HeadersInit {
     : { "Content-Type": "application/json" };
 }
 
+function formatApiError(code: string | undefined): string {
+  switch (code) {
+    case "invalid_slug":
+      return "Invalid slug — use lowercase letters, numbers, and hyphens only.";
+    case "slug_exists":
+      return "That ad slug is already in use.";
+    case "redirect_loop":
+      return "Destination cannot point back to the same /ads/ link.";
+    case "not_allowed":
+      return "That landing path is not allowed.";
+    case "invalid_path":
+      return "Invalid landing path — must start with /.";
+    default:
+      return code ?? "Something went wrong.";
+  }
+}
+
+function resolveDestination(
+  presetValue: string,
+  customValue: string,
+  presets: Preset[],
+): string {
+  const custom = customValue.trim();
+  if (custom) return custom;
+  return presetValue;
+}
+
+type DestinationFieldsProps = {
+  presets: Preset[];
+  destOptions: string[];
+  presetValue: string;
+  customValue: string;
+  onPresetChange: (path: string) => void;
+  onCustomChange: (path: string) => void;
+  idPrefix: string;
+};
+
+function DestinationFields({
+  presets,
+  destOptions,
+  presetValue,
+  customValue,
+  onPresetChange,
+  onCustomChange,
+  idPrefix,
+}: DestinationFieldsProps) {
+  return (
+    <div className="space-y-2">
+      <label className="block text-xs text-slate-400" htmlFor={`${idPrefix}-preset`}>
+        Landing page (where the visitor ends up)
+        <select
+          id={`${idPrefix}-preset`}
+          value={customValue.trim() ? "" : presetValue}
+          onChange={(e) => {
+            onPresetChange(e.target.value);
+            onCustomChange("");
+          }}
+          disabled={Boolean(customValue.trim())}
+          className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm disabled:opacity-50"
+        >
+          {presets.map((p) => (
+            <option key={p.path} value={p.path}>
+              {p.label} — {p.path}
+            </option>
+          ))}
+          {destOptions
+            .filter((p) => !presets.some((pr) => pr.path === p))
+            .map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+        </select>
+      </label>
+      <label className="block text-xs text-slate-400" htmlFor={`${idPrefix}-custom`}>
+        Or custom internal path
+        <input
+          id={`${idPrefix}-custom`}
+          value={customValue}
+          onChange={(e) => onCustomChange(e.target.value)}
+          placeholder="/lp/snap/hair-gummies"
+          className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+        />
+      </label>
+    </div>
+  );
+}
+
 export function RedirectKillerDashboard() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [configError, setConfigError] = useState<string | null>(null);
@@ -43,12 +131,14 @@ export function RedirectKillerDashboard() {
   const [filterEnabled, setFilterEnabled] = useState<"all" | "yes" | "no">("all");
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
+  const [newDest, setNewDest] = useState("/lp/snap/hair-gummies");
+  const [newCustomDest, setNewCustomDest] = useState("");
   const [newSlug, setNewSlug] = useState("");
-  const [newDest, setNewDest] = useState("/products/hair-gummies");
-  const [customDest, setCustomDest] = useState("");
 
   const [editId, setEditId] = useState<string | null>(null);
+  const [editSlug, setEditSlug] = useState("");
   const [editDest, setEditDest] = useState("");
+  const [editCustomDest, setEditCustomDest] = useState("");
 
   const loadSession = useCallback(async () => {
     const res = await fetch("/api/redirectkiller/auth/session", { credentials: "include" });
@@ -59,9 +149,6 @@ export function RedirectKillerDashboard() {
     }
     const data = (await res.json()) as { authenticated?: boolean; destinations?: string[] };
     setAuthenticated(Boolean(data.authenticated));
-    if (data.destinations) {
-      /* destinations available for custom validation hints */
-    }
   }, []);
 
   const loadRedirects = useCallback(async () => {
@@ -95,6 +182,13 @@ export function RedirectKillerDashboard() {
     redirects.forEach((r) => paths.add(r.destinationPath));
     return [...paths].sort();
   }, [presets, redirects]);
+
+  const newPreview = useMemo(() => {
+    const slug = newSlug.trim().toLowerCase() || "your-slug";
+    const dest =
+      resolveDestination(newDest, newCustomDest, presets) || "/landing-page";
+    return { slug, dest };
+  }, [newSlug, newDest, newCustomDest, presets]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -138,7 +232,7 @@ export function RedirectKillerDashboard() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setStatusMsg(null);
-    const destinationPath = customDest.trim() || newDest;
+    const destinationPath = resolveDestination(newDest, newCustomDest, presets);
     setBusy(true);
     try {
       const res = await fetch("/api/redirectkiller/redirects", {
@@ -149,11 +243,11 @@ export function RedirectKillerDashboard() {
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) {
-        setStatusMsg(data.error ?? "Could not create redirect");
+        setStatusMsg(formatApiError(data.error));
         return;
       }
       setNewSlug("");
-      setCustomDest("");
+      setNewCustomDest("");
       setStatusMsg("Redirect created.");
       await loadRedirects();
     } finally {
@@ -161,19 +255,33 @@ export function RedirectKillerDashboard() {
     }
   }
 
+  function startEdit(row: RedirectRow) {
+    setEditId(row.id);
+    setEditSlug(row.slug);
+    const isPreset = presets.some((p) => p.path === row.destinationPath);
+    if (isPreset || destOptions.includes(row.destinationPath)) {
+      setEditDest(row.destinationPath);
+      setEditCustomDest("");
+    } else {
+      setEditDest(presets[0]?.path ?? "/lp/snap/hair-gummies");
+      setEditCustomDest(row.destinationPath);
+    }
+  }
+
   async function saveEdit(row: RedirectRow) {
     setStatusMsg(null);
+    const destinationPath = resolveDestination(editDest, editCustomDest, presets);
     setBusy(true);
     try {
       const res = await fetch(`/api/redirectkiller/redirects/${row.id}`, {
         method: "PATCH",
         credentials: "include",
         headers: apiHeaders(),
-        body: JSON.stringify({ destinationPath: editDest }),
+        body: JSON.stringify({ slug: editSlug, destinationPath }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) {
-        setStatusMsg(data.error ?? "Update failed");
+        setStatusMsg(formatApiError(data.error));
         return;
       }
       setEditId(null);
@@ -286,7 +394,10 @@ export function RedirectKillerDashboard() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-lg font-semibold text-white">Redirect Killer</h1>
-            <p className="text-xs text-slate-400">Public links: /ads/your-slug</p>
+            <p className="text-xs text-slate-400">
+              Ad link <span className="font-mono text-slate-300">/ads/…</span> → landing page on
+              your site
+            </p>
           </div>
           <button
             type="button"
@@ -308,51 +419,43 @@ export function RedirectKillerDashboard() {
 
         <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
           <h2 className="text-base font-semibold">Create redirect</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Pick the landing page first, then the short ad slug you will paste in Snapchat / Meta.
+          </p>
           <form onSubmit={handleCreate} className="mt-4 grid gap-4 md:grid-cols-2">
-            <label className="block text-xs text-slate-400">
-              Slug (unique)
-              <input
-                value={newSlug}
-                onChange={(e) => setNewSlug(e.target.value)}
-                placeholder="hair-ad"
-                pattern="[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
-                required
+            <div className="md:col-span-2">
+              <DestinationFields
+                idPrefix="create"
+                presets={presets}
+                destOptions={destOptions}
+                presetValue={newDest}
+                customValue={newCustomDest}
+                onPresetChange={setNewDest}
+                onCustomChange={setNewCustomDest}
               />
-            </label>
-            <label className="block text-xs text-slate-400">
-              Destination
-              <select
-                value={newDest}
-                onChange={(e) => {
-                  setNewDest(e.target.value);
-                  setCustomDest("");
-                }}
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
-              >
-                {presets.map((p) => (
-                  <option key={p.path} value={p.path}>
-                    {p.label} — {p.path}
-                  </option>
-                ))}
-                {destOptions
-                  .filter((p) => !presets.some((pr) => pr.path === p))
-                  .map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-              </select>
-            </label>
+            </div>
+
             <label className="block text-xs text-slate-400 md:col-span-2">
-              Or custom internal path
-              <input
-                value={customDest}
-                onChange={(e) => setCustomDest(e.target.value)}
-                placeholder="/lp or /products/hair-gummies"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
-              />
+              Ad link slug (public URL — what you put in the ad)
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <span className="font-mono text-sm text-slate-500">/ads/</span>
+                <input
+                  value={newSlug}
+                  onChange={(e) => setNewSlug(e.target.value)}
+                  placeholder="hair-ad"
+                  pattern="[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?"
+                  className="min-w-[12rem] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm"
+                  required
+                />
+              </div>
             </label>
+
+            <p className="md:col-span-2 rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 font-mono text-xs text-slate-400">
+              <span className="text-emerald-400/90">/ads/{newPreview.slug}</span>
+              <span className="mx-2 text-slate-600">→</span>
+              <span className="text-slate-300">{newPreview.dest}</span>
+            </p>
+
             <div className="md:col-span-2">
               <button
                 type="submit"
@@ -393,11 +496,11 @@ export function RedirectKillerDashboard() {
           </div>
 
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
+            <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="pb-2 pr-3">Slug</th>
-                  <th className="pb-2 pr-3">Destination</th>
+                  <th className="pb-2 pr-3">Ad link (/ads/…)</th>
+                  <th className="pb-2 pr-3">Lands on</th>
                   <th className="pb-2 pr-3">Status</th>
                   <th className="pb-2">Actions</th>
                 </tr>
@@ -411,45 +514,44 @@ export function RedirectKillerDashboard() {
                   </tr>
                 ) : (
                   redirects.map((row) => (
-                    <tr key={row.id} className="border-t border-slate-800">
-                      <td className="py-3 pr-3 font-mono text-emerald-300">{row.slug}</td>
+                    <tr key={row.id} className="border-t border-slate-800 align-top">
                       <td className="py-3 pr-3">
                         {editId === row.id ? (
-                          <select
-                            value={editDest}
-                            onChange={(e) => setEditDest(e.target.value)}
-                            className="w-full max-w-xs rounded border border-slate-600 bg-slate-950 px-2 py-1 text-xs"
-                          >
-                            {presets.map((p) => (
-                              <option key={p.path} value={p.path}>
-                                {p.label} — {p.path}
-                              </option>
-                            ))}
-                            {destOptions
-                              .filter(
-                                (p) =>
-                                  !presets.some((pr) => pr.path === p) && p !== editDest,
-                              )
-                              .map((p) => (
-                                <option key={p} value={p}>
-                                  {p}
-                                </option>
-                              ))}
-                            {!presets.some((p) => p.path === editDest) &&
-                            !destOptions.includes(editDest) ? (
-                              <option value={editDest}>{editDest}</option>
-                            ) : null}
-                          </select>
+                          <div className="flex flex-wrap items-center gap-1">
+                            <span className="font-mono text-xs text-slate-500">/ads/</span>
+                            <input
+                              value={editSlug}
+                              onChange={(e) => setEditSlug(e.target.value)}
+                              pattern="[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?"
+                              className="min-w-[8rem] rounded border border-slate-600 bg-slate-950 px-2 py-1 font-mono text-xs"
+                            />
+                          </div>
                         ) : (
-                          <span className="font-mono text-xs text-slate-300">{row.destinationPath}</span>
+                          <div>
+                            <span className="font-mono text-emerald-300">/ads/{row.slug}</span>
+                            <p className="mt-0.5 text-[10px] text-slate-600">{row.publicUrl}</p>
+                          </div>
                         )}
                       </td>
                       <td className="py-3 pr-3">
-                        <span
-                          className={
-                            row.enabled ? "text-emerald-400" : "text-amber-400"
-                          }
-                        >
+                        {editId === row.id ? (
+                          <DestinationFields
+                            idPrefix={`edit-${row.id}`}
+                            presets={presets}
+                            destOptions={destOptions}
+                            presetValue={editDest}
+                            customValue={editCustomDest}
+                            onPresetChange={setEditDest}
+                            onCustomChange={setEditCustomDest}
+                          />
+                        ) : (
+                          <span className="font-mono text-xs text-slate-300">
+                            {row.destinationPath}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-3">
+                        <span className={row.enabled ? "text-emerald-400" : "text-amber-400"}>
                           {row.enabled ? "Enabled" : "Disabled"}
                         </span>
                       </td>
@@ -482,13 +584,10 @@ export function RedirectKillerDashboard() {
                           ) : (
                             <button
                               type="button"
-                              onClick={() => {
-                                setEditId(row.id);
-                                setEditDest(row.destinationPath);
-                              }}
+                              onClick={() => startEdit(row)}
                               className="rounded border border-slate-600 px-2 py-1 text-xs"
                             >
-                              Edit dest
+                              Edit
                             </button>
                           )}
                           <button
