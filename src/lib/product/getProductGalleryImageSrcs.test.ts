@@ -5,6 +5,7 @@ import {
   getProductBeforeAfterHeroSrc,
   getProductCarouselImageSrcs,
   getProductGalleryImageSrcs,
+  getProductPdpScrollImages,
 } from "./getProductGalleryImageSrcs.ts";
 
 describe("getProductGalleryImageSrcs", () => {
@@ -72,6 +73,24 @@ describe("getProductCarouselImageSrcs", () => {
     assert.equal(srcs.length, 3);
     assert.deepEqual(srcs, ["/main.webp", "/story.webp", "/formula.webp"]);
     assert.equal(srcs.includes("/timeline.webp"), false);
+  });
+});
+
+describe("getProductPdpScrollImages", () => {
+  it("maps timeline, story, main, formula, and upsell fourth slot", () => {
+    const imgs = getProductPdpScrollImages({
+      placeholder: "x",
+      src: "/main.webp",
+      storySrc: "/story.webp",
+      formulaSectionImageSrc: "/formula.webp",
+      timelineSectionImageSrc: "/timeline.webp",
+      upsellSlotSrc: { 1: "/upsell-1.webp", 2: "/u2", 3: "/u3" },
+    });
+    assert.equal(imgs.beforeAfter, "/timeline.webp");
+    assert.equal(imgs.problem, "/story.webp");
+    assert.equal(imgs.productMain, "/main.webp");
+    assert.equal(imgs.storyOrFormula, "/formula.webp");
+    assert.equal(imgs.fourth, "/upsell-1.webp");
   });
 });
 

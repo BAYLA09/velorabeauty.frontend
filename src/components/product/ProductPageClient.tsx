@@ -5,10 +5,15 @@ import { trackSnapViewContent } from "@/lib/analytics/trackSnapCommerce";
 import type { BundleQuantity } from "@/config/pricing";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
-import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductFeaturePills } from "@/components/product/ProductFeaturePills";
 import { ProductMobileStickyBar } from "@/components/product/ProductMobileStickyBar";
-import { ProductPageLongSections } from "@/components/product/ProductPageLongSections";
+import {
+  ProductPageComparisonSection,
+  ProductPageFormulaMarketing,
+  ProductPagePainNarrative,
+  ProductPagePdpTail,
+  ProductPageUsageAndResults,
+} from "@/components/product/ProductPageLongSections";
 import { ProductFinalCtaSection } from "@/components/product/ProductFinalCtaSection";
 import {
   ProductPurchasePanel,
@@ -18,14 +23,14 @@ import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
 import { ProductVeloraGuaranteeBlock } from "@/components/product/ProductVeloraGuaranteeBlock";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
+import { ProductPdpStackedImage } from "@/components/product/ProductPdpStackedImage";
 import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
 import { AttributionCaptureEffect } from "@/components/attribution/AttributionCaptureEffect";
 import type { ProductWithPage } from "@/lib/productCatalog";
 import { ProductGalleryBenefitLines } from "@/components/product/ProductGalleryBenefitLines";
 import {
   getGalleryBenefitLines,
-  getProductBeforeAfterHeroSrc,
-  getProductCarouselImageSrcs,
+  getProductPdpScrollImages,
 } from "@/lib/product/getProductGalleryImageSrcs";
 
 type Props = {
@@ -38,34 +43,15 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
-  const beforeAfterHeroSrc = getProductBeforeAfterHeroSrc(product.pageImage);
-  const carouselSrcs = getProductCarouselImageSrcs(product.pageImage, product.image.src);
+  const scrollImages = getProductPdpScrollImages(product.pageImage, product.image.src);
   const galleryBenefitLines = getGalleryBenefitLines(page);
-
-  const pdpMedia = (fullWidthMobile: boolean) => (
-    <>
-      <ProductGallery
-        mainSrc={product.pageImage.src}
-        gallerySrcs={carouselSrcs}
-        fixedBeforeAfterSrc={beforeAfterHeroSrc}
-        productName={product.name}
-        placeholder={product.pageImage.placeholder}
-        laraFrame
-        fullWidthMobile={fullWidthMobile}
-      />
-      <ProductVeloraGuaranteeBlock page={page} variant="inline" />
-      <ProductGalleryBenefitLines lines={galleryBenefitLines} />
-      <ProductFeaturePills form={page.form} />
-    </>
-  );
 
   useEffect(() => {
     trackSnapViewContent({ productSlug: product.slug, valueAed: product.price });
   }, [product.slug, product.price]);
 
   const displayTotal = purchase?.total ?? cardBundlePrices[quantity];
-  const stickyCtaLabel =
-    purchase?.ctaLabel ?? "اطلبي الآن — الدفع عند الاستلام";
+  const stickyCtaLabel = purchase?.ctaLabel ?? "اطلبي الآن — الدفع عند الاستلام";
 
   return (
     <>
@@ -77,60 +63,97 @@ export function ProductPageClient({ product, allProducts }: Props) {
         className="product-typography bg-velora-cream pb-24 lg:pb-20"
         style={{ ["--header-h" as string]: "3.5rem" }}
       >
-        <div className="mx-auto max-w-lg px-4 py-4 sm:max-w-6xl sm:px-6 sm:py-6 lg:max-w-[1200px] lg:py-8">
+        <div className="mx-auto max-w-lg px-4 py-4 sm:max-w-3xl sm:px-6 sm:py-6 lg:max-w-[720px] lg:py-8">
+          {scrollImages.beforeAfter ? (
+            <ProductPdpStackedImage
+              src={scrollImages.beforeAfter}
+              alt={`${product.name} — قبل وبعد`}
+              priority
+            />
+          ) : null}
+
           <section
             id="buy-box"
-            className="scroll-mt-[var(--header-h)] sm:scroll-mt-[var(--header-h)]"
+            className="scroll-mt-[var(--header-h)] py-5 sm:py-6"
           >
-            <header className="mb-4 text-right sm:mb-5 lg:mb-6">
+            <header className="mb-4 text-right">
               <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
                 {page.headlineQuestion}
               </h1>
             </header>
 
-            <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
-              <aside className="min-w-0 lg:sticky lg:top-[calc(var(--header-h)+1rem)] lg:self-start">
-                <div className="hidden lg:block">{pdpMedia(false)}</div>
-              </aside>
+            <p className="mb-4 text-sm font-semibold tabular-nums text-velora-burgundy/75">
+              من {formatPrice(singleProductPrice)} / {unitLabel}
+            </p>
 
-              <div className="min-w-0 flex-1">
-                <div className="lg:hidden">{pdpMedia(true)}</div>
-
-                <div className="mt-4 flex min-w-0 flex-col gap-3.5 sm:mt-0 sm:gap-4">
-                  <p className="text-sm font-semibold tabular-nums text-velora-burgundy/75">
-                    من {formatPrice(singleProductPrice)} / {unitLabel}
-                  </p>
-
-                  <ProductPurchasePanel
-                    funnelOffers
-                    form={page.form}
-                    productSlug={product.slug}
-                    upsellSlotSrc={product.pageImage.upsellSlotSrc}
-                    productName={product.name}
-                    quantity={quantity}
-                    onQuantityChange={setQuantity}
-                    onChange={setPurchase}
-                    showTrustRow
-                  />
-                </div>
-              </div>
-            </div>
+            <ProductPurchasePanel
+              funnelOffers
+              form={page.form}
+              productSlug={product.slug}
+              upsellSlotSrc={product.pageImage.upsellSlotSrc}
+              productName={product.name}
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              onChange={setPurchase}
+              showTrustRow
+            />
           </section>
+
+          {scrollImages.problem ? (
+            <div className="py-4 sm:py-5">
+              <ProductPdpStackedImage
+                src={scrollImages.problem}
+                alt={`${product.name} — التحدي اليومي`}
+              />
+            </div>
+          ) : null}
+
+          <div className="space-y-4 py-4 sm:py-5">
+            <ProductGalleryBenefitLines lines={galleryBenefitLines} />
+            <ProductFeaturePills form={page.form} />
+          </div>
+
+          <ProductPagePainNarrative page={page} />
+          <ProductPageFormulaMarketing page={page} />
+
+          {scrollImages.productMain ? (
+            <div className="py-4 sm:py-5">
+              <ProductPdpStackedImage
+                src={scrollImages.productMain}
+                alt={`${product.name} — المنتج`}
+              />
+            </div>
+          ) : null}
+
+          <ProductPageUsageAndResults page={page} />
+
+          {scrollImages.storyOrFormula ? (
+            <div className="py-4 sm:py-5">
+              <ProductPdpStackedImage
+                src={scrollImages.storyOrFormula}
+                alt={`${product.name} — التركيبة والروتين`}
+              />
+            </div>
+          ) : null}
+
+          <ProductPageComparisonSection page={page} />
+
+          {scrollImages.fourth ? (
+            <div className="py-4 sm:py-5">
+              <ProductPdpStackedImage
+                src={scrollImages.fourth}
+                alt={`${product.name} — فيلورا`}
+              />
+            </div>
+          ) : null}
+
+          <ProductVeloraGuaranteeBlock page={page} variant="section" />
 
           <div className="mt-8 border-t border-velora-burgundy/8 pt-6">
             <ProductVideoStoriesStrip productSlug={product.slug} />
           </div>
 
-          <ProductPageLongSections
-            page={page}
-            productId={product.id}
-            productName={product.name}
-            marketingSpotlight={product.pageImage.marketingSpotlight}
-            formulaSectionImageSrc={product.pageImage.formulaSectionImageSrc}
-            problemSectionImageSrc={
-              product.pageImage.storySrc ?? product.pageImage.src
-            }
-          />
+          <ProductPagePdpTail page={page} productId={product.id} />
 
           <ProductFinalCtaSection
             form={page.form}
