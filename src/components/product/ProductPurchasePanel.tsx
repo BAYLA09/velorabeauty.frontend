@@ -13,7 +13,12 @@ import { useCart } from "@/context/CartProvider";
 import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { trackSnapStartCheckout } from "@/lib/analytics/trackSnapCommerce";
 import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
+import {
+  HAIR_GUMMIES_BACKORDER_CTA_LABEL,
+  isHairGummiesBackorderReservation,
+} from "@/config/hairGummiesBackorder";
 import { formatPrice, singleProductPrice, type BundleQuantity } from "@/config/pricing";
+import { HairGummiesBackorderNotice } from "@/components/product/HairGummiesBackorderNotice";
 
 const quantities: BundleQuantity[] = [1, 2, 3];
 
@@ -186,13 +191,14 @@ export function ProductPurchasePanel({
 
   const displayTotal = cardOfferPrice(quantity);
   const unitWord = form === "serum" ? "عبوة" : "علبة";
-  const ctaLabel = useMemo(
-    () =>
-      funnelOffers
-        ? "اطلبي الآن — الدفع عند الاستلام"
-        : `ابدئي روتينك الآن — ${formatPrice(displayTotal)}`,
-    [displayTotal, funnelOffers],
-  );
+  const ctaLabel = useMemo(() => {
+    if (isHairGummiesBackorderReservation(productSlug)) {
+      return HAIR_GUMMIES_BACKORDER_CTA_LABEL;
+    }
+    return funnelOffers
+      ? "اطلبي الآن — الدفع عند الاستلام"
+      : `ابدئي روتينك الآن — ${formatPrice(displayTotal)}`;
+  }, [displayTotal, funnelOffers, productSlug]);
 
   useEffect(() => {
     onChange?.({ quantity, total: displayTotal, ctaLabel });
@@ -306,6 +312,9 @@ export function ProductPurchasePanel({
       {funnelOffers && <ProductPaymentMethodsInfo quantity={quantity} />}
 
       <div className="pt-1">
+        {isHairGummiesBackorderReservation(productSlug) ? (
+          <HairGummiesBackorderNotice className="mb-3" />
+        ) : null}
         <button
           type="button"
           onClick={goToCheckout}

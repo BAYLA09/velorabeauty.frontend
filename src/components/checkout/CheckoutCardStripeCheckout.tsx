@@ -14,6 +14,8 @@ import {
 import { CheckoutLaraShell } from "@/components/checkout/CheckoutLaraShell";
 import { CheckoutSupportBlock } from "@/components/support/CheckoutSupportBlock";
 import { CheckoutPayButton } from "@/components/checkout/CheckoutPayButton";
+import { isHairGummiesBackorderReservation } from "@/config/hairGummiesBackorder";
+import { HairGummiesBackorderNotice } from "@/components/product/HairGummiesBackorderNotice";
 import {
   CheckoutStripeElementsProvider,
   useCheckoutStripe,
@@ -336,6 +338,9 @@ function StripeCardPaymentAndSubmit({
       ) : null}
 
       <div className="border-t border-neutral-100 pt-6">
+        {isHairGummiesBackorderReservation(productSlug) ? (
+          <HairGummiesBackorderNotice className="mb-4" />
+        ) : null}
         <CheckoutPayButton
           totalAed={total}
           loading={submitting}
