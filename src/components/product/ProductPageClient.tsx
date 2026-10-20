@@ -15,7 +15,7 @@ import {
   type PurchaseState,
 } from "@/components/product/ProductPurchasePanel";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
-import { ProductTrustBar } from "@/components/product/ProductTrustBar";
+import { ProductVeloraGuaranteeBlock } from "@/components/product/ProductVeloraGuaranteeBlock";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
@@ -24,7 +24,8 @@ import type { ProductWithPage } from "@/lib/productCatalog";
 import { ProductGalleryBenefitLines } from "@/components/product/ProductGalleryBenefitLines";
 import {
   getGalleryBenefitLines,
-  getProductGalleryImageSrcs,
+  getProductBeforeAfterHeroSrc,
+  getProductCarouselImageSrcs,
 } from "@/lib/product/getProductGalleryImageSrcs";
 
 type Props = {
@@ -37,8 +38,26 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
-  const gallerySrcs = getProductGalleryImageSrcs(product.pageImage, product.image.src);
+  const beforeAfterHeroSrc = getProductBeforeAfterHeroSrc(product.pageImage);
+  const carouselSrcs = getProductCarouselImageSrcs(product.pageImage, product.image.src);
   const galleryBenefitLines = getGalleryBenefitLines(page);
+
+  const pdpMedia = (fullWidthMobile: boolean) => (
+    <>
+      <ProductGallery
+        mainSrc={product.pageImage.src}
+        gallerySrcs={carouselSrcs}
+        fixedBeforeAfterSrc={beforeAfterHeroSrc}
+        productName={product.name}
+        placeholder={product.pageImage.placeholder}
+        laraFrame
+        fullWidthMobile={fullWidthMobile}
+      />
+      <ProductVeloraGuaranteeBlock page={page} variant="inline" />
+      <ProductGalleryBenefitLines lines={galleryBenefitLines} />
+      <ProductFeaturePills form={page.form} />
+    </>
+  );
 
   useEffect(() => {
     trackSnapViewContent({ productSlug: product.slug, valueAed: product.price });
@@ -71,32 +90,11 @@ export function ProductPageClient({ product, allProducts }: Props) {
 
             <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
               <aside className="min-w-0 lg:sticky lg:top-[calc(var(--header-h)+1rem)] lg:self-start">
-                <div className="hidden lg:block">
-                  <ProductGallery
-                    mainSrc={product.pageImage.src}
-                    gallerySrcs={gallerySrcs}
-                    productName={product.name}
-                    placeholder={product.pageImage.placeholder}
-                    laraFrame
-                  />
-                  <ProductGalleryBenefitLines lines={galleryBenefitLines} />
-                  <ProductFeaturePills form={page.form} />
-                </div>
+                <div className="hidden lg:block">{pdpMedia(false)}</div>
               </aside>
 
               <div className="min-w-0 flex-1">
-                <div className="lg:hidden">
-                  <ProductGallery
-                    mainSrc={product.pageImage.src}
-                    gallerySrcs={gallerySrcs}
-                    productName={product.name}
-                    placeholder={product.pageImage.placeholder}
-                    laraFrame
-                    fullWidthMobile
-                  />
-                  <ProductGalleryBenefitLines lines={galleryBenefitLines} />
-                  <ProductFeaturePills form={page.form} />
-                </div>
+                <div className="lg:hidden">{pdpMedia(true)}</div>
 
                 <div className="mt-4 flex min-w-0 flex-col gap-3.5 sm:mt-0 sm:gap-4">
                   <p className="text-sm font-semibold tabular-nums text-velora-burgundy/75">

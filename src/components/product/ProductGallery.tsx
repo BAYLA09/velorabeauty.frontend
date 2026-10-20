@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { ProductPageImage } from "./ProductPageImage";
 
 type Props = {
   mainSrc?: string;
-  /** Up to 4 PDP images — hero carousel */
+  /** Carousel images (typically 3) below optional fixed before/after hero */
   gallerySrcs?: string[];
+  /** Fixed full-width before/after hero — not part of the carousel */
+  fixedBeforeAfterSrc?: string;
   productName: string;
   placeholder: string;
   laraFrame?: boolean;
@@ -45,6 +47,7 @@ function ChevronIcon({ direction }: { direction: "prev" | "next" }) {
 export function ProductGallery({
   mainSrc,
   gallerySrcs,
+  fixedBeforeAfterSrc,
   productName,
   placeholder,
   laraFrame = false,
@@ -59,21 +62,26 @@ export function ProductGallery({
     return single ? [single] : [];
   }, [gallerySrcs, mainSrc]);
 
-  const imageKey = images.join("\0");
+  const fixedHero = fixedBeforeAfterSrc?.trim() || "";
+  const imageKey = `${fixedHero}\0${images.join("\0")}`;
 
   const [active, setActive] = useState(0);
-  const [failed, setFailed] = useState<Record<number, boolean>>({});
+  const [failed, setFailed] = useState<Record<string, boolean>>({});
+  const [fixedFailed, setFixedFailed] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     setActive(0);
     setFailed({});
+    setFixedFailed(false);
   }, [imageKey]);
 
   const count = images.length;
   const activeSrc = images[active];
-  const hasImages = count > 0;
+  const hasCarouselImages = count > 0;
   const showControls = count > 1;
+
+  const failKey = (src: string) => src;
 
   const goPrev = useCallback(() => {
     setActive((i) => (i - 1 + count) % count);
@@ -91,11 +99,11 @@ export function ProductGallery({
       }`
     : "relative mx-auto w-fit max-w-full rounded-[2rem] border border-velora-burgundy/10 bg-white shadow-lg";
 
-  function onTouchStart(ev: React.TouchEvent) {
+  function onTouchStart(ev: TouchEvent) {
     touchStartX.current = ev.touches[0]?.clientX ?? null;
   }
 
-  function onTouchEnd(ev: React.TouchEvent) {
+  function onTouchEnd(ev: TouchEvent) {
     if (touchStartX.current === null || count < 2) return;
     const endX = ev.changedTouches[0]?.clientX;
     if (endX === undefined) return;
@@ -108,13 +116,38 @@ export function ProductGallery({
 
   return (
     <div className="w-full min-w-0">
+      {fixedHero ? (
+        <div
+          className={
+            fullWidthMobile
+              ? "-mx-4 mb-4 w-[calc(100%+2rem)] max-w-none sm:mx-0 sm:mb-5 sm:w-full"
+              : "mb-4 w-full sm:mb-5"
+          }
+        >
+          {fixedFailed ? (
+            <div className="flex min-h-[12rem] items-center justify-center bg-velora-cream-dark px-4 text-center text-sm text-velora-burgundy/60">
+              {placeholder}
+            </div>
+          ) : (
+            <ProductPageImage
+              src={fixedHero}
+              alt={`${productName} — قبل وبعد`}
+              priority
+              className="w-full rounded-none object-cover sm:rounded-[1.15rem]"
+              sizes="100vw"
+              onError={() => setFixedFailed(true)}
+            />
+          )}
+        </div>
+      ) : null}
+
       <div
         className={frameOuterClass}
         onTouchStart={showControls ? onTouchStart : undefined}
         onTouchEnd={showControls ? onTouchEnd : undefined}
       >
-        {!hasImages || !activeSrc || failed[active] ? (
-          failed[active] && activeSrc ? (
+        {!hasCarouselImages || !activeSrc || failed[failKey(activeSrc)] ? (
+          failed[failKey(activeSrc)] && activeSrc ? (
             <div className="flex min-h-[16rem] min-w-[16rem] items-center justify-center rounded-[1.25rem] bg-velora-cream-dark p-6 text-center text-sm text-velora-burgundy/60">
               {placeholder}
             </div>
@@ -125,9 +158,11 @@ export function ProductGallery({
           <ProductPageImage
             src={activeSrc}
             alt={`${productName} — صورة ${active + 1}`}
-            priority={active === 0}
+            priority={!fixedHero && active === 0}
             className="rounded-[1.15rem]"
-            onError={() => setFailed((prev) => ({ ...prev, [active]: true }))}
+            onError={() =>
+              setFailed((prev) => ({ ...prev, [failKey(activeSrc)]: true }))
+            }
           />
         )}
 

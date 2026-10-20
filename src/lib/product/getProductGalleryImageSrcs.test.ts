@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   getGalleryBenefitLines,
+  getProductBeforeAfterHeroSrc,
+  getProductCarouselImageSrcs,
   getProductGalleryImageSrcs,
 } from "./getProductGalleryImageSrcs.ts";
 
@@ -44,6 +46,32 @@ describe("getProductGalleryImageSrcs", () => {
     assert.equal(srcs[1], "/story.webp");
     assert.equal(srcs[2], "/main.webp");
     assert.equal(srcs[3], "/story.webp");
+  });
+});
+
+describe("getProductBeforeAfterHeroSrc", () => {
+  it("returns the timeline slot image", () => {
+    const src = getProductBeforeAfterHeroSrc({
+      placeholder: "x",
+      src: "/main.webp",
+      timelineSectionImageSrc: "/timeline.webp",
+    });
+    assert.equal(src, "/timeline.webp");
+  });
+});
+
+describe("getProductCarouselImageSrcs", () => {
+  it("returns three carousel slots without the timeline image", () => {
+    const srcs = getProductCarouselImageSrcs({
+      placeholder: "x",
+      src: "/main.webp",
+      storySrc: "/story.webp",
+      formulaSectionImageSrc: "/formula.webp",
+      timelineSectionImageSrc: "/timeline.webp",
+    });
+    assert.equal(srcs.length, 3);
+    assert.deepEqual(srcs, ["/main.webp", "/story.webp", "/formula.webp"]);
+    assert.equal(srcs.includes("/timeline.webp"), false);
   });
 });
 
