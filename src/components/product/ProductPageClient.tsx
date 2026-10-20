@@ -46,7 +46,7 @@ type Props = {
 
 /**
  * Mobile PDP order aligned with larabeauty.store funnel (magnesium-sleep reference):
- * hero → buy box → videos → images interleaved with copy → guarantee → delivery/FAQ.
+ * hero → subhook/benefits/pills → buy box → videos → images interleaved with copy → guarantee → delivery/FAQ.
  */
 export function ProductPageClient({ product, allProducts }: Props) {
   const [quantity, setQuantity] = useState<BundleQuantity>(2);
@@ -92,6 +92,11 @@ export function ProductPageClient({ product, allProducts }: Props) {
             />
           ) : null}
 
+          <div className="space-y-4 py-4 sm:py-5">
+            <ProductGalleryBenefitLines lines={galleryBenefitLines} />
+            <ProductFeaturePills form={page.form} />
+          </div>
+
           <section id="buy-box" className="py-5 sm:py-6">
             {isHairGummiesBackorderReservation(product.slug) ? (
               <HairGummiesBackorderNotice className="mb-4" />
@@ -125,11 +130,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
               />
             </div>
           ) : null}
-
-          <div className="space-y-4 py-2 sm:py-4">
-            <ProductGalleryBenefitLines lines={galleryBenefitLines} />
-            <ProductFeaturePills form={page.form} />
-          </div>
 
           <ProductPagePainNarrative page={page} />
           <ProductPageFormulaMarketing page={page} />
