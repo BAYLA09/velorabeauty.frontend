@@ -77,7 +77,7 @@ describe("getProductCarouselImageSrcs", () => {
 });
 
 describe("getProductPdpScrollImages", () => {
-  it("maps timeline, story, main, formula, and upsell fourth slot", () => {
+  it("maps exactly four slots: before/after, story, timeline, formula", () => {
     const imgs = getProductPdpScrollImages({
       placeholder: "x",
       src: "/main.webp",
@@ -88,9 +88,8 @@ describe("getProductPdpScrollImages", () => {
     });
     assert.equal(imgs.beforeAfter, "/main.webp");
     assert.equal(imgs.problem, "/story.webp");
-    assert.equal(imgs.productMain, "/timeline.webp");
-    assert.equal(imgs.storyOrFormula, "/formula.webp");
-    assert.equal(imgs.fourth, "/upsell-1.webp");
+    assert.equal(imgs.timeline, "/timeline.webp");
+    assert.equal(imgs.formula, "/formula.webp");
   });
 });
 
