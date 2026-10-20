@@ -1,3 +1,4 @@
+import { isWarmTeeSlug } from "@/config/warmTeeProduct";
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import type { OrderRecord } from "@/lib/ordersRepository";
@@ -9,6 +10,7 @@ export function unitProductCostUsd(slug: string, fees: FeeConfig): number {
   if (s.includes("skin") || s.includes("whitamin")) return fees.products.skinGummies;
   if (s.includes("hair")) return fees.products.hairGummies;
   if (s.includes("stripe-test")) return 0;
+  if (isWarmTeeSlug(s) || s === "warmtee") return 0;
   return fees.products.skinGummies;
 }
 
@@ -26,5 +28,9 @@ export function orderProductCostUsd(order: OrderRecord, fees: FeeConfig): number
 
 export function isExcludedTestOrder(order: OrderRecord): boolean {
   const slug = order.productSlug.toLowerCase();
-  return slug.includes("stripe-test") || slug.includes("velora-stripe-test");
+  return (
+    slug.includes("stripe-test") ||
+    slug.includes("velora-stripe-test") ||
+    isWarmTeeSlug(order.productSlug)
+  );
 }

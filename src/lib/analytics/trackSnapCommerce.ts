@@ -1,4 +1,5 @@
 import { isSnapCatalogSlug } from "@/config/snapPixel";
+import { snapCatalogContentId } from "@/config/warmTeeProduct";
 import { snapContentIdsFromOrder, snapItemCount } from "@/lib/analytics/snapContentIds";
 import { trackStoreEvent } from "@/lib/analytics/trackStoreEvent";
 import type { CartLine } from "@/lib/cart/cartTypes";
@@ -8,11 +9,13 @@ export function trackSnapViewContent(input: {
   valueAed: number;
 }): void {
   if (!isSnapCatalogSlug(input.productSlug)) return;
+  const contentId = snapCatalogContentId(input.productSlug);
+  if (!contentId) return;
   trackStoreEvent({
     event: "view_content",
     value_aed: input.valueAed,
     currency: "AED",
-    content_ids: [input.productSlug],
+    content_ids: [contentId],
     number_items: 1,
   });
 }

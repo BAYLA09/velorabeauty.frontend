@@ -1,3 +1,5 @@
+import { isWarmTeeSlug, warmTeeMerchandiseAed } from "@/config/warmTeeProduct";
+
 export type BundleQuantity = 1 | 2 | 3;
 
 export type PaymentMethod = "card" | "cod";
@@ -72,7 +74,13 @@ export function getCheckoutTotalForUnits(
 export const bundleQuantities: BundleQuantity[] = [1, 2, 3];
 
 /** Card merchandise for one SKU line (1→199, 2→249, 3→339, 4→339+199). */
-export function getMerchandiseAedForLineQuantity(units: number): number | null {
+export function getMerchandiseAedForLineQuantity(
+  units: number,
+  productSlug?: string,
+): number | null {
+  if (productSlug && isWarmTeeSlug(productSlug)) {
+    return warmTeeMerchandiseAed(units);
+  }
   if (!Number.isFinite(units) || units < 1 || units > 4) return null;
   if (units <= MAX_BUNDLE_TIER_UNITS) {
     const tier = bundleQuantityFromUnitCount(units);

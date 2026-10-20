@@ -21,6 +21,7 @@ export const SNAP_CATALOG_SLUGS = [
   "hair-gummies",
   "skin-gummies",
   "eye-serum",
+  "warm",
 ] as const;
 
 export type SnapCatalogSlug = (typeof SNAP_CATALOG_SLUGS)[number];

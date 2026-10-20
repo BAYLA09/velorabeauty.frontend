@@ -2,7 +2,7 @@ import type { BundleQuantity } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { getMerchandiseAedForLineQuantity } from "@/config/pricing";
 import { normalizeCartLines } from "@/lib/cart/cartPricing";
-import { getProductBySlug } from "@/lib/productCatalog";
+import { getStoreProductBySlug } from "@/lib/productCatalog";
 
 /** Per-line bundle price (2× hair = 249, 1× skin = 199, …). */
 export function allocateCartLinePrices(lines: CartLine[]): Map<string, number> {
@@ -15,7 +15,7 @@ export function allocateCartLinePrices(lines: CartLine[]): Map<string, number> {
 
 /** Same packshot as homepage product cards (`images.products.*`). */
 export function getCheckoutProductImage(slug: string): string | undefined {
-  const product = getProductBySlug(slug);
+  const product = getStoreProductBySlug(slug);
   if (!product) return undefined;
   const homeSrc = product.image.src?.trim();
   if (homeSrc) return homeSrc;

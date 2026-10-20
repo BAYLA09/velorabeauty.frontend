@@ -14,6 +14,7 @@ import {
   isStripeLiveTestCheckoutEnabled,
   isStripeLiveTestProductSlug,
 } from "@/config/stripeLiveTestCheckout";
+import { isWarmTeeSlug } from "@/config/warmTeeProduct";
 import {
   resolveCheckoutMerchandiseAed,
   resolveCheckoutTotalAed,
@@ -162,6 +163,25 @@ export function computeOrderAmountsForCart(
 function resolveCreateOrderAmounts(
   input: CreateOrderInput & { eligibleUnits?: number; cartLines?: CartLine[] },
 ): { subtotalAed: number; deliveryFeeAed: number; totalAed: number } {
+  if (
+    isWarmTeeSlug(input.productSlug) &&
+    (!input.cartLines || input.cartLines.length === 0)
+  ) {
+    const totalAed = resolveCheckoutTotalAed(
+      input.quantity,
+      input.paymentMethod,
+      input.eligibleUnits,
+      input.cartLines,
+      input.productSlug,
+    );
+    const subtotalAed = resolveCheckoutMerchandiseAed(
+      input.quantity,
+      input.eligibleUnits,
+      input.cartLines,
+      input.productSlug,
+    );
+    return { subtotalAed, deliveryFeeAed: totalAed - subtotalAed, totalAed };
+  }
   if (
     isStripeLiveTestCheckoutEnabled() &&
     isStripeLiveTestProductSlug(input.productSlug) &&

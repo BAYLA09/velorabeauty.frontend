@@ -9,6 +9,7 @@ import {
   STRIPE_LIVE_TEST_PRODUCT_NAME,
 } from "@/config/stripeLiveTestCheckout";
 import { getProductBySlug } from "@/lib/productCatalog";
+import { isWarmTeeSlug, WARM_TEE_NAME_AR } from "@/config/warmTeeProduct";
 import { parseCheckoutQuantity } from "@/lib/checkoutRoutes";
 
 export const HOMEPAGE_PRODUCT_SLUG = "velora-offer";
@@ -62,6 +63,15 @@ export function resolveCheckoutContext(
     return {
       productSlug,
       productName: STRIPE_LIVE_TEST_PRODUCT_NAME,
+      quantity: 1,
+      eligibleUnits: 1,
+    };
+  }
+
+  if (isWarmTeeSlug(productSlug)) {
+    return {
+      productSlug,
+      productName: WARM_TEE_NAME_AR,
       quantity: 1,
       eligibleUnits: 1,
     };
