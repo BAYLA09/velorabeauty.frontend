@@ -78,6 +78,12 @@ export function ProductPageClient({ product, allProducts }: Props) {
         style={{ ["--header-h" as string]: "3.5rem" }}
       >
         <div className="mx-auto max-w-lg px-4 py-4 sm:max-w-3xl sm:px-6 sm:py-6 lg:max-w-[720px] lg:py-8">
+          <header className="scroll-mt-[var(--header-h)] mb-4 text-right sm:mb-5">
+            <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
+              {page.headlineQuestion}
+            </h1>
+          </header>
+
           {scrollImages.beforeAfter ? (
             <ProductPdpStackedImage
               src={scrollImages.beforeAfter}
@@ -86,16 +92,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
             />
           ) : null}
 
-          <section
-            id="buy-box"
-            className="scroll-mt-[var(--header-h)] py-5 sm:py-6"
-          >
-            <header className="mb-4 text-right">
-              <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
-                {page.headlineQuestion}
-              </h1>
-            </header>
-
+          <section id="buy-box" className="py-5 sm:py-6">
             {isHairGummiesBackorderReservation(product.slug) ? (
               <HairGummiesBackorderNotice className="mb-4" />
             ) : null}

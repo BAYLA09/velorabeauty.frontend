@@ -91,6 +91,26 @@ describe("getProductPdpScrollImages", () => {
     assert.equal(imgs.timeline, "/timeline.webp");
     assert.equal(imgs.formula, "/formula.webp");
   });
+
+  it("never maps upsell qty-1 packshot to a full-width PDP stack slot", () => {
+    const upsellQty1 = "/images/products/pdp/upsell/skin-qty-1.webp";
+    const imgs = getProductPdpScrollImages(
+      {
+        placeholder: "x",
+        src: "/main.webp",
+        storySrc: "/story.webp",
+        formulaSectionImageSrc: "/formula.webp",
+        timelineSectionImageSrc: "/timeline.webp",
+        upsellSlotSrc: { 1: upsellQty1, 2: "/u2", 3: "/u3" },
+        upsellSrc: upsellQty1,
+        marketingSpotlight: upsellQty1,
+      },
+      upsellQty1,
+    );
+    for (const src of Object.values(imgs)) {
+      assert.notEqual(src, upsellQty1);
+    }
+  });
 });
 
 describe("getGalleryBenefitLines", () => {
