@@ -61,6 +61,7 @@ function cleanPdpImageSrc(raw?: string): string | undefined {
 
 /**
  * Exactly four static PDP images: before/after, problem (story), timeline lifestyle, formula (pre-guarantee).
+ * Qty-1 upsell packshots (`upsellSlotSrc[1]`) are for bundle-offer thumbnails only — not stacked PDP heroes.
  */
 export function getProductPdpScrollImages(
   pageImage: ProductImageRef,
