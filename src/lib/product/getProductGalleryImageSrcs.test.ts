@@ -51,13 +51,13 @@ describe("getProductGalleryImageSrcs", () => {
 });
 
 describe("getProductBeforeAfterHeroSrc", () => {
-  it("returns the timeline slot image", () => {
+  it("returns the PDP main path (before/after creative)", () => {
     const src = getProductBeforeAfterHeroSrc({
       placeholder: "x",
       src: "/main.webp",
       timelineSectionImageSrc: "/timeline.webp",
     });
-    assert.equal(src, "/timeline.webp");
+    assert.equal(src, "/main.webp");
   });
 });
 
@@ -86,9 +86,9 @@ describe("getProductPdpScrollImages", () => {
       timelineSectionImageSrc: "/timeline.webp",
       upsellSlotSrc: { 1: "/upsell-1.webp", 2: "/u2", 3: "/u3" },
     });
-    assert.equal(imgs.beforeAfter, "/timeline.webp");
+    assert.equal(imgs.beforeAfter, "/main.webp");
     assert.equal(imgs.problem, "/story.webp");
-    assert.equal(imgs.productMain, "/main.webp");
+    assert.equal(imgs.productMain, "/timeline.webp");
     assert.equal(imgs.storyOrFormula, "/formula.webp");
     assert.equal(imgs.fourth, "/upsell-1.webp");
   });

@@ -39,9 +39,9 @@ function padToSlotCount(unique: string[], slotCount: number): string[] {
   return result.slice(0, slotCount);
 }
 
-/** Fixed top hero — before/after creative (timeline slot). */
+/** Fixed top hero — BEFORE/AFTER creative (stored on PDP `src` / *-main.webp). */
 export function getProductBeforeAfterHeroSrc(pageImage: ProductImageRef): string | undefined {
-  const src = pageImage.timelineSectionImageSrc?.trim();
+  const src = pageImage.src?.trim();
   if (!src || isRetiredBundleImageSrc(src)) return undefined;
   return src;
 }
@@ -62,7 +62,7 @@ function cleanPdpImageSrc(raw?: string): string | undefined {
 
 /**
  * Static scroll images for catalog PDPs (before/after, problem, main, formula, fourth).
- * Timeline = before/after; story = pain/problem; main = packshot; formula = science/lifestyle; fourth = upsell hero.
+ * `src` = BEFORE/AFTER; timeline slot = lifestyle; story = pain/problem; formula = science; fourth = upsell hero.
  */
 export function getProductPdpScrollImages(
   pageImage: ProductImageRef,
@@ -71,7 +71,8 @@ export function getProductPdpScrollImages(
   const beforeAfter = getProductBeforeAfterHeroSrc(pageImage);
   const problem = cleanPdpImageSrc(pageImage.storySrc);
   const productMain =
-    cleanPdpImageSrc(pageImage.src) ?? cleanPdpImageSrc(homePackshotSrc);
+    cleanPdpImageSrc(pageImage.timelineSectionImageSrc) ??
+    cleanPdpImageSrc(homePackshotSrc);
   const storyOrFormula = cleanPdpImageSrc(pageImage.formulaSectionImageSrc);
   const fourth =
     cleanPdpImageSrc(pageImage.upsellSlotSrc?.[1]) ??

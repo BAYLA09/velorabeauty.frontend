@@ -214,28 +214,31 @@ export function ProductPageComparisonSection({ page }: { page: ProductPageConfig
   );
 }
 
-export function ProductPagePdpTail({
+export function ProductPageTestimonials({
   page,
   productId,
 }: {
   page: ProductPageConfig;
   productId: ProductId;
 }) {
+  if (!productPageFlags.showSocialProof) return null;
+  return (
+    <TestimonialsProductStrip
+      title={page.testimonialTitle}
+      subtitle={page.testimonialSubtitle}
+      layout="pdp"
+      productId={productId}
+    />
+  );
+}
+
+export function ProductPageDeliveryAndFaq({ page }: { page: ProductPageConfig }) {
   const faqItems = [...page.preOrderFaq, ...page.faq].filter(
     (item, index, arr) => arr.findIndex((x) => x.question === item.question) === index,
   );
 
   return (
     <>
-      {productPageFlags.showSocialProof ? (
-        <TestimonialsProductStrip
-          title={page.testimonialTitle}
-          subtitle={page.testimonialSubtitle}
-          layout="pdp"
-          productId={productId}
-        />
-      ) : null}
-
       <section className="bg-white py-8 sm:py-10">
         <SectionIntro eyebrow={page.deliveryTitle} title={page.deliverySubtitle} />
         <ol className="space-y-4">
@@ -281,6 +284,22 @@ export function ProductPagePdpTail({
       </section>
 
       <ProductFaq items={faqItems} title={page.preOrderFaqTitle} subtitle="إجابات واضحة قبل الطلب" />
+    </>
+  );
+}
+
+/** @deprecated Use ProductPageDeliveryAndFaq + ProductPageTestimonials in Lara order */
+export function ProductPagePdpTail({
+  page,
+  productId,
+}: {
+  page: ProductPageConfig;
+  productId: ProductId;
+}) {
+  return (
+    <>
+      <ProductPageTestimonials page={page} productId={productId} />
+      <ProductPageDeliveryAndFaq page={page} />
     </>
   );
 }

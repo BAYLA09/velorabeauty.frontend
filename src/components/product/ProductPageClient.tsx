@@ -9,9 +9,10 @@ import { ProductFeaturePills } from "@/components/product/ProductFeaturePills";
 import { ProductMobileStickyBar } from "@/components/product/ProductMobileStickyBar";
 import {
   ProductPageComparisonSection,
+  ProductPageDeliveryAndFaq,
   ProductPageFormulaMarketing,
   ProductPagePainNarrative,
-  ProductPagePdpTail,
+  ProductPageTestimonials,
   ProductPageUsageAndResults,
 } from "@/components/product/ProductPageLongSections";
 import { ProductFinalCtaSection } from "@/components/product/ProductFinalCtaSection";
@@ -43,6 +44,10 @@ type Props = {
   allProducts: ProductWithPage[];
 };
 
+/**
+ * Mobile PDP order aligned with larabeauty.store funnel (magnesium-sleep reference):
+ * hero → buy box → videos → images interleaved with copy → guarantee → delivery/FAQ.
+ */
 export function ProductPageClient({ product, allProducts }: Props) {
   const [quantity, setQuantity] = useState<BundleQuantity>(2);
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
@@ -111,6 +116,10 @@ export function ProductPageClient({ product, allProducts }: Props) {
             />
           </section>
 
+          <div className="mt-2 border-t border-velora-burgundy/8 pt-6">
+            <ProductVideoStoriesStrip productSlug={product.slug} />
+          </div>
+
           {scrollImages.problem ? (
             <div className="py-4 sm:py-5">
               <ProductPdpStackedImage
@@ -120,7 +129,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
             </div>
           ) : null}
 
-          <div className="space-y-4 py-4 sm:py-5">
+          <div className="space-y-4 py-2 sm:py-4">
             <ProductGalleryBenefitLines lines={galleryBenefitLines} />
             <ProductFeaturePills form={page.form} />
           </div>
@@ -148,6 +157,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
             </div>
           ) : null}
 
+          <ProductPageTestimonials page={page} productId={product.id} />
           <ProductPageComparisonSection page={page} />
 
           {scrollImages.fourth ? (
@@ -160,12 +170,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
           ) : null}
 
           <ProductVeloraGuaranteeBlock page={page} variant="section" />
-
-          <div className="mt-8 border-t border-velora-burgundy/8 pt-6">
-            <ProductVideoStoriesStrip productSlug={product.slug} />
-          </div>
-
-          <ProductPagePdpTail page={page} productId={product.id} />
+          <ProductPageDeliveryAndFaq page={page} />
 
           <ProductFinalCtaSection
             form={page.form}
