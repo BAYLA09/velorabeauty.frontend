@@ -404,6 +404,84 @@ export function getOrderByStripePaymentIntentId(paymentIntentId: string): OrderR
   return row ? rowToRecord(row) : null;
 }
 
+function isSqliteUniqueConstraintError(err: unknown): boolean {
+  return (
+    err instanceof Error &&
+    (err.message.includes("UNIQUE constraint failed") ||
+      err.message.includes("idx_orders_stripe_pi_unique"))
+  );
+}
+
+export function createCardOrderWithPaymentIntent(
+  paymentIntentId: string,
+  input: CreateOrderInput & { eligibleUnits?: number; cartLines?: CartLine[] },
+): { order: OrderRecord; created: boolean } {
+  const existing = getOrderByStripePaymentIntentId(paymentIntentId);
+  if (existing) return { order: existing, created: false };
+
+  const { subtotalAed, deliveryFeeAed, totalAed } = resolveCreateOrderAmounts(input);
+  const requestedId = input.id?.trim() ?? "";
+  const id =
+    isStorefrontOrderId(requestedId) && !getOrderById(requestedId) ? requestedId : randomUUID();
+  const createdAt = new Date().toISOString();
+
+  const orderLinesJson =
+    input.cartLines && input.cartLines.length > 0
+      ? JSON.stringify(
+          input.cartLines.map((line) => ({
+            slug: line.slug,
+            quantity: line.quantity,
+          })),
+        )
+      : null;
+
+  const orderAttributionJson =
+    input.attribution && Object.keys(input.attribution).length > 0
+      ? JSON.stringify(input.attribution)
+      : null;
+
+  const db = getDb();
+  try {
+    db.prepare(
+      `INSERT INTO orders (
+        id, product_slug, product_name, quantity, payment_method,
+        subtotal_aed, delivery_fee_aed, total_aed,
+        customer_name, phone, emirate, address, status, created_at,
+        customer_email, marketing_consent, backend_external_checkout_id,
+        order_lines_json, order_attribution_json, stripe_payment_intent_id
+      ) VALUES (?, ?, ?, ?, 'card', ?, ?, ?, ?, ?, ?, ?, 'awaiting_payment', ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      id,
+      input.productSlug,
+      input.productName,
+      input.quantity,
+      subtotalAed,
+      deliveryFeeAed,
+      totalAed,
+      input.customerName.trim(),
+      input.phone.trim(),
+      input.emirate.trim(),
+      input.address.trim(),
+      createdAt,
+      input.customerEmail?.trim() || null,
+      input.marketingConsent ? 1 : 0,
+      input.backendExternalCheckoutId?.trim() || id,
+      orderLinesJson,
+      orderAttributionJson,
+      paymentIntentId,
+    );
+  } catch (err) {
+    if (isSqliteUniqueConstraintError(err)) {
+      const raced = getOrderByStripePaymentIntentId(paymentIntentId);
+      if (raced) return { order: raced, created: false };
+    }
+    throw err;
+  }
+
+  const row = db.prepare(`SELECT * FROM orders WHERE id = ?`).get(id) as OrderRow;
+  return { order: rowToRecord(row), created: true };
+}
+
 export function getOrderAttribution(orderId: string): OrderAttribution | null {
   const row = getDb()
     .prepare(`SELECT order_attribution_json FROM orders WHERE id = ?`)
@@ -433,6 +511,12 @@ export function getOrderCartLines(orderId: string): CartLine[] | null {
   }
 }
 
+function isCardSheetExportComplete(exportedAt: string | null | undefined): boolean {
+  const v = exportedAt?.trim();
+  if (!v) return false;
+  return !v.startsWith("claim:");
+}
+
 export function wasOrderSheetExported(
   orderId: string,
   channel: "cod" | "card",
@@ -441,7 +525,37 @@ export function wasOrderSheetExported(
   const row = getDb()
     .prepare(`SELECT ${column} AS exported_at FROM orders WHERE id = ?`)
     .get(orderId) as { exported_at?: string | null } | undefined;
-  return Boolean(row?.exported_at);
+  if (channel === "card") return isCardSheetExportComplete(row?.exported_at);
+  return Boolean(row?.exported_at?.trim());
+}
+
+/** Atomically claim card sheet export (race-safe). Returns claim token or null. */
+export function claimCardSheetExport(orderId: string): string | null {
+  const claim = `claim:${randomUUID()}`;
+  const result = getDb()
+    .prepare(
+      `UPDATE orders SET sheet_card_exported_at = ?
+       WHERE id = ?
+         AND (sheet_card_exported_at IS NULL OR TRIM(sheet_card_exported_at) = '')`,
+    )
+    .run(claim, orderId);
+  return result.changes === 1 ? claim : null;
+}
+
+export function completeCardSheetExportClaim(orderId: string, claim: string): void {
+  const at = new Date().toISOString();
+  getDb()
+    .prepare(
+      `UPDATE orders SET sheet_card_exported_at = ?, sheet_card_export_last_error = NULL
+       WHERE id = ? AND sheet_card_exported_at = ?`,
+    )
+    .run(at, orderId, claim);
+}
+
+export function releaseCardSheetExportClaim(orderId: string, claim: string): void {
+  getDb()
+    .prepare(`UPDATE orders SET sheet_card_exported_at = NULL WHERE id = ? AND sheet_card_exported_at = ?`)
+    .run(orderId, claim);
 }
 
 export function markOrderSheetExported(orderId: string, channel: "cod" | "card"): void {

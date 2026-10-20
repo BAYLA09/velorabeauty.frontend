@@ -1,27 +1,20 @@
 import { NextResponse } from "next/server";
-import { checkoutEmirates } from "@/config/productCheckout";
-import type { BundleQuantity } from "@/config/pricing";
-import type { CartLine } from "@/lib/cart/cartTypes";
-import { validateCartForCheckout } from "@/lib/cart/validateCartCheckout";
 import {
   checkoutLinesForSync,
   enqueueStorefrontCheckout,
 } from "@/lib/backendCheckout/capture";
 import { kickBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
-import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
+import { isStorefrontOrderId } from "@/lib/backendCheckout/contract";
 import {
-  createOrder,
+  createCardOrderWithPaymentIntent,
   getOrderById,
   getOrderByStripePaymentIntentId,
   setOrderStripePaymentIntent,
   updateOrderCardCustomerDetails,
 } from "@/lib/ordersRepository";
-import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
+import { parseFinalizeCardOrderBody } from "@/lib/stripe/parseFinalizeCardOrder";
+import { stripeMetadataFromOrderSnapshot } from "@/lib/stripe/paymentIntentOrderMetadata";
 import { getStripe, isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
-
-function isBundleQuantity(n: unknown): n is BundleQuantity {
-  return n === 1 || n === 2 || n === 3;
-}
 
 export async function POST(request: Request) {
   if (!isStripeCardCheckoutEnabled()) {
@@ -30,74 +23,20 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    const paymentIntentId = String(body.paymentIntentId ?? "").trim();
-    let productSlug = String(body.productSlug ?? "").trim();
-    let productName = String(body.productName ?? "").trim();
-    let eligibleUnits: number | undefined;
-    const quantity = body.quantity;
-    const rawCartLines = body.cartLines;
-    const customerName = String(body.customerName ?? "").trim();
-    const phone = String(body.phone ?? "").trim();
-    const emirate = String(body.emirate ?? "").trim();
-    const address = String(body.address ?? "").trim();
-    const email = String(body.email ?? "").trim();
-    const marketingConsent = readMarketingConsent(body.marketingConsent);
-    const externalCheckoutId = String(body.externalCheckoutId ?? "").trim();
-    let syncLines: CartLine[] | null = null;
-
-    if (!paymentIntentId) {
-      return NextResponse.json({ error: "جلسة الدفع غير جاهزة." }, { status: 400 });
+    const parsed = parseFinalizeCardOrderBody(body);
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: parsed.status });
     }
-    if (Array.isArray(rawCartLines) && rawCartLines.length > 0) {
-      const lines: CartLine[] = rawCartLines
-        .map((row) => {
-          if (!row || typeof row !== "object") return null;
-          const r = row as Record<string, unknown>;
-          return {
-            slug: String(r.slug ?? "").trim(),
-            quantity: Number(r.quantity),
-          };
-        })
-        .filter((l): l is CartLine => Boolean(l?.slug && l.quantity >= 1));
-      syncLines = lines;
-      const validated = validateCartForCheckout(lines);
-      if (!validated.ok) {
-        return NextResponse.json({ error: validated.error }, { status: 400 });
-      }
-      if (!isBundleQuantity(quantity) || quantity !== validated.cart.bundleQuantity) {
-        return NextResponse.json({ error: "بيانات المنتج غير صالحة." }, { status: 400 });
-      }
-      productSlug = validated.cart.productSlug;
-      productName = validated.cart.productName;
-      eligibleUnits = validated.cart.eligibleUnits;
-    }
-
-    if (!productSlug || !productName || !isBundleQuantity(quantity)) {
-      return NextResponse.json({ error: "بيانات المنتج غير صالحة." }, { status: 400 });
-    }
-    if (!customerName || !phone || !address) {
-      return NextResponse.json({ error: "أكملي الاسم والهاتف وعنوان التوصيل." }, { status: 400 });
-    }
-    const phoneCheck = validateUaeMobilePhone(phone);
-    if (!phoneCheck.ok) {
-      return NextResponse.json({ error: phoneCheck.error }, { status: 400 });
-    }
-    const resolvedPhone = phoneCheck.normalized;
-
-    const resolvedEmirate =
-      emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
-        ? emirate
-        : (checkoutEmirates[0] ?? "دبي");
 
     const stripe = getStripe();
     let order =
-      getOrderByStripePaymentIntentId(paymentIntentId) ??
-      (isStorefrontOrderId(externalCheckoutId)
-        ? getOrderById(externalCheckoutId)
+      getOrderByStripePaymentIntentId(parsed.paymentIntentId) ??
+      (isStorefrontOrderId(parsed.externalCheckoutId)
+        ? getOrderById(parsed.externalCheckoutId)
         : null);
 
     if (order?.status === "paid") {
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await stripe.paymentIntents.retrieve(parsed.paymentIntentId);
       return NextResponse.json({
         orderId: order.id,
         order,
@@ -107,67 +46,59 @@ export async function POST(request: Request) {
 
     if (order && order.paymentMethod === "card") {
       const updated = updateOrderCardCustomerDetails(order.id, {
-        customerName,
-        phone: resolvedPhone,
-        emirate: resolvedEmirate,
-        address,
-        customerEmail: email || undefined,
-        marketingConsent,
+        customerName: parsed.customerName,
+        phone: parsed.phone,
+        emirate: parsed.emirate,
+        address: parsed.address,
+        customerEmail: parsed.email || undefined,
+        marketingConsent: parsed.marketingConsent,
       });
       order = updated ?? order;
-      setOrderStripePaymentIntent(order.id, paymentIntentId);
+      setOrderStripePaymentIntent(order.id, parsed.paymentIntentId);
     } else {
-      order = createOrder({
-        productSlug,
-        productName,
-        quantity,
-        eligibleUnits,
-        cartLines: syncLines ?? undefined,
+      const created = createCardOrderWithPaymentIntent(parsed.paymentIntentId, {
+        productSlug: parsed.productSlug,
+        productName: parsed.productName,
+        quantity: parsed.quantity,
+        eligibleUnits: parsed.eligibleUnits,
+        cartLines: parsed.cartLines ?? undefined,
         paymentMethod: "card",
-        customerName,
-        phone: resolvedPhone,
-        emirate: resolvedEmirate,
-        address,
-        customerEmail: email || undefined,
-        marketingConsent,
-        id: isStorefrontOrderId(externalCheckoutId) ? externalCheckoutId : undefined,
-        backendExternalCheckoutId: isStorefrontOrderId(externalCheckoutId)
-          ? externalCheckoutId
+        customerName: parsed.customerName,
+        phone: parsed.phone,
+        emirate: parsed.emirate,
+        address: parsed.address,
+        customerEmail: parsed.email || undefined,
+        marketingConsent: parsed.marketingConsent,
+        attribution: parsed.attribution,
+        id: isStorefrontOrderId(parsed.externalCheckoutId) ? parsed.externalCheckoutId : undefined,
+        backendExternalCheckoutId: isStorefrontOrderId(parsed.externalCheckoutId)
+          ? parsed.externalCheckoutId
           : undefined,
       });
-      setOrderStripePaymentIntent(order.id, paymentIntentId);
+      order = created.order;
     }
 
-    const metadata: Record<string, string> = {
-      orderId: order.id,
-      productSlug,
-      productName,
-      quantity: String(quantity),
-      phone: resolvedPhone,
-    };
-    if (email) metadata.email = email;
-
-    const paymentIntent = await stripe.paymentIntents.update(paymentIntentId, {
-      metadata,
-      ...(email ? { receipt_email: email } : {}),
+    const paymentIntent = await stripe.paymentIntents.update(parsed.paymentIntentId, {
+      metadata: stripeMetadataFromOrderSnapshot(parsed.snapshot, { orderId: order.id }),
+      ...(parsed.email ? { receipt_email: parsed.email } : {}),
     });
 
-    if (email) {
+    if (parsed.email) {
       try {
         enqueueStorefrontCheckout({
-          email,
-          marketingConsent,
-          customerName,
-          phone,
-          emirate: resolvedEmirate,
+          email: parsed.email,
+          marketingConsent: parsed.marketingConsent,
+          customerName: parsed.customerName,
+          phone: parsed.phone,
+          emirate: parsed.emirate,
           paymentMethod: "card",
           externalCheckoutId: order.backendExternalCheckoutId ?? order.id,
           orderId: order.id,
-          stripePaymentIntentId: paymentIntentId,
+          stripePaymentIntentId: parsed.paymentIntentId,
           lines: checkoutLinesForSync({
-            productSlug,
-            quantity,
-            cartLines: syncLines,
+            productSlug: parsed.productSlug,
+            quantity: parsed.quantity,
+            cartLines: parsed.cartLines,
           }),
           phase: "order_open",
         });

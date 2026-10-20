@@ -18,11 +18,14 @@ import {
 } from "@/lib/ordersSheets/googleSheetsDirect";
 import type { OrderRecord } from "@/lib/ordersRepository";
 import {
+  claimCardSheetExport,
+  completeCardSheetExportClaim,
   getOrderAttribution,
   getOrderById,
   getOrderCartLines,
   markOrderSheetExported,
   recordCardSheetExportAttempt,
+  releaseCardSheetExportClaim,
   wasOrderSheetExported,
 } from "@/lib/ordersRepository";
 
@@ -254,13 +257,21 @@ export async function exportOrderToGoogleSheets(input: {
     return;
   }
 
-  if (wasOrderSheetExported(input.order.id, input.channel)) return;
+  if (input.channel === "cod" && wasOrderSheetExported(input.order.id, input.channel)) return;
+
+  let cardExportClaim: string | null = null;
+  if (input.channel === "card") {
+    if (wasOrderSheetExported(input.order.id, "card")) return;
+    cardExportClaim = claimCardSheetExport(input.order.id);
+    if (!cardExportClaim) return;
+  }
 
   if (input.channel === "card" && input.order.status !== "paid") {
     console.warn("[orders-sheets] card export skipped (order not paid)", {
       orderId: input.order.id,
       status: input.order.status,
     });
+    if (cardExportClaim) releaseCardSheetExportClaim(input.order.id, cardExportClaim);
     return;
   }
   if (input.channel === "cod" && input.order.paymentMethod !== "cod") return;
@@ -330,7 +341,15 @@ export async function exportOrderToGoogleSheets(input: {
         return;
       }
     }
-    if (ok) markOrderSheetExported(input.order.id, input.channel);
+    if (ok) {
+      if (input.channel === "card" && cardExportClaim) {
+        completeCardSheetExportClaim(input.order.id, cardExportClaim);
+      } else {
+        markOrderSheetExported(input.order.id, input.channel);
+      }
+    } else if (input.channel === "card" && cardExportClaim) {
+      releaseCardSheetExportClaim(input.order.id, cardExportClaim);
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown";
     console.error("[orders-sheets] export error", {
@@ -339,6 +358,7 @@ export async function exportOrderToGoogleSheets(input: {
       error: message,
     });
     if (input.channel === "card") {
+      if (cardExportClaim) releaseCardSheetExportClaim(input.order.id, cardExportClaim);
       recordCardSheetExportAttempt(input.order.id, message);
     }
   }

@@ -3,11 +3,11 @@ import type Stripe from "stripe";
 import { recoverPaidOrderCheckout } from "@/lib/backendCheckout/capture";
 import {
   getOrderById,
-  getOrderByStripePaymentIntentId,
   getOrderByStripeSessionId,
   markOrderPaid,
 } from "@/lib/ordersRepository";
 import { exportPaidCardOrderToGoogleSheetsById } from "@/lib/ordersSheets/exportOrder";
+import { fulfillSucceededCardPaymentIntent } from "@/lib/stripe/fulfillCardPaymentIntent";
 import { getStripe } from "@/lib/stripeServer";
 
 export const runtime = "nodejs";
@@ -37,37 +37,7 @@ export async function POST(request: Request) {
   try {
     if (event.type === "payment_intent.succeeded") {
       const intent = event.data.object as Stripe.PaymentIntent;
-      const orderId = intent.metadata?.orderId;
-      let paidOrderId: string | null = null;
-      if (orderId) {
-        markOrderPaid(orderId);
-        paidOrderId = orderId;
-      } else if (intent.id) {
-        const order = getOrderByStripePaymentIntentId(intent.id);
-        if (order) {
-          markOrderPaid(order.id);
-          paidOrderId = order.id;
-        }
-      }
-      const paidOrder = paidOrderId ? getOrderById(paidOrderId) : null;
-      if (paidOrder) {
-        try {
-          await exportPaidCardOrderToGoogleSheetsById(paidOrder.id);
-        } catch (err) {
-          console.error(
-            "[stripe/webhook] card sheet export failed",
-            err instanceof Error ? err.message : err,
-          );
-        }
-        try {
-          recoverPaidOrderCheckout(paidOrder);
-        } catch (err) {
-          console.error(
-            "[stripe/webhook] backend checkout sync failed",
-            err instanceof Error ? err.message : err,
-          );
-        }
-      }
+      await fulfillSucceededCardPaymentIntent(intent);
     } else if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.payment_status === "paid" || session.status === "complete") {

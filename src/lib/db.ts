@@ -46,6 +46,10 @@ function ensureSchema(database: Database.Database): void {
   database.exec(
     `CREATE INDEX IF NOT EXISTS idx_orders_stripe_pi ON orders (stripe_payment_intent_id)`,
   );
+  database.exec(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_stripe_pi_unique ON orders (stripe_payment_intent_id)
+     WHERE stripe_payment_intent_id IS NOT NULL AND TRIM(stripe_payment_intent_id) != ''`,
+  );
   if (!names.has("customer_email")) {
     database.exec(`ALTER TABLE orders ADD COLUMN customer_email TEXT`);
   }
