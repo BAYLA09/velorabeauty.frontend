@@ -19,10 +19,13 @@ import { ProductTrustBar } from "@/components/product/ProductTrustBar";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
-import { uaeDeliveryWindowLabel } from "@/lib/delivery/uaeDeliveryWindow";
 import { AttributionCaptureEffect } from "@/components/attribution/AttributionCaptureEffect";
 import type { ProductWithPage } from "@/lib/productCatalog";
-import { IconCheckCircle } from "@/components/product/ProductFunnelIcons";
+import { ProductGalleryBenefitLines } from "@/components/product/ProductGalleryBenefitLines";
+import {
+  getGalleryBenefitLines,
+  getProductGalleryImageSrcs,
+} from "@/lib/product/getProductGalleryImageSrcs";
 
 type Props = {
   product: ProductWithPage;
@@ -34,7 +37,8 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
-  const deliveryWindow = uaeDeliveryWindowLabel();
+  const gallerySrcs = getProductGalleryImageSrcs(product.pageImage, product.image.src);
+  const galleryBenefitLines = getGalleryBenefitLines(page);
 
   useEffect(() => {
     trackSnapViewContent({ productSlug: product.slug, valueAed: product.price });
@@ -63,24 +67,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
               <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
                 {page.headlineQuestion}
               </h1>
-              <p className="mt-2.5 text-[15px] font-medium leading-[1.85] text-velora-burgundy/85 sm:mt-3 sm:text-base">
-                {page.subhook}
-              </p>
-              <ul className="mt-3 space-y-2 sm:mt-4">
-                {page.heroBullets.map((line) => (
-                  <li
-                    key={line}
-                    className="flex items-start justify-end gap-2 text-right text-[13px] font-semibold leading-relaxed text-velora-burgundy/90 sm:text-sm"
-                  >
-                    <span>{line}</span>
-                    <IconCheckCircle
-                      className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700"
-                      aria-hidden
-                    />
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3 text-xs font-bold text-velora-burgundy/60">{deliveryWindow}</p>
             </header>
 
             <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
@@ -88,10 +74,12 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 <div className="hidden lg:block">
                   <ProductGallery
                     mainSrc={product.pageImage.src}
+                    gallerySrcs={gallerySrcs}
                     productName={product.name}
                     placeholder={product.pageImage.placeholder}
                     laraFrame
                   />
+                  <ProductGalleryBenefitLines lines={galleryBenefitLines} />
                   <ProductFeaturePills form={page.form} />
                 </div>
               </aside>
@@ -100,11 +88,13 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 <div className="lg:hidden">
                   <ProductGallery
                     mainSrc={product.pageImage.src}
+                    gallerySrcs={gallerySrcs}
                     productName={product.name}
                     placeholder={product.pageImage.placeholder}
                     laraFrame
                     fullWidthMobile
                   />
+                  <ProductGalleryBenefitLines lines={galleryBenefitLines} />
                   <ProductFeaturePills form={page.form} />
                 </div>
 

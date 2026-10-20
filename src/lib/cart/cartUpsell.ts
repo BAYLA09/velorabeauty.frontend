@@ -1,3 +1,4 @@
+import { isRetiredBundleImageSrc } from "@/config/retiredBundleImage";
 import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductId } from "@/config/products";
 import { getAllProductsWithPages } from "@/lib/productCatalog";
@@ -33,7 +34,10 @@ export function getUpsellRecommendations(lines: CartLine[]): UpsellProduct[] {
       name: p.name,
       tagline: p.ingredient,
       routineLabel: ROUTINE_LABEL[p.id],
-      imageSrc: p.pageImage.upsellSlotSrc?.[1] ?? p.pageImage.upsellSrc ?? p.image.src,
+      imageSrc:
+        [p.pageImage.upsellSlotSrc?.[1], p.pageImage.upsellSrc, p.image.src].find(
+          (s) => s?.trim() && !isRetiredBundleImageSrc(s),
+        ) ?? p.image.src,
       imageAlt: p.image.placeholder,
     }));
 }

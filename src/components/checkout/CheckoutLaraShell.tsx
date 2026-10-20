@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { CheckoutBackChevron } from "@/components/checkout/CheckoutBackChevron";
+import { checkoutBackLinkClassName } from "@/components/checkout/checkoutBackLinkStyles";
 import { VeloraLogo } from "@/components/ui/VeloraLogo";
 
 function IconShieldCheck({ className }: { className?: string }) {
@@ -20,42 +22,28 @@ function IconShieldCheck({ className }: { className?: string }) {
   );
 }
 
-function IconArrowBack({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  );
-}
-
 type Props = {
   title: string;
   subtitle?: string;
   backHref: string;
+  backLabel?: string;
   children: ReactNode;
 };
 
-export function CheckoutLaraShell({ title, subtitle, backHref, children }: Props) {
+export function CheckoutLaraShell({
+  title,
+  subtitle,
+  backHref,
+  backLabel = "العودة إلى طريقة الدفع",
+  children,
+}: Props) {
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-neutral-200/60 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <Link
-            href={backHref}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900"
-            aria-label="رجوع"
-          >
-            <IconArrowBack className="h-5 w-5" />
+          <Link href={backHref} className={`${checkoutBackLinkClassName} max-w-[min(100%,11rem)] shrink-0 sm:max-w-none`}>
+            <CheckoutBackChevron className="h-5 w-5 shrink-0 text-neutral-800 rtl:rotate-180" />
+            <span className="truncate">{backLabel}</span>
           </Link>
           <Link href="/" className="shrink-0">
             <VeloraLogo layout="row" />

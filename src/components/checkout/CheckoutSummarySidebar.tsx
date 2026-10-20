@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
+import { CheckoutBackChevron } from "@/components/checkout/CheckoutBackChevron";
+import { checkoutBackLinkClassName } from "@/components/checkout/checkoutBackLinkStyles";
 import { CheckoutTrustCard } from "@/components/checkout/CheckoutTrustCard";
 import { CheckoutUpsellPanel } from "@/components/checkout/CheckoutUpsellPanel";
 import { encodeCartItemsParam } from "@/lib/cart/cartSerialization";
@@ -292,15 +294,17 @@ export function CheckoutSummarySidebar({
                 { product: productSlug, quantity: bundleQty, items: cartItemsParam },
                 paymentMethod,
               )}
-              className="block font-semibold text-[#134E3A] underline-offset-2 hover:underline"
+              className={`${checkoutBackLinkClassName} w-full`}
             >
-              ← تغيير طريقة الدفع (بطاقة / COD)
+              <CheckoutBackChevron className="h-5 w-5 shrink-0 text-neutral-800 rtl:rotate-180" />
+              <span>تغيير طريقة الدفع (بطاقة / COD)</span>
             </Link>
             <Link
               href={`${getProductPath(productSlug)}#purchase`}
-              className="block font-medium text-neutral-600 underline-offset-2 hover:text-neutral-900 hover:underline"
+              className={`${checkoutBackLinkClassName} w-full`}
             >
-              ← العودة إلى صفحة المنتج
+              <CheckoutBackChevron className="h-5 w-5 shrink-0 text-neutral-800 rtl:rotate-180" />
+              <span>العودة إلى المنتج</span>
             </Link>
           </nav>
         ) : null}

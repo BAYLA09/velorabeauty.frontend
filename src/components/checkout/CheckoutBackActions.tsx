@@ -6,6 +6,8 @@ import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
 import { getProductPath } from "@/lib/productCatalog";
 import { MIXED_CART_PRODUCT_SLUG } from "@/lib/cart/cartTypes";
 import { HOMEPAGE_PRODUCT_SLUG } from "@/lib/resolveCheckoutContext";
+import { CheckoutBackChevron } from "@/components/checkout/CheckoutBackChevron";
+import { checkoutBackLinkClassName } from "@/components/checkout/checkoutBackLinkStyles";
 
 type BackTarget = "product" | "payment";
 
@@ -28,23 +30,6 @@ function productReturnHref(productSlug: string): string {
   return `${getProductPath(productSlug)}#purchase`;
 }
 
-function ChevronBackIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path
-        fillRule="evenodd"
-        d="M11.78 5.22a.75.75 0 010 1.06L8.06 10l3.72 3.72a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
-
 export function CheckoutBackActions({
   productSlug,
   quantity,
@@ -63,11 +48,8 @@ export function CheckoutBackActions({
 
   return (
     <nav aria-label="رجوع" className={className}>
-      <Link
-        href={href}
-        className="group inline-flex items-center gap-1.5 rounded-md py-1.5 text-sm font-medium text-neutral-600 transition hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400"
-      >
-        <ChevronBackIcon className="h-[18px] w-[18px] shrink-0 text-neutral-400 transition group-hover:text-neutral-700 rtl:rotate-180" />
+      <Link href={href} className={checkoutBackLinkClassName}>
+        <CheckoutBackChevron className="h-5 w-5 shrink-0 text-neutral-800 rtl:rotate-180" />
         <span>{label}</span>
       </Link>
     </nav>

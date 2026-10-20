@@ -52,12 +52,3 @@ export const products: Product[] = [
     cta: "اطلبي الآن",
   },
 ];
-
-export const bundle = {
-  title: "المجموعة الكاملة",
-  subtitle: "شعر، بشرة، ومحيط العين — روتين فيلورا بثلاث خطوات.",
-  savingsLine: "قيمة أوضح عند اختيار المجموعة",
-  priceLabel: formatPrice(339),
-  cta: "اختاري المجموعة",
-  image: images.products.bundle,
-} as const;
