@@ -1,5 +1,13 @@
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { isSnapCatalogSlug } from "@/config/snapPixel";
+import { snapCatalogContentId } from "@/config/warmTeeProduct";
+
+function addSnapContentId(ids: Set<string>, slug: string | undefined) {
+  const trimmed = slug?.trim();
+  if (!trimmed || !isSnapCatalogSlug(trimmed)) return;
+  const contentId = snapCatalogContentId(trimmed);
+  if (contentId) ids.add(contentId);
+}
 
 export function snapContentIdsFromOrder(input: {
   productSlug: string;
@@ -8,12 +16,10 @@ export function snapContentIdsFromOrder(input: {
   const ids = new Set<string>();
   if (input.cartLines?.length) {
     for (const line of input.cartLines) {
-      const slug = line.slug?.trim();
-      if (slug && isSnapCatalogSlug(slug)) ids.add(slug);
+      addSnapContentId(ids, line.slug);
     }
   }
-  const primary = input.productSlug?.trim();
-  if (primary && isSnapCatalogSlug(primary)) ids.add(primary);
+  addSnapContentId(ids, input.productSlug);
   return [...ids];
 }
 

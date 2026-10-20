@@ -1,6 +1,5 @@
 import { images } from "./images";
 import { formatPrice, singleProductPrice } from "./pricing";
-
 export type ProductId = "hair" | "skin" | "eye";
 
 export type Product = {

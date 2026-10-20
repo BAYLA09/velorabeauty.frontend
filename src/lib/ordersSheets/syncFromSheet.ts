@@ -17,7 +17,8 @@ import {
   updateCardOrderStatusFromSheet,
   updateCodOrderStatusFromSheet,
 } from "@/lib/ordersRepository";
-import { getProductBySlug } from "@/lib/productCatalog";
+import { getStoreProductBySlug } from "@/lib/productCatalog";
+import { resolveProductSlugFromSheetSku } from "@/config/warmTeeProduct";
 
 export type ChannelSyncStats = {
   rowsRead: number;
@@ -78,8 +79,8 @@ function importSheetOnlyOrder(
     return;
   }
 
-  const slug = row.sku.trim() || "vitaminamin";
-  const product = getProductBySlug(slug);
+  const slug = resolveProductSlugFromSheetSku(row.sku.trim() || "vitaminamin");
+  const product = getStoreProductBySlug(slug);
   const subtotalAed = row.priceAed > 0 ? row.priceAed : 0;
   const totalAed = subtotalAed > 0 ? subtotalAed : 199;
   const status =

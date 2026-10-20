@@ -1,6 +1,12 @@
 import { images } from "@/config/images";
 import { productPages } from "@/config/productPages";
 import { products, type Product, type ProductId } from "@/config/products";
+import {
+  isWarmTeeSlug,
+  warmTeePageConfig,
+  warmTeePageImage,
+  warmTeeProduct,
+} from "@/config/warmTeeProduct";
 
 export type ProductImageRef = {
   /** فارغ = مساحة محجوزة على PDP */
@@ -27,6 +33,16 @@ export type ProductWithPage = Product & {
   pageImage: ProductImageRef;
 };
 
+/** Listed PDPs + hidden warm tee (checkout / sheets). */
+export type StoreProductRef = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  image: { src: string; placeholder: string };
+  pageImage: ProductImageRef;
+};
+
 function mapProduct(p: Product): ProductWithPage {
   return {
     ...p,
@@ -36,8 +52,34 @@ function mapProduct(p: Product): ProductWithPage {
   };
 }
 
+function mapWarmTeeStoreProduct(): StoreProductRef {
+  return {
+    ...warmTeeProduct,
+    slug: warmTeePageConfig.slug,
+    pageImage: warmTeePageImage,
+  };
+}
+
+const LISTED_PRODUCT_IDS = new Set<ProductId>(["hair", "skin", "eye"]);
+
 export function getAllProductsWithPages(): ProductWithPage[] {
-  return products.map(mapProduct);
+  return products
+    .filter((p) => LISTED_PRODUCT_IDS.has(p.id))
+    .map(mapProduct);
+}
+
+export function getStoreProductBySlug(slug: string): StoreProductRef | undefined {
+  if (isWarmTeeSlug(slug)) return mapWarmTeeStoreProduct();
+  const listed = getAllProductsWithPages().find((p) => p.slug === slug);
+  if (!listed) return undefined;
+  return {
+    id: listed.id,
+    slug: listed.slug,
+    name: listed.name,
+    price: listed.price,
+    image: listed.image,
+    pageImage: listed.pageImage,
+  };
 }
 
 export function getProductBySlug(slug: string): ProductWithPage | undefined {

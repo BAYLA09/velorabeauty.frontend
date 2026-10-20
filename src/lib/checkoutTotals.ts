@@ -10,6 +10,11 @@ import {
   isStripeLiveTestProductSlug,
   STRIPE_LIVE_TEST_PRICE_AED,
 } from "@/config/stripeLiveTestCheckout";
+import {
+  isWarmTeeSlug,
+  warmTeeCheckoutTotalAed,
+  warmTeeMerchandiseAed,
+} from "@/config/warmTeeProduct";
 import { getCheckoutTotalForCart, getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 
@@ -27,6 +32,9 @@ export function resolveCheckoutTotalAed(
   cartLines?: CartLine[],
   productSlug?: string,
 ): number {
+  if (productSlug && isWarmTeeSlug(productSlug)) {
+    return warmTeeCheckoutTotalAed(method);
+  }
   if (
     isStripeLiveTestCheckoutEnabled() &&
     productSlug &&
@@ -51,6 +59,9 @@ export function resolveCheckoutMerchandiseAed(
   cartLines?: CartLine[],
   productSlug?: string,
 ): number {
+  if (productSlug && isWarmTeeSlug(productSlug)) {
+    return warmTeeMerchandiseAed(1) ?? 0;
+  }
   if (isStripeLiveTestCheckoutEnabled() && productSlug && isStripeLiveTestProductSlug(productSlug)) {
     return STRIPE_LIVE_TEST_PRICE_AED;
   }

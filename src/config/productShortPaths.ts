@@ -1,5 +1,6 @@
 /** Short URLs → canonical product PDP paths (ads, bookmarks, old links). */
 export const PRODUCT_SHORT_PATH_REDIRECTS = [
+  { short: "/warm", canonical: "/products/warm" },
   { short: "/hair-gummies", canonical: "/products/hair-gummies" },
   { short: "/skin-gummies", canonical: "/products/skin-gummies" },
   { short: "/eye-serum", canonical: "/products/eye-serum" },

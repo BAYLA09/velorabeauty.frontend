@@ -1,9 +1,10 @@
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { normalizeCartLines } from "@/lib/cart/cartPricing";
 import { getMerchandiseAedForLineQuantity } from "@/config/pricing";
+import { resolveOrderSheetSku } from "@/config/warmTeeProduct";
 import type { OrderAttribution } from "@/lib/attribution/orderAttribution";
 import type { OrderRecord } from "@/lib/ordersRepository";
-import { getProductBySlug } from "@/lib/productCatalog";
+import { getStoreProductBySlug } from "@/lib/productCatalog";
 import { getSiteUrl } from "@/lib/siteUrl";
 import { CARD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/cardSheetColumns";
 import { COD_ORDERS_SHEET_COLUMN_COUNT } from "@/lib/ordersSheets/codSheetColumns";
@@ -68,17 +69,18 @@ export function buildCodSheetRows(
   const utm = attribution ?? {};
 
   return lineItemsForOrder(order, lines).map((line) => {
-    const product = getProductBySlug(line.slug);
-    const sku = line.slug;
+    const product = getStoreProductBySlug(line.slug);
+    const sku = resolveOrderSheetSku(line.slug);
     const productName = product?.name ?? order.productName;
-    const price = getMerchandiseAedForLineQuantity(line.quantity) ?? order.subtotalAed;
+    const price =
+      getMerchandiseAedForLineQuantity(line.quantity, line.slug) ?? order.subtotalAed;
     const row: (string | number)[] = [
       orderDate,
       country,
       order.customerName,
       order.phone,
       order.address,
-      productUrl(sku, utm),
+      productUrl(line.slug, utm),
       sku,
       productName,
       line.quantity,
@@ -111,17 +113,18 @@ export function buildCardSheetRows(
   const utm = attribution ?? {};
 
   return lineItemsForOrder(order, lines).map((line) => {
-    const product = getProductBySlug(line.slug);
-    const sku = line.slug;
+    const product = getStoreProductBySlug(line.slug);
+    const sku = resolveOrderSheetSku(line.slug);
     const productName = product?.name ?? order.productName;
-    const price = getMerchandiseAedForLineQuantity(line.quantity) ?? order.subtotalAed;
+    const price =
+      getMerchandiseAedForLineQuantity(line.quantity, line.slug) ?? order.subtotalAed;
     const row: (string | number)[] = [
       orderDate,
       country,
       order.customerName,
       order.phone,
       order.address,
-      productUrl(sku, utm),
+      productUrl(line.slug, utm),
       sku,
       productName,
       line.quantity,
@@ -149,7 +152,7 @@ export function formatProductsColumn(lines: CartLine[] | null, fallbackName: str
   if (!lines || lines.length === 0) return fallbackName;
   return normalizeCartLines(lines)
     .map((line) => {
-      const name = getProductBySlug(line.slug)?.name ?? line.slug;
+      const name = getStoreProductBySlug(line.slug)?.name ?? line.slug;
       return line.quantity > 1 ? `${name} ×${line.quantity}` : name;
     })
     .join(" · ");
