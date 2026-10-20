@@ -40,6 +40,7 @@ export function CheckoutOrderForm({
   const [phone, setPhone] = useState("");
   const [emirate, setEmirate] = useState(checkoutEmirates[0] ?? "دبي");
   const [address, setAddress] = useState("");
+  const isCod = paymentMethod === "cod";
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -64,7 +65,11 @@ export function CheckoutOrderForm({
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
     const trimmedAddress = address.trim();
-    if (!trimmedName || !trimmedPhone || !trimmedAddress) {
+    if (!trimmedName || !trimmedPhone) {
+      setError("عفواً — أكملي الاسم ورقم الهاتف.");
+      return;
+    }
+    if (!isCod && !trimmedAddress) {
       setError("عفواً — أكملي الاسم والهاتف والعنوان.");
       return;
     }
@@ -86,8 +91,12 @@ export function CheckoutOrderForm({
           paymentMethod,
           customerName: trimmedName,
           phone: phoneCheck.normalized,
-          emirate,
-          address: trimmedAddress,
+          ...(isCod
+            ? {}
+            : {
+                emirate,
+                address: trimmedAddress,
+              }),
           attribution: getCheckoutAttributionForOrder(),
         }),
       });
@@ -159,34 +168,38 @@ export function CheckoutOrderForm({
             />
             <p className="mt-1 text-[11px] text-velora-burgundy/55">{uaePhoneHint}</p>
           </label>
-          <label className="block">
-            <span className="text-xs font-semibold text-velora-burgundy/70">
-              {checkoutExperience.fields.emirate}
-            </span>
-            <select
-              value={emirate}
-              onChange={(ev) => setEmirate(ev.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-velora-burgundy/15 bg-white px-3 py-3 text-sm text-velora-burgundy-dark outline-none ring-velora-champagne/40 focus:ring-2"
-            >
-              {checkoutEmirates.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block sm:col-span-2">
-            <span className="text-xs font-semibold text-velora-burgundy/70">
-              {checkoutExperience.fields.address}
-            </span>
-            <textarea
-              required
-              rows={3}
-              value={address}
-              onChange={(ev) => setAddress(ev.target.value)}
-              className="mt-1.5 w-full resize-none rounded-xl border border-velora-burgundy/15 bg-white px-3 py-3 text-sm text-velora-burgundy-dark outline-none ring-velora-champagne/40 focus:ring-2"
-            />
-          </label>
+          {!isCod && (
+            <>
+              <label className="block">
+                <span className="text-xs font-semibold text-velora-burgundy/70">
+                  {checkoutExperience.fields.emirate}
+                </span>
+                <select
+                  value={emirate}
+                  onChange={(ev) => setEmirate(ev.target.value)}
+                  className="mt-1.5 w-full rounded-xl border border-velora-burgundy/15 bg-white px-3 py-3 text-sm text-velora-burgundy-dark outline-none ring-velora-champagne/40 focus:ring-2"
+                >
+                  {checkoutEmirates.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block sm:col-span-2">
+                <span className="text-xs font-semibold text-velora-burgundy/70">
+                  {checkoutExperience.fields.address}
+                </span>
+                <textarea
+                  required
+                  rows={3}
+                  value={address}
+                  onChange={(ev) => setAddress(ev.target.value)}
+                  className="mt-1.5 w-full resize-none rounded-xl border border-velora-burgundy/15 bg-white px-3 py-3 text-sm text-velora-burgundy-dark outline-none ring-velora-champagne/40 focus:ring-2"
+                />
+              </label>
+            </>
+          )}
         </div>
         {error && (
           <p className="mt-3 text-sm font-semibold text-rose-700" role="alert">

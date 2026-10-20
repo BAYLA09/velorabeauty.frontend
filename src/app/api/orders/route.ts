@@ -83,15 +83,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: phoneCheck.error }, { status: 400 });
     }
     const resolvedPhone = phoneCheck.normalized;
-    if (!address) {
-      return NextResponse.json({ error: "أدخلي عنوان التوصيل." }, { status: 400 });
+
+    let resolvedEmirate = "";
+    let resolvedAddress = "";
+    if (paymentMethod === "card") {
+      if (!address) {
+        return NextResponse.json({ error: "أدخلي عنوان التوصيل." }, { status: 400 });
+      }
+      resolvedEmirate =
+        emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
+          ? emirate
+          : (checkoutEmirates[0] ?? "دبي");
+      resolvedAddress = address || "يُؤكَّد بعد التواصل";
+    } else {
+      resolvedEmirate =
+        emirate &&
+        checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
+          ? emirate
+          : "";
+      resolvedAddress = address;
     }
-    const resolvedEmirate =
-      emirate && checkoutEmirates.includes(emirate as (typeof checkoutEmirates)[number])
-        ? emirate
-        : (checkoutEmirates[0] ?? "دبي");
-    const resolvedAddress =
-      address || (paymentMethod === "card" ? "يُؤكَّد بعد التواصل" : "");
 
     const attribution = parseOrderAttributionFromBody(body);
 
