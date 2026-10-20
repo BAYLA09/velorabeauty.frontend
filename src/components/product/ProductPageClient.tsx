@@ -111,6 +111,10 @@ export function ProductPageClient({ product, allProducts }: Props) {
             />
           </section>
 
+          <div className="mt-6 border-t border-velora-burgundy/8 pt-6">
+            <ProductVideoStoriesStrip productSlug={product.slug} />
+          </div>
+
           {scrollImages.problem ? (
             <div className="py-4 sm:py-5">
               <ProductPdpStackedImage
@@ -160,10 +164,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
           ) : null}
 
           <ProductVeloraGuaranteeBlock page={page} variant="section" />
-
-          <div className="mt-8 border-t border-velora-burgundy/8 pt-6">
-            <ProductVideoStoriesStrip productSlug={product.slug} />
-          </div>
 
           <ProductPagePdpTail page={page} productId={product.id} />
 
