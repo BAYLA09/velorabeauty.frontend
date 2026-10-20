@@ -30,10 +30,10 @@ export const products: Product[] = [
   {
     id: "skin",
     number: "02",
-    name: "علكات البشرة",
-    ingredient: "بالغلوتاثيون",
+    name: "علكات فيلورا للبشرة",
+    ingredient: "بفيتامين C والكولاجين والبيوتين",
     description:
-      "إشراق من الداخل — روتين بسيط يلائم يومك، بلا قوائم منتجات طويلة.",
+      "خطوة يومية بسيطة لروتين العناية — ترطيب ومظهر بشرة مرتاحة، بلا ادعاءات طبية.",
     price: singleProductPrice,
     priceLabel: formatPrice(singleProductPrice),
     image: images.products.skin,

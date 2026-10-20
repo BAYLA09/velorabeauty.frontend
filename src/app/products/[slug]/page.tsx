@@ -7,6 +7,7 @@ import {
   getAllProductsWithPages,
   getProductBySlug,
 } from "@/lib/productCatalog";
+import { getProductPdpScrollImages } from "@/lib/product/getProductGalleryImageSrcs";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -31,7 +32,11 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const all = getAllProductsWithPages();
-  const mainSrc = product.pageImage.src?.trim();
+  const mainSrc = getProductPdpScrollImages(
+    product.pageImage,
+    product.image.src,
+    product.slug,
+  ).beforeAfter?.trim();
 
   return (
     <>

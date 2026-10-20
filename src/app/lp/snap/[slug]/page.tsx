@@ -22,6 +22,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function snapHeroImageSrc(product: NonNullable<ReturnType<typeof getProductBySlug>>): string {
+  if (product.slug === "skin-gummies") {
+    const lifestyle = product.pageImage.timelineSectionImageSrc?.trim();
+    if (lifestyle) return lifestyle;
+    return product.image.src;
+  }
   const slot = product.pageImage.upsellSlotSrc?.[1];
   if (slot) return slot;
   if (product.pageImage.src) return product.pageImage.src;

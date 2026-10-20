@@ -38,7 +38,7 @@ export const images = {
       timelineSectionImageSrc: "/images/products/pdp/hair-timeline-slot.webp?v=20261007",
     },
     skin: {
-      src: "/images/products/pdp/skin-main.webp?v=20261007",
+      src: "/images/products/pdp/skin-timeline-slot.webp?v=20261007",
       storySrc: "/images/products/pdp/skin-story.webp?v=20261007",
       upsellSlotSrc: {
         1: "/images/products/pdp/upsell/skin-qty-1.webp?v=20261007",
