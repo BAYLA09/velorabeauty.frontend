@@ -29,6 +29,11 @@ import { AttributionCaptureEffect } from "@/components/attribution/AttributionCa
 import type { ProductWithPage } from "@/lib/productCatalog";
 import { ProductGalleryBenefitLines } from "@/components/product/ProductGalleryBenefitLines";
 import {
+  HAIR_GUMMIES_BACKORDER_CTA_LABEL,
+  isHairGummiesBackorderReservation,
+} from "@/config/hairGummiesBackorder";
+import { HairGummiesBackorderNotice } from "@/components/product/HairGummiesBackorderNotice";
+import {
   getGalleryBenefitLines,
   getProductPdpScrollImages,
 } from "@/lib/product/getProductGalleryImageSrcs";
@@ -51,7 +56,11 @@ export function ProductPageClient({ product, allProducts }: Props) {
   }, [product.slug, product.price]);
 
   const displayTotal = purchase?.total ?? cardBundlePrices[quantity];
-  const stickyCtaLabel = purchase?.ctaLabel ?? "اطلبي الآن — الدفع عند الاستلام";
+  const stickyCtaLabel =
+    purchase?.ctaLabel ??
+    (isHairGummiesBackorderReservation(product.slug)
+      ? HAIR_GUMMIES_BACKORDER_CTA_LABEL
+      : "اطلبي الآن — الدفع عند الاستلام");
 
   return (
     <>
@@ -82,6 +91,9 @@ export function ProductPageClient({ product, allProducts }: Props) {
               </h1>
             </header>
 
+            {isHairGummiesBackorderReservation(product.slug) ? (
+              <HairGummiesBackorderNotice className="mb-4" />
+            ) : null}
             <p className="mb-4 text-sm font-semibold tabular-nums text-velora-burgundy/75">
               من {formatPrice(singleProductPrice)} / {unitLabel}
             </p>
