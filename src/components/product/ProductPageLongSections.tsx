@@ -43,41 +43,56 @@ function SectionIntro({
 const usageIcons = [IconClock, IconBox, IconDroplet, IconSparkles] as const;
 const mechanismIcons = [IconDroplet, IconLeaf, IconSparkles] as const;
 
-export function ProductPagePainNarrative({ page }: { page: ProductPageConfig }) {
+function ProductPagePainItemCards({ page }: { page: ProductPageConfig }) {
   return (
-    <section className="bg-velora-cream py-8 sm:py-10">
-      <SectionIntro eyebrow={page.painEyebrow} title={page.painTitle} lead={page.painLead} />
-      <div className="space-y-4">
-        {page.painItems.map((item) => (
-          <div
-            key={item.problem}
-            className="overflow-hidden rounded-[1.5rem] border border-velora-burgundy/10 bg-white shadow-sm"
-          >
-            <div className="flex items-start gap-3 p-4 sm:p-5">
-              <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-700/90"
-                aria-hidden
-              >
-                <IconXCircle className="h-4 w-4" />
-              </span>
-              <p className="flex-1 text-sm font-bold leading-relaxed text-velora-burgundy">
-                {item.problem}
-              </p>
-            </div>
-            <div className="flex items-start gap-3 border-t border-velora-burgundy/8 bg-velora-cream-dark/90 p-4 sm:p-5">
-              <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-800/90"
-                aria-hidden
-              >
-                <IconCheckCircle className="h-4 w-4" />
-              </span>
-              <p className="flex-1 text-sm leading-relaxed text-velora-burgundy/85">
-                {item.solution}
-              </p>
-            </div>
+    <div className="space-y-4">
+      {page.painItems.map((item) => (
+        <div
+          key={item.problem}
+          className="overflow-hidden rounded-[1.5rem] border border-velora-burgundy/10 bg-white shadow-sm"
+        >
+          <div className="flex items-start gap-3 p-4 sm:p-5">
+            <span
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-700/90"
+              aria-hidden
+            >
+              <IconXCircle className="h-4 w-4" />
+            </span>
+            <p className="flex-1 text-sm font-bold leading-relaxed text-velora-burgundy">
+              {item.problem}
+            </p>
           </div>
-        ))}
-      </div>
+          <div className="flex items-start gap-3 border-t border-velora-burgundy/8 bg-velora-cream-dark/90 p-4 sm:p-5">
+            <span
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-800/90"
+              aria-hidden
+            >
+              <IconCheckCircle className="h-4 w-4" />
+            </span>
+            <p className="flex-1 text-sm leading-relaxed text-velora-burgundy/85">
+              {item.solution}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Pain eyebrow, title, and lead — story image is placed in the PDP layout after this block. */
+export function ProductPagePainNarrativeIntro({ page }: { page: ProductPageConfig }) {
+  return (
+    <section className="bg-velora-cream pt-8 sm:pt-10 pb-3 sm:pb-4">
+      <SectionIntro eyebrow={page.painEyebrow} title={page.painTitle} lead={page.painLead} />
+    </section>
+  );
+}
+
+/** Complaint / solution cards — rendered after the problem story image on catalog PDPs. */
+export function ProductPagePainNarrativeCards({ page }: { page: ProductPageConfig }) {
+  return (
+    <section className="bg-velora-cream pb-8 sm:pb-10 pt-4 sm:pt-5">
+      <ProductPagePainItemCards page={page} />
     </section>
   );
 }

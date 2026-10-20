@@ -11,7 +11,8 @@ import {
   ProductPageComparisonSection,
   ProductPageDeliveryAndFaq,
   ProductPageFormulaMarketing,
-  ProductPagePainNarrative,
+  ProductPagePainNarrativeCards,
+  ProductPagePainNarrativeIntro,
   ProductPageTestimonials,
   ProductPageUsageAndResults,
 } from "@/components/product/ProductPageLongSections";
@@ -122,16 +123,18 @@ export function ProductPageClient({ product, allProducts }: Props) {
             <ProductVideoStoriesStrip productSlug={product.slug} />
           </div>
 
-          <ProductPagePainNarrative page={page} />
+          <ProductPagePainNarrativeIntro page={page} />
 
           {scrollImages.problem ? (
-            <div className="py-4 sm:py-5">
+            <div className="pb-4 sm:pb-5">
               <ProductPdpStackedImage
                 src={scrollImages.problem}
                 alt={`${product.name} — التحدي اليومي`}
               />
             </div>
           ) : null}
+
+          <ProductPagePainNarrativeCards page={page} />
 
           <ProductPageFormulaMarketing page={page} />
 
