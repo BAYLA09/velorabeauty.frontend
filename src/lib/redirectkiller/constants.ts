@@ -18,6 +18,10 @@ export const REDIRECT_PRESET_DESTINATIONS: RedirectDestinationOption[] = [
   { label: "Skin Gummies (short)", path: "/skin-gummies" },
   { label: "Eye Serum (PDP)", path: "/products/eye-serum" },
   { label: "Eye Serum (short)", path: "/eye-serum" },
+  ...CORE_PRODUCT_SLUGS.map((slug) => ({
+    label: `Snap ad LP — ${slug}`,
+    path: `/lp/snap/${slug}`,
+  })),
 ];
 
 /** Presets plus any other allowlisted internal paths (for admin dropdown). */
@@ -48,6 +52,7 @@ export function listAllowedInternalPaths(): string[] {
     "/eye-serum",
     "/eye-gummies",
     ...CORE_PRODUCT_SLUGS.map((slug) => `/products/${slug}`),
+    ...CORE_PRODUCT_SLUGS.map((slug) => `/lp/snap/${slug}`),
   ];
   const merged = new Set([...base, ...extra]);
   return [...merged].sort();
