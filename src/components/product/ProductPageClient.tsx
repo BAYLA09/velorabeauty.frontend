@@ -137,10 +137,10 @@ export function ProductPageClient({ product, allProducts }: Props) {
           <ProductPagePainNarrative page={page} />
           <ProductPageFormulaMarketing page={page} />
 
-          {scrollImages.productMain ? (
+          {scrollImages.timeline ? (
             <div className="py-4 sm:py-5">
               <ProductPdpStackedImage
-                src={scrollImages.productMain}
+                src={scrollImages.timeline}
                 alt={`${product.name} — المنتج`}
               />
             </div>
@@ -148,23 +148,14 @@ export function ProductPageClient({ product, allProducts }: Props) {
 
           <ProductPageUsageAndResults page={page} />
 
-          {scrollImages.storyOrFormula ? (
-            <div className="py-4 sm:py-5">
-              <ProductPdpStackedImage
-                src={scrollImages.storyOrFormula}
-                alt={`${product.name} — التركيبة والروتين`}
-              />
-            </div>
-          ) : null}
-
           <ProductPageTestimonials page={page} productId={product.id} />
           <ProductPageComparisonSection page={page} />
 
-          {scrollImages.fourth ? (
+          {scrollImages.formula ? (
             <div className="py-4 sm:py-5">
               <ProductPdpStackedImage
-                src={scrollImages.fourth}
-                alt={`${product.name} — فيلورا`}
+                src={scrollImages.formula}
+                alt={`${product.name} — التركيبة والروتين`}
               />
             </div>
           ) : null}
