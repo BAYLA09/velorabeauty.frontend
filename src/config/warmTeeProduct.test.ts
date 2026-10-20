@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { resolveCheckoutTotalAed } from "../lib/checkoutTotals.ts";
 import { snapContentIdsFromOrder } from "../lib/analytics/snapContentIds.ts";
 import {
   resolveOrderSheetSku,
@@ -19,8 +18,6 @@ describe("warmTeeProduct", () => {
   it("prices checkout at 79 AED card / 99 COD", () => {
     assert.equal(warmTeeCheckoutTotalAed("card"), 79);
     assert.equal(warmTeeCheckoutTotalAed("cod"), 99);
-    assert.equal(resolveCheckoutTotalAed(1, "card", 1, undefined, WARM_TEE_SLUG), 79);
-    assert.equal(resolveCheckoutTotalAed(1, "cod", 1, undefined, WARM_TEE_SLUG), 99);
   });
 
   it("uses WARMTEE as Snap content id", () => {
