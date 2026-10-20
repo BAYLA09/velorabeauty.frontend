@@ -63,35 +63,10 @@ function cleanPdpImageSrc(raw?: string): string | undefined {
  * Exactly four static PDP images: before/after, problem (story), timeline lifestyle, formula (pre-guarantee).
  * Qty-1 upsell packshots (`upsellSlotSrc[1]`) are for bundle-offer thumbnails only — not stacked PDP heroes.
  */
-const SKIN_GUMMIES_SLUG = "skin-gummies";
-
-/** Snap/compliance: no before/after hero on skin — lifestyle lead image + four distinct slots. */
-function getSkinGummiesPdpScrollImages(
-  pageImage: ProductImageRef,
-  homePackshotSrc?: string,
-): ProductPdpScrollImages {
-  const lifestyle = cleanPdpImageSrc(pageImage.timelineSectionImageSrc);
-  const problem = cleanPdpImageSrc(pageImage.storySrc);
-  const timeline = cleanPdpImageSrc(homePackshotSrc);
-  const formula = cleanPdpImageSrc(pageImage.formulaSectionImageSrc);
-
-  return {
-    beforeAfter: lifestyle ?? problem,
-    problem,
-    timeline: timeline ?? formula,
-    formula,
-  };
-}
-
 export function getProductPdpScrollImages(
   pageImage: ProductImageRef,
   homePackshotSrc?: string,
-  productSlug?: string,
 ): ProductPdpScrollImages {
-  if (productSlug === SKIN_GUMMIES_SLUG) {
-    return getSkinGummiesPdpScrollImages(pageImage, homePackshotSrc);
-  }
-
   const beforeAfter = getProductBeforeAfterHeroSrc(pageImage);
   const problem = cleanPdpImageSrc(pageImage.storySrc);
   const timeline =

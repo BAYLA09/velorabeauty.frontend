@@ -92,22 +92,6 @@ describe("getProductPdpScrollImages", () => {
     assert.equal(imgs.formula, "/formula.webp");
   });
 
-  it("uses lifestyle hero (not before/after main) for skin-gummies", () => {
-    const imgs = getProductPdpScrollImages(
-      {
-        placeholder: "x",
-        src: "/images/products/pdp/skin-main.webp",
-        storySrc: "/story.webp",
-        formulaSectionImageSrc: "/formula.webp",
-        timelineSectionImageSrc: "/lifestyle.webp",
-      },
-      "/home.webp",
-      "skin-gummies",
-    );
-    assert.equal(imgs.beforeAfter, "/lifestyle.webp");
-    assert.notEqual(imgs.beforeAfter, "/images/products/pdp/skin-main.webp");
-  });
-
   it("never maps upsell qty-1 packshot to a full-width PDP stack slot", () => {
     const upsellQty1 = "/images/products/pdp/upsell/skin-qty-1.webp";
     const imgs = getProductPdpScrollImages(

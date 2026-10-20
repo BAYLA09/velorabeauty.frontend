@@ -45,29 +45,6 @@ type Props = {
   allProducts: ProductWithPage[];
 };
 
-const SKIN_GUMMIES_SLUG = "skin-gummies";
-
-type PdpImageSlot = "beforeAfter" | "problem" | "timeline" | "formula";
-
-function catalogPdpStackedAlt(slug: string, productName: string, slot: PdpImageSlot): string {
-  if (slug === SKIN_GUMMIES_SLUG) {
-    const skinLabels: Record<PdpImageSlot, string> = {
-      beforeAfter: "عناية يومية للبشرة",
-      problem: "لحظة من الروتين",
-      timeline: "علكات فيلورا للبشرة",
-      formula: "التركيبة والروتين",
-    };
-    return `${productName} — ${skinLabels[slot]}`;
-  }
-  const defaultLabels: Record<PdpImageSlot, string> = {
-    beforeAfter: "قبل وبعد",
-    problem: "التحدي اليومي",
-    timeline: "المنتج",
-    formula: "التركيبة والروتين",
-  };
-  return `${productName} — ${defaultLabels[slot]}`;
-}
-
 /**
  * Mobile PDP order aligned with larabeauty.store funnel (magnesium-sleep reference):
  * hero → subhook/benefits/pills → buy box → videos → images interleaved with copy → guarantee → delivery/FAQ.
@@ -77,11 +54,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
-  const scrollImages = getProductPdpScrollImages(
-    product.pageImage,
-    product.image.src,
-    product.slug,
-  );
+  const scrollImages = getProductPdpScrollImages(product.pageImage, product.image.src);
   const galleryBenefitLines = getGalleryBenefitLines(page);
 
   useEffect(() => {
@@ -115,7 +88,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
           {scrollImages.beforeAfter ? (
             <ProductPdpStackedImage
               src={scrollImages.beforeAfter}
-              alt={catalogPdpStackedAlt(product.slug, product.name, "beforeAfter")}
+              alt={`${product.name} — قبل وبعد`}
               priority
             />
           ) : null}
@@ -156,7 +129,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
             <div className="pb-4 sm:pb-5">
               <ProductPdpStackedImage
                 src={scrollImages.problem}
-                alt={catalogPdpStackedAlt(product.slug, product.name, "problem")}
+                alt={`${product.name} — التحدي اليومي`}
               />
             </div>
           ) : null}
@@ -169,7 +142,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
             <div className="py-4 sm:py-5">
               <ProductPdpStackedImage
                 src={scrollImages.timeline}
-                alt={catalogPdpStackedAlt(product.slug, product.name, "timeline")}
+                alt={`${product.name} — المنتج`}
               />
             </div>
           ) : null}
@@ -183,7 +156,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
             <div className="py-4 sm:py-5">
               <ProductPdpStackedImage
                 src={scrollImages.formula}
-                alt={catalogPdpStackedAlt(product.slug, product.name, "formula")}
+                alt={`${product.name} — التركيبة والروتين`}
               />
             </div>
           ) : null}
@@ -212,11 +185,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
         productSlug={product.slug}
         quantity={purchase?.quantity ?? quantity}
         productName={product.name}
-        thumbnailSrc={
-          scrollImages.beforeAfter ??
-          product.pageImage.src ??
-          "/images/products/eye-serum.webp"
-        }
+        thumbnailSrc={product.pageImage.src ?? "/images/products/eye-serum.webp"}
         priceAed={displayTotal}
       />
     </>
