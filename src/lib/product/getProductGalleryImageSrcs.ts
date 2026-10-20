@@ -2,17 +2,18 @@ import { isRetiredBundleImageSrc } from "@/config/retiredBundleImage";
 import type { ProductImageRef } from "@/lib/productCatalog";
 
 const GALLERY_SLOT_COUNT = 4;
+const CAROUSEL_SLOT_COUNT = 3;
 
-/** PDP hero gallery — main, story, formula, timeline, then upsell/home fallbacks. */
-export function getProductGalleryImageSrcs(
+function buildUniqueImagePool(
   pageImage: ProductImageRef,
+  includeTimeline: boolean,
   homePackshotSrc?: string,
 ): string[] {
   const pool = [
     pageImage.src,
     pageImage.storySrc,
     pageImage.formulaSectionImageSrc,
-    pageImage.timelineSectionImageSrc,
+    ...(includeTimeline ? [pageImage.timelineSectionImageSrc] : []),
     pageImage.upsellSlotSrc?.[1],
     pageImage.upsellSlotSrc?.[2],
     pageImage.upsellSlotSrc?.[3],
@@ -26,14 +27,41 @@ export function getProductGalleryImageSrcs(
     if (!s || isRetiredBundleImageSrc(s)) continue;
     if (!unique.includes(s)) unique.push(s);
   }
+  return unique;
+}
 
+function padToSlotCount(unique: string[], slotCount: number): string[] {
   if (unique.length === 0) return [];
-
   const result = [...unique];
-  while (result.length < GALLERY_SLOT_COUNT) {
+  while (result.length < slotCount) {
     result.push(unique[result.length % unique.length]);
   }
-  return result.slice(0, GALLERY_SLOT_COUNT);
+  return result.slice(0, slotCount);
+}
+
+/** Fixed top hero — before/after creative (timeline slot). */
+export function getProductBeforeAfterHeroSrc(pageImage: ProductImageRef): string | undefined {
+  const src = pageImage.timelineSectionImageSrc?.trim();
+  if (!src || isRetiredBundleImageSrc(src)) return undefined;
+  return src;
+}
+
+/** Three-image carousel below the fixed before/after hero (main, story, formula). */
+export function getProductCarouselImageSrcs(
+  pageImage: ProductImageRef,
+  homePackshotSrc?: string,
+): string[] {
+  const unique = buildUniqueImagePool(pageImage, false, homePackshotSrc);
+  return padToSlotCount(unique, CAROUSEL_SLOT_COUNT);
+}
+
+/** PDP hero gallery — main, story, formula, timeline, then upsell/home fallbacks. */
+export function getProductGalleryImageSrcs(
+  pageImage: ProductImageRef,
+  homePackshotSrc?: string,
+): string[] {
+  const unique = buildUniqueImagePool(pageImage, true, homePackshotSrc);
+  return padToSlotCount(unique, GALLERY_SLOT_COUNT);
 }
 
 export function getGalleryBenefitLines(page: {

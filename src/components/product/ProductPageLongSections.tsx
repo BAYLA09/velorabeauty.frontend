@@ -278,38 +278,6 @@ export function ProductPageLongSections({
         />
       ) : null}
 
-      <section className="bg-velora-cream py-10 sm:py-14">
-        <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6 lg:max-w-[1200px]">
-          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#f5e6d3] via-velora-cream-dark to-[#e8d7b8] p-6 sm:p-8">
-            <div
-              className="pointer-events-none absolute -left-8 -top-8 h-32 w-32 rounded-full border-4 border-velora-champagne/40 bg-velora-champagne/20"
-              aria-hidden
-            />
-            <p className="text-center text-[11px] font-bold tracking-[0.25em] text-velora-burgundy/60">
-              ضمان فيلورا
-            </p>
-            <h2 className="mt-2 text-center text-2xl font-extrabold text-velora-burgundy-dark sm:text-3xl">
-              {page.guaranteeTitle}
-            </h2>
-            <p className="mt-2 text-center text-sm text-velora-burgundy/65">{page.guaranteeSubtitle}</p>
-            <ol className="mt-6 space-y-5">
-              {page.guaranteeSteps.map((s) => (
-                <li key={s.title} className="relative pt-4">
-                  <span className="absolute left-1/2 top-0 z-10 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full bg-[#2c1318] text-sm font-black text-velora-cream">
-                    {s.step}
-                  </span>
-                  <div className="rounded-[1.25rem] bg-white px-4 pb-4 pt-8 text-center shadow-sm">
-                    <p className="font-extrabold text-velora-burgundy-dark">{s.title}</p>
-                    <p className="mt-1 text-sm text-velora-burgundy/70">{s.text}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <p className="mt-4 text-center text-[11px] text-velora-burgundy/50">{page.guaranteeFooter}</p>
-          </div>
-        </div>
-      </section>
-
       <section className="bg-white py-10 sm:py-14">
         <div className="mx-auto max-w-lg px-4 sm:max-w-3xl sm:px-6 lg:max-w-[1200px]">
           <SectionIntro eyebrow={page.deliveryTitle} title={page.deliverySubtitle} />
