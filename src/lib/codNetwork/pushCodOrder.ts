@@ -1,4 +1,3 @@
-import type { CartLine } from "@/lib/cart/cartTypes";
 import { buildSellerLeadBodyFromOrder } from "@/lib/codNetwork/buildSellerLead";
 import { createSellerLead, isCodNetworkApiConfigured } from "@/lib/codNetwork/sellerApiClient";
 import {
