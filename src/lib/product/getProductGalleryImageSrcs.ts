@@ -46,6 +46,41 @@ export function getProductBeforeAfterHeroSrc(pageImage: ProductImageRef): string
   return src;
 }
 
+export type ProductPdpScrollImages = {
+  beforeAfter: string | undefined;
+  problem: string | undefined;
+  productMain: string | undefined;
+  storyOrFormula: string | undefined;
+  fourth: string | undefined;
+};
+
+function cleanPdpImageSrc(raw?: string): string | undefined {
+  const s = raw?.trim();
+  if (!s || isRetiredBundleImageSrc(s)) return undefined;
+  return s;
+}
+
+/**
+ * Static scroll images for catalog PDPs (before/after, problem, main, formula, fourth).
+ * Timeline = before/after; story = pain/problem; main = packshot; formula = science/lifestyle; fourth = upsell hero.
+ */
+export function getProductPdpScrollImages(
+  pageImage: ProductImageRef,
+  homePackshotSrc?: string,
+): ProductPdpScrollImages {
+  const beforeAfter = getProductBeforeAfterHeroSrc(pageImage);
+  const problem = cleanPdpImageSrc(pageImage.storySrc);
+  const productMain =
+    cleanPdpImageSrc(pageImage.src) ?? cleanPdpImageSrc(homePackshotSrc);
+  const storyOrFormula = cleanPdpImageSrc(pageImage.formulaSectionImageSrc);
+  const fourth =
+    cleanPdpImageSrc(pageImage.upsellSlotSrc?.[1]) ??
+    cleanPdpImageSrc(pageImage.marketingSpotlight) ??
+    cleanPdpImageSrc(pageImage.upsellSrc);
+
+  return { beforeAfter, problem, productMain, storyOrFormula, fourth };
+}
+
 /** Three-image carousel below the fixed before/after hero (main, story, formula). */
 export function getProductCarouselImageSrcs(
   pageImage: ProductImageRef,
