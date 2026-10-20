@@ -7,8 +7,13 @@ import {
 } from "@/lib/profitAdmin/calculations";
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 import { isExcludedTestOrder, orderProductCostUsd } from "@/lib/profitAdmin/productCosts";
+import { canManualRetryCodNetworkPush } from "@/lib/codNetwork/pushCodOrder";
 import type { OrderRecord } from "@/lib/ordersRepository";
-import { listOrdersBetween, listRecentOrders } from "@/lib/ordersRepository";
+import {
+  getOrderCodNetworkPushState,
+  listOrdersBetween,
+  listRecentOrders,
+} from "@/lib/ordersRepository";
 
 export type DashboardOrderRow = {
   id: string;
@@ -19,6 +24,10 @@ export type DashboardOrderRow = {
   statusTone: "success" | "warning" | "neutral";
   date: string;
   createdAt: string;
+  codNetworkPushStatus: string | null;
+  codNetworkPushError: string | null;
+  codNetworkLeadId: string | null;
+  canRetryCodNetworkPush: boolean;
 };
 
 export type LivePaymentAggregate = {
@@ -106,6 +115,14 @@ export function aggregateOrdersForPeriod(
     .filter((o) => !isExcludedTestOrder(o))
     .map((order) => {
     const st = mapOrderStatus(order);
+    const push =
+      order.paymentMethod === "cod" ? getOrderCodNetworkPushState(order.id) : null;
+    const codNetworkPushStatus =
+      order.paymentMethod === "cod"
+        ? push?.leadId
+          ? "sent"
+          : push?.pushStatus ?? null
+        : null;
     return {
       id: order.id,
       type: (order.paymentMethod === "card" ? "Payment" : "COD") as "Payment" | "COD",
@@ -115,6 +132,11 @@ export function aggregateOrdersForPeriod(
       statusTone: st.tone,
       date: formatDisplayDate(order.createdAt),
       createdAt: order.createdAt,
+      codNetworkPushStatus,
+      codNetworkPushError: push?.pushError ?? null,
+      codNetworkLeadId: push?.leadId ?? null,
+      canRetryCodNetworkPush:
+        order.paymentMethod === "cod" ? canManualRetryCodNetworkPush(order.id) : false,
     };
   });
 

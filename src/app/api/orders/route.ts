@@ -11,6 +11,7 @@ import { kickBackendCheckoutWorker } from "@/lib/backendCheckout/worker";
 import { parseOrderAttributionFromBody } from "@/lib/attribution/orderAttribution";
 import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout/contract";
 import { createOrder } from "@/lib/ordersRepository";
+import { pushCodOrderToNetwork } from "@/lib/codNetwork/pushCodOrder";
 import { exportOrderToGoogleSheets } from "@/lib/ordersSheets/exportOrder";
 import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 
@@ -120,6 +121,11 @@ export async function POST(request: Request) {
         channel: "cod",
         cartLines: syncLines,
       });
+      try {
+        await pushCodOrderToNetwork(order.id);
+      } catch (pushErr) {
+        console.error("[api/orders POST] COD Network push failed", pushErr);
+      }
     }
 
     if (email) {

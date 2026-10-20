@@ -1,5 +1,7 @@
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { normalizeCartLines } from "@/lib/cart/cartPricing";
+import { allocateCodSheetLinePrices } from "@/lib/codNetwork/codFulfillmentPricing";
+import { resolveCodSheetSku } from "@/lib/codNetwork/skuMap";
 import { getMerchandiseAedForLineQuantity } from "@/config/pricing";
 import { resolveOrderSheetSku } from "@/config/warmTeeProduct";
 import type { OrderAttribution } from "@/lib/attribution/orderAttribution";
@@ -68,12 +70,14 @@ export function buildCodSheetRows(
   const notes = buildNotes(order);
   const utm = attribution ?? {};
 
-  return lineItemsForOrder(order, lines).map((line) => {
+  const normalized = lineItemsForOrder(order, lines);
+  const linePrices = allocateCodSheetLinePrices(order, lines);
+
+  return normalized.map((line, index) => {
     const product = getStoreProductBySlug(line.slug);
-    const sku = resolveOrderSheetSku(line.slug);
+    const sku = resolveCodSheetSku(line.slug);
     const productName = product?.name ?? order.productName;
-    const price =
-      getMerchandiseAedForLineQuantity(line.quantity, line.slug) ?? order.subtotalAed;
+    const price = linePrices[index] ?? order.totalAed;
     const row: (string | number)[] = [
       orderDate,
       country,

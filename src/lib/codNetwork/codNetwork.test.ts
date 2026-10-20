@@ -3,8 +3,10 @@ import { describe, it } from "node:test";
 import { verifyCodNetworkWebhookSecret, readCodNetworkWebhookSecret } from "@/lib/codNetwork/auth";
 import { extractStorefrontOrderIdFromInputs, parseLeadWebhookBody, parseOrderWebhookBody } from "@/lib/codNetwork/parseWebhook";
 import { phonesMatch, uaePhoneMatchKey } from "@/lib/codNetwork/phoneMatch";
+import { buildSellerLeadBodyFromOrder } from "@/lib/codNetwork/buildSellerLead";
+import { mapEmirateToCodNetworkCity } from "@/lib/codNetwork/emirateCity";
+import { createSellerLead } from "@/lib/codNetwork/sellerApiClient";
 import { mapCodNetworkLeadStatus, mapCodNetworkOrderStatus } from "@/lib/codNetwork/statusMapping";
-
 describe("COD Network webhook secret", () => {
   it("rejects wrong secret", () => {
     const prev = process.env.COD_NETWORK_WEBHOOK_SECRET;
@@ -67,5 +69,78 @@ describe("UAE phone matching", () => {
   it("normalizes local and international formats", () => {
     assert.equal(uaePhoneMatchKey("0501234567"), "+971501234567");
     assert.equal(phonesMatch("0501234567", "+971 50 123 4567"), true);
+  });
+});
+
+describe("COD Network seller lead", () => {
+  const baseOrder = {
+    id: "abc-123",
+    productSlug: "eye-serum",
+    productName: "Eye",
+    quantity: 1,
+    paymentMethod: "cod",
+    subtotalAed: 199,
+    deliveryFeeAed: 20,
+    totalAed: 219,
+    customerName: "Sara",
+    phone: "+971501234567",
+    emirate: "الشارقة",
+    address: "Al Majaz",
+    status: "pending",
+    stripeCheckoutSessionId: null,
+    stripePaymentIntentId: null,
+    customerEmail: null,
+    marketingConsent: false,
+    backendExternalCheckoutId: null,
+    createdAt: "2026-10-20T12:00:00.000Z",
+    cartLines: [],
+    orderSource: "storefront" as const,
+  };
+
+  it("maps emirate to English city", () => {
+    assert.equal(mapEmirateToCodNetworkCity("دبي"), "Dubai");
+    assert.equal(mapEmirateToCodNetworkCity("الشارقة"), "Sharjah");
+  });
+
+  it("builds lead body with COD SKUs and fee-inclusive prices", () => {
+    const built = buildSellerLeadBodyFromOrder(baseOrder, null);
+    assert.ok(built && "body" in built);
+    assert.equal(built.body.country, "AE");
+    assert.equal(built.body.city, "Sharjah");
+    assert.equal(built.body.items[0].sku, "vitaminamin");
+    assert.equal(built.body.items[0].quantity, 1);
+    assert.equal(built.body.items[0].price, 219);
+  });
+
+  it("createSellerLead uses mocked fetch only", async () => {
+    const prevToken = process.env.COD_NETWORK_API_TOKEN;
+    process.env.COD_NETWORK_API_TOKEN = "test-token-not-logged";
+    const originalFetch = globalThis.fetch;
+    let capturedUrl = "";
+    let capturedBody = "";
+    globalThis.fetch = async (input, init) => {
+      capturedUrl = String(input);
+      capturedBody = String(init?.body ?? "");
+      return new Response(JSON.stringify({ status: "success", data: { id: 42 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    };
+    try {
+      const result = await createSellerLead({
+        phone: "+971501234567",
+        name: "Sara",
+        country: "AE",
+        address: "x",
+        city: "Dubai",
+        items: [{ sku: "vitaminamin", quantity: 1, price: 219 }],
+      });
+      assert.equal(result.leadId, "42");
+      assert.ok(capturedUrl.includes("/v2/seller/leads"));
+      assert.ok(capturedBody.includes("vitaminamin"));
+    } finally {
+      globalThis.fetch = originalFetch;
+      process.env.COD_NETWORK_API_TOKEN = prevToken;
+    }
   });
 });

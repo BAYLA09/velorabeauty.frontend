@@ -83,6 +83,10 @@ type DashboardPayload = {
     status: string;
     statusTone: string;
     date: string;
+    codNetworkPushStatus: string | null;
+    codNetworkPushError: string | null;
+    codNetworkLeadId: string | null;
+    canRetryCodNetworkPush: boolean;
   }[];
   state: ProfitDashboardState;
   fees: FeeConfig;
@@ -202,6 +206,7 @@ export function ProfitAdminDashboard() {
   const [loadingDash, setLoadingDash] = useState(false);
   const [codNetRefreshing, setCodNetRefreshing] = useState(false);
   const [codNetNote, setCodNetNote] = useState<string | null>(null);
+  const [codNetPushingId, setCodNetPushingId] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [localState, setLocalState] = useState<ProfitDashboardState | null>(null);
@@ -272,6 +277,41 @@ export function ProfitAdminDashboard() {
       setCodNetRefreshing(false);
     }
   }, [loadDashboard]);
+
+  const pushOrderToCodNetwork = useCallback(
+    async (orderId: string) => {
+      setCodNetPushingId(orderId);
+      setCodNetNote(null);
+      try {
+        const res = await fetch("/api/bayla-admin/cod-network/push", {
+          method: "POST",
+          credentials: "include",
+          headers: apiHeaders(),
+          body: JSON.stringify({ orderId }),
+        });
+        const json = (await res.json()) as {
+          ok?: boolean;
+          error?: string;
+          leadId?: string;
+          skipped?: boolean;
+          reason?: string;
+        };
+        if (!res.ok || !json.ok) {
+          setCodNetNote(json.error ?? "COD Network push failed");
+          return;
+        }
+        if (json.skipped) {
+          setCodNetNote(`Skipped: ${json.reason ?? "unknown"}`);
+        } else {
+          setCodNetNote(`Lead created: ${json.leadId ?? "ok"}`);
+        }
+        await loadDashboard();
+      } finally {
+        setCodNetPushingId(null);
+      }
+    },
+    [loadDashboard],
+  );
 
   const codNetworkStatusLine = useMemo(() => {
     const cn = data?.codNetwork;
@@ -907,7 +947,7 @@ export function ProfitAdminDashboard() {
                   </p>
                 ) : (
                   <div className="mt-4 overflow-x-auto">
-                    <table className="w-full min-w-[640px] text-left text-sm">
+                    <table className="w-full min-w-[880px] text-left text-sm">
                       <thead className="text-xs uppercase text-slate-500">
                         <tr>
                           <th className="pb-2 pr-4">Order ID</th>
@@ -915,6 +955,7 @@ export function ProfitAdminDashboard() {
                           <th className="pb-2 pr-4">Customer</th>
                           <th className="pb-2 pr-4">Amount</th>
                           <th className="pb-2 pr-4">Status</th>
+                          <th className="pb-2 pr-4">COD Network</th>
                           <th className="pb-2">Date</th>
                         </tr>
                       </thead>
@@ -939,6 +980,38 @@ export function ProfitAdminDashboard() {
                               >
                                 {row.status}
                               </span>
+                            </td>
+                            <td className="py-2.5 pr-4">
+                              {row.type === "COD" ? (
+                                <div className="flex flex-col gap-1">
+                                  <span className="text-xs text-slate-300">
+                                    {row.codNetworkLeadId
+                                      ? `Sent · lead ${row.codNetworkLeadId}`
+                                      : row.codNetworkPushStatus
+                                        ? row.codNetworkPushStatus
+                                        : "Not sent"}
+                                  </span>
+                                  {row.codNetworkPushError ? (
+                                    <span className="text-xs text-orange-300/90">
+                                      {row.codNetworkPushError}
+                                    </span>
+                                  ) : null}
+                                  {row.canRetryCodNetworkPush ? (
+                                    <button
+                                      type="button"
+                                      disabled={codNetPushingId === row.id}
+                                      onClick={() => void pushOrderToCodNetwork(row.id)}
+                                      className="w-fit rounded-lg border border-violet-500/40 px-2 py-0.5 text-xs text-violet-300 hover:bg-violet-500/10 disabled:opacity-50"
+                                    >
+                                      {codNetPushingId === row.id
+                                        ? "Sending…"
+                                        : "Send to COD Network"}
+                                    </button>
+                                  ) : null}
+                                </div>
+                              ) : (
+                                <span className="text-xs text-slate-600">—</span>
+                              )}
                             </td>
                             <td className="py-2.5 text-slate-400">{row.date}</td>
                           </tr>

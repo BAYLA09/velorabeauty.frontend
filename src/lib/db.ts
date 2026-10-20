@@ -85,6 +85,15 @@ function ensureSchema(database: Database.Database): void {
   if (!names.has("cod_network_status_detail")) {
     database.exec(`ALTER TABLE orders ADD COLUMN cod_network_status_detail TEXT`);
   }
+  if (!names.has("cod_network_push_status")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN cod_network_push_status TEXT`);
+  }
+  if (!names.has("cod_network_push_error")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN cod_network_push_error TEXT`);
+  }
+  if (!names.has("cod_network_push_attempted_at")) {
+    database.exec(`ALTER TABLE orders ADD COLUMN cod_network_push_attempted_at TEXT`);
+  }
   database.exec(
     `CREATE INDEX IF NOT EXISTS idx_orders_codnet_lead ON orders (cod_network_lead_id)`,
   );
