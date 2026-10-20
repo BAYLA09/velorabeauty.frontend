@@ -23,6 +23,11 @@ import { AttributionCaptureEffect } from "@/components/attribution/AttributionCa
 import type { ProductWithPage } from "@/lib/productCatalog";
 import { ProductGalleryBenefitLines } from "@/components/product/ProductGalleryBenefitLines";
 import {
+  HAIR_GUMMIES_BACKORDER_CTA_LABEL,
+  isHairGummiesBackorderReservation,
+} from "@/config/hairGummiesBackorder";
+import { HairGummiesBackorderNotice } from "@/components/product/HairGummiesBackorderNotice";
+import {
   getGalleryBenefitLines,
   getProductBeforeAfterHeroSrc,
   getProductCarouselImageSrcs,
@@ -65,7 +70,10 @@ export function ProductPageClient({ product, allProducts }: Props) {
 
   const displayTotal = purchase?.total ?? cardBundlePrices[quantity];
   const stickyCtaLabel =
-    purchase?.ctaLabel ?? "اطلبي الآن — الدفع عند الاستلام";
+    purchase?.ctaLabel ??
+    (isHairGummiesBackorderReservation(product.slug)
+      ? HAIR_GUMMIES_BACKORDER_CTA_LABEL
+      : "اطلبي الآن — الدفع عند الاستلام");
 
   return (
     <>
@@ -97,6 +105,9 @@ export function ProductPageClient({ product, allProducts }: Props) {
                 <div className="lg:hidden">{pdpMedia(true)}</div>
 
                 <div className="mt-4 flex min-w-0 flex-col gap-3.5 sm:mt-0 sm:gap-4">
+                  {isHairGummiesBackorderReservation(product.slug) ? (
+                    <HairGummiesBackorderNotice />
+                  ) : null}
                   <p className="text-sm font-semibold tabular-nums text-velora-burgundy/75">
                     من {formatPrice(singleProductPrice)} / {unitLabel}
                   </p>

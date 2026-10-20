@@ -34,6 +34,8 @@ import {
   uaePhonePlaceholder,
   validateUaeMobilePhone,
 } from "@/lib/phone/uaePhone";
+import { isHairGummiesBackorderReservation } from "@/config/hairGummiesBackorder";
+import { HairGummiesBackorderNotice } from "@/components/product/HairGummiesBackorderNotice";
 import { saveOrderDraft } from "@/lib/orderStorage";
 import type { OrderRecord } from "@/lib/ordersRepository";
 
@@ -231,6 +233,10 @@ export function CheckoutConfirmClient({
                 📞 سيتصل بك فريقنا خلال 24 ساعة لتأكيد طلبك — الرجاء الرد على الرقم
               </p>
             )}
+
+            {isHairGummiesBackorderReservation(productSlug) ? (
+              <HairGummiesBackorderNotice />
+            ) : null}
 
             <button
               type="submit"
