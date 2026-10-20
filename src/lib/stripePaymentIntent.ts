@@ -2,6 +2,10 @@ import type { BundleQuantity } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
 import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { getSiteUrl } from "@/lib/siteUrl";
+import {
+  snapshotFromCheckoutFields,
+  stripeMetadataFromOrderSnapshot,
+} from "@/lib/stripe/paymentIntentOrderMetadata";
 import { getStripe } from "@/lib/stripeServer";
 
 export type CardPaymentIntentResult = {
@@ -35,13 +39,16 @@ export async function createOrUpdateCardPaymentIntent(input: {
     if (current.status === "succeeded" || current.status === "canceled") {
       throw new Error("payment_intent_expired");
     }
+    const snapshot = snapshotFromCheckoutFields({
+      productSlug,
+      productName,
+      quantity,
+      eligibleUnits,
+      cartLines,
+    });
     const updated = await stripe.paymentIntents.update(paymentIntentId, {
       amount: amountFils,
-      metadata: {
-        productSlug,
-        productName,
-        quantity: String(quantity),
-      },
+      metadata: stripeMetadataFromOrderSnapshot(snapshot),
     });
     if (!updated.client_secret) {
       throw new Error("payment_intent_missing_secret");
@@ -53,16 +60,18 @@ export async function createOrUpdateCardPaymentIntent(input: {
     };
   }
 
+  const snapshot = snapshotFromCheckoutFields({
+    productSlug,
+    productName,
+    quantity,
+    eligibleUnits,
+    cartLines,
+  });
   const intent = await stripe.paymentIntents.create({
     amount: amountFils,
     currency: "aed",
     payment_method_types: ["card"],
-    metadata: {
-      productSlug,
-      productName,
-      quantity: String(quantity),
-      siteUrl: getSiteUrl(),
-    },
+    metadata: stripeMetadataFromOrderSnapshot(snapshot, { siteUrl: getSiteUrl() }),
   });
 
   if (!intent.client_secret) {

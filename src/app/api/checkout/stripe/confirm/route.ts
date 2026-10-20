@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { recoverPaidOrderCheckout } from "@/lib/backendCheckout/capture";
 import { getOrderById, markOrderPaid } from "@/lib/ordersRepository";
 import { exportPaidCardOrderToGoogleSheetsById } from "@/lib/ordersSheets/exportOrder";
+import { fulfillSucceededCardPaymentIntent } from "@/lib/stripe/fulfillCardPaymentIntent";
 import { getStripe, isStripeCardCheckoutEnabled } from "@/lib/stripeServer";
 
 /** Fallback when webhook is delayed — verifies Checkout Session or PaymentIntent after redirect. */
@@ -53,20 +54,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "جلسة غير مطابقة." }, { status: 400 });
       }
       if (intent.status === "succeeded") {
-        markOrderPaid(orderId);
-        const updated = getOrderById(orderId);
-        if (updated) {
-          await exportPaidCardOrderToGoogleSheetsById(updated.id);
-          try {
-            recoverPaidOrderCheckout(updated);
-          } catch (err) {
-            console.error(
-              "[api/checkout/stripe/confirm] backend checkout sync failed",
-              err instanceof Error ? err.message : err,
-            );
-          }
-        }
-        return NextResponse.json({ paid: true, order: updated });
+        const updated = await fulfillSucceededCardPaymentIntent(intent);
+        return NextResponse.json({ paid: true, order: updated ?? getOrderById(orderId) });
       }
       return NextResponse.json({ paid: false, order });
     }

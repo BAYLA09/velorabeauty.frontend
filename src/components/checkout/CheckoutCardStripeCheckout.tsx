@@ -28,6 +28,7 @@ import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
 import { readCheckoutApiJson } from "@/lib/checkout/readCheckoutApiJson";
 import { formatCheckoutPayError } from "@/lib/checkout/formatCheckoutPayError";
 import { STRIPE_CHECKOUT_BILLING_COUNTRY } from "@/lib/checkout/stripePaymentElementConfig";
+import { getCheckoutAttributionForOrder } from "@/lib/attribution/checkoutAttributionClient";
 import { trackSnapAddBilling } from "@/lib/analytics/trackSnapCommerce";
 import { confirmCardPaymentOnServer } from "@/lib/checkout/confirmCardPaymentOnServer";
 import { submitAndConfirmStripePayment } from "@/lib/checkout/submitAndConfirmStripePayment";
@@ -239,6 +240,7 @@ function StripeCardPaymentAndSubmit({
           externalCheckoutId: resolveCheckoutExternalId(form.externalCheckoutId),
           emirate: form.emirate,
           address: fullAddress,
+          attribution: getCheckoutAttributionForOrder(),
           ...(sendCartLines ? { cartLines } : {}),
         }),
       });
