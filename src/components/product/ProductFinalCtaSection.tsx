@@ -2,7 +2,6 @@
 
 import type { BundleQuantity } from "@/config/pricing";
 import type { ProductForm } from "@/config/productPages";
-import { uaeDeliveryWindowLabel } from "@/lib/delivery/uaeDeliveryWindow";
 import {
   ProductPurchasePanel,
   type PurchaseState,
@@ -29,8 +28,6 @@ export function ProductFinalCtaSection({
   onPurchaseChange,
   headline,
 }: Props) {
-  const deliveryWindow = uaeDeliveryWindowLabel();
-
   return (
     <section
       id="final-cta"
@@ -41,7 +38,7 @@ export function ProductFinalCtaSection({
           {headline}
         </h2>
         <p className="mt-2 text-right text-sm font-medium text-velora-burgundy/65">
-          {deliveryWindow} · العرض لفترة محدودة
+          العرض لفترة محدودة
         </p>
         <div className="mt-6">
           <ProductPurchasePanel

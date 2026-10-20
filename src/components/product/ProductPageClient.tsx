@@ -19,7 +19,6 @@ import { ProductTrustBar } from "@/components/product/ProductTrustBar";
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
-import { uaeDeliveryWindowLabel } from "@/lib/delivery/uaeDeliveryWindow";
 import { AttributionCaptureEffect } from "@/components/attribution/AttributionCaptureEffect";
 import type { ProductWithPage } from "@/lib/productCatalog";
 import { ProductGalleryBenefitLines } from "@/components/product/ProductGalleryBenefitLines";
@@ -38,7 +37,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
   const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
-  const deliveryWindow = uaeDeliveryWindowLabel();
   const gallerySrcs = getProductGalleryImageSrcs(product.pageImage, product.image.src);
   const galleryBenefitLines = getGalleryBenefitLines(page);
 
@@ -69,9 +67,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
               <h1 className="text-[1.35rem] font-black leading-[1.35] text-velora-burgundy-dark sm:text-[1.75rem] lg:text-[2rem] lg:leading-[1.28]">
                 {page.headlineQuestion}
               </h1>
-              <p className="mt-3 text-xs font-bold text-velora-burgundy/60 sm:mt-4">
-                {deliveryWindow}
-              </p>
             </header>
 
             <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
