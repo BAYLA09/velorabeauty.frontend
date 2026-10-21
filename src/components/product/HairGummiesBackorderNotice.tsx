@@ -4,7 +4,7 @@ type Props = {
   className?: string;
 };
 
-/** Reservation / backorder banner — Gulf Arabic, Velora buy-box styling. */
+/** Hair gummies reservation banner — only when HAIR_GUMMIES_BACKORDER is true. */
 export function HairGummiesBackorderNotice({ className = "" }: Props) {
   return (
     <div

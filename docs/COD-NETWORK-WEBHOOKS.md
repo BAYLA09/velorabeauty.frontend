@@ -33,7 +33,7 @@ Use the same value as Easypanel `COD_NETWORK_WEBHOOK_SECRET`.
 | `COD_NETWORK_API_TOKEN` | No | Seller API bearer token for **Refresh from COD Network** and outbound lead push |
 | `COD_NETWORK_API_BASE` | No | Default `https://api.cod.network` |
 | `COD_NETWORK_PUSH_ENABLED` | No | When `true`, new storefront COD orders are POSTed to `/v2/seller/leads` after Google Sheets export |
-| `COD_NETWORK_SKU_MAP_JSON` | No | JSON slug→SKU overrides (defaults: `eye-serum`→`vitaminamin`, `skin-gummies`→`WHITEAMIN`) |
+| `COD_NETWORK_SKU_MAP_JSON` | No | JSON slug→SKU overrides (defaults: `hair-gummies`→`HAIRAMIN`, `eye-serum`→`vitaminamin`, `skin-gummies`→`WHITEAMIN`) |
 
 ## 3) Status mapping (default)
 
