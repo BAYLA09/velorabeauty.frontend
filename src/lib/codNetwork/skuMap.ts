@@ -1,6 +1,7 @@
 import { isWarmTeeSlug, resolveOrderSheetSku } from "@/config/warmTeeProduct";
 
 const DEFAULT_COD_NETWORK_SKU_MAP: Record<string, string> = {
+  "hair-gummies": "HAIRAMIN",
   "eye-serum": "vitaminamin",
   "skin-gummies": "WHITEAMIN",
 };
@@ -29,7 +30,7 @@ export function readCodNetworkSkuMap(): Record<string, string> {
   return parsed ? { ...DEFAULT_COD_NETWORK_SKU_MAP, ...parsed } : { ...DEFAULT_COD_NETWORK_SKU_MAP };
 }
 
-/** COD Network SKU when mapped; `null` if unmapped (e.g. hair-gummies). */
+/** COD Network SKU when mapped; `null` if unmapped. */
 export function resolveCodNetworkSkuForSlug(slug: string): string | null {
   const key = slug.trim();
   if (!key) return null;

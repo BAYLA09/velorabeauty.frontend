@@ -6,9 +6,9 @@ import {
 } from "@/config/hairGummiesBackorder";
 
 describe("hairGummiesBackorder", () => {
-  it("is enabled only for hair-gummies when flag is on", () => {
-    assert.equal(HAIR_GUMMIES_BACKORDER, true);
-    assert.equal(isHairGummiesBackorderReservation("hair-gummies"), true);
+  it("is off in stock — normal checkout for hair-gummies", () => {
+    assert.equal(HAIR_GUMMIES_BACKORDER, false);
+    assert.equal(isHairGummiesBackorderReservation("hair-gummies"), false);
     assert.equal(isHairGummiesBackorderReservation("skin-gummies"), false);
     assert.equal(isHairGummiesBackorderReservation("eye-serum"), false);
   });
