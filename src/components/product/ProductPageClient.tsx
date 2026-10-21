@@ -86,11 +86,13 @@ export function ProductPageClient({ product, allProducts }: Props) {
           </header>
 
           {scrollImages.beforeAfter ? (
-            <ProductPdpStackedImage
-              src={scrollImages.beforeAfter}
-              alt={`${product.name} — قبل وبعد`}
-              priority
-            />
+            <div className="py-3 sm:py-4">
+              <ProductPdpStackedImage
+                src={scrollImages.beforeAfter}
+                alt={`${product.name} — قبل وبعد`}
+                priority
+              />
+            </div>
           ) : null}
 
           <div className="space-y-4 py-4 sm:py-5">
@@ -126,7 +128,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
           <ProductPagePainNarrativeIntro page={page} />
 
           {scrollImages.problem ? (
-            <div className="pb-4 sm:pb-5">
+            <div className="py-3 sm:py-4">
               <ProductPdpStackedImage
                 src={scrollImages.problem}
                 alt={`${product.name} — التحدي اليومي`}
@@ -139,7 +141,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
           <ProductPageFormulaMarketing page={page} />
 
           {scrollImages.timeline ? (
-            <div className="py-4 sm:py-5">
+            <div className="py-3 sm:py-4">
               <ProductPdpStackedImage
                 src={scrollImages.timeline}
                 alt={`${product.name} — المنتج`}
@@ -153,7 +155,7 @@ export function ProductPageClient({ product, allProducts }: Props) {
           <ProductPageComparisonSection page={page} />
 
           {scrollImages.formula ? (
-            <div className="py-4 sm:py-5">
+            <div className="py-3 sm:py-4">
               <ProductPdpStackedImage
                 src={scrollImages.formula}
                 alt={`${product.name} — التركيبة والروتين`}
