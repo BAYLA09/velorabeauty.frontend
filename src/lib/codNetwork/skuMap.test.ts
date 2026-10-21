@@ -11,11 +11,11 @@ describe("COD Network SKU map", () => {
   it("maps known slugs to COD SKUs", () => {
     assert.equal(resolveCodNetworkSkuForSlug("eye-serum"), "vitaminamin");
     assert.equal(resolveCodNetworkSkuForSlug("skin-gummies"), "WHITEAMIN");
-    assert.equal(resolveCodNetworkSkuForSlug("hair-gummies"), null);
+    assert.equal(resolveCodNetworkSkuForSlug("hair-gummies"), "HAIRAMIN");
   });
 
   it("uses sheet SKU fallback for unmapped and warm", () => {
-    assert.equal(resolveCodSheetSku("hair-gummies"), "hair-gummies");
+    assert.equal(resolveCodSheetSku("hair-gummies"), "HAIRAMIN");
     assert.equal(resolveCodSheetSku("warm"), "WARMTEE");
     assert.equal(resolveCodSheetSku("eye-serum"), "vitaminamin");
   });
@@ -28,9 +28,10 @@ describe("COD Network SKU map", () => {
     process.env.COD_NETWORK_SKU_MAP_JSON = prev;
   });
 
-  it("blocks warm and unmapped from API push", () => {
+  it("blocks warm from API push; catalog slugs with mapped SKUs are pushable", () => {
     assert.equal(orderLinesPushableToCodNetwork(["eye-serum"]).ok, true);
+    assert.equal(orderLinesPushableToCodNetwork(["hair-gummies"]).ok, true);
     assert.equal(orderLinesPushableToCodNetwork(["warm"]).ok, false);
-    assert.equal(orderLinesPushableToCodNetwork(["hair-gummies"]).ok, false);
+    assert.equal(orderLinesPushableToCodNetwork(["unknown-slug"]).ok, false);
   });
 });

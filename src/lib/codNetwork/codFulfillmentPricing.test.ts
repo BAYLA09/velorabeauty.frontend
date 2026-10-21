@@ -80,7 +80,7 @@ describe("COD fulfillment pricing", () => {
 
   it("sheet SKU mapping uses COD Network codes for mapped slugs", () => {
     assert.equal(resolveCodSheetSku("eye-serum"), "vitaminamin");
-    assert.equal(resolveCodSheetSku("hair-gummies"), "hair-gummies");
+    assert.equal(resolveCodSheetSku("hair-gummies"), "HAIRAMIN");
   });
 
   it("API unit prices sum to order.totalAed", () => {

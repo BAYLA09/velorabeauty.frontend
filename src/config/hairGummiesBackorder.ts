@@ -5,7 +5,7 @@ export const HAIR_GUMMIES_PRODUCT_SLUG = "hair-gummies";
  * When true, hair-gummies shows backorder reservation copy on PDP and checkout.
  * Set to `false` when stock is back in warehouse.
  */
-export const HAIR_GUMMIES_BACKORDER = true;
+export const HAIR_GUMMIES_BACKORDER = false;
 
 export const HAIR_GUMMIES_BACKORDER_NOTICE_AR =
   "نفدت الكمية مؤقتاً — المخزون الجديد واصل قريباً جداً. احجزي حبتك الحين ونتواصل معك أول ما يوصل.";
