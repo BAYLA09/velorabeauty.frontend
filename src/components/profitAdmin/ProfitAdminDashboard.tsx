@@ -9,7 +9,12 @@ import { BAYLA_ADMIN_CSRF_HEADER } from "@/lib/profitAdmin/constants";
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 import type { DailyProfitPoint } from "@/lib/profitAdmin/orderMetrics";
 import type { MarketingMetrics } from "@/lib/profitAdmin/marketingMetrics";
-import { formatMoneyMetric, formatRoiPct, formatRoas } from "@/lib/profitAdmin/marketingMetrics";
+import {
+  computeMarketingMetrics,
+  formatMoneyMetric,
+  formatRoiPct,
+  formatRoas,
+} from "@/lib/profitAdmin/marketingMetrics";
 import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository";
 
 type DashboardPayload = {
@@ -193,6 +198,72 @@ function NumInput({
         ) : null}
       </div>
     </label>
+  );
+}
+
+/** Manual Snapchat spend from Ads Manager (AED) → stored as USD for profit math. */
+function SnapAdSpendInput({
+  adSpendUsd,
+  aedPerUsd,
+  preview,
+  onAdSpendUsd,
+}: {
+  adSpendUsd: number;
+  aedPerUsd: number;
+  preview: MarketingMetrics | null;
+  onAdSpendUsd: (usd: number) => void;
+}) {
+  const safeRate = aedPerUsd > 0 ? aedPerUsd : 3.6725;
+  const aed = Math.round(adSpendUsd * safeRate * 100) / 100;
+
+  return (
+    <div className="block text-xs text-slate-400">
+      <span className="font-medium text-slate-300">Ad spend (Snapchat)</span>
+      <p className="mt-0.5 text-[11px] text-slate-500">
+        دخل المبلغ من Snapchat Ads Manager (AED) — الحساب تلقائي
+      </p>
+      <div className="relative mt-1">
+        <input
+          type="number"
+          min={0}
+          step="0.01"
+          value={Number.isFinite(aed) ? aed : 0}
+          onChange={(e) => {
+            const nextAed = Math.max(0, Number.parseFloat(e.target.value) || 0);
+            onAdSpendUsd(nextAed / safeRate);
+          }}
+          className="w-full rounded-lg border border-violet-500/40 bg-[#0c1018] px-3 py-2 pr-12 text-sm text-white"
+        />
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+          AED
+        </span>
+      </div>
+      <p className="mt-1 text-[11px] text-slate-500">≈ {money(adSpendUsd)} USD (for reports)</p>
+      {preview && preview.grossProfitBeforeAdUsd !== undefined ? (
+        <dl className="mt-2 space-y-1 rounded-lg border border-slate-700/60 bg-[#0c1018]/80 px-2 py-2 text-[11px] text-slate-400">
+          <div className="flex justify-between gap-2">
+            <dt>Profit before ads</dt>
+            <dd className="text-slate-200">{money(preview.grossProfitBeforeAdUsd)}</dd>
+          </div>
+          <div className="flex justify-between gap-2">
+            <dt>− Snapchat spend</dt>
+            <dd className="text-violet-300">{money(adSpendUsd)}</dd>
+          </div>
+          <div className="flex justify-between gap-2 border-t border-slate-700/80 pt-1 font-medium">
+            <dt className="text-emerald-400/90">Net profit</dt>
+            <dd className="text-emerald-300">{money(preview.netProfitUsd)}</dd>
+          </div>
+          <div className="flex justify-between gap-2 pt-0.5">
+            <dt>ROAS</dt>
+            <dd>{formatRoas(preview.roas)}</dd>
+          </div>
+          <div className="flex justify-between gap-2">
+            <dt>CPA / order</dt>
+            <dd>{formatMoneyMetric(preview.cpaUsd)}</dd>
+          </div>
+        </dl>
+      ) : null}
+    </div>
   );
 }
 
@@ -386,6 +457,15 @@ export function ProfitAdminDashboard() {
     return formatPrevLabel(data.previousRange.from, data.previousRange.to);
   }, [data]);
 
+  const snapAdPreview = useMemo(() => {
+    if (!data || !localState) return null;
+    return computeMarketingMetrics({
+      adSpendUsd: localState.adSpendUsd,
+      payment: data.payment.result,
+      cod: data.cod.result,
+    });
+  }, [data, localState]);
+
   if (authenticated === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0f111a] text-slate-200">
@@ -562,7 +642,7 @@ export function ProfitAdminDashboard() {
               <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {[
                   {
-                    label: "Total Profit",
+                    label: "Net profit (after Snapchat ads)",
                     value: money(data.kpis.totalProfitUsd),
                     change: data.kpis.changes.totalProfitPct,
                     tone: "from-violet-600/20 to-violet-900/10 border-violet-500/30",
@@ -625,10 +705,11 @@ export function ProfitAdminDashboard() {
                       value={localState.deliveryRatePct}
                       onChange={(n) => patchState({ deliveryRatePct: n })}
                     />
-                    <NumInput
-                      label="Ad spend (Snapchat)"
-                      value={localState.adSpendUsd}
-                      onChange={(n) => patchState({ adSpendUsd: n })}
+                    <SnapAdSpendInput
+                      adSpendUsd={localState.adSpendUsd}
+                      aedPerUsd={data?.fees.aedPerUsd ?? 3.6725}
+                      preview={snapAdPreview}
+                      onAdSpendUsd={(n) => patchState({ adSpendUsd: n })}
                     />
                   </div>
                 </article>
