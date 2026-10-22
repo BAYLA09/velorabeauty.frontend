@@ -16,6 +16,7 @@ import {
   formatRoas,
 } from "@/lib/profitAdmin/marketingMetrics";
 import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository";
+import { computeSnapchatAdSpendUsd } from "@/lib/profitAdmin/snapAdSpend";
 
 type DashboardPayload = {
   range: { from: string; to: string };
@@ -201,30 +202,35 @@ function NumInput({
   );
 }
 
-/** Manual Snapchat spend (USD) for the selected date range. */
-function SnapAdSpendInput({
-  adSpendUsd,
+/** Manual Snapchat CPA (USD per purchase) — total spend = CPA × orders in range. */
+function SnapCpaInput({
+  snapCpaUsd,
+  purchaseCount,
+  totalAdSpendUsd,
   preview,
-  onAdSpendUsd,
+  onSnapCpaUsd,
 }: {
-  adSpendUsd: number;
+  snapCpaUsd: number;
+  purchaseCount: number;
+  totalAdSpendUsd: number;
   preview: MarketingMetrics | null;
-  onAdSpendUsd: (usd: number) => void;
+  onSnapCpaUsd: (usd: number) => void;
 }) {
   return (
     <div className="block text-xs text-slate-400">
-      <span className="font-medium text-slate-300">Ad spend (Snapchat)</span>
+      <span className="font-medium text-slate-300">Snapchat CPA (per purchase)</span>
       <p className="mt-0.5 text-[11px] text-slate-500">
-        Enter total spend in USD — net profit, ROAS, and CPA update automatically.
+        Enter what Snapchat cost you for one purchase (USD). We multiply by orders in your date
+        range and calculate net profit, ROAS, and total ad spend.
       </p>
       <div className="relative mt-1">
         <input
           type="number"
           min={0}
           step="0.01"
-          value={Number.isFinite(adSpendUsd) ? adSpendUsd : 0}
+          value={Number.isFinite(snapCpaUsd) ? snapCpaUsd : 0}
           onChange={(e) => {
-            onAdSpendUsd(Math.max(0, Number.parseFloat(e.target.value) || 0));
+            onSnapCpaUsd(Math.max(0, Number.parseFloat(e.target.value) || 0));
           }}
           className="w-full rounded-lg border border-violet-500/40 bg-[#0c1018] px-3 py-2 pr-12 text-sm text-white"
         />
@@ -235,12 +241,18 @@ function SnapAdSpendInput({
       {preview && preview.grossProfitBeforeAdUsd !== undefined ? (
         <dl className="mt-2 space-y-1 rounded-lg border border-slate-700/60 bg-[#0c1018]/80 px-2 py-2 text-[11px] text-slate-400">
           <div className="flex justify-between gap-2">
+            <dt>CPA × purchases</dt>
+            <dd className="text-slate-200">
+              {money(snapCpaUsd)} × {purchaseCount} = {money(totalAdSpendUsd)}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-2">
             <dt>Profit before ads</dt>
             <dd className="text-slate-200">{money(preview.grossProfitBeforeAdUsd)}</dd>
           </div>
           <div className="flex justify-between gap-2">
-            <dt>− Snapchat spend</dt>
-            <dd className="text-violet-300">{money(adSpendUsd)}</dd>
+            <dt>− Total Snapchat spend</dt>
+            <dd className="text-violet-300">{money(totalAdSpendUsd)}</dd>
           </div>
           <div className="flex justify-between gap-2 border-t border-slate-700/80 pt-1 font-medium">
             <dt className="text-emerald-400/90">Net profit</dt>
@@ -452,12 +464,24 @@ export function ProfitAdminDashboard() {
 
   const snapAdPreview = useMemo(() => {
     if (!data || !localState) return null;
+    const purchaseCount = data.payment.result.orderCount + data.cod.input.totalOrders;
+    const adSpendUsd = computeSnapchatAdSpendUsd(localState.snapCpaUsd, purchaseCount);
     return computeMarketingMetrics({
-      adSpendUsd: localState.adSpendUsd,
+      adSpendUsd,
       payment: data.payment.result,
       cod: data.cod.result,
     });
   }, [data, localState]);
+
+  const snapPurchaseCount = useMemo(() => {
+    if (!data) return 0;
+    return data.payment.result.orderCount + data.cod.input.totalOrders;
+  }, [data]);
+
+  const snapTotalAdSpendUsd = useMemo(() => {
+    if (!localState) return 0;
+    return computeSnapchatAdSpendUsd(localState.snapCpaUsd, snapPurchaseCount);
+  }, [localState, snapPurchaseCount]);
 
   if (authenticated === null) {
     return (
@@ -698,10 +722,12 @@ export function ProfitAdminDashboard() {
                       value={localState.deliveryRatePct}
                       onChange={(n) => patchState({ deliveryRatePct: n })}
                     />
-                    <SnapAdSpendInput
-                      adSpendUsd={localState.adSpendUsd}
+                    <SnapCpaInput
+                      snapCpaUsd={localState.snapCpaUsd}
+                      purchaseCount={snapPurchaseCount}
+                      totalAdSpendUsd={snapTotalAdSpendUsd}
                       preview={snapAdPreview}
-                      onAdSpendUsd={(n) => patchState({ adSpendUsd: n })}
+                      onSnapCpaUsd={(n) => patchState({ snapCpaUsd: n })}
                     />
                   </div>
                 </article>
@@ -931,8 +957,12 @@ export function ProfitAdminDashboard() {
                         <dd>{money(data.profitSummary.totalProfitUsd)}</dd>
                       </div>
                       <div className="flex justify-between border-t border-slate-700 pt-2 text-slate-400">
-                        <dt>Ad spend (Snapchat)</dt>
+                        <dt>Total Snapchat spend (CPA × orders)</dt>
                         <dd>{money(data.kpis.adSpendUsd)}</dd>
+                      </div>
+                      <div className="flex justify-between text-slate-500 text-xs">
+                        <dt>Your CPA input</dt>
+                        <dd>{money(data.state.snapCpaUsd)} / purchase</dd>
                       </div>
                       <div className="flex justify-between text-slate-300">
                         <dt>Total Profit Margin</dt>
