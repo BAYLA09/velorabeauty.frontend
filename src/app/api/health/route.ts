@@ -45,7 +45,7 @@ export async function GET() {
     "Port 3000 · Volume /app/data · Env men deploy/easypanel.env.example",
     "Deploy: 1–3 d9ayeq — f logs khass Pulling / Pull complete",
     "Ila Deploy 1–2 seconds → Source glt — chof docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md",
-    "Auto-deploy: Easypanel Webhook → GitHub Secret EASYPANEL_DEPLOY_WEBHOOK (daba ma kaynch f repo)",
+    "Auto-deploy: Easypanel env EASYPANEL_DEPLOY_WEBHOOK + GitHub Secret DEPLOY_TRIGGER_SECRET (wla EASYPANEL_DEPLOY_WEBHOOK direct)",
   ];
 
   const statusMessageDarija =
@@ -83,7 +83,7 @@ export async function GET() {
       deployChecklistDarija,
       liveImagePullCommand: pinImageTag ? `docker pull ${pinImageTag}` : null,
       autoDeployNoteAr:
-        "Deploy أوتوماتيكي: GitHub → Secret EASYPANEL_DEPLOY_WEBHOOK (URL من Easypanel → Deployments → Webhook). بلا secret، Deploy يدوي فقط.",
+        "Deploy أوتوماتيكي: Easypanel env EASYPANEL_DEPLOY_WEBHOOK + GitHub DEPLOY_TRIGGER_SECRET (relay)، أو GitHub EASYPANEL_DEPLOY_WEBHOOK مباشرة. بلا إعداد → Deploy يدوي.",
       easypanel: {
         /** Use App → Docker Image OR Compose with docker-compose.yml — never Git Dockerfile build */
         source: "docker-image",

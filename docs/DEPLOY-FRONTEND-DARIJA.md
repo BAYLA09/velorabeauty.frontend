@@ -5,7 +5,8 @@
 | Chno kayban | Chno kayn f l-waqi3 |
 |-------------|---------------------|
 | Deploy **1–2 seconds** | Easypanel **ma kaypullich** image GHCR (Source = Git / webhook l9dim) |
-| Merge f GitHub ✅ walakin site qdım | **Ma kaynch** `EASYPANEL_DEPLOY_WEBHOOK` f GitHub → **Deploy yddawi b ydek** |
+| Merge f GitHub ✅ walakin site qdım | **Ma kaynch** auto-deploy f GitHub → **Deploy yddawi b ydek** (wla 9ad relay t7t) |
+| Actions **Deploy Frontend** k7l f **6 seconds** ✅ | **Normal** ila ma kaynch secrets — ma kaydirch pull; khass config wla Deploy yddawi |
 | Build failed / OOM | Easypanel kaybni `Dockerfile` 3la VPS — **ghlt** |
 
 **Publish container** f GitHub kaykhdem ✅ — l-mochkil f **Easypanel ma kaypullich** `:latest`.
@@ -43,14 +44,22 @@ curl -s https://www.velorabeauty.world/api/health | jq '{version: .version[0:7],
 
 `version` = 7 chars men commit jdid 3la `main`.
 
-### 3) Auto-deploy (ikhtiyari — bach ma tb9ach tdir Deploy b ydek)
+### 3) Auto-deploy (bach ma tb9ach tdir Deploy b ydek)
 
-1. Easypanel → service **Docker Image** (nfss li fawq) → **Deployments** → **Webhook** → copy URL
-2. GitHub → repo **velorabeauty.frontend** → **Settings** → **Secrets** → **Actions**
-3. New secret: **`EASYPANEL_DEPLOY_WEBHOOK`** = URL li nsexti
-4. **Important:** webhook khass ykon dial service **Docker Image** — mashi service Git li Deploy 1s
+**A — Relay (m7taj, ma t7otich webhook f GitHub):**
 
-Men ba3d: kol **Publish container** ghadi ytrigger Easypanel.
+1. Easypanel → service **Docker Image** → **Deployments** → **Webhook** → copy URL
+2. Easypanel → **Environment**:
+   - `EASYPANEL_DEPLOY_WEBHOOK` = URL dyal webhook
+   - `DEPLOY_TRIGGER_SECRET` = string twil random (b7al password)
+3. GitHub → **Settings** → **Secrets** → **Actions** → **`DEPLOY_TRIGGER_SECRET`** = **nfs** l-value
+4. **Deploy yddawi** wa7d merra bach `/api/deploy/trigger` yban f image, wla senni merge jdid
+
+Men ba3d: **Publish container** ✅ → **Deploy Frontend** kay3ayat site → Easypanel pull.
+
+**B — Direct (ikhtiyari):** GitHub secret **`EASYPANEL_DEPLOY_WEBHOOK`** = URL (Actions POST direct — khass VPS y9bal GitHub IPs).
+
+**Important:** webhook dial service **Docker Image** — mashi Git (Deploy 1s).
 
 ---
 
