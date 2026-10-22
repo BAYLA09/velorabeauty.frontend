@@ -3,12 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef } from "react";
-import { codFee, formatPrice } from "@/config/pricing";
+import { codFee, formatPrice, getMerchandiseAedForLineQuantity } from "@/config/pricing";
 import { useCart } from "@/context/CartProvider";
-import {
-  computeCartPricing,
-  targetBundleTotalAfterUpsell,
-} from "@/lib/cart/cartPricing";
+import { computeCartPricing } from "@/lib/cart/cartPricing";
 import { buildMixedCartSummary } from "@/lib/cart/cartCheckoutMeta";
 import { encodeCartItemsParam } from "@/lib/cart/cartSerialization";
 import { normalizeCartLines } from "@/lib/cart/cartPricing";
@@ -35,18 +32,18 @@ function QuantityStepper({
       <button
         type="button"
         aria-label={`${label} — نقصان`}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-[#650D20] transition hover:bg-[#FCE8E5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65]"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-lg font-bold text-[#650D20] transition hover:bg-[#FCE8E5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65]"
         onClick={() => onChange(value - 1)}
       >
         −
       </button>
-      <span className="min-w-[2rem] text-center text-sm font-bold tabular-nums text-[#291A1C]">
+      <span className="min-w-[2.25rem] text-center text-base font-black tabular-nums text-[#291A1C]">
         {value}
       </span>
       <button
         type="button"
         aria-label={`${label} — زيادة`}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-[#650D20] transition hover:bg-[#FCE8E5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65]"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-lg font-bold text-[#650D20] transition hover:bg-[#FCE8E5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65]"
         onClick={() => onChange(value + 1)}
       >
         +
@@ -150,8 +147,10 @@ export function CartDrawer() {
 
           {lines.length === 0 ? (
             <div className="pb-2 pt-2">
-              <p className="text-center text-base font-extrabold text-[#291A1C]">{t.empty}</p>
-              <p className="mt-2 text-center text-sm text-[#291A1C]/60">{t.pricingHint}</p>
+              <p className="text-center text-lg font-extrabold text-[#291A1C]">{t.empty}</p>
+              <p className="mt-2 text-center text-sm leading-relaxed text-[#291A1C]/65">
+                {t.emptyHint}
+              </p>
               <CartUpsellSection lines={lines} onAdd={(slug) => addItem(slug, 1)} />
             </div>
           ) : (
@@ -159,39 +158,45 @@ export function CartDrawer() {
               {lines.map((line) => {
                 const product = getProductBySlug(line.slug);
                 if (!product) return null;
+                const lineMerch =
+                  getMerchandiseAedForLineQuantity(line.quantity, line.slug) ?? 0;
                 return (
                   <li
                     key={line.slug}
-                    className="flex gap-3 rounded-2xl border border-[#650D20]/10 bg-white p-3 shadow-sm"
+                    className="rounded-2xl border border-[#650D20]/10 bg-white p-3.5 shadow-sm"
                   >
-                    <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-[#FCE8E5]">
-                      <Image
-                        src={product.image.src}
-                        alt={product.image.placeholder}
-                        fill
-                        className="object-contain p-1"
-                        sizes="72px"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold leading-snug text-[#291A1C]">{product.name}</p>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-[#291A1C]/55">
-                        {product.ingredient}
-                      </p>
-                      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                        <QuantityStepper
-                          label={product.name}
-                          value={line.quantity}
-                          onChange={(n) => setLineQuantity(line.slug, n)}
+                    <div className="flex gap-3">
+                      <div className="relative h-[5rem] w-[5rem] shrink-0 overflow-hidden rounded-xl bg-[#FCE8E5]">
+                        <Image
+                          src={product.image.src}
+                          alt={product.image.placeholder}
+                          fill
+                          className="object-contain p-1"
+                          sizes="80px"
                         />
-                        <button
-                          type="button"
-                          onClick={() => removeLine(line.slug)}
-                          className="text-xs font-semibold text-[#650D20]/70 underline-offset-2 hover:text-[#650D20] hover:underline"
-                        >
-                          {t.remove}
-                        </button>
                       </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-bold leading-snug text-[#291A1C]">
+                          {product.name}
+                        </p>
+                        <p className="mt-1 text-lg font-black tabular-nums text-[#650D20]">
+                          {formatPrice(lineMerch)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                      <QuantityStepper
+                        label={product.name}
+                        value={line.quantity}
+                        onChange={(n) => setLineQuantity(line.slug, n)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeLine(line.slug)}
+                        className="rounded-lg px-2 py-1.5 text-xs font-bold text-[#650D20] underline-offset-2 hover:bg-[#FCE8E5] hover:underline"
+                      >
+                        {t.remove}
+                      </button>
                     </div>
                   </li>
                 );
@@ -219,23 +224,24 @@ export function CartDrawer() {
           <footer className="border-t border-[#650D20]/10 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {pricing.ok ? (
               <dl className="space-y-2 text-sm">
-                <div className="flex justify-between gap-4">
-                  <dt className="text-[#291A1C]/70">{t.subtotal(pricing.eligibleUnits)}</dt>
-                  <dd className="font-bold tabular-nums text-[#291A1C]">
+                <div className="flex justify-between gap-4 border-b border-[#650D20]/8 pb-3">
+                  <dt className="text-base font-extrabold text-[#291A1C]">{t.total}</dt>
+                  <dd className="text-xl font-black tabular-nums text-[#650D20]">
+                    {formatPrice(pricing.merchandiseAed)}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4 text-xs">
+                  <dt className="text-[#291A1C]/60">{t.subtotal(pricing.eligibleUnits)}</dt>
+                  <dd className="font-semibold tabular-nums text-[#291A1C]/80">
                     {formatPrice(pricing.merchandiseAed)}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <dt className="text-[#291A1C]/70">{t.shipping}</dt>
-                  <dd className="text-xs text-[#291A1C]/60">
+                  <dt className="text-[#291A1C]/60">{t.shipping}</dt>
+                  <dd className="text-[11px] text-[#291A1C]/55">
                     {t.shippingHint(formatPrice(0), formatPrice(codFee))}
                   </dd>
                 </div>
-                {eligibleUnits < 3 && targetBundleTotalAfterUpsell(eligibleUnits) ? (
-                  <p className="text-[11px] leading-relaxed text-[#650D20]/80">
-                    {t.bundleNote}
-                  </p>
-                ) : null}
               </dl>
             ) : (
               <p className="text-sm text-red-800">
