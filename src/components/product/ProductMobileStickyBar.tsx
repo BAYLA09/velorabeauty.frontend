@@ -20,7 +20,7 @@ function scrollToBuyBox() {
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/** Sticky CTA — mobile + desktop; visible when buy box and final CTA are off-screen */
+/** Sticky CTA — mobile + desktop; visible when the top buy box is off-screen */
 export function ProductMobileStickyBar({
   ctaLabel,
   productName,
@@ -31,25 +31,21 @@ export function ProductMobileStickyBar({
 
   useEffect(() => {
     const buyBox = document.getElementById("buy-box");
-    const finalCta = document.getElementById("final-cta");
     if (!buyBox) return;
 
     let buyVisible = true;
-    let finalVisible = false;
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.target.id === "buy-box") buyVisible = entry.isIntersecting;
-          if (entry.target.id === "final-cta") finalVisible = entry.isIntersecting;
         }
-        setVisible(!buyVisible && !finalVisible);
+        setVisible(!buyVisible);
       },
       { root: null, rootMargin: "0px", threshold: 0.08 },
     );
 
     observer.observe(buyBox);
-    if (finalCta) observer.observe(finalCta);
 
     return () => observer.disconnect();
   }, []);
