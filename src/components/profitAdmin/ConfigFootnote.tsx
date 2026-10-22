@@ -14,7 +14,7 @@ export function ConfigFootnote({ fees }: { fees: FeeConfig }) {
       {money(fees.cod.callCenterDeliveredUsd)} · ship {money(fees.cod.shippingReturnedUsd)} returned
       / {money(fees.cod.shippingDeliveredUsd)} delivered · service fee {fees.cod.serviceFeePercent}%
       of delivered COD cash only. COGS eye {money(fees.products.eyeSerum)} / skin{" "}
-      {money(fees.products.skinGummies)} · FX {fees.aedPerUsd} AED/USD. Fees are never combined on
+      {money(fees.products.skinGummies)}. All figures USD. Fees are never combined on
       one order.
     </p>
   );
