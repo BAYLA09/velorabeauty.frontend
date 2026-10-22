@@ -10,6 +10,8 @@ type Props = {
   className?: string;
   sizes?: string;
   onError?: () => void;
+  /** Full-bleed PDP stack — no crop, no rounded frame, minimal chrome */
+  presentation?: "default" | "stacked";
 };
 
 /** PDP — Next يضغّط PNG الكبيرة + الصورة تظهر تدريجياً (ما نخبّيهاش حتى التحميل الكامل) */
@@ -20,7 +22,9 @@ export function ProductPageImage({
   className = "",
   sizes = "(max-width: 768px) 92vw, (max-width: 1200px) 50vw, 560px",
   onError,
+  presentation = "default",
 }: Props) {
+  const stacked = presentation === "stacked";
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -39,12 +43,16 @@ export function ProductPageImage({
     );
   }
 
+  const wrapperClass = stacked
+    ? `relative w-full ${className}`
+    : `relative w-full min-h-[8rem] ${className}`;
+
   return (
-    <div className={`relative w-full min-h-[8rem] ${className}`}>
+    <div className={wrapperClass}>
       <div
-        className={`absolute inset-0 animate-pulse rounded-[inherit] bg-velora-cream-dark/80 transition-opacity duration-200 ${
-          loaded ? "pointer-events-none opacity-0" : "opacity-100"
-        }`}
+        className={`absolute inset-0 animate-pulse bg-velora-cream-dark/80 transition-opacity duration-200 ${
+          stacked ? "" : "rounded-[inherit]"
+        } ${loaded ? "pointer-events-none opacity-0" : "opacity-100"}`}
         aria-hidden={loaded}
       />
       <Image
@@ -56,7 +64,9 @@ export function ProductPageImage({
         priority={priority}
         fetchPriority={priority ? "high" : "auto"}
         unoptimized
-        className="relative z-[1] block h-auto w-full max-w-full"
+        className={`relative z-[1] block h-auto w-full max-w-full ${
+          stacked ? "rounded-none object-contain object-center" : ""
+        }`}
         style={{ width: "100%", height: "auto" }}
         onLoad={() => setLoaded(true)}
         onError={() => {
