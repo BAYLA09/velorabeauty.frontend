@@ -16,7 +16,6 @@ import {
   ProductPageTestimonials,
   ProductPageUsageAndResults,
 } from "@/components/product/ProductPageLongSections";
-import { ProductFinalCtaSection } from "@/components/product/ProductFinalCtaSection";
 import {
   ProductPurchasePanel,
   type PurchaseState,
@@ -165,17 +164,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
 
           <ProductVeloraGuaranteeBlock page={page} variant="section" />
           <ProductPageDeliveryAndFaq page={page} />
-
-          <ProductFinalCtaSection
-            form={page.form}
-            productSlug={product.slug}
-            productName={product.name}
-            upsellSlotSrc={product.pageImage.upsellSlotSrc}
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            onPurchaseChange={setPurchase}
-            headline="جاهزة تكملين طلبك؟"
-          />
 
           <RelatedProducts currentSlug={product.slug} products={allProducts} />
         </div>
