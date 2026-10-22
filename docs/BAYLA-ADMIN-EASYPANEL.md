@@ -21,7 +21,7 @@ Only these are editable in the UI (single **Your inputs** panel):
 |-------|---------|
 | Confirmation rate (%) | COD Network / call-center confirmation |
 | Delivery rate (%) | Share of confirmed orders delivered |
-| Ad spend (Snapchat) | Enter **AED** from Snapchat Ads Manager — saved as USD; net profit, ROAS, CPA update automatically |
+| Ad spend (Snapchat) | Enter **USD** spend for the period — net profit, ROAS, CPA update automatically |
 
 Saved in `bayla_profit_admin_state`.
 

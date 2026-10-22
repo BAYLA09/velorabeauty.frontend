@@ -201,44 +201,37 @@ function NumInput({
   );
 }
 
-/** Manual Snapchat spend from Ads Manager (AED) → stored as USD for profit math. */
+/** Manual Snapchat spend (USD) for the selected date range. */
 function SnapAdSpendInput({
   adSpendUsd,
-  aedPerUsd,
   preview,
   onAdSpendUsd,
 }: {
   adSpendUsd: number;
-  aedPerUsd: number;
   preview: MarketingMetrics | null;
   onAdSpendUsd: (usd: number) => void;
 }) {
-  const safeRate = aedPerUsd > 0 ? aedPerUsd : 3.6725;
-  const aed = Math.round(adSpendUsd * safeRate * 100) / 100;
-
   return (
     <div className="block text-xs text-slate-400">
       <span className="font-medium text-slate-300">Ad spend (Snapchat)</span>
       <p className="mt-0.5 text-[11px] text-slate-500">
-        دخل المبلغ من Snapchat Ads Manager (AED) — الحساب تلقائي
+        Enter total spend in USD — net profit, ROAS, and CPA update automatically.
       </p>
       <div className="relative mt-1">
         <input
           type="number"
           min={0}
           step="0.01"
-          value={Number.isFinite(aed) ? aed : 0}
+          value={Number.isFinite(adSpendUsd) ? adSpendUsd : 0}
           onChange={(e) => {
-            const nextAed = Math.max(0, Number.parseFloat(e.target.value) || 0);
-            onAdSpendUsd(nextAed / safeRate);
+            onAdSpendUsd(Math.max(0, Number.parseFloat(e.target.value) || 0));
           }}
           className="w-full rounded-lg border border-violet-500/40 bg-[#0c1018] px-3 py-2 pr-12 text-sm text-white"
         />
         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-          AED
+          USD
         </span>
       </div>
-      <p className="mt-1 text-[11px] text-slate-500">≈ {money(adSpendUsd)} USD (for reports)</p>
       {preview && preview.grossProfitBeforeAdUsd !== undefined ? (
         <dl className="mt-2 space-y-1 rounded-lg border border-slate-700/60 bg-[#0c1018]/80 px-2 py-2 text-[11px] text-slate-400">
           <div className="flex justify-between gap-2">
@@ -690,7 +683,7 @@ export function ProfitAdminDashboard() {
                   <h2 className="text-base font-semibold text-violet-200">Your inputs</h2>
                   <p className="mt-1 text-xs text-slate-400">
                     The only values you control — everything else uses live orders and server fee
-                    config.
+                    config. All amounts on this dashboard are <strong className="text-slate-300">USD ($)</strong>.
                   </p>
                   <div className="mt-4 grid gap-4 sm:grid-cols-3">
                     <NumInput
@@ -707,7 +700,6 @@ export function ProfitAdminDashboard() {
                     />
                     <SnapAdSpendInput
                       adSpendUsd={localState.adSpendUsd}
-                      aedPerUsd={data?.fees.aedPerUsd ?? 3.6725}
                       preview={snapAdPreview}
                       onAdSpendUsd={(n) => patchState({ adSpendUsd: n })}
                     />
@@ -1130,8 +1122,8 @@ export function ProfitAdminDashboard() {
                   <dd>{money(data.fees.products.hairGummies)}</dd>
                 </div>
                 <div className="flex justify-between gap-2 sm:block">
-                  <dt className="text-slate-400">AED per USD (FX)</dt>
-                  <dd>{data.fees.aedPerUsd}</dd>
+                  <dt className="text-slate-400">Store AED→USD rate (internal)</dt>
+                  <dd>{data.fees.aedPerUsd} AED per $1</dd>
                 </div>
                 <div className="flex justify-between gap-2 sm:block">
                   <dt className="text-slate-400">Stripe fee (card only)</dt>
