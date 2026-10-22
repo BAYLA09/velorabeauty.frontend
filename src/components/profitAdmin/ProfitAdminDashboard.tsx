@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BreakEvenSimulatorPanel } from "@/components/profitAdmin/BreakEvenSimulatorPanel";
 import { ConfigFootnote } from "@/components/profitAdmin/ConfigFootnote";
 import { DonutChart } from "@/components/profitAdmin/DonutChart";
 import { ProfitLineChart } from "@/components/profitAdmin/ProfitLineChart";
@@ -109,6 +110,7 @@ const NAV = [
   { id: "payment", label: "Payment Orders", icon: "◎" },
   { id: "cod", label: "COD Orders", icon: "◈" },
   { id: "products", label: "Products", icon: "▣" },
+  { id: "break-even", label: "Break Event", icon: "⚖" },
   { id: "costs", label: "Costs & Fees", icon: "◇" },
   { id: "analytics", label: "Analytics", icon: "◐" },
   { id: "reports", label: "Reports", icon: "▤" },
@@ -1125,6 +1127,15 @@ export function ProfitAdminDashboard() {
                 )}
               </article>
             </>
+          ) : null}
+
+          {(activeNav === "break-even" || activeNav === "costs") && data && localState ? (
+            <BreakEvenSimulatorPanel
+              fees={data.fees}
+              localState={localState}
+              paymentResult={data.payment.result}
+              onPatch={patchState}
+            />
           ) : null}
 
           {(activeNav === "products" || activeNav === "costs") && data ? (

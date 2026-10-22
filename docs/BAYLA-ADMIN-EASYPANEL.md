@@ -25,6 +25,8 @@ Only these are editable in the UI (single **Your inputs** panel):
 
 Saved in `bayla_profit_admin_state`.
 
+**Break Event** (nav or above Costs & Fees): simulator with lead count, **card % / COD %**, same confirmation, delivery, and Snapchat CPA — shows max CPA and net profit per card vs COD channel (USD).
+
 ## Unit economics (server env — not on the page)
 
 ### Card (Stripe) only — never on COD orders

@@ -6,6 +6,10 @@ export type ProfitDashboardState = {
   deliveryRatePct: number;
   /** Snapchat cost per purchase (USD) — total spend = CPA × orders in range. */
   snapCpaUsd: number;
+  /** Break Event simulator — hypothetical lead volume. */
+  breakEvenSimLeadCount: number;
+  /** Share of simulated leads that pay by card (0–100); rest = COD. */
+  breakEvenCardLeadPct: number;
   chartDays: 7 | 30 | 90;
   dateRangeFrom: string | null;
   dateRangeTo: string | null;
@@ -15,6 +19,8 @@ const DEFAULT_STATE: ProfitDashboardState = {
   confirmationRatePct: 70,
   deliveryRatePct: 80,
   snapCpaUsd: 0,
+  breakEvenSimLeadCount: 100,
+  breakEvenCardLeadPct: 50,
   chartDays: 7,
   dateRangeFrom: null,
   dateRangeTo: null,
@@ -35,6 +41,21 @@ function readSnapCpaUsd(raw: Record<string, unknown>): number {
   return DEFAULT_STATE.snapCpaUsd;
 }
 
+function readBreakEvenFields(raw: Record<string, unknown>): Pick<
+  ProfitDashboardState,
+  "breakEvenSimLeadCount" | "breakEvenCardLeadPct"
+> {
+  const leadCount =
+    typeof raw.breakEvenSimLeadCount === "number"
+      ? Math.max(0, Math.round(raw.breakEvenSimLeadCount))
+      : DEFAULT_STATE.breakEvenSimLeadCount;
+  const cardPct =
+    typeof raw.breakEvenCardLeadPct === "number"
+      ? Math.min(100, Math.max(0, raw.breakEvenCardLeadPct))
+      : DEFAULT_STATE.breakEvenCardLeadPct;
+  return { breakEvenSimLeadCount: leadCount, breakEvenCardLeadPct: cardPct };
+}
+
 function migrateParsed(raw: Record<string, unknown>): ProfitDashboardState {
   if (
     typeof raw.confirmationRatePct === "number" &&
@@ -45,6 +66,7 @@ function migrateParsed(raw: Record<string, unknown>): ProfitDashboardState {
       confirmationRatePct: raw.confirmationRatePct,
       deliveryRatePct: raw.deliveryRatePct,
       snapCpaUsd: readSnapCpaUsd(raw),
+      ...readBreakEvenFields(raw),
       chartDays:
         raw.chartDays === 30 || raw.chartDays === 90 ? raw.chartDays : DEFAULT_STATE.chartDays,
       dateRangeFrom:
@@ -65,6 +87,7 @@ function migrateParsed(raw: Record<string, unknown>): ProfitDashboardState {
         ? cod.deliveryRatePct
         : DEFAULT_STATE.deliveryRatePct,
     snapCpaUsd: readSnapCpaUsd({ ...raw, fees: raw.fees }),
+    ...readBreakEvenFields(raw),
     chartDays:
       raw.chartDays === 30 || raw.chartDays === 90 ? raw.chartDays : DEFAULT_STATE.chartDays,
     dateRangeFrom:
