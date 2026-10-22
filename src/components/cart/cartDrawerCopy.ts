@@ -2,22 +2,17 @@
 export const cartDrawerCopy = {
   title: "سلتك",
   empty: "سلتك فارغة",
-  pricingHint:
-    "نفس المنتج: 199 / 249 / 339 من صفحة المنتج · منتج مختلف يُضاف +199 د.إ (مثال: 2 شعر + 1 بشرة = 448).",
+  emptyHint: "اختاري منتجاً للبدء، أو أضيفي من التوصيات أدناه بضغطة واحدة.",
   add: "أضيفي",
   remove: "حذف",
-  upsellSection: "🔥 قبل الدفع — كمّلي روتينك",
-  upsellBadge: "ضغطة واحدة",
-  upsellHint: "تبقين في السلة · ما تعيديش اختيار الكمية · أضيفي وكمّلي.",
-  upsellFootnote: (current: string) =>
-    `المجموع الحالي ${current} — الأسعار كما هي (+199 لكل منتج مختلف).`,
-  addPlus: "+ أضيفي",
-  saveAmount: (aed: number) => `وفّري ${aed} د.إ`,
-  addForDelta: (price: string) => `زيادة بـ ${price} فقط للانتقال للعرض التالي`,
+  upsellSection: "قد يعجبك أيضاً",
+  upsellAlsoLike: "قد يعجبك أيضاً",
+  upsellPriceFrom: (price: string) => `من ${price}`,
   bundleComplete: (price: string) =>
     `عرض 3 منتجات مكتمل — ${price} · أضيفي رابعاً بـ 199 د.إ أو أكملي الدفع.`,
   cartFull: (price: string) => `4 منتجات — ${price} · جاهزة للدفع.`,
   subtotal: (n: number) => `مجموع المنتجات (${n})`,
+  total: "المجموع",
   shipping: "التوصيل",
   shippingHint: (card: string, cod: string) =>
     `يُحدَّد عند الدفع — ${card} بالبطاقة · ${cod} COD`,
@@ -27,7 +22,7 @@ export const cartDrawerCopy = {
   invalid: "سلة غير صالحة.",
   close: "إغلاق السلة",
   closeBtn: "إغلاق",
-  afterAddTotal: (price: string) => `المجموع بعد الإضافة: ${price}`,
   productCount: (n: number) => (n === 1 ? "منتج واحد" : `${n} منتجات`),
   none: "لا منتجات",
+  lineTotal: "سعر هذا المنتج في السلة",
 } as const;

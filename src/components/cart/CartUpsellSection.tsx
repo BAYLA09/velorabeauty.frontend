@@ -1,16 +1,10 @@
 "use client";
 
-import { formatPrice } from "@/config/pricing";
+import Image from "next/image";
+import { formatPrice, singleProductPrice } from "@/config/pricing";
 import type { CartLine } from "@/lib/cart/cartTypes";
-import { getMerchandiseAedForCart } from "@/lib/cart/cartPricing";
-import {
-  canAddMoreUnits,
-  getUpsellOfferCopy,
-  getUpsellRecommendations,
-  targetTotalAfterAddingSlug,
-} from "@/lib/cart/cartUpsell";
+import { canAddMoreUnits, getUpsellRecommendations } from "@/lib/cart/cartUpsell";
 import { cartDrawerCopy as t } from "@/components/cart/cartDrawerCopy";
-import { VeloraUpsellHero, VeloraUpsellProductCard } from "@/components/cart/VeloraUpsellUi";
 
 type Props = {
   lines: CartLine[];
@@ -20,47 +14,55 @@ type Props = {
 export function CartUpsellSection({ lines, onAdd }: Props) {
   if (!canAddMoreUnits(lines)) return null;
 
-  const offer = getUpsellOfferCopy(lines);
   const recommendations = getUpsellRecommendations(lines);
-  const currentTotal = getMerchandiseAedForCart(lines);
+  if (recommendations.length === 0) return null;
 
-  if (recommendations.length === 0 || !offer) return null;
+  const displayPrice = formatPrice(singleProductPrice);
 
   return (
     <section
       className="mt-6 border-t border-[#650D20]/10 pt-5"
       aria-labelledby="cart-upsell-title"
     >
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h3 id="cart-upsell-title" className="text-sm font-black text-[#650D20]">
-          {t.upsellSection}
-        </h3>
-        <span className="rounded-full bg-[#FCE8E5] px-2 py-0.5 text-[9px] font-extrabold text-[#650D20]">
-          {t.upsellBadge}
-        </span>
-      </div>
-      <p className="mb-3 text-[10px] font-semibold leading-relaxed text-[#291A1C]/60">
-        {t.upsellHint}
+      <h3 id="cart-upsell-title" className="text-base font-black text-[#650D20]">
+        {t.upsellAlsoLike}
+      </h3>
+      <p className="mt-1 text-xs font-medium text-[#291A1C]/55">
+        منتجات فيلورا الأخرى — اضغطي «أضيفي» لإضافتها للسلة.
       </p>
 
-      <VeloraUpsellHero offer={offer} currentTotal={currentTotal} />
-
-      <ul className="mt-3 space-y-2.5">
-        {recommendations.map((rec, index) => (
-          <VeloraUpsellProductCard
-            key={rec.slug}
-            rec={rec}
-            lines={lines}
-            targetTotal={targetTotalAfterAddingSlug(lines, rec.slug)}
-            featured={index === 0}
-            onAdd={() => onAdd(rec.slug)}
-          />
+      <ul className="mt-4 space-y-3">
+        {recommendations.map((rec) => (
+          <li key={rec.slug}>
+            <div
+              className="flex items-center gap-3 rounded-2xl border border-[#650D20]/12 bg-white p-3 shadow-sm"
+            >
+              <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-[#FCE8E5]">
+                <Image
+                  src={rec.imageSrc}
+                  alt={rec.imageAlt}
+                  fill
+                  className="object-contain p-1"
+                  sizes="72px"
+                />
+              </div>
+              <div className="min-w-0 flex-1 text-right">
+                <p className="text-sm font-bold leading-snug text-[#291A1C]">{rec.name}</p>
+                <p className="mt-0.5 text-lg font-black tabular-nums text-[#650D20]">
+                  {t.upsellPriceFrom(displayPrice)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onAdd(rec.slug)}
+                className="shrink-0 rounded-full bg-[#650D20] px-4 py-2.5 text-sm font-black text-[#FFF9F5] shadow-md transition hover:bg-[#291A1C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6AD65]"
+              >
+                {t.add}
+              </button>
+            </div>
+          </li>
         ))}
       </ul>
-
-      <p className="mt-3 text-center text-[9px] font-medium text-[#291A1C]/45">
-        {t.upsellFootnote(formatPrice(currentTotal ?? 0))}
-      </p>
     </section>
   );
 }
