@@ -4,7 +4,8 @@ import { getDb } from "@/lib/db";
 export type ProfitDashboardState = {
   confirmationRatePct: number;
   deliveryRatePct: number;
-  adSpendUsd: number;
+  /** Snapchat cost per purchase (USD) — total spend = CPA × orders in range. */
+  snapCpaUsd: number;
   chartDays: 7 | 30 | 90;
   dateRangeFrom: string | null;
   dateRangeTo: string | null;
@@ -13,7 +14,7 @@ export type ProfitDashboardState = {
 const DEFAULT_STATE: ProfitDashboardState = {
   confirmationRatePct: 70,
   deliveryRatePct: 80,
-  adSpendUsd: 0,
+  snapCpaUsd: 0,
   chartDays: 7,
   dateRangeFrom: null,
   dateRangeTo: null,
@@ -29,16 +30,21 @@ function ensureTable(): void {
   `);
 }
 
+function readSnapCpaUsd(raw: Record<string, unknown>): number {
+  if (typeof raw.snapCpaUsd === "number") return Math.max(0, raw.snapCpaUsd);
+  return DEFAULT_STATE.snapCpaUsd;
+}
+
 function migrateParsed(raw: Record<string, unknown>): ProfitDashboardState {
   if (
     typeof raw.confirmationRatePct === "number" &&
     typeof raw.deliveryRatePct === "number" &&
-    typeof raw.adSpendUsd === "number"
+    (typeof raw.snapCpaUsd === "number" || typeof raw.adSpendUsd === "number")
   ) {
     return {
       confirmationRatePct: raw.confirmationRatePct,
       deliveryRatePct: raw.deliveryRatePct,
-      adSpendUsd: raw.adSpendUsd,
+      snapCpaUsd: readSnapCpaUsd(raw),
       chartDays:
         raw.chartDays === 30 || raw.chartDays === 90 ? raw.chartDays : DEFAULT_STATE.chartDays,
       dateRangeFrom:
@@ -49,7 +55,6 @@ function migrateParsed(raw: Record<string, unknown>): ProfitDashboardState {
   }
 
   const cod = (raw.cod as Record<string, unknown> | undefined) ?? {};
-  const fees = (raw.fees as Record<string, unknown> | undefined) ?? {};
   return {
     confirmationRatePct:
       typeof cod.confirmationRatePct === "number"
@@ -59,12 +64,7 @@ function migrateParsed(raw: Record<string, unknown>): ProfitDashboardState {
       typeof cod.deliveryRatePct === "number"
         ? cod.deliveryRatePct
         : DEFAULT_STATE.deliveryRatePct,
-    adSpendUsd:
-      typeof fees.adSpendUsd === "number"
-        ? fees.adSpendUsd
-        : typeof raw.adSpendUsd === "number"
-          ? raw.adSpendUsd
-          : DEFAULT_STATE.adSpendUsd,
+    snapCpaUsd: readSnapCpaUsd({ ...raw, fees: raw.fees }),
     chartDays:
       raw.chartDays === 30 || raw.chartDays === 90 ? raw.chartDays : DEFAULT_STATE.chartDays,
     dateRangeFrom:

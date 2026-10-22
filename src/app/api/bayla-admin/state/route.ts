@@ -41,10 +41,10 @@ export async function PUT(request: NextRequest) {
       typeof incoming.deliveryRatePct === "number"
         ? clampPct(incoming.deliveryRatePct)
         : current.deliveryRatePct,
-    adSpendUsd:
-      typeof incoming.adSpendUsd === "number"
-        ? Math.max(0, incoming.adSpendUsd)
-        : current.adSpendUsd,
+    snapCpaUsd:
+      typeof incoming.snapCpaUsd === "number"
+        ? Math.max(0, incoming.snapCpaUsd)
+        : current.snapCpaUsd,
     chartDays:
       incoming.chartDays === 7 || incoming.chartDays === 30 || incoming.chartDays === 90
         ? incoming.chartDays

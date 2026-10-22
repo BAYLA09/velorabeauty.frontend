@@ -21,7 +21,7 @@ Only these are editable in the UI (single **Your inputs** panel):
 |-------|---------|
 | Confirmation rate (%) | COD Network / call-center confirmation |
 | Delivery rate (%) | Share of confirmed orders delivered |
-| Ad spend (Snapchat) | Enter **USD** spend for the period — net profit, ROAS, CPA update automatically |
+| Snapchat CPA (USD / purchase) | Cost per purchase from Snap — **total ad spend = CPA × orders** in the date range; net profit & ROAS follow |
 
 Saved in `bayla_profit_admin_state`.
 
@@ -75,7 +75,7 @@ Card revenue and COGS use **real paid orders** in the date range. COD **N** and 
 |--------|---------|
 | ROI % | `netProfit / (adSpend + fulfillment costs) × 100` |
 | ROAS | `(card revenue + delivered COD revenue) / adSpend` |
-| CPA | `adSpend / total orders` |
+| CPA (display) | Same as your CPA input (total spend ÷ orders) |
 | Cost / delivered order | `adSpend / (paid orders + delivered COD orders)` |
 | Break-even ROAS | `total revenue / gross profit before ad spend` |
 

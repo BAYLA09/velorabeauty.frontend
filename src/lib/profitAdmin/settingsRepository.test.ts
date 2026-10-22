@@ -23,19 +23,19 @@ test("migrates legacy persisted state to three owner fields", () => {
   const state = loadProfitDashboardState();
   assert.equal(state.confirmationRatePct, 65);
   assert.equal(state.deliveryRatePct, 75);
-  assert.equal(state.adSpendUsd, 250);
+  assert.equal(state.snapCpaUsd, 0);
   assert.equal(state.chartDays, 30);
 
   saveProfitDashboardState({
     confirmationRatePct: 70,
     deliveryRatePct: 80,
-    adSpendUsd: 100,
+    snapCpaUsd: 4.5,
     chartDays: 7,
     dateRangeFrom: null,
     dateRangeTo: null,
   });
   const saved = loadProfitDashboardState();
-  assert.equal(saved.adSpendUsd, 100);
+  assert.equal(saved.snapCpaUsd, 4.5);
   const row = db
     .prepare(`SELECT state_json FROM bayla_profit_admin_state WHERE id = 1`)
     .get() as { state_json: string };

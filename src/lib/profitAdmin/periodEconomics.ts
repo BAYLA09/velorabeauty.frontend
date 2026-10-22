@@ -7,6 +7,7 @@ import {
   buildPaymentPanelFromLive,
   type PeriodMetrics,
 } from "@/lib/profitAdmin/orderMetrics";
+import { computeSnapchatAdSpendUsd } from "@/lib/profitAdmin/snapAdSpend";
 import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository";
 
 export type PeriodEconomics = {
@@ -34,14 +35,14 @@ export function computePeriodEconomics(
     state.confirmationRatePct,
     state.deliveryRatePct,
   );
-  const adSpendUsd = state.adSpendUsd;
+  const totalOrders = paymentResult.orderCount + codInput.totalOrders;
+  const adSpendUsd = computeSnapchatAdSpendUsd(state.snapCpaUsd, totalOrders);
   const marketing = computeMarketingMetrics({ adSpendUsd, payment: paymentResult, cod: codResult });
   const totalProfitUsd = netProfitAfterAdSpend(
     paymentResult.profitUsd,
     codResult.profitUsd,
     adSpendUsd,
   );
-  const totalOrders = paymentResult.orderCount + codInput.totalOrders;
 
   return {
     live,
