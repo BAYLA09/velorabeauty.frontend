@@ -30,12 +30,16 @@ test("migrates legacy persisted state to three owner fields", () => {
     confirmationRatePct: 70,
     deliveryRatePct: 80,
     snapCpaUsd: 4.5,
+    breakEvenSimLeadCount: 200,
+    breakEvenCardLeadPct: 40,
     chartDays: 7,
     dateRangeFrom: null,
     dateRangeTo: null,
   });
   const saved = loadProfitDashboardState();
   assert.equal(saved.snapCpaUsd, 4.5);
+  assert.equal(saved.breakEvenSimLeadCount, 200);
+  assert.equal(saved.breakEvenCardLeadPct, 40);
   const row = db
     .prepare(`SELECT state_json FROM bayla_profit_admin_state WHERE id = 1`)
     .get() as { state_json: string };

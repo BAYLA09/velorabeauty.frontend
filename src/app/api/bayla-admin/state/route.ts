@@ -45,6 +45,14 @@ export async function PUT(request: NextRequest) {
       typeof incoming.snapCpaUsd === "number"
         ? Math.max(0, incoming.snapCpaUsd)
         : current.snapCpaUsd,
+    breakEvenSimLeadCount:
+      typeof incoming.breakEvenSimLeadCount === "number"
+        ? Math.max(0, Math.round(incoming.breakEvenSimLeadCount))
+        : current.breakEvenSimLeadCount,
+    breakEvenCardLeadPct:
+      typeof incoming.breakEvenCardLeadPct === "number"
+        ? clampPct(incoming.breakEvenCardLeadPct)
+        : current.breakEvenCardLeadPct,
     chartDays:
       incoming.chartDays === 7 || incoming.chartDays === 30 || incoming.chartDays === 90
         ? incoming.chartDays
