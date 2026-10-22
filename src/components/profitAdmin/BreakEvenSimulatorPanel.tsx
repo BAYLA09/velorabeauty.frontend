@@ -1,9 +1,14 @@
 "use client";
 
 import {
-  breakEvenUnitEconomicsFromPayment,
   computeBreakEvenScenario,
+  resolveBreakEvenUnitEconomics,
 } from "@/lib/profitAdmin/breakEvenSimulator";
+import {
+  formatOfferAedLine,
+  normalizeOfferMix,
+  SITE_STORE_OFFERS,
+} from "@/lib/profitAdmin/breakEvenOffers";
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 import { formatRoas } from "@/lib/profitAdmin/marketingMetrics";
 import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository";
@@ -15,7 +20,6 @@ function money(n: number): string {
 type Props = {
   fees: FeeConfig;
   localState: ProfitDashboardState;
-  paymentResult: { orderCount: number; revenueUsd: number; productCostUsd: number } | null;
   onPatch: (patch: Partial<ProfitDashboardState>) => void;
 };
 
@@ -56,19 +60,84 @@ function NumField({
   );
 }
 
-export function BreakEvenSimulatorPanel({ fees, localState, paymentResult, onPatch }: Props) {
-  const units = breakEvenUnitEconomicsFromPayment(fees, paymentResult);
-  const scenario = computeBreakEvenScenario(fees, localState, units);
+export function BreakEvenSimulatorPanel({ fees, localState, onPatch }: Props) {
+  const units = resolveBreakEvenUnitEconomics(fees, localState);
+  const scenario = computeBreakEvenScenario(fees, localState);
   const atBreakEven = Math.abs(scenario.netProfitUsd) < 0.01;
   const aboveBe = scenario.netProfitUsd > 0;
+  const offerMix = normalizeOfferMix({
+    offer1Pct: localState.breakEvenOffer1Pct,
+    offer2Pct: localState.breakEvenOffer2Pct,
+    offer3Pct: localState.breakEvenOffer3Pct,
+  });
 
   return (
     <article className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/25 to-[#1a1d27] p-5">
       <h2 className="text-base font-semibold text-amber-200">Break Event</h2>
       <p className="mt-1 text-xs text-slate-400">
-        Simulator (USD) — adjust lead mix, COD funnel, and Snapchat CPA to see break-even per card vs
-        COD. Uses live card averages when you have paid orders; COD uses env default price/COGS.
+        Simulator (USD) — same bundle prices as the storefront (199/219, 249/269, 339/359 AED).
       </p>
+
+      <div className="mt-4 rounded-lg border border-slate-700/70 bg-[#0c1018]/70 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs font-medium text-slate-300">Site offer</p>
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            <input
+              type="checkbox"
+              checked={localState.breakEvenOfferMixEnabled}
+              onChange={(e) => onPatch({ breakEvenOfferMixEnabled: e.target.checked })}
+              className="rounded border-slate-600"
+            />
+            Mix offers (% — leave a tier at 0% if you only sell 1 or 2 bundles)
+          </label>
+        </div>
+        {localState.breakEvenOfferMixEnabled ? (
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <NumField
+              label="1 product (199 / 219 AED)"
+              suffix="%"
+              value={localState.breakEvenOffer1Pct}
+              onChange={(n) => onPatch({ breakEvenOffer1Pct: Math.max(0, n) })}
+            />
+            <NumField
+              label="2 products (249 / 269 AED)"
+              suffix="%"
+              value={localState.breakEvenOffer2Pct}
+              onChange={(n) => onPatch({ breakEvenOffer2Pct: Math.max(0, n) })}
+            />
+            <NumField
+              label="3 products (339 / 359 AED)"
+              suffix="%"
+              value={localState.breakEvenOffer3Pct}
+              onChange={(n) => onPatch({ breakEvenOffer3Pct: Math.max(0, n) })}
+            />
+          </div>
+        ) : (
+          <label className="mt-2 block text-xs text-slate-400">
+            Single offer (all simulated leads)
+            <select
+              value={localState.breakEvenOfferTier}
+              onChange={(e) =>
+                onPatch({ breakEvenOfferTier: Number(e.target.value) as 1 | 2 | 3 })
+              }
+              className="mt-1 w-full rounded-lg border border-slate-700 bg-[#0c1018] px-3 py-2 text-sm text-white"
+            >
+              {SITE_STORE_OFFERS.map((o) => (
+                <option key={o.tier} value={o.tier}>
+                  {formatOfferAedLine(o)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <p className="mt-2 text-[11px] text-slate-500">
+          {localState.breakEvenOfferMixEnabled
+            ? `Normalized mix: ${offerMix[1].toFixed(0)}% / ${offerMix[2].toFixed(0)}% / ${offerMix[3].toFixed(0)}%`
+            : formatOfferAedLine(
+                SITE_STORE_OFFERS.find((o) => o.tier === localState.breakEvenOfferTier)!,
+              )}
+        </p>
+      </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <NumField

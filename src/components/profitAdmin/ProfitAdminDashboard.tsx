@@ -1133,7 +1133,6 @@ export function ProfitAdminDashboard() {
             <BreakEvenSimulatorPanel
               fees={data.fees}
               localState={localState}
-              paymentResult={data.payment.result}
               onPatch={patchState}
             />
           ) : null}
