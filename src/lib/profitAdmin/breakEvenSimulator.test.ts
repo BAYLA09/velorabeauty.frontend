@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { computeBreakEvenScenario, defaultBreakEvenUnitEconomics } from "@/lib/profitAdmin/breakEvenSimulator";
+import { computeBreakEvenScenario } from "@/lib/profitAdmin/breakEvenSimulator";
 import { DEFAULT_FEE_CONFIG } from "@/lib/profitAdmin/feesDefaults";
 
 test("computeBreakEvenScenario splits leads and computes max CPA", () => {
   const fees = structuredClone(DEFAULT_FEE_CONFIG) as typeof DEFAULT_FEE_CONFIG;
-  const units = defaultBreakEvenUnitEconomics(fees);
   const r = computeBreakEvenScenario(
     fees,
     {
@@ -14,8 +13,12 @@ test("computeBreakEvenScenario splits leads and computes max CPA", () => {
       snapCpaUsd: 0,
       breakEvenSimLeadCount: 100,
       breakEvenCardLeadPct: 50,
+      breakEvenOfferTier: 1,
+      breakEvenOfferMixEnabled: false,
+      breakEvenOffer1Pct: 100,
+      breakEvenOffer2Pct: 0,
+      breakEvenOffer3Pct: 0,
     },
-    units,
   );
   assert.equal(r.totalLeads, 100);
   assert.equal(r.cardLeads, 50);

@@ -10,6 +10,13 @@ export type ProfitDashboardState = {
   breakEvenSimLeadCount: number;
   /** Share of simulated leads that pay by card (0–100); rest = COD. */
   breakEvenCardLeadPct: number;
+  /** Site bundle tier when mix is off (1 = 199/219, 2 = 249/269, 3 = 339/359 AED). */
+  breakEvenOfferTier: 1 | 2 | 3;
+  /** When true, split simulated leads across the three site offers below. */
+  breakEvenOfferMixEnabled: boolean;
+  breakEvenOffer1Pct: number;
+  breakEvenOffer2Pct: number;
+  breakEvenOffer3Pct: number;
   chartDays: 7 | 30 | 90;
   dateRangeFrom: string | null;
   dateRangeTo: string | null;
@@ -21,6 +28,11 @@ const DEFAULT_STATE: ProfitDashboardState = {
   snapCpaUsd: 0,
   breakEvenSimLeadCount: 100,
   breakEvenCardLeadPct: 50,
+  breakEvenOfferTier: 1,
+  breakEvenOfferMixEnabled: false,
+  breakEvenOffer1Pct: 100,
+  breakEvenOffer2Pct: 0,
+  breakEvenOffer3Pct: 0,
   chartDays: 7,
   dateRangeFrom: null,
   dateRangeTo: null,
@@ -41,9 +53,20 @@ function readSnapCpaUsd(raw: Record<string, unknown>): number {
   return DEFAULT_STATE.snapCpaUsd;
 }
 
+function readOfferTier(raw: Record<string, unknown>): 1 | 2 | 3 {
+  const t = raw.breakEvenOfferTier;
+  return t === 2 || t === 3 ? t : DEFAULT_STATE.breakEvenOfferTier;
+}
+
 function readBreakEvenFields(raw: Record<string, unknown>): Pick<
   ProfitDashboardState,
-  "breakEvenSimLeadCount" | "breakEvenCardLeadPct"
+  | "breakEvenSimLeadCount"
+  | "breakEvenCardLeadPct"
+  | "breakEvenOfferTier"
+  | "breakEvenOfferMixEnabled"
+  | "breakEvenOffer1Pct"
+  | "breakEvenOffer2Pct"
+  | "breakEvenOffer3Pct"
 > {
   const leadCount =
     typeof raw.breakEvenSimLeadCount === "number"
@@ -53,7 +76,24 @@ function readBreakEvenFields(raw: Record<string, unknown>): Pick<
     typeof raw.breakEvenCardLeadPct === "number"
       ? Math.min(100, Math.max(0, raw.breakEvenCardLeadPct))
       : DEFAULT_STATE.breakEvenCardLeadPct;
-  return { breakEvenSimLeadCount: leadCount, breakEvenCardLeadPct: cardPct };
+  return {
+    breakEvenSimLeadCount: leadCount,
+    breakEvenCardLeadPct: cardPct,
+    breakEvenOfferTier: readOfferTier(raw),
+    breakEvenOfferMixEnabled: Boolean(raw.breakEvenOfferMixEnabled),
+    breakEvenOffer1Pct:
+      typeof raw.breakEvenOffer1Pct === "number"
+        ? Math.max(0, raw.breakEvenOffer1Pct)
+        : DEFAULT_STATE.breakEvenOffer1Pct,
+    breakEvenOffer2Pct:
+      typeof raw.breakEvenOffer2Pct === "number"
+        ? Math.max(0, raw.breakEvenOffer2Pct)
+        : DEFAULT_STATE.breakEvenOffer2Pct,
+    breakEvenOffer3Pct:
+      typeof raw.breakEvenOffer3Pct === "number"
+        ? Math.max(0, raw.breakEvenOffer3Pct)
+        : DEFAULT_STATE.breakEvenOffer3Pct,
+  };
 }
 
 function migrateParsed(raw: Record<string, unknown>): ProfitDashboardState {

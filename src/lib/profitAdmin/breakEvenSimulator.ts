@@ -7,6 +7,11 @@ import {
 } from "@/lib/profitAdmin/calculations";
 import type { FeeConfig } from "@/lib/profitAdmin/feesDefaults";
 import { computeMarketingMetrics } from "@/lib/profitAdmin/marketingMetrics";
+import {
+  blendedSiteOfferEconomics,
+  normalizeOfferMix,
+  siteOfferUnitEconomics,
+} from "@/lib/profitAdmin/breakEvenOffers";
 import type { ProfitDashboardState } from "@/lib/profitAdmin/settingsRepository";
 import { computeSnapchatAdSpendUsd } from "@/lib/profitAdmin/snapAdSpend";
 
@@ -63,6 +68,28 @@ export function breakEvenUnitEconomicsFromPayment(
   };
 }
 
+export function resolveBreakEvenUnitEconomics(
+  fees: FeeConfig,
+  state: Pick<
+    ProfitDashboardState,
+    | "breakEvenOfferTier"
+    | "breakEvenOfferMixEnabled"
+    | "breakEvenOffer1Pct"
+    | "breakEvenOffer2Pct"
+    | "breakEvenOffer3Pct"
+  >,
+): BreakEvenUnitEconomics {
+  if (state.breakEvenOfferMixEnabled) {
+    const mix = normalizeOfferMix({
+      offer1Pct: state.breakEvenOffer1Pct,
+      offer2Pct: state.breakEvenOffer2Pct,
+      offer3Pct: state.breakEvenOffer3Pct,
+    });
+    return blendedSiteOfferEconomics(fees, mix);
+  }
+  return siteOfferUnitEconomics(fees, state.breakEvenOfferTier);
+}
+
 function splitLeads(totalLeads: number, cardLeadPct: number): { cardLeads: number; codLeads: number } {
   const total = Math.max(0, Math.round(totalLeads));
   const pct = Math.min(100, Math.max(0, cardLeadPct));
@@ -80,9 +107,15 @@ export function computeBreakEvenScenario(
     | "snapCpaUsd"
     | "breakEvenSimLeadCount"
     | "breakEvenCardLeadPct"
+    | "breakEvenOfferTier"
+    | "breakEvenOfferMixEnabled"
+    | "breakEvenOffer1Pct"
+    | "breakEvenOffer2Pct"
+    | "breakEvenOffer3Pct"
   >,
-  units: BreakEvenUnitEconomics,
+  units?: BreakEvenUnitEconomics,
 ): BreakEvenScenarioResult {
+  const economics = units ?? resolveBreakEvenUnitEconomics(fees, state);
   const totalLeads = Math.max(0, Math.round(state.breakEvenSimLeadCount));
   const cardLeadPct = Math.min(100, Math.max(0, state.breakEvenCardLeadPct));
   const codLeadPct = 100 - cardLeadPct;
@@ -90,8 +123,8 @@ export function computeBreakEvenScenario(
 
   const card = computePaymentPanel({
     orderCount: cardLeads,
-    totalRevenueUsd: cardLeads * units.avgCardRevenueUsd,
-    productCostUsd: cardLeads * units.avgCardProductCostUsd,
+    totalRevenueUsd: cardLeads * economics.avgCardRevenueUsd,
+    productCostUsd: cardLeads * economics.avgCardProductCostUsd,
     shippingCostUsd: cardLeads * fees.payment.shippingPerOrderUsd,
     stripePercent: fees.payment.stripePercent,
     stripeFixedUsd: fees.payment.stripeFixedUsd,
@@ -103,8 +136,8 @@ export function computeBreakEvenScenario(
         totalOrders: codLeads,
         confirmationRatePct: state.confirmationRatePct,
         deliveryRatePct: state.deliveryRatePct,
-        sellingPricePerOrderUsd: units.codSellingPriceUsd,
-        productCostPerOrderUsd: units.codProductCostUsd,
+        sellingPricePerOrderUsd: economics.codSellingPriceUsd,
+        productCostPerOrderUsd: economics.codProductCostUsd,
       },
       fees,
     ),

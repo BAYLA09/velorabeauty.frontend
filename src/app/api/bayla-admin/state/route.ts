@@ -53,6 +53,28 @@ export async function PUT(request: NextRequest) {
       typeof incoming.breakEvenCardLeadPct === "number"
         ? clampPct(incoming.breakEvenCardLeadPct)
         : current.breakEvenCardLeadPct,
+    breakEvenOfferTier:
+      incoming.breakEvenOfferTier === 2 || incoming.breakEvenOfferTier === 3
+        ? incoming.breakEvenOfferTier
+        : incoming.breakEvenOfferTier === 1
+          ? 1
+          : current.breakEvenOfferTier,
+    breakEvenOfferMixEnabled:
+      typeof incoming.breakEvenOfferMixEnabled === "boolean"
+        ? incoming.breakEvenOfferMixEnabled
+        : current.breakEvenOfferMixEnabled,
+    breakEvenOffer1Pct:
+      typeof incoming.breakEvenOffer1Pct === "number"
+        ? Math.max(0, incoming.breakEvenOffer1Pct)
+        : current.breakEvenOffer1Pct,
+    breakEvenOffer2Pct:
+      typeof incoming.breakEvenOffer2Pct === "number"
+        ? Math.max(0, incoming.breakEvenOffer2Pct)
+        : current.breakEvenOffer2Pct,
+    breakEvenOffer3Pct:
+      typeof incoming.breakEvenOffer3Pct === "number"
+        ? Math.max(0, incoming.breakEvenOffer3Pct)
+        : current.breakEvenOffer3Pct,
     chartDays:
       incoming.chartDays === 7 || incoming.chartDays === 30 || incoming.chartDays === 90
         ? incoming.chartDays
