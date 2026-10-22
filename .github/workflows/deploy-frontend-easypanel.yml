@@ -1,7 +1,11 @@
 # Deploy storefront on Easypanel after a new GHCR image is published.
-# One-time: GitHub repo → Settings → Secrets → EASYPANEL_DEPLOY_WEBHOOK
-# Copy URL from Easypanel → your **Docker Image** service → Deployments → Webhook
-# (NOT a Git/GitHub source service — those finish in ~1s and do not pull GHCR).
+#
+# Option A (recommended): GitHub Secret DEPLOY_TRIGGER_SECRET + Easypanel env:
+#   EASYPANEL_DEPLOY_WEBHOOK = Deployments → Webhook URL (Docker Image service)
+#   DEPLOY_TRIGGER_SECRET    = same random string in GitHub Actions secret
+#   → Actions POST https://www.velorabeauty.world/api/deploy/trigger (no webhook URL in GitHub)
+#
+# Option B: GitHub Secret EASYPANEL_DEPLOY_WEBHOOK = webhook URL (direct POST from Actions)
 
 name: Deploy Frontend (Easypanel)
 
@@ -53,35 +57,58 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/main" | jq -r .sha)"
           echo "prefix=${SHA:0:7}" >> "$GITHUB_OUTPUT"
 
-      - name: Check Easypanel webhook secret
-        id: hook
+      - name: Detect deploy credentials
+        id: creds
         env:
           WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
-        run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::EASYPANEL_DEPLOY_WEBHOOK not set — image published on GHCR but Easypanel will NOT auto-pull."
-            echo "Manual deploy: Easypanel → Docker Image → ghcr.io/bayla09/velorabeauty.frontend:latest → Deploy (1–3 min)"
-            echo "Auto deploy: Easypanel → Deployments → Webhook → GitHub Secret EASYPANEL_DEPLOY_WEBHOOK"
-            echo "Guide: docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
-            exit 0
-          fi
-          echo "configured=true" >> "$GITHUB_OUTPUT"
-
-      - name: Manual Easypanel deploy (no auto webhook)
-        if: >-
-          steps.hook.outputs.configured != 'true' &&
-          (github.event_name == 'workflow_dispatch' ||
-           github.event.workflow_run.conclusion == 'success')
-        env:
-          EXPECT: ${{ steps.ver.outputs.prefix }}
+          RELAY: ${{ secrets.DEPLOY_TRIGGER_SECRET }}
         run: |
           set -euo pipefail
-          echo "::notice title=Easypanel manual deploy required::Image is on GHCR for commit ${EXPECT}. Easypanel → Source Docker Image → ghcr.io/bayla09/velorabeauty.frontend:latest → Deploy (1–3 min, logs must show Pulling). Add GitHub Secret EASYPANEL_DEPLOY_WEBHOOK for auto-deploy."
-          echo "Pin tag: ghcr.io/bayla09/velorabeauty.frontend:${EXPECT}"
+          mode=none
+          if [ -n "$WEBHOOK" ]; then mode=webhook; fi
+          if [ -n "$RELAY" ]; then
+            if [ "$mode" = webhook ]; then mode=both; else mode=relay; fi
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          if [ "$mode" = none ]; then
+            echo "::warning::No auto-deploy: set GitHub Secret DEPLOY_TRIGGER_SECRET (recommended) or EASYPANEL_DEPLOY_WEBHOOK."
+            echo "Guide: docs/DEPLOY-FRONTEND-DARIJA.md"
+          fi
 
-      - name: Trigger Easypanel redeploy
-        if: steps.hook.outputs.configured == 'true'
+      - name: Trigger Easypanel redeploy (production relay)
+        id: relay
+        if: >-
+          steps.creds.outputs.mode == 'relay' ||
+          steps.creds.outputs.mode == 'both'
+        env:
+          SECRET: ${{ secrets.DEPLOY_TRIGGER_SECRET }}
+          TRIGGER_URL: https://www.velorabeauty.world/api/deploy/trigger
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            code=$(curl -sS -o /tmp/relay-deploy.txt -w "%{http_code}" -X POST \
+              -H "Authorization: Bearer $SECRET" \
+              "$TRIGGER_URL")
+            echo "Relay attempt $attempt → HTTP $code"
+            cat /tmp/relay-deploy.txt || true
+            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+              echo "ok=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ "$code" = "404" ] || [ "$code" = "503" ]; then
+              echo "::warning::Relay not ready ($code). Deploy this repo once manually, set EASYPANEL_DEPLOY_WEBHOOK + DEPLOY_TRIGGER_SECRET on Easypanel."
+            fi
+            sleep $((attempt * 15))
+          done
+          echo "ok=false" >> "$GITHUB_OUTPUT"
+          echo "::error::Production deploy relay failed. Check Easypanel env EASYPANEL_DEPLOY_WEBHOOK and DEPLOY_TRIGGER_SECRET."
+          exit 1
+
+      - name: Trigger Easypanel redeploy (direct webhook)
+        id: direct
+        if: >-
+          steps.creds.outputs.mode == 'webhook' ||
+          steps.creds.outputs.mode == 'both'
         env:
           WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
         run: |
@@ -91,6 +118,7 @@ jobs:
             echo "Webhook attempt $attempt → HTTP $code"
             cat /tmp/ep-deploy.txt || true
             if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+              echo "ok=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             sleep $((attempt * 15))
@@ -98,8 +126,29 @@ jobs:
           echo "::error::Easypanel webhook failed. Webhook must target Docker Image service (not Git)."
           exit 1
 
+      - name: Fail when auto-deploy not configured
+        if: >-
+          steps.creds.outputs.mode == 'none' &&
+          github.event_name == 'workflow_run'
+        env:
+          EXPECT: ${{ steps.ver.outputs.prefix }}
+        run: |
+          set -euo pipefail
+          echo "::error title=Auto-deploy disabled::GHCR image ready (${EXPECT}) but no DEPLOY_TRIGGER_SECRET or EASYPANEL_DEPLOY_WEBHOOK in GitHub. Easypanel → Deploy manually (1–3 min) OR configure secrets — docs/DEPLOY-FRONTEND-DARIJA.md"
+          echo "Pin: ghcr.io/bayla09/velorabeauty.frontend:${EXPECT}"
+          exit 1
+
+      - name: Manual Easypanel deploy notice
+        if: >-
+          steps.creds.outputs.mode == 'none' &&
+          github.event_name == 'workflow_dispatch'
+        env:
+          EXPECT: ${{ steps.ver.outputs.prefix }}
+        run: |
+          echo "::notice title=Manual deploy::Image ${EXPECT} on GHCR. Easypanel → Docker Image → latest → Deploy (1–3 min)."
+
       - name: Wait for live /api/health version
-        if: steps.hook.outputs.configured == 'true'
+        if: steps.creds.outputs.mode != 'none'
         env:
           EXPECT: ${{ steps.ver.outputs.prefix }}
           HEALTH_URL: https://www.velorabeauty.world/api/health
@@ -116,5 +165,5 @@ jobs:
             fi
             sleep 15
           done
-          echo "::warning title=Production version not verified::Live site did not report $EXPECT within 10 minutes. If you use manual deploy: Easypanel → Docker Image → Deploy (1–3 min). Deploy finishing in ~1s means wrong Source (Git). See docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
+          echo "::warning title=Production version not verified::Live site did not report $EXPECT within 10 minutes. Easypanel → Docker Image → Deploy. Deploy <2s = wrong Source (Git). See docs/EASYPANEL-DEPLOY-1-SECONDE-AR.md"
           exit 0
