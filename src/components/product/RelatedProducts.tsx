@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { ProductPageImage } from "@/components/product/ProductPageImage";
+import {
+  luxuryImageFrameOuterClass,
+  luxuryImageInnerCompactClass,
+} from "@/components/product/productLuxuryFrame";
 import { formatPrice, singleProductPrice } from "@/config/pricing";
 import type { ProductWithPage } from "@/lib/productCatalog";
 import { getProductPath } from "@/lib/productCatalog";
@@ -39,12 +43,14 @@ export function RelatedProducts({
                   من {formatPrice(singleProductPrice)}
                 </p>
               </div>
-              <div className="relative flex h-32 w-32 shrink-0 items-center justify-center bg-white sm:h-36 sm:w-36">
-                <ProductPageImage
-                  src={p.image.src}
-                  alt={p.name}
-                  className="max-h-[85%] max-w-[85%] object-contain"
-                />
+              <div className="flex h-32 w-32 shrink-0 items-center justify-center bg-velora-cream p-2 sm:h-36 sm:w-36 sm:p-2.5">
+                <div className={`${luxuryImageFrameOuterClass({ compact: true })} h-full w-full`}>
+                  <ProductPageImage
+                    src={p.image.src}
+                    alt={p.name}
+                    className={`${luxuryImageInnerCompactClass} max-h-full object-contain`}
+                  />
+                </div>
               </div>
             </Link>
           ))}

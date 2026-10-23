@@ -1,4 +1,8 @@
 import { ProductPageImage } from "@/components/product/ProductPageImage";
+import {
+  luxuryImageFrameOuterClass,
+  luxuryImageInnerClass,
+} from "@/components/product/productLuxuryFrame";
 
 /** مساحة صورة على PDP — تظهر دائماً (خاوية حتى تضيفي المسار في images.ts) */
 export function ProductPdpImageSlot({
@@ -13,12 +17,18 @@ export function ProductPdpImageSlot({
   const hasImage = Boolean(src?.trim());
 
   return (
-    <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-dashed border-velora-burgundy/20 bg-velora-cream-dark/40 shadow-sm">
+    <div className="mt-8">
       {hasImage && src ? (
-        <ProductPageImage src={src} alt={imageAlt} className="h-auto w-full object-cover" />
+        <div className={luxuryImageFrameOuterClass({ fullWidth: true })}>
+          <ProductPageImage
+            src={src}
+            alt={imageAlt}
+            className={`${luxuryImageInnerClass} h-auto object-cover`}
+          />
+        </div>
       ) : (
         <div
-          className="flex aspect-[4/3] flex-col items-center justify-center gap-2 px-4 text-center sm:aspect-[16/10]"
+          className="flex aspect-[4/3] flex-col items-center justify-center gap-2 overflow-hidden rounded-[1.75rem] border border-dashed border-velora-burgundy/20 bg-velora-cream-dark/40 px-4 text-center shadow-sm sm:aspect-[16/10]"
           aria-label={placeholderLabel}
         >
           <span

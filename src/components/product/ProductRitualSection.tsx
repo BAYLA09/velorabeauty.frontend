@@ -1,6 +1,10 @@
 "use client";
 
 import { ProductPageImage } from "@/components/product/ProductPageImage";
+import {
+  luxuryImageFrameOuterClass,
+  luxuryImageInnerClass,
+} from "@/components/product/productLuxuryFrame";
 import { productPageFlags } from "@/config/productPageFlags";
 import { productProblemOverlayById } from "@/config/productRitualSection";
 import type { ProductId } from "@/config/products";
@@ -23,13 +27,15 @@ export function ProductRitualSection({
     <section className="bg-velora-cream py-6 sm:py-10">
       <div className="mx-auto max-w-lg px-4 sm:max-w-4xl sm:px-6 lg:max-w-6xl">
         <div className="overflow-hidden rounded-[2rem] border border-velora-burgundy/10 bg-white shadow-[0_12px_40px_rgba(58,24,32,0.1)] sm:rounded-[2.5rem]">
-          <div className="relative w-full overflow-hidden bg-velora-cream-dark">
+          <div className="relative w-full bg-velora-cream-dark p-3 sm:p-4">
             {hasImage && imageSrc ? (
-              <ProductPageImage
-                src={imageSrc}
-                alt={data.headline}
-                className="h-auto w-full object-cover"
-              />
+              <div className={luxuryImageFrameOuterClass({ fullWidth: true })}>
+                <ProductPageImage
+                  src={imageSrc}
+                  alt={data.headline}
+                  className={`${luxuryImageInnerClass} h-auto object-cover`}
+                />
+              </div>
             ) : (
               <div className="aspect-[4/3] w-full border-b border-dashed border-velora-burgundy/10 bg-velora-cream-dark/60 sm:aspect-[16/10]" aria-hidden />
             )}
