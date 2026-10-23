@@ -58,7 +58,7 @@ export async function GET() {
       : inSyncWithMain
         ? easypanelDeployWebhookConfigured
           ? "الموقع محدّث مع GitHub main. Auto-deploy جاهز (EASYPANEL_DEPLOY_WEBHOOK ✅)."
-          : "الموقع محدّث مع GitHub main. Auto-deploy ❌: Easypanel → Environment → EASYPANEL_DEPLOY_WEBHOOK = Deployments → Webhook URL → Save → Deploy."
+          : "الموقع محدّث مع GitHub main. Auto-deploy ❌: GitHub Secret EASYPANEL_DEPLOY_WEBHOOK = Webhook URL (أو Easypanel Environment بنفس الاسم)."
         : `الموقع قديم (${shortSha}) — main هو ${githubMainPrefix}. Easypanel → Docker Image → latest → Deploy (1–3 d9ayeq, mashi 1 thanya).`;
   const pinImageTag =
     shortSha !== "local" ? `ghcr.io/bayla09/velorabeauty.frontend:${shortSha}` : null;
