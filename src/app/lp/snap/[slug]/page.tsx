@@ -4,6 +4,7 @@ import { SnapProductAdLanding } from "@/components/lp/SnapProductAdLanding";
 import { productSlugs } from "@/config/productPages";
 import { getSnapLpSkinGummiesOverride } from "@/config/snapLpSkinGummiesCompliance";
 import { getProductBySlug } from "@/lib/productCatalog";
+import { snapLpViewContentValueAed } from "@/lib/analytics/snapLpViewContent";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -82,6 +83,7 @@ export default async function SnapProductAdPage({ params }: Props) {
       priceLabel={product.priceLabel}
       cta={product.cta}
       heroImageSrc={snapHeroImageSrc(product)}
+      viewContentValueAed={snapLpViewContentValueAed(product.slug, product.price)}
       catalogDisplay={{
         heroImageAlt: product.name,
         ingredientLine: product.ingredient,

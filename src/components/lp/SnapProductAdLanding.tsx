@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AttributionCaptureEffect } from "@/components/attribution/AttributionCaptureEffect";
 import { brand } from "@/config/brand";
 import { getProductPath } from "@/lib/productCatalog";
+import { trackSnapViewContent } from "@/lib/analytics/trackSnapCommerce";
 
 export type SnapLpDisplayOverride = {
   heroImageAlt: string;
@@ -22,6 +24,8 @@ type Props = {
   catalogDisplay?: SnapLpDisplayOverride;
   /** Compliance copy for `/lp/snap/skin-gummies` only. */
   snapDisplayOverride?: SnapLpDisplayOverride;
+  /** When set, fires Snap VIEW_CONTENT once on mount (hair-gummies LP only). */
+  viewContentValueAed?: number;
 };
 
 export function SnapProductAdLanding({
@@ -31,7 +35,13 @@ export function SnapProductAdLanding({
   heroImageSrc,
   catalogDisplay,
   snapDisplayOverride,
+  viewContentValueAed,
 }: Props) {
+  useEffect(() => {
+    if (viewContentValueAed === undefined) return;
+    trackSnapViewContent({ productSlug, valueAed: viewContentValueAed });
+  }, [productSlug, viewContentValueAed]);
+
   const buyHref = getProductPath(productSlug);
   const display = snapDisplayOverride ?? catalogDisplay;
   if (!display) {
