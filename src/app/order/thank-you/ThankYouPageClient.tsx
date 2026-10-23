@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FooterSection } from "@/components/FooterSection";
 import { CodThankYouSuccess } from "@/components/order/CodThankYouSuccess";
+import { ThankYouCrossSell } from "@/components/order/ThankYouCrossSell";
 import { ProductStoreHeader } from "@/components/product/ProductStoreHeader";
 import { CheckoutSupportBlock } from "@/components/support/CheckoutSupportBlock";
 import type { CartLine } from "@/lib/cart/cartTypes";
@@ -159,6 +160,9 @@ export function ThankYouPageClient() {
               purchaseVerified={purchaseVerified}
               onNavigateAway={() => clearOrderDraft()}
             />
+            {order.method === "cod" ? (
+              <ThankYouCrossSell purchasedSlug={order.productSlug} />
+            ) : null}
             <CheckoutSupportBlock />
           </div>
         )}

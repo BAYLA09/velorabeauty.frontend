@@ -10,8 +10,13 @@ import {
   ProductPaymentMethodsInfo,
 } from "@/components/product/ProductPaymentMethodsInfo";
 import { useCart } from "@/context/CartProvider";
-import { buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
-import { trackSnapStartCheckout } from "@/lib/analytics/trackSnapCommerce";
+import { buildCheckoutPath, buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
+import {
+  trackSnapAddToCart,
+  trackSnapStartCheckout,
+} from "@/lib/analytics/trackSnapCommerce";
+import { snapMerchandiseValueAed } from "@/lib/analytics/snapCommercePricing";
+import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
 import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
 import {
   HAIR_GUMMIES_BACKORDER_CTA_LABEL,
@@ -213,14 +218,33 @@ export function ProductPurchasePanel({
     });
   }
 
-  function goToCheckout() {
+  function goToCardPaymentStep() {
+    warmStripeCheckout();
+    router.push(
+      buildCheckoutPaymentStepPath({ product: productSlug, quantity }, "card"),
+    );
+  }
+
+  function goToCodCheckout() {
+    const merchandiseAed = snapMerchandiseValueAed({ productSlug, quantity });
+    trackSnapAddToCart({
+      productSlug,
+      quantity,
+      valueAed: merchandiseAed,
+    });
+    const codTotal = resolveCheckoutTotalAed(
+      quantity,
+      "cod",
+      quantity,
+      undefined,
+      productSlug,
+    );
     trackSnapStartCheckout({
       productSlug,
       quantity,
-      valueAed: displayTotal,
+      valueAed: codTotal,
     });
-    warmStripeCheckout();
-    router.push(buildCheckoutPaymentStepPath({ product: productSlug, quantity }));
+    router.push(buildCheckoutPath("cod", { product: productSlug, quantity }));
   }
 
   function addSelectionToCart() {
@@ -309,7 +333,9 @@ export function ProductPurchasePanel({
         })}
       </div>
 
-      {funnelOffers && <ProductPaymentMethodsInfo quantity={quantity} />}
+      {funnelOffers && (
+        <ProductPaymentMethodsInfo quantity={quantity} onSelectCard={goToCardPaymentStep} />
+      )}
 
       <div className="pt-1">
         {isHairGummiesBackorderReservation(productSlug) ? (
@@ -317,9 +343,7 @@ export function ProductPurchasePanel({
         ) : null}
         <button
           type="button"
-          onClick={goToCheckout}
-          onMouseEnter={warmStripeCheckout}
-          onFocus={warmStripeCheckout}
+          onClick={goToCodCheckout}
           className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#3a1820] to-[#2c1318] py-4 text-base font-black text-white shadow-[0_12px_32px_rgba(44,19,24,0.35)] transition hover:from-velora-burgundy hover:to-[#2c1318] active:scale-[0.99] sm:text-lg"
         >
           {ctaLabel}

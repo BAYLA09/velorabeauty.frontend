@@ -24,14 +24,22 @@ export function trackSnapAddToCart(input: {
   productSlug: string;
   quantity: number;
   valueAed: number;
+  cartLines?: CartLine[];
 }): void {
-  if (!isSnapCatalogSlug(input.productSlug)) return;
+  const content_ids = snapContentIdsFromOrder({
+    productSlug: input.productSlug,
+    cartLines: input.cartLines,
+  });
+  if (content_ids.length === 0) return;
   trackStoreEvent({
     event: "add_cart",
     value_aed: input.valueAed,
     currency: "AED",
-    content_ids: [input.productSlug],
-    number_items: Math.max(1, input.quantity),
+    content_ids,
+    number_items: snapItemCount({
+      quantity: input.quantity,
+      cartLines: input.cartLines,
+    }),
   });
 }
 

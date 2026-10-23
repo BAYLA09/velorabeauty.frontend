@@ -15,7 +15,7 @@ import type { CartLine } from "@/lib/cart/cartTypes";
 import { MAX_CART_UNITS } from "@/lib/cart/cartTypes";
 import { isEligibleProductSlug } from "@/lib/cart/eligibleCatalog";
 import { trackSnapAddToCart } from "@/lib/analytics/trackSnapCommerce";
-import { singleProductPrice } from "@/config/pricing";
+import { snapAddToCartDeltaAed } from "@/lib/analytics/snapCommercePricing";
 import { readCartFromStorage, writeCartToStorage } from "@/lib/cart/cartStorage";
 
 type CartUiState = {
@@ -123,10 +123,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (idx >= 0) next[idx] = { slug, quantity: next[idx].quantity + addQty };
       else next.push({ slug, quantity: addQty });
       applyLines(next, "success");
+      const valueAed = snapAddToCartDeltaAed(state.lines, slug, addQty);
+      const lineAfter = next.find((l) => l.slug === slug);
       trackSnapAddToCart({
         productSlug: slug,
-        quantity: addQty,
-        valueAed: singleProductPrice * addQty,
+        quantity: lineAfter?.quantity ?? addQty,
+        valueAed,
       });
       return true;
     },

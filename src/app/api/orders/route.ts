@@ -13,7 +13,14 @@ import { isStorefrontOrderId, readMarketingConsent } from "@/lib/backendCheckout
 import { createOrder } from "@/lib/ordersRepository";
 import { pushCodOrderToNetwork } from "@/lib/codNetwork/pushCodOrder";
 import { exportOrderToGoogleSheets } from "@/lib/ordersSheets/exportOrder";
+import { sendSnapCapiPurchaseAsync } from "@/lib/analytics/snapConversionsApi";
 import { validateUaeMobilePhone } from "@/lib/phone/uaePhone";
+
+function clientIpFromRequest(request: Request): string | null {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0]?.trim() ?? null;
+  return request.headers.get("x-real-ip")?.trim() ?? null;
+}
 
 function isBundleQuantity(n: unknown): n is BundleQuantity {
   return n === 1 || n === 2 || n === 3;
@@ -124,6 +131,11 @@ export async function POST(request: Request) {
       backendExternalCheckoutId: isStorefrontOrderId(externalCheckoutId)
         ? externalCheckoutId
         : undefined,
+    });
+
+    sendSnapCapiPurchaseAsync(order, {
+      userAgent: request.headers.get("user-agent"),
+      clientIp: clientIpFromRequest(request),
     });
 
     if (paymentMethod === "cod") {
