@@ -6,8 +6,13 @@ import {
 } from "@/config/pricing";
 import { IconBanknote, IconCard } from "@/components/product/ProductFunnelIcons";
 
-/** عرض معلوماتي فقط — الاختيار فـ `/checkout` */
-export function ProductPaymentMethodsInfo({ quantity: _quantity }: { quantity: BundleQuantity }) {
+type Props = {
+  quantity: BundleQuantity;
+  /** Opens card checkout (payment step with card selected). */
+  onSelectCard?: () => void;
+};
+
+export function ProductPaymentMethodsInfo({ quantity: _quantity, onSelectCard }: Props) {
   void _quantity;
 
   return (
@@ -16,17 +21,35 @@ export function ProductPaymentMethodsInfo({ quantity: _quantity }: { quantity: B
         طرق الدفع المتاحة
       </p>
       <div className="grid gap-2.5 sm:grid-cols-2">
-        <div className="pointer-events-none select-none rounded-2xl border border-velora-burgundy/10 bg-gradient-to-br from-white to-velora-cream-dark/40 px-3.5 py-3.5 shadow-sm">
-          <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-velora-champagne/35 bg-velora-cream text-velora-burgundy">
-              <IconCard className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 text-right">
-              <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع بالبطاقة</p>
-              <p className="mt-0.5 text-[11px] font-bold text-emerald-800">شحن مجاني</p>
+        {onSelectCard ? (
+          <button
+            type="button"
+            onClick={onSelectCard}
+            className="w-full rounded-2xl border border-velora-burgundy/10 bg-gradient-to-br from-white to-velora-cream-dark/40 px-3.5 py-3.5 text-right shadow-sm transition hover:border-velora-burgundy/25 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-velora-burgundy"
+          >
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-velora-champagne/35 bg-velora-cream text-velora-burgundy">
+                <IconCard className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1 text-right">
+                <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع بالبطاقة</p>
+                <p className="mt-0.5 text-[11px] font-bold text-emerald-800">شحن مجاني</p>
+              </div>
+            </div>
+          </button>
+        ) : (
+          <div className="pointer-events-none select-none rounded-2xl border border-velora-burgundy/10 bg-gradient-to-br from-white to-velora-cream-dark/40 px-3.5 py-3.5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-velora-champagne/35 bg-velora-cream text-velora-burgundy">
+                <IconCard className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 text-right">
+                <p className="text-sm font-extrabold text-velora-burgundy-dark">الدفع بالبطاقة</p>
+                <p className="mt-0.5 text-[11px] font-bold text-emerald-800">شحن مجاني</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <div className="pointer-events-none select-none rounded-2xl border border-velora-burgundy/10 bg-gradient-to-br from-white to-velora-cream-dark/40 px-3.5 py-3.5 shadow-sm">
           <div className="flex items-start gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-velora-burgundy/15 bg-white text-velora-burgundy">

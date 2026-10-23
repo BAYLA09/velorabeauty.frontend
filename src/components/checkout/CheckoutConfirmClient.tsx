@@ -267,6 +267,7 @@ export function CheckoutConfirmClient({
           paymentMethod={paymentMethod}
           totalLabel="المجموع الكلي"
           editableBasket
+          showCheckoutUpsell={paymentMethod !== "cod"}
         />
       </div>
     </CheckoutFunnelShell>

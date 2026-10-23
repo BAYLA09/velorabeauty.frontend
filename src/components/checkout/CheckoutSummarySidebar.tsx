@@ -52,6 +52,7 @@ type Props = {
   footer?: ReactNode;
   showTrust?: boolean;
   editableBasket?: boolean;
+  showCheckoutUpsell?: boolean;
 };
 
 export function CheckoutSummarySidebar({
@@ -64,6 +65,7 @@ export function CheckoutSummarySidebar({
   footer,
   showTrust = false,
   editableBasket = false,
+  showCheckoutUpsell = true,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -227,7 +229,7 @@ export function CheckoutSummarySidebar({
           </ul>
         ) : null}
 
-        {editableBasket && productSlug && lines.length > 0 ? (
+        {showCheckoutUpsell && editableBasket && productSlug && lines.length > 0 ? (
           <CheckoutUpsellPanel
             lines={lines}
             eligibleUnits={totalUnits}
