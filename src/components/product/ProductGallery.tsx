@@ -91,13 +91,16 @@ export function ProductGallery({
     setActive((i) => (i + 1) % count);
   }, [count]);
 
+  const frameWidthClass = fullWidthMobile
+    ? "mx-auto w-full max-w-full lg:mx-0 lg:w-fit"
+    : "mx-auto w-fit max-w-full lg:mx-0";
+
+  /** Lara-style luxury frame — white mat, soft depth; only when laraFrame=true */
   const frameOuterClass = laraFrame
-    ? `relative rounded-[2rem] border-8 border-white bg-white p-0 shadow-2xl ${
-        fullWidthMobile
-          ? "mx-auto w-full max-w-full lg:mx-0 lg:w-fit"
-          : "mx-auto w-fit max-w-full lg:mx-0"
-      }`
+    ? `relative overflow-hidden rounded-[1.625rem] border-[7px] border-white bg-[#faf8f5] p-1 shadow-[0_6px_28px_rgba(44,19,24,0.07),0_22px_56px_rgba(44,19,24,0.11)] ring-1 ring-[#2c1318]/[0.06] sm:rounded-[2rem] sm:border-8 sm:p-1.5 ${frameWidthClass}`
     : "relative mx-auto w-fit max-w-full rounded-[2rem] border border-velora-burgundy/10 bg-white shadow-lg";
+
+  const frameImageClass = laraFrame ? "rounded-[1.2rem] sm:rounded-[1.35rem]" : "rounded-[1.15rem]";
 
   function onTouchStart(ev: TouchEvent) {
     touchStartX.current = ev.touches[0]?.clientX ?? null;
@@ -159,7 +162,7 @@ export function ProductGallery({
             src={activeSrc}
             alt={`${productName} — صورة ${active + 1}`}
             priority={!fixedHero && active === 0}
-            className="rounded-[1.15rem]"
+            className={frameImageClass}
             onError={() =>
               setFailed((prev) => ({ ...prev, [failKey(activeSrc)]: true }))
             }
