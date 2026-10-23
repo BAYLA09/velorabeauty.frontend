@@ -16,6 +16,8 @@ services:
       PORT: "3000"
       DATABASE_PATH: /app/data/velora.sqlite
       SITE_URL: https://www.velorabeauty.world
+      # Required for GitHub auto-deploy (Publish container → OIDC → this URL POSTs Deployments webhook):
+      # EASYPANEL_DEPLOY_WEBHOOK: "paste from Easypanel → Deployments → Webhook"
       # Easypanel → Environment (required for card pay):
       # STRIPE_SECRET_KEY=sk_live_...
       # STRIPE_PUBLISHABLE_KEY=pk_live_...
