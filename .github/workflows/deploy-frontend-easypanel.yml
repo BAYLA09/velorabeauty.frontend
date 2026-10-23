@@ -1,16 +1,15 @@
 # Deploy storefront on Easypanel after a new GHCR image is published.
 #
-# Option A (recommended): GitHub Secret DEPLOY_TRIGGER_SECRET + Easypanel env:
-#   EASYPANEL_DEPLOY_WEBHOOK = Deployments → Webhook URL (Docker Image service)
-#   DEPLOY_TRIGGER_SECRET    = same random string in GitHub Actions secret
-#   → Actions POST https://www.velorabeauty.world/api/deploy/trigger (no webhook URL in GitHub)
+# Easypanel (once): Environment → EASYPANEL_DEPLOY_WEBHOOK = Deployments → Webhook URL (Docker Image service)
+# GitHub: no secret required — Actions uses OIDC → POST /api/deploy/trigger → Easypanel webhook
 #
-# Option B: GitHub Secret EASYPANEL_DEPLOY_WEBHOOK = webhook URL (direct POST from Actions)
+# Optional: GitHub Secret EASYPANEL_DEPLOY_WEBHOOK (direct) or DEPLOY_TRIGGER_SECRET (shared relay)
 
 name: Deploy Frontend (Easypanel)
 
 permissions:
   contents: read
+  id-token: write
 
 on:
   workflow_run:
@@ -57,52 +56,19 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/main" | jq -r .sha)"
           echo "prefix=${SHA:0:7}" >> "$GITHUB_OUTPUT"
 
-      - name: Detect deploy credentials
+      - name: Detect optional GitHub secrets
         id: creds
         env:
           WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
           RELAY: ${{ secrets.DEPLOY_TRIGGER_SECRET }}
         run: |
           set -euo pipefail
-          mode=none
+          mode=oidc
           if [ -n "$WEBHOOK" ]; then mode=webhook; fi
           if [ -n "$RELAY" ]; then
             if [ "$mode" = webhook ]; then mode=both; else mode=relay; fi
           fi
           echo "mode=$mode" >> "$GITHUB_OUTPUT"
-          if [ "$mode" = none ]; then
-            echo "::warning::No auto-deploy: set GitHub Secret DEPLOY_TRIGGER_SECRET (recommended) or EASYPANEL_DEPLOY_WEBHOOK."
-            echo "Guide: docs/DEPLOY-FRONTEND-DARIJA.md"
-          fi
-
-      - name: Trigger Easypanel redeploy (production relay)
-        id: relay
-        if: >-
-          steps.creds.outputs.mode == 'relay' ||
-          steps.creds.outputs.mode == 'both'
-        env:
-          SECRET: ${{ secrets.DEPLOY_TRIGGER_SECRET }}
-          TRIGGER_URL: https://www.velorabeauty.world/api/deploy/trigger
-        run: |
-          set -euo pipefail
-          for attempt in 1 2 3 4; do
-            code=$(curl -sS -o /tmp/relay-deploy.txt -w "%{http_code}" -X POST \
-              -H "Authorization: Bearer $SECRET" \
-              "$TRIGGER_URL")
-            echo "Relay attempt $attempt → HTTP $code"
-            cat /tmp/relay-deploy.txt || true
-            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
-              echo "ok=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            if [ "$code" = "404" ] || [ "$code" = "503" ]; then
-              echo "::warning::Relay not ready ($code). Deploy this repo once manually, set EASYPANEL_DEPLOY_WEBHOOK + DEPLOY_TRIGGER_SECRET on Easypanel."
-            fi
-            sleep $((attempt * 15))
-          done
-          echo "ok=false" >> "$GITHUB_OUTPUT"
-          echo "::error::Production deploy relay failed. Check Easypanel env EASYPANEL_DEPLOY_WEBHOOK and DEPLOY_TRIGGER_SECRET."
-          exit 1
 
       - name: Trigger Easypanel redeploy (direct webhook)
         id: direct
@@ -118,7 +84,6 @@ jobs:
             echo "Webhook attempt $attempt → HTTP $code"
             cat /tmp/ep-deploy.txt || true
             if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
-              echo "ok=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             sleep $((attempt * 15))
@@ -126,29 +91,65 @@ jobs:
           echo "::error::Easypanel webhook failed. Webhook must target Docker Image service (not Git)."
           exit 1
 
-      - name: Fail when auto-deploy not configured
+      - name: Trigger Easypanel redeploy (shared-secret relay)
+        id: relay_secret
         if: >-
-          steps.creds.outputs.mode == 'none' &&
-          github.event_name == 'workflow_run'
+          (steps.creds.outputs.mode == 'relay' || steps.creds.outputs.mode == 'both') &&
+          (steps.direct.outcome != 'success')
         env:
-          EXPECT: ${{ steps.ver.outputs.prefix }}
+          SECRET: ${{ secrets.DEPLOY_TRIGGER_SECRET }}
+          TRIGGER_URL: https://www.velorabeauty.world/api/deploy/trigger
         run: |
           set -euo pipefail
-          echo "::error title=Auto-deploy disabled::GHCR image ready (${EXPECT}) but no DEPLOY_TRIGGER_SECRET or EASYPANEL_DEPLOY_WEBHOOK in GitHub. Easypanel → Deploy manually (1–3 min) OR configure secrets — docs/DEPLOY-FRONTEND-DARIJA.md"
-          echo "Pin: ghcr.io/bayla09/velorabeauty.frontend:${EXPECT}"
+          for attempt in 1 2 3 4; do
+            code=$(curl -sS -o /tmp/relay-deploy.txt -w "%{http_code}" -X POST \
+              -H "Authorization: Bearer $SECRET" \
+              "$TRIGGER_URL")
+            echo "Secret relay attempt $attempt → HTTP $code"
+            cat /tmp/relay-deploy.txt || true
+            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+              exit 0
+            fi
+            sleep $((attempt * 15))
+          done
           exit 1
 
-      - name: Manual Easypanel deploy notice
+      - name: Trigger Easypanel redeploy (OIDC relay — default)
+        id: relay_oidc
         if: >-
-          steps.creds.outputs.mode == 'none' &&
-          github.event_name == 'workflow_dispatch'
+          steps.direct.outcome != 'success' &&
+          steps.relay_secret.outcome != 'success'
+        uses: actions/github-script@v7
         env:
-          EXPECT: ${{ steps.ver.outputs.prefix }}
-        run: |
-          echo "::notice title=Manual deploy::Image ${EXPECT} on GHCR. Easypanel → Docker Image → latest → Deploy (1–3 min)."
+          TRIGGER_URL: https://www.velorabeauty.world/api/deploy/trigger
+          OIDC_AUDIENCE: velorabeauty-easypanel-deploy
+        with:
+          script: |
+            const triggerUrl = process.env.TRIGGER_URL;
+            const audience = process.env.OIDC_AUDIENCE;
+            for (let attempt = 1; attempt <= 4; attempt++) {
+              const token = await core.getIDToken(audience);
+              const res = await fetch(triggerUrl, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              const text = await res.text();
+              core.info(`OIDC relay attempt ${attempt} → HTTP ${res.status}: ${text.slice(0, 400)}`);
+              if (res.status >= 200 && res.status < 300) return;
+              if (res.status === 503) {
+                core.error(
+                  'Easypanel env EASYPANEL_DEPLOY_WEBHOOK missing. Panel → Docker Image service → Environment → paste Deployments → Webhook URL → Save → Deploy once.',
+                );
+              }
+              await new Promise((r) => setTimeout(r, attempt * 15000));
+            }
+            core.setFailed('Production deploy relay failed after 4 attempts.');
 
       - name: Wait for live /api/health version
-        if: steps.creds.outputs.mode != 'none'
+        if: >-
+          steps.direct.outcome == 'success' ||
+          steps.relay_secret.outcome == 'success' ||
+          steps.relay_oidc.outcome == 'success'
         env:
           EXPECT: ${{ steps.ver.outputs.prefix }}
           HEALTH_URL: https://www.velorabeauty.world/api/health
