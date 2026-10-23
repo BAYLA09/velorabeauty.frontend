@@ -44,15 +44,17 @@ curl -s https://www.velorabeauty.world/api/health | jq '{version: .version[0:7],
 
 `version` = 7 chars men commit jdid 3la `main`.
 
-### 3) Auto-deploy (wa7d ligne f Easypanel — bla GitHub Secret)
+### 3) Auto-deploy — **Ahsan tariqa (GitHub Secret, 2 d9ayeq)**
 
-1. Easypanel → service **Docker Image** → **Deployments** → **Webhook** → copy URL  
-2. **Environment** → `EASYPANEL_DEPLOY_WEBHOOK` = had URL → **Save** → **Deploy** (1–3 d9)  
-3. Men ba3d: **Publish container** ✅ → **Deploy Frontend** (OIDC) → Easypanel pull  
+1. Easypanel → service **Docker Image** → **Deployments** → **Webhook** → **Copy URL**  
+2. GitHub → repo **velorabeauty.frontend** → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**  
+   - Name: **`EASYPANEL_DEPLOY_WEBHOOK`**  
+   - Value: paste URL  
+3. **Ma khassk** redeploy Easypanel — men ba3d kol merge: **Publish container** ✅ → job **deploy-easypanel** ✅  
 
-Ila **Deploy Frontend** kay3ti **503** → `EASYPANEL_DEPLOY_WEBHOOK` ma mzyodch f Environment.
+Ila **deploy-easypanel** kayfshl: webhook ma mashi dial service **Docker Image** (Deploy 1s = Git).
 
-*(Ikhtiyari: GitHub secrets `EASYPANEL_DEPLOY_WEBHOOK` direct wla `DEPLOY_TRIGGER_SECRET`.)*
+**B — Easypanel Environment (OIDC):** `EASYPANEL_DEPLOY_WEBHOOK` f panel → Save → Deploy wa7d merra.
 
 **Important:** webhook dial service **Docker Image** — mashi Git (Deploy 1s).
 

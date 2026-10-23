@@ -112,7 +112,34 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Trigger Easypanel redeploy (OIDC)
+      - name: Trigger Easypanel redeploy (GitHub secret — recommended)
+        id: direct
+        env:
+          WEBHOOK: ${{ secrets.EASYPANEL_DEPLOY_WEBHOOK }}
+          SHORT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ -z "$WEBHOOK" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No EASYPANEL_DEPLOY_WEBHOOK GitHub secret — trying OIDC relay next."
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          for attempt in 1 2 3 4 5; do
+            code=$(curl -sS -o /tmp/ep-wh-out.txt -w "%{http_code}" -X POST "$WEBHOOK")
+            echo "Direct webhook attempt $attempt → HTTP $code"
+            cat /tmp/ep-wh-out.txt || true
+            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+              echo "::notice::Easypanel redeploy triggered for ${SHORT:0:7}. Wait 1–3 min → /api/health"
+              exit 0
+            fi
+            sleep $((attempt * 12))
+          done
+          echo "::error::Easypanel webhook failed. Webhook must be from Docker Image service (not Git)."
+          exit 1
+
+      - name: Trigger Easypanel redeploy (OIDC relay fallback)
+        if: steps.direct.outputs.skip == 'true'
         uses: actions/github-script@v7
         env:
           TRIGGER_URL: https://www.velorabeauty.world/api/deploy/trigger
@@ -136,9 +163,9 @@ jobs:
               }
               if (res.status === 503) {
                 core.error(
-                  'Missing Easypanel env EASYPANEL_DEPLOY_WEBHOOK. Panel → Docker Image → Deployments → Webhook → copy URL → Environment → Save → Deploy once. Then re-run Publish container.',
+                  'Auto-deploy not configured. EASIEST: GitHub → Settings → Secrets → Actions → EASYPANEL_DEPLOY_WEBHOOK = Easypanel Deployments → Webhook URL. OR Easypanel Environment → same variable name.',
                 );
-                core.setFailed('Auto-deploy blocked until EASYPANEL_DEPLOY_WEBHOOK is set on the server.');
+                core.setFailed('Add EASYPANEL_DEPLOY_WEBHOOK (GitHub secret or Easypanel env).');
                 return;
               }
               await new Promise((r) => setTimeout(r, attempt * 12000));
