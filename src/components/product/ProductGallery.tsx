@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { ProductPageImage } from "./ProductPageImage";
+import {
+  luxuryImageFrameOuterClass,
+  luxuryImageInnerClass,
+} from "@/components/product/productLuxuryFrame";
 
 type Props = {
   mainSrc?: string;
@@ -50,7 +54,7 @@ export function ProductGallery({
   fixedBeforeAfterSrc,
   productName,
   placeholder,
-  laraFrame = false,
+  laraFrame = true,
   fullWidthMobile = false,
 }: Props) {
   const images = useMemo(() => {
@@ -91,13 +95,18 @@ export function ProductGallery({
     setActive((i) => (i + 1) % count);
   }, [count]);
 
+  const frameWidth =
+    fullWidthMobile && laraFrame
+      ? "mx-auto w-full max-w-full lg:mx-0 lg:w-fit"
+      : laraFrame
+        ? "mx-auto w-fit max-w-full lg:mx-0"
+        : "";
+
   const frameOuterClass = laraFrame
-    ? `relative rounded-[2rem] border-8 border-white bg-white p-0 shadow-2xl ${
-        fullWidthMobile
-          ? "mx-auto w-full max-w-full lg:mx-0 lg:w-fit"
-          : "mx-auto w-fit max-w-full lg:mx-0"
-      }`
+    ? `${luxuryImageFrameOuterClass({ fullWidth: fullWidthMobile })} ${frameWidth}`.trim()
     : "relative mx-auto w-fit max-w-full rounded-[2rem] border border-velora-burgundy/10 bg-white shadow-lg";
+
+  const frameImageClass = laraFrame ? luxuryImageInnerClass : "rounded-[1.15rem]";
 
   function onTouchStart(ev: TouchEvent) {
     touchStartX.current = ev.touches[0]?.clientX ?? null;
@@ -127,6 +136,17 @@ export function ProductGallery({
           {fixedFailed ? (
             <div className="flex min-h-[12rem] items-center justify-center bg-velora-cream-dark px-4 text-center text-sm text-velora-burgundy/60">
               {placeholder}
+            </div>
+          ) : laraFrame ? (
+            <div className={luxuryImageFrameOuterClass({ fullWidth: true })}>
+              <ProductPageImage
+                src={fixedHero}
+                alt={`${productName} — قبل وبعد`}
+                priority
+                className={`${luxuryImageInnerClass} object-cover`}
+                sizes="100vw"
+                onError={() => setFixedFailed(true)}
+              />
             </div>
           ) : (
             <ProductPageImage
@@ -159,7 +179,7 @@ export function ProductGallery({
             src={activeSrc}
             alt={`${productName} — صورة ${active + 1}`}
             priority={!fixedHero && active === 0}
-            className="rounded-[1.15rem]"
+            className={frameImageClass}
             onError={() =>
               setFailed((prev) => ({ ...prev, [failKey(activeSrc)]: true }))
             }

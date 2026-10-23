@@ -1,6 +1,10 @@
 import { ProductPageImage } from "@/components/product/ProductPageImage";
+import {
+  luxuryImageFrameOuterClass,
+  luxuryImageInnerClass,
+} from "@/components/product/productLuxuryFrame";
 
-/** صورة marketing واحدة (Lara-style) — لا تظهر 3 صور فوق بعض */
+/** صورة marketing واحدة — إطار فاخر */
 export function ProductMarketingGallery({
   src,
   productName,
@@ -12,11 +16,11 @@ export function ProductMarketingGallery({
 
   return (
     <section className="mx-auto max-w-lg px-4 py-2 sm:max-w-3xl sm:px-6">
-      <div className="overflow-hidden rounded-[1.75rem] border border-velora-burgundy/10 bg-white shadow-sm">
+      <div className={luxuryImageFrameOuterClass({ fullWidth: true })}>
         <ProductPageImage
           src={src}
           alt={`${productName} — صورة العرض`}
-          className="h-auto w-full object-cover"
+          className={`${luxuryImageInnerClass} h-auto object-cover`}
         />
       </div>
     </section>

@@ -1,6 +1,10 @@
 "use client";
 
 import { ProductPageImage } from "@/components/product/ProductPageImage";
+import {
+  luxuryImageFrameOuterClass,
+  luxuryImageInnerClass,
+} from "@/components/product/productLuxuryFrame";
 
 type Props = {
   src: string;
@@ -8,19 +12,20 @@ type Props = {
   priority?: boolean;
 };
 
-/** Full-bleed PDP stack — edge-to-edge on mobile, natural aspect ratio, no card chrome. */
+/** PDP scroll images — luxury white mat frame (Lara-style). */
 export function ProductPdpStackedImage({ src, alt, priority = false }: Props) {
   return (
-    <div
-      className="-mx-4 w-[calc(100%+2rem)] max-w-none sm:-mx-6 sm:w-[calc(100%+3rem)] lg:mx-0 lg:w-full"
-    >
-      <ProductPageImage
-        src={src}
-        alt={alt}
-        priority={priority}
-        presentation="stacked"
-        sizes="100vw"
-      />
+    <div className="w-full min-w-0">
+      <div className={luxuryImageFrameOuterClass({ fullWidth: true })}>
+        <ProductPageImage
+          src={src}
+          alt={alt}
+          priority={priority}
+          presentation="stacked"
+          sizes="100vw"
+          className={luxuryImageInnerClass}
+        />
+      </div>
     </div>
   );
 }
