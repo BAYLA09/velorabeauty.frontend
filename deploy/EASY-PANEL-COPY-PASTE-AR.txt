@@ -4,15 +4,16 @@
   Pin (main): ghcr.io/bayla09/velorabeauty.frontend:1ff1fd7
 ═══════════════════════════════════════════════════════════
 
-【0】 Deploy أوتوماتيكي (GitHub → Easypanel) — دابا ناقص!
-     GitHub Actions "Deploy Frontend (Easypanel)" كيفشل حيت:
-     EASYPANEL_DEPLOY_WEBHOOK = (ما مضافش)
-
+【0】 Deploy أوتوماتيكي (GitHub → Easypanel) — خطوة واحدة f Easypanel:
      Easypanel → خدمة Frontend (Docker Image) → Deployments → Webhook → Copy URL
-     GitHub → BAYLA09/velorabeauty.frontend → Settings → Secrets → Actions
-     → New secret: EASYPANEL_DEPLOY_WEBHOOK = (paste URL)
+     Easypanel → Environment → زيد:
+     EASYPANEL_DEPLOY_WEBHOOK=(paste URL هنا)
+     Save → Deploy (1–3 min)
 
-     من بعد: كل merge f main → Publish container → Deploy auto (1–3 min)
+     GitHub ma محتاجش Secret (OIDC → /api/deploy/trigger → webhook).
+     Ila Deploy Frontend كيعطي 503 → EASYPANEL_DEPLOY_WEBHOOK ناقص f Environment.
+
+     من بعد: merge main → Publish container → Deploy Frontend auto
 
 【1】 Source = Docker Image ONLY (ماشي Git — Deploy 1s = غلط)
      Image:
