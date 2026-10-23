@@ -8,6 +8,10 @@ const productPageClientPath = join(
   process.cwd(),
   "src/components/product/ProductPageClient.tsx",
 );
+const purchasePanelPath = join(
+  process.cwd(),
+  "src/components/product/ProductPurchasePanel.tsx",
+);
 
 describe("catalog PDP layout", () => {
   it("renders a single quantity offer block (top buy box only)", () => {
@@ -17,6 +21,14 @@ describe("catalog PDP layout", () => {
     assert.ok(!source.includes("ProductFinalCtaSection"));
     assert.ok(!source.includes("جاهزة تكملين طلبك"));
     assert.ok(source.includes("ProductMobileStickyBar"));
+  });
+
+  it("uses direct COD and card checkout buttons in purchase panel", () => {
+    const source = readFileSync(purchasePanelPath, "utf8");
+    assert.ok(source.includes("ProductPdpPaymentButtons"));
+    assert.ok(source.includes('buildCheckoutPath("card"'));
+    assert.ok(source.includes('buildCheckoutPath("cod"'));
+    assert.ok(!source.includes("buildCheckoutPaymentStepPath"));
   });
 });
 
