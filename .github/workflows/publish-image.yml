@@ -10,6 +10,7 @@ on:
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 concurrency:
   group: publish-container-${{ github.ref }}
@@ -96,12 +97,50 @@ jobs:
             echo "4. Easypanel → **Deploy** (1–3 min) — image ما كتوصلش وحده."
             echo "5. تحقق: \`curl -s https://www.velorabeauty.world/api/health\` → version فيها \`${SHORT}\`."
             echo "6. Env: \`deploy/easypanel.env.example\` · Guide Darija: \`docs/DEPLOY-FRONTEND-DARIJA.md\`"
-            echo "7. **Webhook:** GitHub Secret \`EASYPANEL_DEPLOY_WEBHOOK\` (Easypanel → Docker Image service → Deployments → Webhook). بلا secret → Deploy يدوي ف Easypanel."
+            echo "7. **Auto-deploy:** Easypanel Environment → \`EASYPANEL_DEPLOY_WEBHOOK\` = Deployments → Webhook URL (GitHub OIDC — no GitHub secret)."
             echo ""
             echo "Compose جاهز: \`deploy/easypanel-docker-image.compose.yaml\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Auto deploy hint
         run: |
-          echo "After this workflow: **Deploy Frontend (Easypanel)** runs if EASYPANEL_DEPLOY_WEBHOOK is set."
-          echo "Setup: docs/EASYPANEL-AUTO-DEPLOY-AR.md"
+          echo "Next job: OIDC → /api/deploy/trigger (needs EASYPANEL_DEPLOY_WEBHOOK on Easypanel server)."
+          echo "Setup: docs/DEPLOY-FRONTEND-DARIJA.md"
+
+  deploy-easypanel:
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Trigger Easypanel redeploy (OIDC)
+        uses: actions/github-script@v7
+        env:
+          TRIGGER_URL: https://www.velorabeauty.world/api/deploy/trigger
+          OIDC_AUDIENCE: velorabeauty-easypanel-deploy
+        with:
+          script: |
+            const triggerUrl = process.env.TRIGGER_URL;
+            const audience = process.env.OIDC_AUDIENCE;
+            const short = context.sha.slice(0, 7);
+            for (let attempt = 1; attempt <= 5; attempt++) {
+              const token = await core.getIDToken(audience);
+              const res = await fetch(triggerUrl, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              const text = await res.text();
+              core.info(`OIDC deploy attempt ${attempt} → HTTP ${res.status}: ${text.slice(0, 500)}`);
+              if (res.status >= 200 && res.status < 300) {
+                core.notice(`Easypanel redeploy triggered for ${short}. Wait 1–3 min, then check /api/health.`);
+                return;
+              }
+              if (res.status === 503) {
+                core.error(
+                  'Missing Easypanel env EASYPANEL_DEPLOY_WEBHOOK. Panel → Docker Image → Deployments → Webhook → copy URL → Environment → Save → Deploy once. Then re-run Publish container.',
+                );
+                core.setFailed('Auto-deploy blocked until EASYPANEL_DEPLOY_WEBHOOK is set on the server.');
+                return;
+              }
+              await new Promise((r) => setTimeout(r, attempt * 12000));
+            }
+            core.setFailed('Easypanel deploy relay failed after 5 attempts.');

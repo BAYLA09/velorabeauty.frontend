@@ -18,6 +18,7 @@ import {
   buildShaPrefix,
   fetchGithubMainShaPrefix,
 } from "@/lib/deploy/githubMainHead";
+import { readEasypanelDeployWebhookUrl } from "@/lib/deploy/easypanelRedeploy";
 import {
   getStripePublishableKey,
   isStripeCardCheckoutEnabled,
@@ -37,6 +38,7 @@ export async function GET() {
     githubMainPrefix !== null &&
     shortSha !== "local" &&
     shortSha === githubMainPrefix;
+  const easypanelDeployWebhookConfigured = readEasypanelDeployWebhookUrl() !== null;
 
   const deployChecklistDarija = [
     "GitHub → Actions → Publish container (khass ykoun ✅ ba3d merge)",
@@ -54,8 +56,10 @@ export async function GET() {
         ? null
         : `الموقع على ${shortSha}. ما قدرنا نقراو GitHub main من السيرفر — دير Deploy يدوي: Docker Image → latest (1–3 دقائق).`
       : inSyncWithMain
-        ? "الموقع محدّث مع GitHub main."
-        : `الموقع قديم (${shortSha}) — main هو ${githubMainPrefix}. Easypanel → Docker Image → latest → Deploy (1–3 دقائق، ماشي 1 ثانية).`;
+        ? easypanelDeployWebhookConfigured
+          ? "الموقع محدّث مع GitHub main. Auto-deploy جاهز (EASYPANEL_DEPLOY_WEBHOOK ✅)."
+          : "الموقع محدّث مع GitHub main. Auto-deploy ❌: Easypanel → Environment → EASYPANEL_DEPLOY_WEBHOOK = Deployments → Webhook URL → Save → Deploy."
+        : `الموقع قديم (${shortSha}) — main هو ${githubMainPrefix}. Easypanel → Docker Image → latest → Deploy (1–3 d9ayeq, mashi 1 thanya).`;
   const pinImageTag =
     shortSha !== "local" ? `ghcr.io/bayla09/velorabeauty.frontend:${shortSha}` : null;
 
@@ -78,6 +82,8 @@ export async function GET() {
       pinImageTag,
       githubMainPrefix,
       inSyncWithMain,
+      easypanelDeployWebhookConfigured,
+      autoDeployReady: easypanelDeployWebhookConfigured,
       statusMessageAr: statusMessageDarija,
       statusMessageDarija,
       deployChecklistDarija,
