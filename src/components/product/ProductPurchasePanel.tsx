@@ -5,18 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import type { ProductForm } from "@/config/productPages";
 import { IconCrown } from "@/components/product/ProductFunnelIcons";
 import { ProductBuyBoxTrustRow } from "@/components/product/ProductBuyBoxTrustRow";
-import {
-  cardOfferPrice,
-  ProductPaymentMethodsInfo,
-} from "@/components/product/ProductPaymentMethodsInfo";
+import { cardOfferPrice } from "@/components/product/ProductPaymentMethodsInfo";
+import { ProductPdpPaymentButtons } from "@/components/product/ProductPdpPaymentButtons";
 import { useCart } from "@/context/CartProvider";
-import { buildCheckoutPath, buildCheckoutPaymentStepPath } from "@/lib/checkoutRoutes";
-import {
-  trackSnapAddToCart,
-  trackSnapStartCheckout,
-} from "@/lib/analytics/trackSnapCommerce";
-import { snapMerchandiseValueAed } from "@/lib/analytics/snapCommercePricing";
-import { resolveCheckoutTotalAed } from "@/lib/checkoutTotals";
+import { buildCheckoutPath } from "@/lib/checkoutRoutes";
+import { firePdpCheckoutSnapEvents } from "@/lib/analytics/pdpCheckoutSnap";
 import { prefetchStripeCardCheckout } from "@/lib/stripeCheckoutPrefetch";
 import {
   HAIR_GUMMIES_BACKORDER_CTA_LABEL,
@@ -218,31 +211,21 @@ export function ProductPurchasePanel({
     });
   }
 
-  function goToCardPaymentStep() {
+  function goToCardCheckout() {
+    firePdpCheckoutSnapEvents({
+      productSlug,
+      quantity,
+      paymentMethod: "card",
+    });
     warmStripeCheckout();
-    router.push(
-      buildCheckoutPaymentStepPath({ product: productSlug, quantity }, "card"),
-    );
+    router.push(buildCheckoutPath("card", { product: productSlug, quantity }));
   }
 
   function goToCodCheckout() {
-    const merchandiseAed = snapMerchandiseValueAed({ productSlug, quantity });
-    trackSnapAddToCart({
+    firePdpCheckoutSnapEvents({
       productSlug,
       quantity,
-      valueAed: merchandiseAed,
-    });
-    const codTotal = resolveCheckoutTotalAed(
-      quantity,
-      "cod",
-      quantity,
-      undefined,
-      productSlug,
-    );
-    trackSnapStartCheckout({
-      productSlug,
-      quantity,
-      valueAed: codTotal,
+      paymentMethod: "cod",
     });
     router.push(buildCheckoutPath("cod", { product: productSlug, quantity }));
   }
@@ -333,27 +316,33 @@ export function ProductPurchasePanel({
         })}
       </div>
 
-      {funnelOffers && (
-        <ProductPaymentMethodsInfo quantity={quantity} onSelectCard={goToCardPaymentStep} />
-      )}
-
       <div className="pt-1">
         {isHairGummiesBackorderReservation(productSlug) ? (
           <HairGummiesBackorderNotice className="mb-3" />
         ) : null}
-        <button
-          type="button"
-          onClick={goToCodCheckout}
-          className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#3a1820] to-[#2c1318] py-4 text-base font-black text-white shadow-[0_12px_32px_rgba(44,19,24,0.35)] transition hover:from-velora-burgundy hover:to-[#2c1318] active:scale-[0.99] sm:text-lg"
-        >
-          {ctaLabel}
-          <span
-            className="text-lg transition group-hover:translate-x-[-2px]"
-            aria-hidden
+
+        {funnelOffers ? (
+          <ProductPdpPaymentButtons
+            codLabel={ctaLabel}
+            onCod={goToCodCheckout}
+            onCard={goToCardCheckout}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={goToCodCheckout}
+            className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#3a1820] to-[#2c1318] py-4 text-base font-black text-white shadow-[0_12px_32px_rgba(44,19,24,0.35)] transition hover:from-velora-burgundy hover:to-[#2c1318] active:scale-[0.99] sm:text-lg"
           >
-            ←
-          </span>
-        </button>
+            {ctaLabel}
+            <span
+              className="text-lg transition group-hover:translate-x-[-2px]"
+              aria-hidden
+            >
+              ←
+            </span>
+          </button>
+        )}
+
         <button
           type="button"
           onClick={addSelectionToCart}
@@ -363,11 +352,6 @@ export function ProductPurchasePanel({
           {form === "serum" ? "عبوة" : "علبة"})
         </button>
         {funnelOffers && showTrustRow ? <ProductBuyBoxTrustRow /> : null}
-        {funnelOffers && !showTrustRow && (
-          <p className="mt-2.5 text-center text-[11px] font-semibold leading-relaxed text-velora-burgundy/60">
-            اختاري طريقة الدفع في الخطوة التالية — رسوم COD تظهر مرة واحدة هناك.
-          </p>
-        )}
         {!funnelOffers && (
           <p className="mt-2 text-center text-xs font-bold text-velora-burgundy/70">
             بطاقة أو COD — الاختيار في صفحة الدفع
