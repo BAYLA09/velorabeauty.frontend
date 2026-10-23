@@ -5,7 +5,6 @@ import { trackSnapViewContent } from "@/lib/analytics/trackSnapCommerce";
 import type { BundleQuantity } from "@/config/pricing";
 import { FooterSection } from "@/components/FooterSection";
 import { ProductAnnouncementBar } from "@/components/product/ProductAnnouncementBar";
-import { ProductFeaturePills } from "@/components/product/ProductFeaturePills";
 import { ProductMobileStickyBar } from "@/components/product/ProductMobileStickyBar";
 import {
   ProductPageComparisonSection,
@@ -25,7 +24,7 @@ import { ProductVeloraGuaranteeBlock } from "@/components/product/ProductVeloraG
 import { ProductVideoStoriesStrip } from "@/components/product/ProductVideoStoriesStrip";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { ProductPdpStackedImage } from "@/components/product/ProductPdpStackedImage";
-import { cardBundlePrices, formatPrice, singleProductPrice } from "@/config/pricing";
+import { cardBundlePrices } from "@/config/pricing";
 import { AttributionCaptureEffect } from "@/components/attribution/AttributionCaptureEffect";
 import type { ProductWithPage } from "@/lib/productCatalog";
 import { ProductGalleryBenefitLines } from "@/components/product/ProductGalleryBenefitLines";
@@ -52,7 +51,6 @@ export function ProductPageClient({ product, allProducts }: Props) {
   const [quantity, setQuantity] = useState<BundleQuantity>(2);
   const [purchase, setPurchase] = useState<PurchaseState | null>(null);
   const page = product.page;
-  const unitLabel = page.form === "serum" ? "عبوة" : "علبة";
   const scrollImages = getProductPdpScrollImages(product.pageImage, product.image.src);
   const galleryBenefitLines = getGalleryBenefitLines(page);
 
@@ -94,19 +92,16 @@ export function ProductPageClient({ product, allProducts }: Props) {
             </div>
           ) : null}
 
-          <div className="space-y-4 py-4 sm:py-5">
-            <ProductGalleryBenefitLines lines={galleryBenefitLines} />
-            <ProductFeaturePills form={page.form} />
-          </div>
+          {galleryBenefitLines.length > 0 ? (
+            <div className="space-y-4 py-4 sm:py-5">
+              <ProductGalleryBenefitLines lines={galleryBenefitLines} />
+            </div>
+          ) : null}
 
           <section id="buy-box" className="py-5 sm:py-6">
             {isHairGummiesBackorderReservation(product.slug) ? (
               <HairGummiesBackorderNotice className="mb-4" />
             ) : null}
-            <p className="mb-4 text-sm font-semibold tabular-nums text-velora-burgundy/75">
-              من {formatPrice(singleProductPrice)} / {unitLabel}
-            </p>
-
             <ProductPurchasePanel
               funnelOffers
               form={page.form}
